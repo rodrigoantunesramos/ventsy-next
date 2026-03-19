@@ -219,7 +219,7 @@ async function init() {
         const inicial = nome.split(' ')[0][0]?.toUpperCase() || '?';
 
         // Assinatura
-                    try {
+            try {
             const assin = await getAssinatura(user.id);
 
             if (assin) {

@@ -46,6 +46,13 @@ const MENU_ITEMS = [
   { rota: 'configuracoes',     label: '⚙️ Configurações',          group: null },
 ];
 
+ getAssinatura(userId: string) {"{"}
+  const {"{"} data, error {"}"} = await sb .from('assinaturas') .select('plano, validade') .eq('usuario_id', userId) // Certifique-off que o nome da coluna está correto 
+  .single(); if (error) return null; return data; {"}"}
+
+
+
+
 // ── Componente ────────────────────────────────────────────────────────────────
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [profile, setProfile]       = useState<UserProfile | null>(null);
@@ -72,14 +79,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         if (perfil) { nome = perfil.nome || nome; usuario = perfil.usuario || ''; }
       } catch (_) {}
 
-     try {
-        const assin = await getAssinatura(user.id);
-
-            if (assin) {
-              plano    = (assin.plano || 'basico').toLowerCase();
-              validade = assin.validade || null;
-        }
-      } catch (_) {}
+    
+      <>
+  // Adicione isto antes do componente AdminLayout async function
+ 
+</>
 
       const inicial = (nome.split(' ')[0][0] ?? '?').toUpperCase();
 
