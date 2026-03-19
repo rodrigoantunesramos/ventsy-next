@@ -104,20 +104,19 @@ function PropriedadeContent() {
         if (!propId||propId==='demo'){loadDemo();return}
         const {data:p} = await supabase.from('propriedades').select('*').eq('id',propId).single()
         if (!p){loadDemo();return}
-        const {data:fts} = await supabase.from('fotos').select('*').eq('propriedade_id',propId).order('ordem','asc')const [{ data: assin }, { data: fts }, { data: vids }, { data: avals }, { data: usr }] = await Promise.all([
+        const { data: fts } = await supabase
+  .from('fotos')
+  .select('*')
+  .eq('propriedade_id', propId)
+  .order('ordem', { ascending: true })
+
+const [{ data: assin }, { data: vids }, { data: avals }, { data: usr }] = await Promise.all([
   supabase
     .from('assinaturas')
     .select('plano_ativo,status')
     .eq('usuario_id', p.usuario_id || '')
     .single()
-    .then(res => ({ data: res.data })),
-
-  supabase
-    .from('fotos_imovel')
-    .select('url,secao,ordem')
-    .eq('propriedade_id', propId)
-    .order('ordem')
-    .then(res => ({ data: res.data || [] })),
+    .then(res => ({ data: res.data || null })),
 
   supabase
     .from('videos_propriedade')
@@ -132,6 +131,13 @@ function PropriedadeContent() {
     .eq('verificada', true)
     .order('criado_em', { ascending: false })
     .then(res => ({ data: res.data || [] })),
+
+  supabase
+    .from('usuarios')
+    .select('*')
+    .eq('id', p.usuario_id || '')
+    .single()
+    .then(res => ({ data: res.data || null })),
 ])
         setPlano((assin as any)?.plano_ativo||'basico')
         setProp(p)
