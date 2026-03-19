@@ -219,15 +219,14 @@ async function init() {
         const inicial = nome.split(' ')[0][0]?.toUpperCase() || '?';
 
         // Assinatura
-        let plano = 'basico', validade = null;
-        try {
+                    try {
             const assin = await getAssinatura(user.id);
+
             if (assin) {
-                plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
-                validade = assin.fim_periodo  || assin.validade || null;
-                setState({ assinatura: assin });
+                plano    = (assin.plano || 'basico').toLowerCase();
+                validade = assin.validade || null;
             }
-        } catch (_) {}
+            } catch (_) {}
 
         // Preencher UI
         preencherUI({ nome, email: user.email, usuario, plano, validade, inicial });
