@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — VENTSY</title>
+
+    <!-- CDN deps -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- App (ES modules) -->
+    <script type="module" src="js/app.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+     <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+
+</head>
+<body>
+
+<!-- ── LOADING ── -->
+<div id="loading-screen">
+    <div class="loading-logo"><em>VENTSY</em></div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- ── HEADER ── -->
+<header>
+    <div class="header-left">
+        <a href="index.html">
+            <img src="../logovents.png" alt="Logo VENTSY" class="logo">
+        </a>
+    </div>
+    <div class="header-right">
+        <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="avatar-container">
+            <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
+                <span id="avatar-inicial">?</span>
+            </button>
+            <div class="avatar-dropdown" id="avatar-menu">
+                <div class="drop-header">
+                    <strong id="drop-nome">Carregando...</strong>
+                    <span id="drop-email"></span>
+                </div>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="../modules/minhapropriedade.js">🏡 Minha Propriedade</a>
+                <a href="configuracoes.html">⚙️ Configurações</a>
+                <a href="planos2.html">💳 Planos Ventsy</a>
+                <a href="../fale-conosco.html">❓ Ajuda</a>
+                <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ── OVERLAY SIDEBAR MOBILE ── -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ── LAYOUT PRINCIPAL ── -->
+<main class="dashboard-container" id="main-content" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+        <div class="perfil-resumo">
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <h3 id="sidebar-nome">Carregando...</h3>
+            <span class="handle" id="sidebar-handle"></span>
+            <div class="plano-chip" id="sidebar-plano-chip">⭐ Carregando...</div>
+            <div class="plano-validade" id="sidebar-validade"></div>
+        </div>
+        <nav class="dash-menu">
+            <a data-rota="dashboard" onclick="navegar('dashboard')" class="active">🏠 Dashboard</a>
+            <span class="menu-section-label">Minha Propriedade</span>
+            <a data-rota="minhapropriedade" onclick="navegar('minhapropriedade')">📍 Minha Propriedade</a>            
+            <a data-rota="fotos" onclick="navegar('fotos')">📸 Fotos</a>
+            <span class="menu-section-label">Gestão</span>
+            <a data-rota="leads" onclick="navegar('leads')">🎉 Clientes & Eventos</a>
+            <a data-rota="calendario" onclick="navegar('calendario')">📅 Disponibilidade</a>
+            <a data-rota="relatorio" onclick="navegar('relatorio')">📊 Relatório</a>
+            <a data-rota="financeiro" onclick="navegar('financeiro')">💰 Financeiro</a>
+            <a data-rota="documentos" onclick="navegar('documentos')">📄 Documentos</a>
+            <a data-rota="equipe" onclick="navegar('equipe')">👥 Equipe & Folha</a>
+            <span class="menu-section-label">Conta</span>
+            <a data-rota="indique" onclick="navegar('indique')">🎁 Programa de Indicação</a>
+            <a data-rota="planos" onclick="navegar('planos')">💳 Planos Ventsy</a>
+            <a data-rota="configuracoes" onclick="navegar('configuracoes')">⚙️ Configurações</a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <section class="dash-content">
+
+        <!-- ════════════════════════════════════
+             PÁGINA: DASHBOARD (original)
+        ════════════════════════════════════ -->
+        <div class="page-section ativa" id="pagina-dashboard">
+
+            <div class="boas-vindas">
+                <div class="bv-inner">
+                    <p class="bv-tag">Área do proprietário(a)</p>
+                    <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
+                    <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
+                </div>
+                <div class="bv-acao">
+                    <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span id="btn-ver-prop-txt">Ver minha propriedade</span>
+                    </a>
+                    <a href="../index.html" class="btn-outras-prop">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Analisar outras propriedades
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid-metricas">
+                <div class="card-metrica">
+                    <span class="icon">👁</span>
+                    <div><p>Visualizações (30d)</p><h3 id="m-views" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">📱</span>
+                    <div><p>Cliques WhatsApp (30d)</p><h3 id="m-whatsapp" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">💬</span>
+                    <div><p>Cliques Formulário (30d)</p><h3 id="m-formulario" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">⭐</span>
+                    <div><p>Avaliação Média</p><h3 id="m-nota" class="loading">—</h3></div>
+                </div>
+            </div>
+
+            <div class="container-duas-colunas">
+                <div class="secao-dash">
+                    <div class="analytics-header">
+                        <h3>Desempenho — últimos 30 dias</h3>
+                        <div class="analytics-tabs">
+                            <button class="tab-btn ativo" data-tipo="view"       onclick="mudarTab(this)">👁 Visualizações</button>
+                            <button class="tab-btn"        data-tipo="whatsapp"   onclick="mudarTab(this)">📱 WhatsApp</button>
+                            <button class="tab-btn"        data-tipo="formulario" onclick="mudarTab(this)">💬 Formulário</button>
+                            <button class="tab-btn"        data-tipo="nota"       onclick="mudarTab(this)">⭐ Avaliações</button>
+                        </div>
+                    </div>
+                    <div style="position:relative; height:300px; width:100%">
+                        <canvas id="graficoAnalytics"></canvas>
+                    </div>
+                    <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
+                </div>
+            </div>
+
+            <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 6 concluídos</span></p>
+            <div class="passo-lista">
+
+                <div class="passo-item completo" id="passo-1">
+                    <div class="passo-num">✓</div>
+                    <div class="passo-info">
+                        <h4>Conta criada com sucesso</h4>
+                        <p>Seu cadastro foi concluído. Bem-vindo à VENTSY!</p>
+                    </div>
+                    <span class="passo-acao verde">✓ Concluído</span>
+                </div>
+
+                <div class="passo-item" id="passo-2">
+                    <div class="passo-num">2</div>
+                    <div class="passo-info">
+                        <h4>Adicione as fotos da sua propriedade</h4>
+                        <p>Obrigatório: 5 fotos em destaque na galeria principal.</p>
+                    </div>
+                    <a href="fotos.html" class="passo-acao vermelho">Adicionar fotos</a>
+                </div>
+
+                <div class="passo-item" id="passo-3">
+                    <div class="passo-num">3</div>
+                    <div class="passo-info">
+                        <h4>Descreva seu espaço</h4>
+                        <p>Preencha a aba "Sobre" com uma descrição do seu espaço.</p>
+                    </div>
+                    <a href="minhapropriedade.html#sobre" class="passo-acao vermelho">Preencher descrição</a>
+                </div>
+
+                <div class="passo-item" id="passo-4">
+                    <div class="passo-num">4</div>
+                    <div class="passo-info">
+                        <h4>Informe o endereço completo</h4>
+                        <p>Obrigatório: CEP, rua, número, bairro, cidade e estado.</p>
+                    </div>
+                    <a href="minhapropriedade.html#endereco" class="passo-acao vermelho">Adicionar endereço</a>
+                </div>
+
+                <div class="passo-item" id="passo-5">
+                    <div class="passo-num">5</div>
+                    <div class="passo-info">
+                        <h4>Adicione as informações de contato</h4>
+                        <p>Obrigatório: nome, tipo, capacidade, WhatsApp, e-mail, responsável e foto.</p>
+                    </div>
+                    <a href="minhapropriedade.html#contato" class="passo-acao vermelho">Preencher contato</a>
+                </div>
+
+                <div class="passo-item" id="passo-6">
+                    <div class="passo-num">6</div>
+                    <div class="passo-info">
+                        <h4>Adicione os valores dos eventos</h4>
+                        <p>Obrigatório: pelo menos o valor por hora ou o valor de diária.</p>
+                    </div>
+                    <a href="minhapropriedade.html#valores" class="passo-acao vermelho">Adicionar valores</a>
+                </div>
+
+                <div class="passo-item" id="passo-7">
+                    <div class="passo-num">7</div>
+                    <div class="passo-info">
+                        <h4>Selecione os tipos de eventos</h4>
+                        <p>Obrigatório: pelo menos 1 tipo de evento que a propriedade oferece.</p>
+                    </div>
+                    <a href="minhapropriedade.html#eventos" class="passo-acao vermelho">Selecionar eventos</a>
+                </div>
+
+            </div>
+
+            <div class="card-solicitar">
+                <p class="tag">Último passo</p>
+                <h3>Pronto para ir ao ar? 🚀</h3>
+                <p>
+                    Após preencher todos os dados acima, clique no botão abaixo para solicitar
+                    a publicação da sua propriedade na plataforma. Nossa equipe fará a revisão
+                    em até <strong>48 horas úteis</strong> e você receberá um e-mail com o resultado.
+                </p>
+                <div class="solicitar-aviso" id="solicitar-aviso">
+                    ⚠️ Complete todos os <strong>4 passos</strong> acima para liberar o botão.
+                </div>
+                <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()" disabled>
+                    🚀 Solicitar liberação de propriedade na plataforma VENTSY
+                </button>
+                <p class="solicitar-hint" id="solicitar-hint">
+                    Após a solicitação, nossa equipe entrará em contato para confirmar os dados.
+                </p>
+            </div>
+
+        </div><!-- /pagina-dashboard -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: FINANCEIRO
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-financeiro">
+
+            <!-- Header fixo da seção -->
+            <div class="fin-header">
+                <div>
+                    <h2>💰 Financeiro</h2>
+                    <div class="nome-propriedade" id="fin-data-atual"></div>
+                </div>
+                <div class="fin-header-right">
+                    <select class="fin-select" onchange="finUpdatePeriod(this.value)">
+                        <option value="mes">Este Mês</option>
+                        <option value="trimestre">Trimestre</option>
+                        <option value="ano">Este Ano</option>
+                    </select>
+                    <button class="btn-fin btn-fin-ghost" onclick="finOpenModal('despesa')">+ Despesa</button>
+                    <button class="btn-fin btn-fin-primary" onclick="finOpenModal('receita')">+ Receita</button>
+                </div>
+            </div>
+
+            <!-- Sub-abas internas -->
+            <div class="fin-tabs">
+                <button class="fin-tab-btn ativo" onclick="finMudarAba('painel', this)">📊 Painel</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('receitas', this)">💚 Receitas</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('despesas', this)">🔴 Despesas</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('eventos', this)">📅 Eventos</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('relatorios', this)">📋 Relatórios</button>
+            </div>
+
+            <!-- ── ABA: PAINEL ── -->
+            <div class="fin-tab-content ativo" id="fin-painel">
+
+                <!-- KPIs -->
+                <div class="fin-kpi-grid">
+                    <div class="fin-kpi-card verde" style="animation: fadeUp .3s ease both">
+                        <div class="fin-kpi-label">Receita Total</div>
+                        <div class="fin-kpi-value verde" id="fin-kpi-receita">R$ 48.700</div>
+                        <div class="fin-delta up">↑ 12% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card vermelho" style="animation: fadeUp .35s ease both">
+                        <div class="fin-kpi-label">Despesas Totais</div>
+                        <div class="fin-kpi-value vermelho" id="fin-kpi-despesa">R$ 19.350</div>
+                        <div class="fin-delta down">↑ 4% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card gold" style="animation: fadeUp .4s ease both">
+                        <div class="fin-kpi-label">Lucro Líquido</div>
+                        <div class="fin-kpi-value gold" id="fin-kpi-lucro">R$ 29.350</div>
+                        <div class="fin-delta up">↑ 18% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card azul" style="animation: fadeUp .45s ease both">
+                        <div class="fin-kpi-label">Eventos no Mês</div>
+                        <div class="fin-kpi-value azul" id="fin-kpi-eventos">14</div>
+                        <div class="fin-delta up">↑ 2 vs mês anterior</div>
+                    </div>
+                </div>
+
+                <!-- Grid meio -->
+                <div class="fin-mid-grid">
+
+                    <!-- Gráfico de barras -->
+                    <div class="fin-section" style="animation: fadeUp .4s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Receitas × Despesas</div>
+                                <div class="fin-section-sub">Últimos 6 meses</div>
+                            </div>
+                            <span class="fin-badge">2025</span>
+                        </div>
+                        <canvas id="finBarChart" height="160"></canvas>
+                    </div>
+
+                    <!-- Donut -->
+                    <div class="fin-section" style="animation: fadeUp .45s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Fontes de Receita</div>
+                                <div class="fin-section-sub">Distribuição por categoria</div>
+                            </div>
+                        </div>
+                        <div class="fin-donut-wrap">
+                            <canvas id="finDonutChart" width="140" height="140"></canvas>
+                            <div class="fin-donut-legend" id="finDonutLegend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metas -->
+                    <div class="fin-section" style="animation: fadeUp .5s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Metas Mensais</div>
+                                <div class="fin-section-sub">Progresso até agora</div>
+                            </div>
+                            <button class="btn-fin btn-fin-ghost" style="font-size:0.78rem;padding:6px 14px" onclick="finOpenModal('meta')">Editar</button>
+                        </div>
+                        <div class="fin-goal-list" id="finGoalList"></div>
+                    </div>
+
+                    <!-- Próximos Eventos -->
+                    <div class="fin-section" style="animation: fadeUp .55s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Próximos Eventos</div>
+                                <div class="fin-section-sub">Previsão de entrada</div>
+                            </div>
+                        </div>
+                        <div class="fin-cf-row">
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Confirmados</div>
+                                <div class="fin-cf-val" style="color:#0ca678">R$ 22.400</div>
+                            </div>
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Em Negociação</div>
+                                <div class="fin-cf-val" style="color:#f59e0b">R$ 8.900</div>
+                            </div>
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Pendente Pag.</div>
+                                <div class="fin-cf-val" style="color:#ff385c">R$ 5.200</div>
+                            </div>
+                        </div>
+                        <div class="fin-event-list" id="finEventList"></div>
+                    </div>
+
+                    <!-- Lançamentos -->
+                    <div class="fin-section fin-wide" style="animation: fadeUp .6s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Lançamentos Recentes</div>
+                                <div class="fin-section-sub">Todas as movimentações do mês</div>
+                            </div>
+                            <div style="display:flex;gap:8px">
+                                <select class="fin-select" style="font-size:0.78rem;padding:6px 12px" onchange="finFilterTable(this.value)">
+                                    <option value="todos">Todos</option>
+                                    <option value="receita">Receitas</option>
+                                    <option value="despesa">Despesas</option>
+                                    <option value="pendente">Pendentes</option>
+                                </select>
+                                <button class="btn-fin btn-fin-ghost" style="font-size:0.78rem;padding:6px 14px">Exportar</button>
+                            </div>
+                        </div>
+                        <div class="fin-table-wrap">
+                            <table class="fin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Tipo de Evento</th>
+                                        <th>Status</th>
+                                        <th style="text-align:right">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="finTransTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- /fin-painel -->
+
+            <!-- ── ABA: RECEITAS ── -->
+            <div class="fin-tab-content" id="fin-receitas">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">💚 Receitas do Período</div>
+                            <div class="fin-section-sub">Todas as entradas registradas</div>
+                        </div>
+                        <button class="btn-fin btn-fin-primary" onclick="finOpenModal('receita')">+ Nova Receita</button>
+                    </div>
+                    <div class="fin-table-wrap">
+                        <table class="fin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th style="text-align:right">Valor</th></tr>
+                            </thead>
+                            <tbody id="finReceitasTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA: DESPESAS ── -->
+            <div class="fin-tab-content" id="fin-despesas">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">🔴 Despesas do Período</div>
+                            <div class="fin-section-sub">Todas as saídas registradas</div>
+                        </div>
+                        <button class="btn-fin btn-fin-ghost" onclick="finOpenModal('despesa')">+ Nova Despesa</button>
+                    </div>
+                    <div class="fin-table-wrap">
+                        <table class="fin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th style="text-align:right">Valor</th></tr>
+                            </thead>
+                            <tbody id="finDespesasTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA: EVENTOS ── -->
+            <div class="fin-tab-content" id="fin-eventos">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">📅 Eventos com Movimentação</div>
+                            <div class="fin-section-sub">Receitas vinculadas a eventos</div>
+                        </div>
+                    </div>
+                    <div class="fin-event-list" id="finEventListFull" style="max-height:500px;overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <!-- ── ABA: RELATÓRIOS ── -->
+            <div class="fin-tab-content" id="fin-relatorios">
+                <div class="fin-mid-grid">
+                    <div class="fin-section">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">📋 Resumo do Mês</div>
+                                <div class="fin-section-sub">Visão consolidada</div>
+                            </div>
+                        </div>
+                        <div class="fin-cf-row" style="flex-direction:column;gap:14px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#f7f7f7;border-radius:10px;border:1px solid #eee;">
+                                <span style="font-size:0.88rem;color:#444;font-weight:600;">Total Receitas</span>
+                                <span style="font-weight:700;color:#0ca678;font-size:1rem;" id="rel-receita">R$ 48.700</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#f7f7f7;border-radius:10px;border:1px solid #eee;">
+                                <span style="font-size:0.88rem;color:#444;font-weight:600;">Total Despesas</span>
+                                <span style="font-weight:700;color:#ff385c;font-size:1rem;" id="rel-despesa">R$ 19.350</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(255,56,92,0.04);border-radius:10px;border:1px solid rgba(255,56,92,0.15);">
+                                <span style="font-size:0.88rem;color:#444;font-weight:700;">Lucro Líquido</span>
+                                <span style="font-weight:700;color:#f59e0b;font-size:1.1rem;" id="rel-lucro">R$ 29.350</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fin-section">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">🎯 Metas vs Realizado</div>
+                                <div class="fin-section-sub">Performance do mês</div>
+                            </div>
+                        </div>
+                        <div class="fin-goal-list" id="finGoalListRel"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /pagina-financeiro -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: DOCUMENTOS
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-documentos">
+
+            <div class="docs-header">
+                <div>
+                    <h2>📄 Documentos</h2>
+                    <div class="nome-propriedade">Licenças, alvarás e documentos com controle de validade</div>
+                </div>
+                <div class="docs-header-right">
+                    <button class="btn-fin btn-fin-ghost" onclick="docsExport()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exportar Lista
+                    </button>
+                    <button class="btn-fin btn-fin-primary" onclick="docsOpenAddModal()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo Documento
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alert banner -->
+            <div class="docs-alert" id="docsAlertBanner" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="docs-alert-text">
+                    <strong id="docsAlertTitle">Atenção</strong>
+                    <span id="docsAlertDesc">Verifique os documentos abaixo.</span>
+                </div>
+                <span class="docs-alert-tag" id="docsAlertCount">0 itens</span>
+            </div>
+
+            <!-- Summary -->
+            <div class="docs-summary">
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#f0fdf4">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#16a34a" id="docsCntOk">0</div><div class="docs-sum-label">Em Dia</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#fffbeb">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#d97706" id="docsCntWarn">0</div><div class="docs-sum-label">A Vencer (90d)</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#fef2f2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#dc2626" id="docsCntExp">0</div><div class="docs-sum-label">Vencidos</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#eff6ff">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#1a73e8" id="docsCntTotal">0</div><div class="docs-sum-label">Total de Docs</div></div>
+                </div>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="docs-filter-bar">
+                <button class="docs-filter-pill active" onclick="docsSetFilter('todos',this)">Todos</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('juridico',this)">Jurídico</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('licencas',this)">Licenças</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('fiscal',this)">Fiscal</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('seguros',this)">Seguros</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('alvara',this)">Alvarás</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('outros',this)">Outros</button>
+                <div class="docs-search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Buscar documento..." oninput="docsSearch(this.value)">
+                </div>
+            </div>
+
+            <!-- Docs container -->
+            <div id="docsContainer"></div>
+
+        </div><!-- /pagina-documentos -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: EQUIPE & FOLHA
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-equipe">
+
+            <div class="eq-header">
+                <div>
+                    <h2>👥 Equipe & Folha</h2>
+                    <div class="nome-propriedade">Gestão de funcionários, contracheques e encargos</div>
+                </div>
+                <div class="eq-header-right">
+                    <button class="btn-fin btn-fin-ghost" onclick="eqSwitchTab('impostos')">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M20 12h-2M17.66 17.66l-1.41-1.41M12 20v-2M6.34 17.66l-1.41-1.41M4 12H2M6.34 6.34L4.93 4.93"/></svg>
+                        Configurar Encargos
+                    </button>
+                    <button class="btn-fin btn-fin-primary" onclick="eqOpenEmpModal()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo Funcionário
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI strip -->
+            <div class="eq-kpi-grid">
+                <div class="eq-kpi t"><div class="eq-kpi-label">Total Funcionários</div><div class="eq-kpi-val" id="eq-kpi-total">0</div><div class="eq-kpi-sub" id="eq-kpi-ativos-sub">— ativos</div></div>
+                <div class="eq-kpi a"><div class="eq-kpi-label">Folha Bruta / Mês</div><div class="eq-kpi-val" id="eq-kpi-bruta">R$ 0</div><div class="eq-kpi-sub">Soma dos salários base</div></div>
+                <div class="eq-kpi r"><div class="eq-kpi-label">Encargos Totais</div><div class="eq-kpi-val" id="eq-kpi-encargos">R$ 0</div><div class="eq-kpi-sub">Custo patronal estimado</div></div>
+                <div class="eq-kpi v"><div class="eq-kpi-label">Custo Total / Mês</div><div class="eq-kpi-val" id="eq-kpi-custo">R$ 0</div><div class="eq-kpi-sub">Bruto + encargos</div></div>
+            </div>
+
+            <!-- Sub-abas -->
+            <div class="eq-tabs">
+                <button class="eq-tab active" id="eq-tab-equipe"   onclick="eqSwitchTab('equipe')">Equipe</button>
+                <button class="eq-tab"         id="eq-tab-folha"   onclick="eqSwitchTab('folha')">Folha de Pagamento</button>
+                <button class="eq-tab"         id="eq-tab-impostos" onclick="eqSwitchTab('impostos')">Encargos & Impostos</button>
+            </div>
+
+            <!-- ── ABA: EQUIPE ── -->
+            <div id="eq-panel-equipe" class="eq-panel active">
+                <div class="eq-filter-bar">
+                    <button class="eq-filter-pill active" onclick="eqFilterEmp('todos',this)">Todos</button>
+                    <button class="eq-filter-pill" onclick="eqFilterEmp('ativo',this)">Ativos</button>
+                    <button class="eq-filter-pill" onclick="eqFilterEmp('ferias',this)">Férias</button>
+                    <button class="eq-filter-pill" onclick="eqFilterEmp('horista',this)">Horista</button>
+                    <div class="eq-search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="Buscar funcionário..." oninput="eqSearchEmp(this.value)">
+                    </div>
+                </div>
+                <div class="eq-emp-grid" id="eqEmpGrid"></div>
+            </div>
+
+            <!-- ── ABA: FOLHA ── -->
+            <div id="eq-panel-folha" class="eq-panel">
+                <div class="eq-payroll-header">
+                    <div class="eq-month-nav">
+                        <button onclick="eqChangeMonth(-1)">‹</button>
+                        <div class="eq-month-label" id="eqMonthLabel">—</div>
+                        <button onclick="eqChangeMonth(1)">›</button>
+                    </div>
+                    <div style="display:flex;gap:10px">
+                        <button class="btn-fin btn-fin-ghost" onclick="eqExportPayroll()">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Exportar CSV
+                        </button>
+                        <button class="btn-fin btn-fin-primary" style="background:#f59e0b;box-shadow:0 2px 10px rgba(245,158,11,.25)">Fechar Folha</button>
+                    </div>
+                </div>
+                <div class="eq-payroll-totals">
+                    <div class="eq-ptotal"><div class="eq-ptotal-label">Total Bruto</div><div class="eq-ptotal-val" style="color:#f59e0b" id="eq-pt-bruto">R$ 0</div></div>
+                    <div class="eq-ptotal"><div class="eq-ptotal-label">Total Descontos</div><div class="eq-ptotal-val" style="color:#ff385c" id="eq-pt-descontos">R$ 0</div></div>
+                    <div class="eq-ptotal"><div class="eq-ptotal-label">Total Líquido</div><div class="eq-ptotal-val" style="color:#0ca678" id="eq-pt-liquido">R$ 0</div></div>
+                </div>
+                <div class="eq-table-wrap">
+                    <table class="eq-table">
+                        <thead><tr>
+                            <th>Funcionário</th><th>Cargo</th><th>Salário Base</th>
+                            <th>Adicionais</th><th>Descontos</th><th>Líquido</th><th>Status</th><th></th>
+                        </tr></thead>
+                        <tbody id="eqPayrollBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── ABA: IMPOSTOS ── -->
+            <div id="eq-panel-impostos" class="eq-panel">
+                <div style="max-width:900px">
+                    <div class="eq-tax-notice">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        <div>
+                            <strong>⚠️ Peça ajuda ao seu contador para preencher esta seção.</strong>
+                            <span>Os percentuais variam conforme regime tributário, categoria e legislação vigente.</span>
+                        </div>
+                    </div>
+                    <div class="eq-tax-grid">
+                        <!-- Encargos Patronais -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="2"/></svg> Encargos Patronais</div>
+                            <div class="eq-tax-section-desc">Pago pela empresa sobre a folha de pagamento</div>
+                            <div class="eq-tax-field"><label><span>INSS Patronal</span><em id="eq-v-inss-pat">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-inss-pat" value="20" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>FGTS</span><em id="eq-v-fgts">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-fgts" value="8" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>RAT / SAT</span><em id="eq-v-rat">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-rat" value="2" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Sistema S</span><em id="eq-v-sis-s">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-sis-s" value="3.1" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outros patronais</span><em id="eq-v-outros-pat">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-pat" value="0" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total patronal</span><span class="eq-tax-total-val" id="eq-total-patronal">0%</span></div>
+                        </div>
+                        <!-- Descontos do funcionário -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff385c" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Descontos do Funcionário</div>
+                            <div class="eq-tax-section-desc">Descontados do salário bruto do trabalhador</div>
+                            <div class="eq-tax-field"><label><span>INSS Empregado</span><em id="eq-v-inss-emp">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-inss-emp" value="9" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>IRRF</span><em id="eq-v-irrf">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-irrf" value="7.5" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Vale Transporte (desc.)</span><em id="eq-v-vt">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-vt" value="6" min="0" max="6" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Plano Saúde (R$ fixo)</span><em id="eq-v-ps">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-ps" value="0" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outros descontos</span><em id="eq-v-outros-desc">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-desc" value="0" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total descontos</span><span class="eq-tax-total-val" id="eq-total-desconto">0%</span></div>
+                        </div>
+                        <!-- Benefícios -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0ca678" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> Benefícios (R$/mês)</div>
+                            <div class="eq-tax-section-desc">Valores fixos pagos pela empresa por funcionário</div>
+                            <div class="eq-tax-field"><label><span>Vale Refeição/Alimentação</span><em id="eq-v-vr">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-vr" value="550" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Vale Transporte (empresa)</span><em id="eq-v-vt-emp">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-vt-emp" value="220" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Plano Saúde (empresa)</span><em id="eq-v-ps-emp">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-ps-emp" value="0" min="0" step="50" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outros benefícios</span><em id="eq-v-outros-ben">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-ben" value="0" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total benefícios / func.</span><span class="eq-tax-total-val" id="eq-total-beneficios">R$ 0</span></div>
+                        </div>
+                        <!-- Provisões -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Provisões</div>
+                            <div class="eq-tax-section-desc">Reservas mensais para direitos trabalhistas futuros</div>
+                            <div class="eq-tax-field"><label><span>13º Salário (1/12)</span><em id="eq-v-dec">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-dec" value="8.33" min="0" max="100" step="0.01" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Férias + 1/3</span><em id="eq-v-fer">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-fer" value="11.11" min="0" max="100" step="0.01" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Multa FGTS rescisão</span><em id="eq-v-multa">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-multa" value="3.2" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outras provisões</span><em id="eq-v-outros-prov">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-prov" value="0" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total provisões</span><span class="eq-tax-total-val" id="eq-total-provisoes">0%</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Simulador -->
+                    <div class="eq-sim-panel">
+                        <div class="eq-sim-title">🧮 Simulador de Custo Real</div>
+                        <div class="eq-sim-desc">Digite o salário base e veja o custo total para a empresa e o líquido do funcionário.</div>
+                        <div class="eq-sim-body">
+                            <div style="display:flex;flex-direction:column;gap:14px">
+                                <div><div class="eq-sim-label">Salário Base (R$)</div><input class="eq-sim-input" type="number" id="eq-sim-salario" value="2500" min="0" step="100" oninput="eqRunSimulator()"></div>
+                                <div><div class="eq-sim-label">Tipo de Contrato</div>
+                                    <select class="eq-sim-select" id="eq-sim-tipo" onchange="eqRunSimulator()">
+                                        <option value="clt">CLT — Integral</option>
+                                        <option value="horista">CLT — Horista</option>
+                                        <option value="mei">MEI / Autônomo</option>
+                                    </select>
+                                </div>
+                                <div><div class="eq-sim-label">Horas extras (quantidade)</div><input class="eq-sim-input" type="number" id="eq-sim-he" value="0" min="0" max="80" step="1" oninput="eqRunSimulator()" style="font-size:.9rem"></div>
+                                <div><div class="eq-sim-label">Adicional / Bônus (R$)</div><input class="eq-sim-input" type="number" id="eq-sim-bonus" value="0" min="0" step="50" oninput="eqRunSimulator()" style="font-size:.9rem"></div>
+                            </div>
+                            <div>
+                                <div class="eq-sim-result" id="eqSimResult"></div>
+                                <div class="eq-sim-disclaimer">⚠️ Simulação estimada com base nos encargos configurados.<br>Consulte seu contador para valores oficiais.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /pagina-equipe -->
+
+  <!-- ════════════════════════════════════
+             PÁGINA: FOTOS
+        ════════════════════════════════════ -->
+
+
+
+            <div class="page-section" id="pagina-fotos">
+
+    <div class="dash-header-fixo">
+        <div>
+            <h2>📸 Fotos do Espaço</h2>
+            <p style="font-size:0.82rem;color:#999;margin-top:3px;">Organize as fotos por ambiente e defina as 5 fotos em destaque.</p>
+        </div>
+        <div class="fotos-header-acoes">
+            <button class="fotos-btn-salvar-tudo" onclick="fotosSalvarTudo()">💾 Salvar</button>
+            <button class="fotos-btn-nova-secao" onclick="fotosCriarSecao()">+ Nova seção</button>
+        </div>
+    </div>
+
+    <!-- Aviso sem propriedade -->
+    <div class="fotos-aviso-sem-prop" id="fotos-aviso-sem-prop">
+        <span style="font-size:1.5rem">⚠️</span>
+        <p>Você precisa cadastrar sua propriedade antes de adicionar fotos. <a href="minhapropriedade.html">Cadastrar agora →</a></p>
+    </div>
+
+    <!-- Banner de plano -->
+    <div class="fotos-banner-plano" id="fotos-banner-plano"></div>
+
+    <!-- Tabs -->
+    <div class="fotos-tabs">
+        <button class="fotos-tab-btn active" id="fotos-tab-espaco" onclick="fotosMudarAba('espaco')">📷 Fotos do Espaço</button>
+        <button class="fotos-tab-btn" id="fotos-tab-evento" onclick="fotosMudarAba('evento')">🎉 Fotos de Eventos</button>
+    </div>
+
+    <!-- ═══ ABA: FOTOS DO ESPAÇO ═══ -->
+    <div class="fotos-aba ativa" id="fotos-aba-espaco">
+
+        <div class="fotos-aviso-intro">
+            <span class="fotos-aviso-intro-icon">💡</span>
+            <div class="fotos-aviso-intro-texto">
+                <h4>Fotos do espaço em si</h4>
+                <p>Crie uma seção para cada ambiente — ex: <strong>Área Externa</strong>, <strong>Salão Principal</strong>, <strong>Lareira</strong>. A primeira foto de cada seção será a capa daquele ambiente.</p>
+            </div>
+        </div>
+
+        <!-- PAINEL DESTAQUE -->
+        <div class="fotos-destaque-panel">
+            <div class="fotos-destaque-panel-top">
+                <div>
+                    <h3>⭐ 5 Fotos em Destaque — Galeria Principal</h3>
+                    <p>Clique em um slot para ativá-lo, depois clique na foto abaixo que deseja colocar nessa posição.<br>
+                    Pos. 1 = foto grande à esquerda &nbsp;|&nbsp; 2 = sup. esq. &nbsp;|&nbsp; 3 = sup. dir. &nbsp;|&nbsp; 4 = inf. esq. &nbsp;|&nbsp; 5 = inf. dir.</p>
+                </div>
+            </div>
+            <div class="fotos-destaque-slots-grid">
+                <div class="fotos-destaque-slot slot-main" id="fotos-dslot-1" onclick="fotosAtivarSlot(1)" title="Posição 1 — principal">
+                    <img id="fotos-dslot-img-1" src="" alt="Posição 1">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-1"><span>📷</span><span>Pos. 1<br><small>(principal)</small></span></div>
+                    <div class="fotos-dslot-num">1</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(1)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-2" onclick="fotosAtivarSlot(2)" title="Posição 2">
+                    <img id="fotos-dslot-img-2" src="" alt="Posição 2">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-2"><span>📷</span><span>Pos. 2</span></div>
+                    <div class="fotos-dslot-num">2</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(2)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-3" onclick="fotosAtivarSlot(3)" title="Posição 3">
+                    <img id="fotos-dslot-img-3" src="" alt="Posição 3">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-3"><span>📷</span><span>Pos. 3</span></div>
+                    <div class="fotos-dslot-num">3</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(3)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-4" onclick="fotosAtivarSlot(4)" title="Posição 4">
+                    <img id="fotos-dslot-img-4" src="" alt="Posição 4">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-4"><span>📷</span><span>Pos. 4</span></div>
+                    <div class="fotos-dslot-num">4</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(4)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-5" onclick="fotosAtivarSlot(5)" title="Posição 5">
+                    <img id="fotos-dslot-img-5" src="" alt="Posição 5">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-5"><span>📷</span><span>Pos. 5</span></div>
+                    <div class="fotos-dslot-num">5</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(5)">✕</button>
+                </div>
+            </div>
+            <div class="fotos-slot-hint" id="fotos-slot-hint"></div>
+        </div>
+
+        <!-- Seções do espaço -->
+        <div class="fotos-lista-secoes-wrap" id="fotos-lista-secoes">
+            <div class="fotos-placeholder-vazio" id="fotos-placeholder">
+                <span>🏗️</span>
+                <h3>Nenhuma seção criada ainda</h3>
+                <p>Clique em <strong>"+ Nova seção"</strong> para começar a organizar as fotos por ambiente.</p>
+            </div>
+        </div>
+
+    </div><!-- /fotos-aba-espaco -->
+
+    <!-- ═══ ABA: FOTOS DE EVENTOS ═══ -->
+    <div class="fotos-aba" id="fotos-aba-evento">
+
+        <div class="fotos-aviso-intro" style="background:#1b3a5c">
+            <span class="fotos-aviso-intro-icon">🎉</span>
+            <div class="fotos-aviso-intro-texto">
+                <h4>Como o espaço fica decorado nos eventos</h4>
+                <p>Mostre registros de eventos já realizados — casamentos, aniversários, corporativos. Isso inspira novos contratantes.</p>
+            </div>
+        </div>
+
+        <!-- Seções de evento -->
+        <div class="fotos-lista-secoes-wrap" id="fotos-lista-secoes-evento">
+            <div class="fotos-placeholder-vazio" id="fotos-placeholder-evento">
+                <span>🎉</span>
+                <h3>Nenhuma seção de evento ainda</h3>
+                <p>Clique em <strong>"+ Nova seção"</strong> para adicionar fotos de eventos realizados.</p>
+            </div>
+        </div>
+
+    </div><!-- /fotos-aba-evento -->
+
+    <!-- Rodapé sticky com botão salvar -->
+    <div class="fotos-footer-acoes">
+        <button class="fotos-btn-salvar fotos-btn-salvar" onclick="fotosSalvarTudo()">💾 Salvar alterações</button>
+    </div>
+
+</div><!-- /pagina-fotos -->
+
+
+<!-- ════════════════════════════════════
+     PÁGINA: MINHA PROPRIEDADE
+════════════════════════════════════ -->
+
+<div class="page-section" id="pagina-minhapropriedade">
+
+    <header class="dash-header-fixo">
+        <h2>🏡 Minha Propriedade</h2>
+        <button class="prop-btn-visualizar" id="prop-btn-visualizar" onclick="propVerAnuncio()" style="opacity:0.5">
+            👁 Ver Anúncio Público
+        </button>
+    </header>
+
+    <!-- ABAS DE NAVEGAÇÃO -->
+    <nav class="prop-sub-menu">
+        <button class="prop-tab-link active" data-tab="contato"  onclick="propOpenTab(event,'contato')">1. Contato</button>
+        <button class="prop-tab-link"        data-tab="sobre"    onclick="propOpenTab(event,'sobre')">2. Sobre</button>
+        <button class="prop-tab-link"        data-tab="valores"  onclick="propOpenTab(event,'valores')">3. Valores</button>
+        <button class="prop-tab-link"        data-tab="endereco" onclick="propOpenTab(event,'endereco')">4. Endereço</button>
+        <button class="prop-tab-link"        data-tab="eventos"  onclick="propOpenTab(event,'eventos')">5. Eventos</button>
+        <button class="prop-tab-link"        data-tab="faq"      onclick="propOpenTab(event,'faq')">6. FAQ</button>
+        <button class="prop-tab-link"        data-tab="servicos" onclick="propOpenTab(event,'servicos')">7. Serviços</button>
+        <button class="prop-tab-link"        data-tab="forca"    onclick="propOpenTab(event,'forca')">⚡ Força do Anúncio</button>
+    </nav>
+
+    <div class="prop-container-abas">
+
+        <!-- ══ ABA 1: CONTATO ══ -->
+        <div id="prop-aba-contato" class="prop-tab-content active">
+            <div class="prop-sessao-edit">
+                <h3>Dados da Propriedade</h3>
+                <p class="aviso-form">Essas informações serão exibidas no seu anúncio público.</p>
+                <div class="grid-form">
+                    <div class="campo span-2">
+                        <label>Nome do Espaço</label>
+                        <input type="text" id="prop-nome-espaco" placeholder="Ex: Mansão das Palmeiras">
+                    </div>
+                    <div class="campo span-2">
+                        <label>Tipo de Propriedade</label>
+                        <select id="prop-tipo-propriedade">
+                            <option value="">Selecione o tipo...</option>
+                            <option value="Sítio">🌿 Sítio</option>
+                            <option value="Chácara">🏡 Chácara</option>
+                            <option value="Salão de Festas">🎉 Salão de Festas</option>
+                            <option value="Fazenda">🐄 Fazenda</option>
+                            <option value="Casa de Campo">🏠 Casa de Campo</option>
+                            <option value="Mansão / Villa">🏛️ Mansão / Villa</option>
+                            <option value="Espaço Gourmet">🍷 Espaço Gourmet</option>
+                            <option value="Haras / Rancho">🐎 Haras / Rancho</option>
+                            <option value="Clube / Resort">🏊 Clube / Resort</option>
+                            <option value="Espaço Corporativo">💼 Espaço Corporativo</option>
+                            <option value="Espaço ao Ar Livre">🌳 Espaço ao Ar Livre</option>
+                            <option value="Outro">📍 Outro</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label>Capacidade Máxima (pessoas)</label>
+                        <input type="number" id="prop-capacidade" placeholder="Ex: 200" min="1">
+                    </div>
+                    <div class="campo">
+                        <label>E-mail de Contato</label>
+                        <input type="email" id="prop-email-contato" placeholder="contato@seuespaco.com.br">
+                    </div>
+                    <div class="campo">
+                        <label>WhatsApp</label>
+                        <input type="tel" id="prop-whatsapp" placeholder="(21) 99999-0000">
+                    </div>
+                    <div class="campo">
+                        <label>Telefone Fixo</label>
+                        <input type="tel" id="prop-telefone" placeholder="(21) 3333-0000">
+                    </div>
+                    <div class="campo">
+                        <label>Instagram</label>
+                        <input type="text" id="prop-instagram" placeholder="@seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>Facebook</label>
+                        <input type="text" id="prop-facebook" placeholder="facebook.com/seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>TikTok</label>
+                        <input type="text" id="prop-tiktok" placeholder="@seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>YouTube</label>
+                        <input type="text" id="prop-youtube" placeholder="youtube.com/@seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>LinkedIn</label>
+                        <input type="text" id="prop-linkedin" placeholder="linkedin.com/in/seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>Site Externo</label>
+                        <input type="text" id="prop-site" placeholder="www.seuespaco.com.br">
+                    </div>
+                </div>
+            </div>
+            <div class="prop-sessao-edit">
+                <h3>Responsável pelo Atendimento</h3>
+                <p class="aviso-form">Quem os clientes vão encontrar ao entrar em contato?</p>
+                <div class="prop-atendimento-box">
+                    <div class="prop-foto-anfitriao">
+                        <div class="avatar-preview" id="prop-avatar-preview">😊</div>
+                        <button class="btn-trocar-foto" onclick="document.getElementById('prop-input-foto-resp').click()">Trocar Foto</button>
+                        <input type="file" id="prop-input-foto-resp" accept="image/*" hidden onchange="propPreviewFoto(this)">
+                        <input type="hidden" id="prop-foto-resp-data">
+                    </div>
+                    <div class="prop-info-anfitriao">
+                        <div class="campo">
+                            <label>Nome do Responsável</label>
+                            <input type="text" id="prop-nome-resp" placeholder="Ex: Rodrigo Ramos">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 2: SOBRE ══ -->
+        <div id="prop-aba-sobre" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <h3>Descrição do Espaço</h3>
+                <p class="aviso-form">⚠️ Não inclua dados de contato aqui. Use conteúdo exclusivo e original.</p>
+                <div class="campo">
+                    <label>Apresentação completa do espaço</label>
+                    <textarea id="prop-descricao" class="txt-descricao" placeholder="Apresente seu espaço, explique seus diferenciais..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 3: VALORES ══ -->
+        <div id="prop-aba-valores" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <h3>Preços de Referência</h3>
+                <p class="aviso-form">Valores orientativos exibidos no anúncio. Negociações pelo WhatsApp.</p>
+                <div class="prop-preco-grid">
+                    <div class="campo">
+                        <label>Valor por Hora</label>
+                        <div class="prop-input-moeda"><span>R$</span><input type="number" id="prop-valor-hora" placeholder="0,00" min="0"></div>
+                    </div>
+                    <div class="campo">
+                        <label>Valor por Diária (dia completo)</label>
+                        <div class="prop-input-moeda"><span>R$</span><input type="number" id="prop-valor-diaria" placeholder="0,00" min="0"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="prop-sessao-edit">
+                <h3>Custos Extras (opcionais para o cliente)</h3>
+                <p class="aviso-form">Serviços que o cliente pode contratar à parte.</p>
+                <div id="prop-lista-custos-extras" class="prop-lista-custos-extras"></div>
+                <button type="button" class="prop-btn-add-faq" onclick="propAdicionarCusto()">+ Adicionar item</button>
+            </div>
+        </div>
+
+        <!-- ══ ABA 4: ENDEREÇO ══ -->
+        <div id="prop-aba-endereco" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <div class="prop-header-sessao">
+                    <h3>Localização do Espaço</h3>
+                    <p class="aviso-form">O endereço completo ajuda os clientes a traçarem a rota.</p>
+                </div>
+                <div class="prop-grid-endereco">
+                    <div class="campo-cep">
+                        <span class="campo-label">CEP</span>
+                        <input type="text" id="prop-cep" placeholder="00000-000" onblur="propBuscarCEP()">
+                    </div>
+                    <div class="campo-largo">
+                        <span class="campo-label">Logradouro (Rua / Avenida)</span>
+                        <input type="text" id="prop-rua" placeholder="Ex: Rua das Flores">
+                    </div>
+                    <div class="campo-curto">
+                        <span class="campo-label">Número</span>
+                        <input type="text" id="prop-numero" placeholder="123">
+                    </div>
+                    <div class="campo-medio">
+                        <span class="campo-label">Complemento</span>
+                        <input type="text" id="prop-complemento" placeholder="Sala, Bloco...">
+                    </div>
+                    <div class="campo-medio">
+                        <span class="campo-label">Bairro</span>
+                        <input type="text" id="prop-bairro" placeholder="Ex: Centro">
+                    </div>
+                    <div class="campo-medio">
+                        <span class="campo-label">Cidade</span>
+                        <input type="text" id="prop-cidade" placeholder="Ex: São Paulo">
+                    </div>
+                    <div style="grid-column: span 6;">
+                        <span class="campo-label">Estado</span>
+                        <input type="hidden" id="prop-uf">
+                        <div class="prop-uf-grid" id="prop-uf-grid">
+                            <button type="button" class="prop-uf-btn" data-uf="AC" onclick="propSelecionarUF(this,'AC')">AC</button>
+                            <button type="button" class="prop-uf-btn" data-uf="AL" onclick="propSelecionarUF(this,'AL')">AL</button>
+                            <button type="button" class="prop-uf-btn" data-uf="AP" onclick="propSelecionarUF(this,'AP')">AP</button>
+                            <button type="button" class="prop-uf-btn" data-uf="AM" onclick="propSelecionarUF(this,'AM')">AM</button>
+                            <button type="button" class="prop-uf-btn" data-uf="BA" onclick="propSelecionarUF(this,'BA')">BA</button>
+                            <button type="button" class="prop-uf-btn" data-uf="CE" onclick="propSelecionarUF(this,'CE')">CE</button>
+                            <button type="button" class="prop-uf-btn" data-uf="DF" onclick="propSelecionarUF(this,'DF')">DF</button>
+                            <button type="button" class="prop-uf-btn" data-uf="ES" onclick="propSelecionarUF(this,'ES')">ES</button>
+                            <button type="button" class="prop-uf-btn" data-uf="GO" onclick="propSelecionarUF(this,'GO')">GO</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MA" onclick="propSelecionarUF(this,'MA')">MA</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MT" onclick="propSelecionarUF(this,'MT')">MT</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MS" onclick="propSelecionarUF(this,'MS')">MS</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MG" onclick="propSelecionarUF(this,'MG')">MG</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PA" onclick="propSelecionarUF(this,'PA')">PA</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PB" onclick="propSelecionarUF(this,'PB')">PB</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PR" onclick="propSelecionarUF(this,'PR')">PR</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PE" onclick="propSelecionarUF(this,'PE')">PE</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PI" onclick="propSelecionarUF(this,'PI')">PI</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RJ" onclick="propSelecionarUF(this,'RJ')">RJ</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RN" onclick="propSelecionarUF(this,'RN')">RN</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RS" onclick="propSelecionarUF(this,'RS')">RS</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RO" onclick="propSelecionarUF(this,'RO')">RO</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RR" onclick="propSelecionarUF(this,'RR')">RR</button>
+                            <button type="button" class="prop-uf-btn" data-uf="SC" onclick="propSelecionarUF(this,'SC')">SC</button>
+                            <button type="button" class="prop-uf-btn" data-uf="SP" onclick="propSelecionarUF(this,'SP')">SP</button>
+                            <button type="button" class="prop-uf-btn" data-uf="SE" onclick="propSelecionarUF(this,'SE')">SE</button>
+                            <button type="button" class="prop-uf-btn" data-uf="TO" onclick="propSelecionarUF(this,'TO')">TO</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:20px;">
+                    <button type="button" class="prop-btn-visualizar" style="background:#0d0d0d;color:#fff;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:0.88rem;" onclick="propAtualizarMapa()">
+                        📍 Atualizar Mapa
+                    </button>
+                    <div class="prop-mapa-container" style="margin-top:14px;">
+                        <div id="prop-mapa-msg" style="font-size:0.85rem;color:#aaa;padding:14px;text-align:center;">
+                            Preencha o endereço e clique em "Atualizar Mapa"
+                        </div>
+                        <div id="prop-mapa-leaflet" style="display:none;width:100%;height:280px;border-radius:14px;overflow:hidden;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 5: EVENTOS ══ -->
+        <div id="prop-aba-eventos" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <div class="prop-header-sessao">
+                    <h3>Quais eventos seu espaço recebe?</h3>
+                    <p class="aviso-form">Selecione todos os tipos de celebrações permitidos no seu local.</p>
+                </div>
+                <div class="prop-grid-eventos">
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="casamento"><div class="prop-conteudo-check"><span class="prop-icon-evento">💍</span><span class="prop-nome-evento">Casamentos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="infantil"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎈</span><span class="prop-nome-evento">Festas Infantis</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="corporativo"><div class="prop-conteudo-check"><span class="prop-icon-evento">💼</span><span class="prop-nome-evento">Corporativos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="aniversario"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎂</span><span class="prop-nome-evento">Aniversários</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="confraternizacao"><div class="prop-conteudo-check"><span class="prop-icon-evento">🥂</span><span class="prop-nome-evento">Confraternizações</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="formatura"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎓</span><span class="prop-nome-evento">Formaturas</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="workshop"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎤</span><span class="prop-nome-evento">Workshops / Cursos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="religioso"><div class="prop-conteudo-check"><span class="prop-icon-evento">🕊️</span><span class="prop-nome-evento">Retiros / Religiosos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="show"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎸</span><span class="prop-nome-evento">Shows / Festivais</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="esportivo"><div class="prop-conteudo-check"><span class="prop-icon-evento">🏆</span><span class="prop-nome-evento">Esportivos</span></div></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 6: FAQ ══ -->
+        <div id="prop-aba-faq" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <div class="prop-header-sessao">
+                    <h3>Perguntas Frequentes (FAQ)</h3>
+                    <p class="aviso-form">Ajude seus clientes respondendo às dúvidas mais comuns.</p>
+                </div>
+                <div id="prop-lista-faq" class="prop-lista-faq">
+                    <div class="prop-faq-item" data-fixo="true">
+                        <div class="prop-faq-inputs">
+                            <input type="text" value="Regras de Cobrança" readonly style="background:#f5f5f5;color:#555;cursor:default;font-weight:600">
+                            <textarea id="prop-regras-preco" placeholder="Ex: Valor inclui 6 horas de uso. Mínimo de 4h..." style="min-height:100px"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <button class="prop-btn-adicionar-faq" onclick="propAdicionarFAQ()">+ Adicionar Nova Pergunta</button>
+            </div>
+        </div>
+
+        <!-- ══ ABA 7: SERVIÇOS ══ -->
+        <div id="prop-aba-servicos" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <h3>Serviços e Amenidades Disponíveis</h3>
+                <p class="aviso-form">Marque tudo que seu espaço oferece.</p>
+                <div class="prop-amenidades-grid">
+                    <label class="prop-amenidade-check"><input type="checkbox" value="climatizado"><span class="prop-amenidade-label">❄️ Climatizado</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="estacionamento"><span class="prop-amenidade-label">🅿️ Estacionamento</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="seguranca"><span class="prop-amenidade-label">🛡️ Segurança</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="espaco-aberto"><span class="prop-amenidade-label">🌿 Espaço Aberto</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="cozinha"><span class="prop-amenidade-label">🍽️ Cozinha Equipada</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="gerador"><span class="prop-amenidade-label">⚡ Gerador</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="piscina"><span class="prop-amenidade-label">🏊 Piscina</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="wifi"><span class="prop-amenidade-label">📶 Wi-Fi</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="acessibilidade"><span class="prop-amenidade-label">♿ Acessibilidade</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="hospedagem"><span class="prop-amenidade-label">🛏️ Hospedagem</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="palco"><span class="prop-amenidade-label">🎤 Palco / Som</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="decoracao"><span class="prop-amenidade-label">🎀 Decoração</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="bar"><span class="prop-amenidade-label">🍹 Bar / Chopeira</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="churrasqueira"><span class="prop-amenidade-label">🔥 Churrasqueira</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="playground"><span class="prop-amenidade-label">🛝 Playground</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="quadra"><span class="prop-amenidade-label">⚽ Quadra Esportiva</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="camarim"><span class="prop-amenidade-label">💄 Camarim</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="projetor"><span class="prop-amenidade-label">📽️ Projetor / Telão</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="sauna"><span class="prop-amenidade-label">🧖 Sauna</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="heliponto"><span class="prop-amenidade-label">🚁 Heliponto</span></label>
+                </div>
+            </div>
+            <div class="prop-sessao-edit">
+                <h3>Serviços Extras que Você Pode Oferecer</h3>
+                <p class="aviso-form">Serviços adicionais disponíveis (pode ter custo extra).</p>
+                <div class="prop-amenidades-grid">
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="buffet"><span class="prop-amenidade-label">🍽️ Buffet Completo</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="garcom"><span class="prop-amenidade-label">🤵 Garçons / Staff</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="seguranca-extra"><span class="prop-amenidade-label">🛡️ Equipe de Segurança</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="bar-open"><span class="prop-amenidade-label">🍹 Bar Open Bar</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="mesa-cadeira"><span class="prop-amenidade-label">🪑 Mesas/Cadeiras</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="decoracao-extra"><span class="prop-amenidade-label">🎀 Decoração Completa</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="floricultura"><span class="prop-amenidade-label">💐 Floricultura</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="dj"><span class="prop-amenidade-label">🎧 DJ / Sonorização</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="foto-video"><span class="prop-amenidade-label">📸 Foto e Vídeo</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="cerimonialista"><span class="prop-amenidade-label">📋 Cerimonialista</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="valet"><span class="prop-amenidade-label">🚗 Valet</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="limpeza"><span class="prop-amenidade-label">🧹 Limpeza Pós-Evento</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="iluminacao"><span class="prop-amenidade-label">💡 Iluminação Especial</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="locacao-tendas"><span class="prop-amenidade-label">⛺ Tendas</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="transporte"><span class="prop-amenidade-label">🚌 Transfer</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="hospedagem-extra"><span class="prop-amenidade-label">🛏️ Hospedagem de Convidados</span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 8: FORÇA DO ANÚNCIO ══ -->
+        <div id="prop-aba-forca" class="prop-tab-content">
+            <div class="prop-termometro-card" id="prop-termometro-card">
+                <div class="prop-termometro-header">
+                    <div class="prop-termometro-titulo">🌡️ Força do seu anúncio</div>
+                    <div class="prop-termometro-pct" id="prop-termo-pct" style="color:#ff385c;">—</div>
+                </div>
+                <div class="prop-termometro-bar-wrap">
+                    <div class="prop-termometro-bar-fill" id="prop-termo-bar" style="width:0%;"></div>
+                </div>
+                <div class="prop-termometro-msg" id="prop-termo-msg">Calculando...</div>
+                <div class="prop-termometro-itens" id="prop-termo-itens"></div>
+            </div>
+        </div>
+
+    </div><!-- /prop-container-abas -->
+
+    <!-- FOOTER AÇÕES (sticky) -->
+    <div class="prop-footer-acoes">
+        <button class="prop-btn-cancelar" onclick="navegar('dashboard')">Cancelar</button>
+        <button class="prop-btn-salvar" onclick="propSalvar()">💾 Salvar Alterações</button>
+    </div>
+
+</div><!-- /pagina-minhapropriedade -->
+
+    <!-- ════════════════════════════════════
+     PÁGINA: CLIENTES & EVENTOS (LEADS)
+     ════════════════════════════════════ -->
+
+
+     <div class="page-section" id="pagina-leads">
+
+    <div class="dash-header-fixo">
+        <div>
+            <h2>🎉 Clientes & Eventos</h2>
+            <p>Gerencie todos os seus contatos, negociações e eventos em um só lugar.</p>
+        </div>
+        <div class="header-acoes">
+            <button class="btn-outline" onclick="leadsExportarExcel()">📊 Excel</button>
+            <button class="btn-outline" onclick="leadsExportarPDF()">📄 PDF</button>
+            <button class="btn-primary" onclick="leadsAbrirModalNovo()">＋ Novo Cliente</button>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid-kpis">
+        <div class="card-kpi">
+            <div class="kpi-icone verde">🎉</div>
+            <div class="kpi-label">Total</div>
+            <div class="kpi-valor" id="leads-kpi-total">—</div>
+            <div class="kpi-sub">clientes cadastrados</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone amarelo">🔥</div>
+            <div class="kpi-label">Em Negociação</div>
+            <div class="kpi-valor" id="leads-kpi-negociando">—</div>
+            <div class="kpi-sub">ativos no funil</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone azul">✅</div>
+            <div class="kpi-label">Contratados</div>
+            <div class="kpi-valor" id="leads-kpi-contratados">—</div>
+            <div class="kpi-sub">eventos confirmados</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone verde">🎊</div>
+            <div class="kpi-label">Finalizados</div>
+            <div class="kpi-valor" id="leads-kpi-finalizados">—</div>
+            <div class="kpi-sub">eventos realizados</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone rosa">❌</div>
+            <div class="kpi-label">Perdidos</div>
+            <div class="kpi-valor" id="leads-kpi-perdidos">—</div>
+            <div class="kpi-sub">negociações encerradas</div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="tabela-wrapper">
+        <div class="tabela-toolbar">
+            <div class="tabela-toolbar-left">
+                <span class="tabela-titulo">Lista de Clientes e Eventos</span>
+                <span class="tabela-count" id="leads-tabela-count">0 clientes</span>
+                <select class="select-filtro" id="leads-filtro-status" onchange="leadsAplicarFiltros()">
+                    <option value="">Todos os status</option>
+                    <option value="lead">Lead / Novo Contato</option>
+                    <option value="consultada">Data Consultada</option>
+                    <option value="visita">Visita Agendada</option>
+                    <option value="negociacao">Em Negociação</option>
+                    <option value="reserva">Reserva Temporária</option>
+                    <option value="contratado">Contrato Assinado</option>
+                    <option value="briefing">Montando Briefing</option>
+                    <option value="pronto">Pronto para Execução</option>
+                    <option value="montagem">Em Montagem</option>
+                    <option value="finalizado">Evento Concluído</option>
+                    <option value="pos">Pós-Evento / Feedback</option>
+                    <option value="perdido">Perdido</option>
+                    <option value="recontactar">Recontactar</option>
+                </select>
+                <select class="select-filtro" id="leads-filtro-tipo" onchange="leadsAplicarFiltros()">
+                    <option value="">Todos os tipos</option>
+                    <option value="Casamento">Casamento</option>
+                    <option value="Aniversário">Aniversário</option>
+                    <option value="Corporativo">Corporativo</option>
+                    <option value="Formatura">Formatura</option>
+                    <option value="Batizado">Batizado</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <input type="text" class="input-busca" id="leads-input-busca"
+                       placeholder="Buscar por nome..." oninput="leadsAplicarFiltros()">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span style="font-size:0.78rem;color:#aaa;">Por página:</span>
+                <select class="select-filtro" id="leads-por-pagina" onchange="leadsMudarPorPagina()">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tabela-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="td-seta"></th>
+                        <th class="leads-th" onclick="leadsOrdenarPor('nome_evento')">Nome do Evento <span class="leads-sort-icon" id="leads-sort-nome_evento">↕</span></th>
+                        <th class="leads-th" onclick="leadsOrdenarPor('quem_contratou')">Quem Contratou <span class="leads-sort-icon" id="leads-sort-quem_contratou">↕</span></th>
+                        <th class="leads-th" onclick="leadsOrdenarPor('data_inicio')">Data do Evento <span class="leads-sort-icon" id="leads-sort-data_inicio">↕</span></th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="leads-tabela-body"></tbody>
+            </table>
+        </div>
+
+        <div id="leads-estado-vazio" class="estado-vazio" style="display:none;">
+            <div class="icone-vazio">🎉</div>
+            <p>Nenhum cliente encontrado. Que tal adicionar o primeiro?</p>
+        </div>
+
+        <div class="paginacao" id="leads-paginacao" style="display:none;">
+            <span class="paginacao-info" id="leads-paginacao-info"></span>
+            <div class="paginacao-btns" id="leads-paginacao-btns"></div>
+        </div>
+    </div>
+
+</div><!-- /pagina-leads -->
+
+
+<!-- MODAL: Atualizar Status -->
+<div class="modal-overlay" id="leads-modal-status">
+    <div class="modal-box">
+        <button class="btn-fechar-modal" onclick="leadsFecharModalStatus()">✕</button>
+        <h3>Atualizar Status</h3>
+        <p class="modal-sub" id="leads-modal-status-nome">—</p>
+        <div class="lista-status">
+            <div class="status-grupo-label">🔍 Funil de Vendas</div>
+            <div class="opcao-status" data-status="lead"        onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#f59e0b"></div><div><div class="label-status">Lead / Novo Contato</div><div class="desc-status">Cliente acabou de chegar, ainda sem qualificação</div></div></div>
+            <div class="opcao-status" data-status="consultada"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#3b82f6"></div><div><div class="label-status">Data Consultada</div><div class="desc-status">Verificou disponibilidade, orçamento enviado</div></div></div>
+            <div class="opcao-status" data-status="visita"      onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#8b5cf6"></div><div><div class="label-status">Visita Agendada</div><div class="desc-status">Cliente vai conhecer o espaço pessoalmente</div></div></div>
+            <div class="opcao-status" data-status="negociacao"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#ec4899"></div><div><div class="label-status">Em Negociação</div><div class="desc-status">Ajustando valores, serviços ou pagamento</div></div></div>
+            <div class="opcao-status" data-status="reserva"     onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#f97316"></div><div><div class="label-status">Reserva Temporária</div><div class="desc-status">Data "segurada" por 24–48h</div></div></div>
+            <div class="status-grupo-label">📋 Gestão do Evento</div>
+            <div class="opcao-status" data-status="contratado"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#10b981"></div><div><div class="label-status">Contrato Assinado</div><div class="desc-status">Sinal pago, compromisso firmado</div></div></div>
+            <div class="opcao-status" data-status="briefing"    onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#0ea5e9"></div><div><div class="label-status">Montando Briefing</div><div class="desc-status">Coletando detalhes do evento</div></div></div>
+            <div class="opcao-status" data-status="pronto"      onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#14b8a6"></div><div><div class="label-status">Pronto para Execução</div><div class="desc-status">Briefing fechado, fornecedores alinhados</div></div></div>
+            <div class="opcao-status" data-status="montagem"    onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#f97316"></div><div><div class="label-status">Em Montagem</div><div class="desc-status">Equipe já está no local</div></div></div>
+            <div class="status-grupo-label">🏁 Finalização</div>
+            <div class="opcao-status" data-status="finalizado"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#1ebc54"></div><div><div class="label-status">Evento Concluído</div><div class="desc-status">A festa aconteceu com sucesso</div></div></div>
+            <div class="opcao-status" data-status="pos"         onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#22c55e"></div><div><div class="label-status">Pós-Evento / Feedback</div><div class="desc-status">Enviando pesquisa de satisfação</div></div></div>
+            <div class="opcao-status" data-status="perdido"     onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#ef4444"></div><div><div class="label-status">Perdido</div><div class="desc-status">Negociação encerrada sem conversão</div></div></div>
+            <div class="opcao-status" data-status="recontactar" onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#6b7280"></div><div><div class="label-status">Recontactar</div><div class="desc-status">Follow-up pendente ou evento recorrente</div></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Novo Cliente -->
+<div class="modal-overlay" id="leads-modal-novo">
+    <div class="modal-box modal-novo">
+        <button class="btn-fechar-modal" onclick="leadsFecharModalNovo()">✕</button>
+        <h3>➕ Novo Cliente / Evento</h3>
+        <p class="modal-sub">Preencha os dados básicos para começar</p>
+        <div class="campo-grupo">
+            <label class="campo-label">Nome do Evento *</label>
+            <input type="text" class="campo-input" id="leads-novo-nome-evento" placeholder="Ex: Casamento Ana & Pedro">
+        </div>
+        <div class="campo-grupo">
+            <label class="campo-label">Quem Contratou *</label>
+            <input type="text" class="campo-input" id="leads-novo-quem-contratou" placeholder="Nome completo do contratante">
+        </div>
+        <div class="campo-grupo">
+            <label class="campo-label">Tipo de Evento</label>
+            <select class="campo-input" id="leads-novo-tipo">
+                <option value="">Selecionar...</option>
+                <option value="Casamento">💒 Casamento</option>
+                <option value="Aniversário">🎂 Aniversário</option>
+                <option value="Corporativo">💼 Corporativo</option>
+                <option value="Formatura">🎓 Formatura</option>
+                <option value="Batizado">👶 Batizado</option>
+                <option value="Outro">📌 Outro</option>
+            </select>
+        </div>
+        <div class="campo-grupo">
+            <label class="campo-label">Status Inicial</label>
+            <select class="campo-input" id="leads-novo-status">
+                <option value="lead">Lead / Novo Contato</option>
+                <option value="consultada">Data Consultada</option>
+                <option value="negociacao">Em Negociação</option>
+            </select>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px;">
+            <button class="btn-outline" style="flex:1;" onclick="leadsFecharModalNovo()">Cancelar</button>
+            <button class="btn-primary" style="flex:1;justify-content:center;" onclick="leadsCriarCliente()">Criar Cliente</button>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- ════════════════════════════════════
+     PLANOS
+     ════════════════════════════════════ -->
+
+
+     <div class="page-section" id="pagina-planos">
+
+    <div class="dash-header-fixo">
+        <h2>💳 Assinaturas e Planos</h2>
+        <p>Selecione o plano ideal, escolha a duração e finalize com segurança.</p>
+    </div>
+
+    <!-- BANNER PLANO ATIVO -->
+    <div class="banner-plano-ativo" id="planos-banner-ativo">
+        <div class="banner-plano-esq">
+            <span class="banner-plano-icone" id="planos-banner-icone">⭐</span>
+            <div class="banner-plano-info">
+                <h4 id="planos-banner-titulo">Seu plano atual</h4>
+                <p id="planos-banner-desc">Carregando informações...</p>
+            </div>
+        </div>
+        <div class="banner-badges">
+            <span class="badge-ativo">● Ativo</span>
+            <span class="badge-validade" id="planos-banner-validade">Válido até —</span>
+            <span class="badge-downgrade-pendente" id="planos-badge-downgrade" style="display:none;">⏳ Downgrade agendado</span>
+        </div>
+    </div>
+
+    <!-- GRID DE PLANOS -->
+    <div class="container-planos" id="planos-container">
+        <!-- Gerado via JS -->
+    </div>
+
+    <!-- CHECKOUT INLINE -->
+    <div class="checkout-inline" id="planos-checkout-inline" style="display:none;">
+        <div class="checkout-inline-header">
+            <h3 id="planos-checkout-titulo">🛒 Finalizar Assinatura</h3>
+            <button class="btn-fechar-checkout" onclick="planosFecharCheckout()">✕</button>
+        </div>
+        <div class="checkout-body">
+
+            <!-- COLUNA ESQUERDA: RESUMO + DURAÇÃO + CUPOM -->
+            <div class="col-resumo">
+                <h4>Resumo do Pedido</h4>
+
+                <div class="resumo-plano-box">
+                    <div class="resumo-plano-nome" id="planos-resumo-nome">—</div>
+                    <div class="resumo-plano-preco" id="planos-resumo-preco">R$ —</div>
+                    <div class="resumo-plano-desc" id="planos-resumo-desc">—</div>
+                </div>
+
+                <!-- Duração -->
+                <div class="duracao-label">⏱ Duração da assinatura:</div>
+                <div class="duracao-opcoes">
+                    <button class="planos-duracao-btn ativo" data-meses="1"  onclick="planosSelecionarDuracao(1)">1 mês</button>
+                    <button class="planos-duracao-btn"        data-meses="3"  onclick="planosSelecionarDuracao(3)">3 meses</button>
+                    <button class="planos-duracao-btn"        data-meses="6"  onclick="planosSelecionarDuracao(6)">6 meses</button>
+                    <button class="planos-duracao-btn"        data-meses="12" onclick="planosSelecionarDuracao(12)">
+                        12 meses <span class="duracao-badge-anual">−20%</span>
+                    </button>
+                </div>
+
+                <!-- Cupom -->
+                <div class="duracao-label">🎟 Cupom de desconto:</div>
+                <div class="cupom-row">
+                    <input type="text" class="input-cupom" id="planos-input-cupom" placeholder="CODIGO123" maxlength="30" oninput="this.value=this.value.toUpperCase()">
+                    <button class="btn-aplicar-cupom" id="planos-btn-aplicar-cupom" onclick="planosAplicarCupom()">Aplicar</button>
+                </div>
+                <div class="cupom-feedback" id="planos-cupom-feedback" style="display:none;"></div>
+
+                <!-- Valores -->
+                <div class="resumo-linha"><span>Subtotal</span><span id="planos-val-subtotal">—</span></div>
+                <div class="resumo-linha" id="planos-linha-desconto-anual" style="display:none;">
+                    <span>🎉 Desconto anual (20%)</span>
+                    <span class="desconto" style="color:#1ebc54;" id="planos-val-desconto-anual">—</span>
+                </div>
+                <div class="resumo-linha credito" id="planos-linha-credito" style="display:none;">
+                    <span>💚 Crédito do plano atual</span>
+                    <span id="planos-val-credito">—</span>
+                </div>
+                <div class="resumo-linha desconto" id="planos-linha-desconto-cupom" style="display:none;">
+                    <span id="planos-label-desconto-cupom">🎟 Desconto (cupom)</span>
+                    <span style="color:#1ebc54;" id="planos-val-desconto-cupom">—</span>
+                </div>
+                <div class="resumo-total">
+                    <span>Total a pagar:</span>
+                    <strong id="planos-resumo-total">R$ —</strong>
+                </div>
+
+                <ul class="check-lista-resumo">
+                    <li>✅ Acesso imediato após confirmação</li>
+                    <li>✅ Sem taxa de cancelamento antecipado</li>
+                    <li>✅ Suporte durante toda a assinatura</li>
+                    <li>✅ Nota fiscal emitida automaticamente</li>
+                </ul>
+            </div>
+
+            <!-- COLUNA DIREITA: PAGAMENTO + NF-E + TERMOS -->
+            <div class="col-pagamento">
+                <h4>Forma de Pagamento</h4>
+
+                <div class="metodos-pagamento">
+                    <label class="metodo-item">
+                        <input type="radio" name="planos-pagamento" value="pix" checked onchange="planosTrocarMetodo('pix')">
+                        <div class="metodo-box">⚡ Pix<br><small style="font-size:0.7rem;font-weight:400;">Aprovação imediata</small></div>
+                    </label>
+                    <label class="metodo-item">
+                        <input type="radio" name="planos-pagamento" value="cartao" onchange="planosTrocarMetodo('cartao')">
+                        <div class="metodo-box">💳 Cartão<br><small style="font-size:0.7rem;font-weight:400;">Crédito ou débito</small></div>
+                    </label>
+                    <label class="metodo-item">
+                        <input type="radio" name="planos-pagamento" value="boleto" onchange="planosTrocarMetodo('boleto')">
+                        <div class="metodo-box">📄 Boleto<br><small style="font-size:0.7rem;font-weight:400;">Vence em 3 dias</small></div>
+                    </label>
+                </div>
+
+                <!-- Área Pix -->
+                <div class="area-pagamento" id="planos-area-pix">
+                    <div class="pix-instrucao">
+                        <div class="pix-ico">⚡</div>
+                        <strong>Pagamento por Pix</strong>
+                        <p>Ao confirmar, um QR Code será gerado para você escanear.<br>Aprovação em até <strong>1 minuto</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Área Cartão -->
+                <div class="area-pagamento" id="planos-area-cartao" style="display:none;">
+                    <div id="planos-form-cartao-mp">
+                        <input type="text" class="input-checkout" id="planos-cartao-numero" placeholder="Número do Cartão" maxlength="19" oninput="planosMascaraCartao(this)">
+                        <div class="input-duplo">
+                            <input type="text" class="input-checkout" id="planos-cartao-validade" placeholder="Validade (MM/AA)" maxlength="5" oninput="planosMascaraValidade(this)">
+                            <input type="text" class="input-checkout" id="planos-cartao-cvv" placeholder="CVV" maxlength="4">
+                        </div>
+                        <input type="text" class="input-checkout" id="planos-cartao-nome" placeholder="Nome igual ao cartão">
+                        <select class="select-checkout" id="planos-cartao-parcelas">
+                            <option value="1">1x sem juros</option>
+                        </select>
+                        <input type="text" class="input-checkout" id="planos-cartao-cpf" placeholder="CPF ou CNPJ do titular" maxlength="18" oninput="planosMascaraCPFCNPJ(this)">
+                    </div>
+                    <p style="font-size:0.72rem;color:#aaa;margin-top:6px;text-align:center;">🔒 Dados criptografados pelo SDK do Mercado Pago</p>
+                </div>
+
+                <!-- Área Boleto -->
+                <div class="area-pagamento" id="planos-area-boleto" style="display:none;">
+                    <input type="text" class="input-checkout" id="planos-boleto-cpf" placeholder="CPF ou CNPJ do pagador" maxlength="18" oninput="planosMascaraCPFCNPJ(this)">
+                </div>
+
+                <!-- NF-e -->
+                <div class="nfe-toggle" onclick="planosToggleNFe()">
+                    <span id="planos-nfe-seta">▶</span> 📋 Inserir dados para Nota Fiscal (NF-e) — opcional
+                </div>
+                <div class="nfe-area" id="planos-nfe-area">
+                    <label class="form-label">CPF ou CNPJ</label>
+                    <input type="text" class="input-checkout" id="planos-nfe-cpfcnpj" placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18" oninput="planosMascaraCPFCNPJ(this)">
+                    <label class="form-label">Nome / Razão Social</label>
+                    <input type="text" class="input-checkout" id="planos-nfe-nome" placeholder="Nome completo ou razão social">
+                    <label class="form-label">E-mail para recebimento da NF</label>
+                    <input type="email" class="input-checkout" id="planos-nfe-email" placeholder="seu@email.com">
+                    <div class="nfe-row">
+                        <div style="flex:2;"><label class="form-label">Endereço</label><input type="text" class="input-checkout" id="planos-nfe-endereco" placeholder="Rua, número"></div>
+                        <div style="flex:1;"><label class="form-label">CEP</label><input type="text" class="input-checkout" id="planos-nfe-cep" placeholder="00000-000" maxlength="9" oninput="planosMascaraCEP(this)"></div>
+                    </div>
+                    <div class="nfe-row">
+                        <div style="flex:2;"><label class="form-label">Cidade</label><input type="text" class="input-checkout" id="planos-nfe-cidade" placeholder="Cidade"></div>
+                        <div style="flex:1;"><label class="form-label">Estado</label>
+                            <select class="select-checkout" id="planos-nfe-estado">
+                                <option value="">UF</option>
+                                <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                                <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                                <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                                <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                                <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                                <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                                <option>SP</option><option>SE</option><option>TO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Política -->
+                <div class="politica-cancelamento">
+                    ⚠️ <strong>Política de Cancelamento:</strong> Você pode cancelar sua assinatura a qualquer momento. Não há reembolso proporcional do período já pago. Planos anuais não permitem cancelamento parcial com estorno.
+                </div>
+
+                <!-- Termos -->
+                <div class="termos-box">
+                    <label class="termos-check-row">
+                        <input type="checkbox" id="planos-check-termos" onchange="planosValidarBtnFinalizar()">
+                        <span>Li e aceito os <a href="../termos.html" target="_blank">Termos de Uso</a> e a <a href="../privacidade.html" target="_blank">Política de Privacidade</a> da VENTSY.</span>
+                    </label>
+                </div>
+
+                <!-- Selos -->
+                <div class="selos-seguranca">
+                    <div class="selo">🔒 SSL Criptografado</div>
+                    <div class="selo">💳 Mercado Pago</div>
+                    <div class="selo">🛡️ Ambiente Seguro</div>
+                </div>
+
+                <button class="btn-finalizar" id="planos-btn-finalizar" disabled onclick="planosFinalizarCompra()">
+                    ✅ Confirmar e Finalizar Pagamento
+                </button>
+                <p class="seguranca-aviso">🔒 Pagamento processado com segurança pelo Mercado Pago</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="faq-assinatura">
+        <p>Precisa de um plano personalizado para redes de espaços? <a href="../fale-conosco.html">Fale com nosso consultor.</a></p>
+    </div>
+
+</div><!-- /pagina-planos -->
+
+
+<!-- MODAL: Downgrade -->
+<div class="modal-overlay" id="planos-modal-downgrade">
+    <div class="downgrade-box">
+        <button class="btn-fechar-modal" onclick="planosFecharModal('planos-modal-downgrade')">✕</button>
+        <h3>⬇️ Confirmar Downgrade</h3>
+        <p>Você está prestes a fazer o downgrade para o plano <strong id="planos-downgrade-nome-destino">—</strong>.</p>
+        <div class="aviso-downgrade">
+            <strong>⚠️ Leia com atenção antes de confirmar:</strong>
+            Seu plano atual (<span id="planos-downgrade-nome-atual">—</span>) continuará <strong>ativo até o fim do período já pago</strong> em <strong id="planos-downgrade-data-fim">—</strong>. Após essa data, o plano será alterado automaticamente.
+            <br><br><strong>Não há reembolso</strong> do valor já pago no plano atual.
+        </div>
+        <div class="confirma-digitacao">
+            <label>Para confirmar, digite <strong>CONFIRMAR</strong> abaixo:</label>
+            <input type="text" id="planos-input-confirma-downgrade" placeholder="Digite CONFIRMAR"
+                   oninput="planosValidarDowngrade(this.value)">
+        </div>
+        <div class="modal-acoes">
+            <button class="btn-cancelar-modal" onclick="planosFecharModal('planos-modal-downgrade')">Cancelar</button>
+            <button class="btn-confirmar-downgrade" id="planos-btn-ok-downgrade" disabled onclick="planosExecutarDowngrade()">Confirmar downgrade</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Resultado do pagamento -->
+<div class="modal-pagamento-overlay" id="planos-modal-pagamento">
+    <div class="modal-pagamento-box" id="planos-modal-pagamento-conteudo">
+        <!-- preenchido via JS -->
+    </div>
+</div>
+
+
+
+
+    <!-- ════════════════════════════════════
+     RELATORIO
+     ════════════════════════════════════ -->
+
+
+    <div class="page-section" id="pagina-relatorio">
+
+    <!-- HEADER + PERÍODO -->
+    <div class="dash-header-fixo">
+        <div>
+            <h2>📊 Relatório de Desempenho</h2>
+            <p id="rel-sub-periodo">Análise detalhada do seu espaço na plataforma VENTSY.</p>
+        </div>
+        <div class="controles-periodo">
+            <div class="filtro-periodo">
+                <button class="rel-btn-periodo btn-periodo"        onclick="relSetPeriodo('semana', this)">Semana</button>
+                <button class="rel-btn-periodo btn-periodo ativo"  id="rel-btn-mes" onclick="relSetPeriodo('mes', this)">Mês</button>
+                <button class="rel-btn-periodo btn-periodo"        onclick="relSetPeriodo('ano', this)">Ano</button>
+                <button class="rel-btn-periodo btn-periodo"        onclick="relSetPeriodo('personalizado', this)">📅 Período</button>
+            </div>
+            <div class="range-personalizado" id="rel-range-personalizado" style="display:none;">
+                <input type="date" id="rel-data-inicio" onchange="relAplicarPersonalizado()">
+                <span>até</span>
+                <input type="date" id="rel-data-fim" onchange="relAplicarPersonalizado()">
+            </div>
+        </div>
+    </div>
+
+    <!-- SELETOR DE MÉTRICA -->
+    <div class="seletor-metricas" id="rel-seletor-metricas"></div>
+
+    <!-- GRÁFICO FULL WIDTH -->
+    <div class="card-grafico-full">
+        <div class="card-header">
+            <h3 id="rel-titulo-grafico">Visualizações</h3>
+            <span id="rel-label-periodo-grafico">Últimos 30 dias</span>
+        </div>
+        <div class="grafico-wrapper-full">
+            <canvas id="rel-grafico"></canvas>
+        </div>
+    </div>
+
+    <!-- TABELA DE MÉTRICAS -->
+    <div class="card-tabela">
+        <h3>📋 Todas as Métricas do Período</h3>
+        <table class="tabela-metricas">
+            <thead>
+                <tr>
+                    <th>Métrica</th>
+                    <th style="text-align:right">Total</th>
+                    <th style="text-align:right">Média/dia</th>
+                    <th style="min-width:120px"></th>
+                </tr>
+            </thead>
+            <tbody id="rel-tbody-metricas"></tbody>
+        </table>
+    </div>
+
+    <!-- RANKING + BUSCAS POPULARES -->
+    <div class="linha-inferior">
+        <div class="card-ranking">
+            <h3>🏆 Seu Ranking</h3>
+            <div id="rel-ranking-content">
+                <div class="ranking-sem-dados">
+                    <p style="color:#666;">Carregando...</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-tendencias">
+            <h3>🔥 Buscas populares na VENTSY</h3>
+            <div id="rel-tendencias-content">
+                <p style="color:#bbb;font-size:0.85rem;">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /pagina-relatorio -->
+
+
+
+<!-- ════════════════════════════════════
+     PÁGINA: PROGRAMA DE INDICAÇÃO
+════════════════════════════════════ -->
+<div class="page-section" id="pagina-indique">
+
+    <div class="dash-header-fixo">
+        <h2>🎁 Programa de Indicação</h2>
+        <p>Indique espaços, ganhe benefícios exclusivos na sua assinatura.</p>
+    </div>
+
+    <!-- CARD SEU CÓDIGO -->
+    <div class="indique-card-codigo">
+        <div class="indique-card-codigo-esq">
+            <div class="indique-codigo-icone-wrap">🎟️</div>
+            <div class="indique-codigo-texto">
+                <label>Seu código de indicação</label>
+                <div class="indique-codigo-valor">
+                    <span id="indique-codigo-valor">——————</span>
+                    <button class="indique-btn-copiar-codigo" id="indique-btn-copiar-codigo" onclick="indiqueCopiarCodigo()">
+                        📋 Copiar
+                    </button>
+                </div>
+            </div>
+        </div>
+        <p class="indique-codigo-dica">
+            Passe este código para quem você quer indicar.<br>
+            <strong>Funciona tanto pelo link quanto digitando na hora do cadastro.</strong>
+        </p>
+    </div>
+
+    <!-- CARD HERO -->
+    <div class="indique-card-hero">
+        <div class="indique-badge-promo">PROGRAMA DE PARCEIROS</div>
+        <h3>Indique um espaço e ganhe<br><em>1 mês grátis</em></h3>
+        <p>Quando o indicado publicar uma propriedade e realizar a <strong>primeira compra de um plano</strong>, você recebe automaticamente <strong>1 mês gratuito</strong> na sua assinatura.</p>
+
+        <div class="indique-caixa-link">
+            <label>Seu link de convite único</label>
+            <div class="indique-input-copiar-grupo">
+                <input type="text" id="indique-link-ref" value="ventsy.com/anunciar?ref=..." readonly>
+                <button class="indique-btn-copiar" id="indique-btn-copiar" onclick="indiqueCopiarLink()">📋 Copiar</button>
+            </div>
+        </div>
+
+        <div class="indique-botoes-share">
+            <button class="indique-share-btn indique-share-whatsapp" onclick="indiqueEnviarWhats()">
+                📱 Enviar pelo WhatsApp
+            </button>
+            <button class="indique-share-btn indique-share-email" onclick="indiqueEnviarEmail()">
+                📧 Enviar por E-mail
+            </button>
+        </div>
+    </div>
+
+    <!-- PASSOS -->
+    <div class="indique-passos">
+        <div class="indique-passo">
+            <div class="numero">1</div>
+            <h4>Envie o link</h4>
+            <p>Mande seu link para donos de chácaras, salões, sítios ou qualquer espaço para eventos.</p>
+        </div>
+        <div class="indique-passo">
+            <div class="numero">2</div>
+            <h4>Eles publicam e testam</h4>
+            <p>O novo parceiro cria e publica um anúncio na VENTSY durante o período de teste gratuito.</p>
+        </div>
+        <div class="indique-passo">
+            <div class="numero">3</div>
+            <h4>Você ganha!</h4>
+            <p>Quando o indicado realizar a <strong>primeira compra de um plano</strong>, seu 1 mês grátis é creditado. Renovações futuras dele não geram novo bônus.</p>
+        </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="indique-secao-resultados">
+        <div class="indique-header-resultados">
+            <div>
+                <h3>Acompanhe seus resultados</h3>
+                <p style="font-size:0.78rem;color:#aaa;margin-top:4px;">O bônus de 1 mês é creditado somente na <strong style="color:#888">primeira compra</strong> do indicado.</p>
+            </div>
+            <div class="indique-badges-resumo">
+                <div class="indique-badge-resumo-item">
+                    <span>Indicados</span>
+                    <strong id="indique-total-indicados">—</strong>
+                </div>
+                <div class="indique-badge-resumo-item">
+                    <span>Publicaram</span>
+                    <strong id="indique-total-publicaram">—</strong>
+                </div>
+                <div class="indique-badge-resumo-item premio">
+                    <span>Meses Ganhos</span>
+                    <strong id="indique-total-creditos">—</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="indique-tabela-container">
+            <table class="indique-tabela">
+                <thead>
+                    <tr>
+                        <th>Propriedade Indicada</th>
+                        <th>Data do Convite</th>
+                        <th>Status</th>
+                        <th>Sua Recompensa</th>
+                    </tr>
+                </thead>
+                <tbody id="indique-tbody">
+                    <!-- preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div><!-- /pagina-indique -->
+
+
+
+
+<!-- ════════════════════════════════════
+     PÁGINA: CONFIGURAÇÕES
+════════════════════════════════════ -->
+
+<div class="page-section" id="pagina-configuracoes">
+
+    <div class="dash-header-fixo">
+        <h2>⚙️ Configurações</h2>
+        <p>Gerencie os dados da sua conta, segurança e preferências.</p>
+    </div>
+
+    <!-- ── PERFIL PESSOAL ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">👤</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Perfil Pessoal</h3>
+                <p>Suas informações de conta na plataforma VENTSY</p>
+            </div>
+        </div>
+
+        <div class="cfg-perfil-topo-box">
+            <div class="cfg-avatar-grande-wrap">
+                <div class="cfg-avatar-grande" id="cfg-avatar-grande">?</div>
+                <button class="cfg-btn-trocar-avatar" onclick="document.getElementById('cfg-input-foto-perfil').click()" title="Trocar foto">📷</button>
+                <input type="file" id="cfg-input-foto-perfil" accept="image/*" hidden onchange="cfgPreviewAvatar(this)">
+            </div>
+            <div class="cfg-perfil-info-texto">
+                <h4 id="cfg-perfil-nome-display">—</h4>
+                <span id="cfg-perfil-email-display">—</span>
+            </div>
+        </div>
+
+        <div class="cfg-grid-2">
+            <div class="campo">
+                <label>Nome Completo</label>
+                <input type="text" id="cfg-campo-nome" placeholder="Seu nome completo">
+            </div>
+            <div class="campo">
+                <label>Usuário (@handle)</label>
+                <input type="text" id="cfg-campo-usuario" placeholder="@seuusuario">
+                <span class="dica">Identificador único público na plataforma</span>
+            </div>
+            <div class="campo">
+                <label>E-mail de Login</label>
+                <input type="email" id="cfg-campo-email" disabled>
+                <span class="dica">Para alterar o e-mail entre em contato com o suporte</span>
+            </div>
+            <div class="campo">
+                <label>Telefone Pessoal</label>
+                <input type="tel" id="cfg-campo-telefone" placeholder="(21) 99999-0000">
+            </div>
+            <div class="campo">
+                <label>CPF / CNPJ</label>
+                <input type="text" id="cfg-campo-documento" placeholder="000.000.000-00">
+            </div>
+            <div class="campo">
+                <label>Data de Nascimento</label>
+                <input type="date" id="cfg-campo-nascimento">
+            </div>
+        </div>
+
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-primario" onclick="cfgSalvarPerfil()">💾 Salvar Alterações</button>
+        </div>
+    </div>
+
+    <!-- ── SEGURANÇA / SENHA ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">🔒</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Segurança — Alterar Senha</h3>
+                <p>Use uma senha forte com letras, números e símbolos</p>
+            </div>
+        </div>
+
+        <div class="cfg-grid-2">
+            <div class="campo span-2">
+                <label>Nova Senha</label>
+                <div class="cfg-input-senha-wrap">
+                    <input type="password" id="cfg-nova-senha" placeholder="Mínimo 8 caracteres" oninput="cfgCalcularForcaSenha(this.value)">
+                    <button class="cfg-btn-olho" type="button" onclick="cfgToggleSenha('cfg-nova-senha', this)">👁</button>
+                </div>
+                <div style="margin-top:8px;display:flex;gap:4px;">
+                    <div id="cfg-forca-1" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    <div id="cfg-forca-2" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    <div id="cfg-forca-3" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    <div id="cfg-forca-4" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                </div>
+                <span class="dica" id="cfg-forca-label">Digite a nova senha</span>
+            </div>
+            <div class="campo span-2">
+                <label>Confirmar Nova Senha</label>
+                <div class="cfg-input-senha-wrap">
+                    <input type="password" id="cfg-confirmar-senha" placeholder="Repita a nova senha">
+                    <button class="cfg-btn-olho" type="button" onclick="cfgToggleSenha('cfg-confirmar-senha', this)">👁</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-secundario" onclick="cfgAlterarSenha()">🔑 Atualizar Senha</button>
+            <button class="cfg-btn-secundario" onclick="cfgEnviarLinkRedefinicao()">📧 Receber link por e-mail</button>
+        </div>
+    </div>
+
+    <!-- ── NOTIFICAÇÕES ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">🔔</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Notificações e Alertas</h3>
+                <p>Escolha como deseja ser avisado sobre interações</p>
+            </div>
+        </div>
+
+        <div class="cfg-lista-notif">
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Novo Lead por E-mail</strong>
+                    <p>Receba um e-mail quando alguém clicar no botão de contato do seu anúncio.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-lead-email" checked><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Novo Lead por WhatsApp</strong>
+                    <p>Receba uma mensagem no WhatsApp a cada novo contato gerado.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-lead-whatsapp"><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Alerta de Visitas</strong>
+                    <p>Ser notificado quando seu anúncio receber um novo acesso.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-visitas"><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>E-mails Promocionais</strong>
+                    <p>Novidades, dicas de marketing e atualizações da plataforma VENTSY.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-promo" checked><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Relatório Semanal</strong>
+                    <p>Resumo semanal de visitas, leads e desempenho do seu anúncio por e-mail.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-relatorio" checked><span class="switch-slider"></span></label>
+            </div>
+        </div>
+
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-primario" onclick="cfgSalvarNotificacoes()">💾 Salvar Preferências</button>
+        </div>
+    </div>
+
+    <!-- ── SEGURANÇA AVANÇADA ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">🛡️</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Segurança Avançada</h3>
+                <p>Proteja sua conta com camadas extras de verificação</p>
+            </div>
+        </div>
+
+        <div class="cfg-item-seguranca">
+            <div class="cfg-seg-texto">
+                <strong>Autenticação de Dois Fatores (2FA)</strong>
+                <p>Adicione um código enviado ao seu celular ou e-mail a cada login.</p>
+                <span class="cfg-badge-status cfg-badge-inativo" id="cfg-badge-2fa">○ Não configurado</span>
+            </div>
+            <button class="cfg-btn-secundario" onclick="cfgAbrirModal2FA()">Configurar</button>
+        </div>
+
+        <div class="cfg-item-seguranca">
+            <div class="cfg-seg-texto">
+                <strong>Sessões Ativas</strong>
+                <p>Encerre o acesso de todos os dispositivos conectados à sua conta.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="cfgEncerrarSessoes()">Encerrar todas</button>
+        </div>
+
+        <div class="cfg-item-seguranca">
+            <div class="cfg-seg-texto">
+                <strong>Histórico de Acessos</strong>
+                <p>Veja os últimos logins realizados na sua conta.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="mostrarToast('📋 Funcionalidade em breve!')">Ver histórico</button>
+        </div>
+    </div>
+
+    <!-- ── ZONA DE PERIGO ── -->
+    <div class="cfg-secao-perigo">
+        <div class="cfg-secao-header" style="border-bottom-color:#ffe0e0;">
+            <div class="cfg-secao-icone" style="background:#fff0f0;">⚠️</div>
+            <div class="cfg-titulo-grupo">
+                <h3 style="color:#ff385c;">Zona de Perigo</h3>
+                <p>Ações irreversíveis — leia com atenção antes de continuar</p>
+            </div>
+        </div>
+
+        <div class="cfg-perigo-item">
+            <div class="cfg-perigo-texto">
+                <strong>Despublicar meu anúncio</strong>
+                <p>Oculta temporariamente seu espaço da busca pública. Pode reativar quando quiser.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="mostrarToast('👁‍🗨 Anúncio despublicado temporariamente.')">Despublicar</button>
+        </div>
+
+        <div class="cfg-perigo-item">
+            <div class="cfg-perigo-texto">
+                <strong>Cancelar assinatura</strong>
+                <p>Encerra sua assinatura atual ao fim do período vigente. Dados são mantidos.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="mostrarToast('💳 Solicitação enviada. Em breve entraremos em contato.')">Cancelar plano</button>
+        </div>
+
+        <div class="cfg-perigo-item">
+            <div class="cfg-perigo-texto">
+                <strong>Excluir minha conta permanentemente</strong>
+                <p>Remove todos os dados, anúncio e histórico. Esta ação <strong>não pode ser desfeita</strong>.</p>
+            </div>
+            <button class="cfg-btn-perigo" onclick="cfgAbrirModalExcluir()">🗑️ Excluir conta</button>
+        </div>
+    </div>
+
+</div><!-- /pagina-configuracoes -->
+
+
+<!-- MODAL: 2FA -->
+<div class="cfg-modal-overlay" id="cfg-modal-2fa">
+    <div class="cfg-modal-box">
+        <button class="cfg-modal-fechar" onclick="cfgFecharModal('cfg-modal-2fa')">✕</button>
+        <h3>🛡️ Autenticação de Dois Fatores</h3>
+        <p>Escolha como deseja receber o código de verificação a cada login.</p>
+        <div class="cfg-modal-opcoes">
+            <div class="cfg-opcao-2fa" onclick="cfgAtivar2FA('sms')">
+                <span class="cfg-opcao-2fa-icon">📱</span>
+                <div class="cfg-opcao-2fa-texto">
+                    <strong>SMS para o celular</strong>
+                    <span>Código enviado por mensagem de texto</span>
+                </div>
+            </div>
+            <div class="cfg-opcao-2fa" onclick="cfgAtivar2FA('email')">
+                <span class="cfg-opcao-2fa-icon">📧</span>
+                <div class="cfg-opcao-2fa-texto">
+                    <strong>Código por E-mail</strong>
+                    <span>Código enviado para o e-mail cadastrado</span>
+                </div>
+            </div>
+            <div class="cfg-opcao-2fa" onclick="cfgAtivar2FA('app')">
+                <span class="cfg-opcao-2fa-icon">🔐</span>
+                <div class="cfg-opcao-2fa-texto">
+                    <strong>App autenticador</strong>
+                    <span>Google Authenticator, Authy, etc.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Excluir Conta -->
+<div class="cfg-modal-overlay cfg-modal-confirmacao" id="cfg-modal-excluir">
+    <div class="cfg-modal-box">
+        <button class="cfg-modal-fechar" onclick="cfgFecharModal('cfg-modal-excluir')">✕</button>
+        <h3 style="color:#ff385c;">🗑️ Excluir Conta</h3>
+        <p>Esta ação é <strong>permanente e irreversível</strong>. Todos os seus dados, anúncio, fotos e histórico de leads serão apagados.</p>
+        <p style="margin-top:-10px;">Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo:</p>
+        <div class="cfg-campo-confirma">
+            <input type="text" id="cfg-input-confirma-excluir" placeholder="Digite EXCLUIR para confirmar"
+                   oninput="cfgValidarExclusao(this.value)">
+        </div>
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-secundario" onclick="cfgFecharModal('cfg-modal-excluir')">Cancelar</button>
+            <button class="cfg-btn-perigo" id="cfg-btn-confirma-excluir" disabled
+                    onclick="cfgConfirmarExclusao()" style="opacity:.4;cursor:not-allowed;">
+                Excluir permanentemente
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+        
+    </section>
+</main>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+    <span>✅</span>
+    <span id="toast-msg">Mensagem</span>
+</div>
+
+<!-- MODAL FINANCEIRO -->
+<div class="fin-modal-overlay" id="finModal">
+    <div class="fin-modal">
+        <div class="fin-modal-head">
+            <div>
+                <h2 id="fin-modal-title">Novo Lançamento</h2>
+                <p id="fin-modal-desc">Registre a movimentação financeira abaixo.</p>
+            </div>
+            <button class="fin-modal-close" onclick="finCloseModal()">✕</button>
+        </div>
+        <div class="fin-form-grid">
+            <div class="fin-form-group">
+                <label>Tipo</label>
+                <select id="fin-f-tipo">
+                    <option value="receita">Receita</option>
+                    <option value="despesa">Despesa</option>
+                </select>
+            </div>
+            <div class="fin-form-group">
+                <label>Data</label>
+                <input type="date" id="fin-f-data">
+            </div>
+            <div class="fin-form-group">
+                <label>Valor (R$)</label>
+                <input type="number" id="fin-f-valor" placeholder="0,00" step="0.01" min="0">
+            </div>
+            <div class="fin-form-group">
+                <label>Categoria</label>
+                <select id="fin-f-cat">
+                    <option>Aluguel de Espaço</option>
+                    <option>Buffet / Catering</option>
+                    <option>Decoração</option>
+                    <option>Som / Iluminação</option>
+                    <option>Limpeza</option>
+                    <option>Manutenção</option>
+                    <option>Marketing</option>
+                    <option>Outros</option>
+                </select>
+            </div>
+            <div class="fin-form-group">
+                <label>Status</label>
+                <select id="fin-f-status">
+                    <option value="pago">Pago</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="atrasado">Atrasado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </div>
+            <div class="fin-form-group full">
+                <label>Descrição</label>
+                <input type="text" id="fin-f-desc" placeholder="Ex: Casamento Silva — Salão Principal">
+            </div>
+        </div>
+        <div class="fin-modal-actions">
+            <button class="btn-fin btn-fin-ghost" onclick="finCloseModal()">Cancelar</button>
+            <button class="btn-fin btn-fin-primary" onclick="finSaveTransaction()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ADD/EDIT DOCUMENTOS -->
+<div class="docs-modal-overlay" id="docsAddModal">
+  <div class="docs-modal">
+    <div class="docs-modal-header">
+      <div>
+        <h2 id="docsFormTitle">Novo Documento</h2>
+        <p>Preencha os dados e anexe o arquivo do documento.</p>
+      </div>
+      <button class="docs-modal-close" onclick="docsCloseAddModal()">✕</button>
+    </div>
+    <div class="docs-modal-body">
+      <div class="docs-form-grid">
+        <div class="docs-form-group full">
+          <label>Nome do Documento</label>
+          <input type="text" id="docs-f-nome" placeholder="Ex: Licença do Corpo de Bombeiros">
+        </div>
+        <div class="docs-form-group">
+          <label>Categoria</label>
+          <select id="docs-f-cat">
+            <option value="licencas">Licenças</option>
+            <option value="alvara">Alvarás</option>
+            <option value="juridico">Jurídico</option>
+            <option value="fiscal">Fiscal</option>
+            <option value="seguros">Seguros</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="docs-form-group">
+          <label>Órgão Emissor</label>
+          <input type="text" id="docs-f-orgao" placeholder="Ex: Corpo de Bombeiros">
+        </div>
+        <div class="docs-form-group">
+          <label>Número / Protocolo</label>
+          <input type="text" id="docs-f-numero" placeholder="Ex: 00123456/2024">
+        </div>
+        <div class="docs-form-group">
+          <label>Data de Emissão</label>
+          <input type="date" id="docs-f-emissao">
+        </div>
+        <div class="docs-form-group">
+          <label>Data de Vencimento</label>
+          <input type="date" id="docs-f-vencimento" placeholder="Deixe vazio se não vence">
+        </div>
+        <div class="docs-form-group full">
+          <label>Observações</label>
+          <textarea id="docs-f-obs" placeholder="Informações adicionais, contatos, instruções de renovação..."></textarea>
+        </div>
+        <div class="docs-form-group full">
+          <label>Arquivo</label>
+          <div class="docs-upload-zone" id="docsUploadZone" onclick="document.getElementById('docsFileInput').click()" ondragover="docsDragOver(event)" ondragleave="docsDragLeave()" ondrop="docsDropFile(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>Arraste aqui ou <strong>clique para selecionar</strong></p>
+            <p class="ftype">PDF, JPG, PNG — até 20 MB</p>
+          </div>
+          <div class="docs-file-preview" id="docsFilePreview" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span id="docsFilePreviewName">arquivo.pdf</span>
+          </div>
+          <input type="file" id="docsFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="docsFileSelected(this)">
+        </div>
+      </div>
+    </div>
+    <div class="docs-modal-footer">
+      <button class="btn-fin btn-fin-ghost" onclick="docsCloseAddModal()">Cancelar</button>
+      <button class="btn-fin btn-fin-primary" onclick="docsSaveDoc()">Salvar Documento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VIEW DOCUMENTOS -->
+<div class="docs-modal-overlay" id="docsViewModal">
+  <div class="docs-modal" style="width:600px">
+    <div class="docs-modal-header">
+      <div>
+        <div style="font-size:0.68rem;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;font-weight:700" id="docs-view-cat">—</div>
+        <h2 id="docs-view-nome">—</h2>
+      </div>
+      <button class="docs-modal-close" onclick="docsCloseViewModal()">✕</button>
+    </div>
+    <div class="docs-view-content">
+      <div class="docs-view-grid" id="docsViewGrid"></div>
+      <div class="docs-file-placeholder" id="docsViewFile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <p>Pré-visualização não disponível nesta demo</p>
+        <p style="font-size:0.72rem;margin-top:3px;color:#ccc" id="docsViewFileName">—</p>
+      </div>
+      <div id="docsViewObsWrap" style="margin-top:16px;display:none">
+        <div style="font-size:0.68rem;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-weight:700">Observações</div>
+        <div class="docs-notes-box" id="docsViewObs"></div>
+      </div>
+    </div>
+    <div class="docs-modal-footer">
+      <button class="btn-fin btn-fin-ghost" onclick="docsEditDoc()">Editar</button>
+      <button class="btn-fin btn-fin-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar Arquivo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FUNCIONÁRIO -->
+<div class="eq-modal-overlay" id="eqEmpModal">
+  <div class="eq-modal">
+    <div class="eq-modal-head">
+      <div><h2 id="eqEmpModalTitle">Novo Funcionário</h2><p>Preencha os dados do colaborador.</p></div>
+      <button class="eq-modal-close" onclick="eqCloseEmpModal()">✕</button>
+    </div>
+    <div class="eq-modal-body">
+      <div class="eq-fg"><label>Nome Completo</label><input type="text" id="eq-ef-nome" placeholder="Ex: Maria da Silva"></div>
+      <div class="eq-fg-row">
+        <div class="eq-fg"><label>Cargo / Função</label><input type="text" id="eq-ef-cargo" placeholder="Ex: Garçom"></div>
+        <div class="eq-fg"><label>Departamento</label>
+          <select id="eq-ef-dept">
+            <option>Operações</option><option>Limpeza</option><option>Segurança</option>
+            <option>Cozinha/Buffet</option><option>Decoração</option><option>Administração</option><option>Tecnologia</option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-fg-row">
+        <div class="eq-fg"><label>Salário Base (R$)</label><input type="number" id="eq-ef-salario" value="1800" min="0" step="100"></div>
+        <div class="eq-fg"><label>Tipo de Contrato</label>
+          <select id="eq-ef-contrato">
+            <option value="clt">CLT — Integral</option>
+            <option value="horista">CLT — Horista</option>
+            <option value="mei">MEI / Autônomo</option>
+            <option value="estagio">Estágio</option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-fg-row">
+        <div class="eq-fg"><label>Data de Admissão</label><input type="date" id="eq-ef-admissao"></div>
+        <div class="eq-fg"><label>Status</label>
+          <select id="eq-ef-status">
+            <option value="ativo">Ativo</option>
+            <option value="ferias">Férias</option>
+            <option value="afas">Afastado</option>
+            <option value="horista">Horista/Freelancer</option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-fg"><label>Telefone / WhatsApp</label><input type="text" id="eq-ef-tel" placeholder="(31) 9 9999-9999"></div>
+      <div class="eq-fg"><label>Observações</label><textarea id="eq-ef-obs" placeholder="Informações adicionais..."></textarea></div>
+    </div>
+    <div class="eq-modal-foot">
+      <button class="btn-fin btn-fin-ghost" onclick="eqCloseEmpModal()">Cancelar</button>
+      <button class="btn-fin btn-fin-primary" onclick="eqSaveEmployee()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTRACHEQUE -->
+<div class="eq-modal-overlay" id="eqPayModal">
+  <div class="eq-modal" style="width:460px">
+    <div class="eq-modal-head">
+      <div><h2 id="eq-pay-emp-name">—</h2><p id="eq-pay-emp-role">Contracheque</p></div>
+      <button class="eq-modal-close" onclick="document.getElementById('eqPayModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="eq-modal-body">
+      <div id="eqPayBreakdown"></div>
+      <div class="eq-pb-total">
+        <span class="eq-pb-total-label">Salário Líquido</span>
+        <span class="eq-pb-total-val" id="eq-pb-liquido">R$ 0</span>
+      </div>
+      <div class="eq-cost-info">
+        Custo total para a empresa: <strong id="eq-pb-custo-empresa" style="color:#f59e0b">R$ 0</strong><br>
+        Inclui encargos patronais, benefícios e provisões.
+      </div>
+    </div>
+    <div class="eq-modal-foot">
+      <button class="btn-fin btn-fin-ghost" onclick="document.getElementById('eqPayModal').classList.remove('open')">Fechar</button>
+      <button class="btn-fin btn-fin-primary">Imprimir Contracheque</button>
+    </div>
+  </div>
+</div>
+
+       
+
+
+    
+<!-- ──────────── FOOTER ──────────── -->
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Atendimento</h3>
+            <ul>
+                <li><a href="fale-conosco.html">Fale Conosco</a></li>
+                <li><a href="privacidade.html">Política de Privacidade</a></li>
+                <li><a href="termos.html">Termos de Uso</a></li>
+                <li><a href="como-funciona.html">Como Funciona</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Anunciar</h3>
+            <ul>
+                <li><a href="cadastro.html">Cadastre sua propriedade</a></li>
+                <li><a href="planos.html">Planos Disponíveis</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
+</footer>
+
+
+</body>
+</html>
