@@ -72,12 +72,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         if (perfil) { nome = perfil.nome || nome; usuario = perfil.usuario || ''; }
       } catch (_) {}
 
-      try {
-        const { data: assin } = await sb
-          .from('assinaturas').select('plano,validade').eq('usuario_id', user.id).maybeSingle();
-        if (assin) {
-          plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
-          validade = assin.fim_periodo  || assin.validade || null;
+     try {
+        const assin = await getAssinatura(user.id);
+
+            if (assin) {
+              plano    = (assin.plano || 'basico').toLowerCase();
+              validade = assin.validade || null;
         }
       } catch (_) {}
 
