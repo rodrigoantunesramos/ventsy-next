@@ -104,13 +104,35 @@ function PropriedadeContent() {
         if (!propId||propId==='demo'){loadDemo();return}
         const {data:p} = await supabase.from('propriedades').select('*').eq('id',propId).single()
         if (!p){loadDemo();return}
-        const [{data:assin},{data:fts},{data:vids},{data:avals},{data:usr}] = await Promise.all([
-          supabase.from('assinaturas').select('plano_ativo,status').eq('usuario_id',p.usuario_id||'').single().catch(()=>({data:null})),
-          supabase.from('fotos_imovel').select('url,secao,ordem').eq('propriedade_id',propId).order('ordem').catch(()=>({data:[]})),
-          supabase.from('videos_propriedade').select('url,titulo').eq('propriedade_id',propId).catch(()=>({data:[]})),
-          supabase.from('avaliacoes').select('*').eq('propriedade_id',propId).eq('verificada',true).order('criado_em',{ascending:false}).catch(()=>({data:[]})),
-          supabase.from('usuarios').select('nome,criado_em,foto_perfil').eq('id',p.usuario_id||'').single().catch(()=>({data:null})),
-        ])
+        const {data:fts} = await supabase.from('fotos').select('*').eq('propriedade_id',propId).order('ordem','asc')const [{ data: assin }, { data: fts }, { data: vids }, { data: avals }, { data: usr }] = await Promise.all([
+  supabase
+    .from('assinaturas')
+    .select('plano_ativo,status')
+    .eq('usuario_id', p.usuario_id || '')
+    .single()
+    .then(res => ({ data: res.data })),
+
+  supabase
+    .from('fotos_imovel')
+    .select('url,secao,ordem')
+    .eq('propriedade_id', propId)
+    .order('ordem')
+    .then(res => ({ data: res.data || [] })),
+
+  supabase
+    .from('videos_propriedade')
+    .select('url,titulo')
+    .eq('propriedade_id', propId)
+    .then(res => ({ data: res.data || [] })),
+
+  supabase
+    .from('avaliacoes')
+    .select('*')
+    .eq('propriedade_id', propId)
+    .eq('verificada', true)
+    .order('criado_em', { ascending: false })
+    .then(res => ({ data: res.data || [] })),
+])
         setPlano((assin as any)?.plano_ativo||'basico')
         setProp(p)
         setFotos((fts||[]).map((f:any)=>({url:f.url,titulo:f.secao||'',ordem:f.ordem})))
