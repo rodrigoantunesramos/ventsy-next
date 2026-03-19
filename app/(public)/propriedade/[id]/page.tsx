@@ -88,74 +88,135 @@ function PropriedadeContent() {
   const [formErros,setFormErros] = useState<Record<string,boolean>>({})
   const wppRef = useRef('')
 
-  useEffect(() => {
-    const loadDemo = () => {
-      setPlano('ultra')
-      setProp({ id:'demo', nome:'Chácara Macacu — Sítio para Eventos', descricao:`Se você procura natureza, conforto e estrutura completa para celebrar o seu grande dia, acabou de encontrar o lugar perfeito!\n\nA chácara está localizada em Cachoeiras de Macacu, cercada pelo verde, com clima tranquilo e ao mesmo tempo preparada para receber eventos inesquecíveis.\n\nDestaques do espaço: Campo de futebol com grama tapete. Piscina + Chuveirão. Área de churrasqueira completa. Lareira a céu aberto para noites especiais.`, capacidade:'1.000', tipo_propriedade:'Sítio', cidade:'Cachoeiras de Macacu', estado:'RJ', valor_base:3000, valor_hora:500, avaliacao:4.9, comodidades:['📶 Wi-Fi rápido','🚗 Estacionamento gratuito','🔥 Churrasqueira','🏊 Piscina','⚽ Campo de futebol','🌳 Área verde'], whatsapp:'5521999999999', faq:[{pergunta:'Como funciona o processo de reserva?',resposta:'Entre em contato pelo WhatsApp ou preencha o formulário ao lado. O proprietário responderá para confirmar disponibilidade.'},{pergunta:'O espaço aceita pets?',resposta:'Consulte o proprietário diretamente, pois a política varia conforme o evento e o porte do animal.'}] })
-      setFotos(Array.from({length:5},(_,i)=>({url:`https://picsum.photos/seed/chacara${i+1}/800/600`,titulo:['Vista principal','Área da piscina','Churrasqueira','Campo de futebol','Lareira'][i],ordem:i})))
-      setVideos([{url:'',titulo:'Tour completo da Chácara'}])
-      setAval(AVAL_DEMO)
-      setAnfNome('Rodrigo Ramos'); setAnfTempo('2 anos')
-      wppRef.current='5521999999999'
+ useEffect(() => {
+  const loadDemo = () => {
+    setPlano('ultra')
+    setProp({
+      id:'demo',
+      nome:'Chácara Macacu — Sítio para Eventos',
+      descricao:`Se você procura natureza, conforto e estrutura completa para celebrar o seu grande dia, acabou de encontrar o lugar perfeito!\n\nA chácara está localizada em Cachoeiras de Macacu, cercada pelo verde, com clima tranquilo e ao mesmo tempo preparada para receber eventos inesquecíveis.\n\nDestaques do espaço: Campo de futebol com grama tapete. Piscina + Chuveirão. Área de churrasqueira completa. Lareira a céu aberto para noites especiais.`,
+      capacidade:'1.000',
+      tipo_propriedade:'Sítio',
+      cidade:'Cachoeiras de Macacu',
+      estado:'RJ',
+      valor_base:3000,
+      valor_hora:500,
+      avaliacao:4.9,
+      comodidades:['📶 Wi-Fi rápido','🚗 Estacionamento gratuito','🔥 Churrasqueira','🏊 Piscina','⚽ Campo de futebol','🌳 Área verde'],
+      whatsapp:'5521999999999',
+      faq:[
+        {pergunta:'Como funciona o processo de reserva?',resposta:'Entre em contato pelo WhatsApp ou preencha o formulário ao lado. O proprietário responderá para confirmar disponibilidade.'},
+        {pergunta:'O espaço aceita pets?',resposta:'Consulte o proprietário diretamente, pois a política varia conforme o evento e o porte do animal.'}
+      ]
+    })
+
+    setFotos(Array.from({length:5},(_,i)=>({
+      url:`https://picsum.photos/seed/chacara${i+1}/800/600`,
+      titulo:['Vista principal','Área da piscina','Churrasqueira','Campo de futebol','Lareira'][i],
+      ordem:i
+    })))
+
+    setVideos([{url:'',titulo:'Tour completo da Chácara'}])
+    setAval(AVAL_DEMO)
+    setAnfNome('Rodrigo Ramos')
+    setAnfTempo('2 anos')
+    wppRef.current='5521999999999'
+    setLoading(false)
+  }
+
+  const load = async () => {
+    try {
+      if (!propId || propId === 'demo') {
+        loadDemo()
+        return
+      }
+
+      const { data: p } = await supabase
+        .from('propriedades')
+        .select('*')
+        .eq('id', propId)
+        .single()
+
+      if (!p) {
+        loadDemo()
+        return
+      }
+
+      const { data: fts } = await supabase
+        .from('fotos')
+        .select('*')
+        .eq('propriedade_id', propId)
+        .order('ordem', { ascending: true }); // ✅ CORREÇÃO AQUI
+
+      const [{ data: assin }, { data: vids }, { data: avals }, { data: usr }] = await Promise.all([
+        supabase
+          .from('assinaturas')
+          .select('plano_ativo,status')
+          .eq('usuario_id', p.usuario_id || '')
+          .single()
+          .then(res => ({ data: res.data || null })),
+
+        supabase
+          .from('videos_propriedade')
+          .select('url,titulo')
+          .eq('propriedade_id', propId)
+          .then(res => ({ data: res.data || [] })),
+
+        supabase
+          .from('avaliacoes')
+          .select('*')
+          .eq('propriedade_id', propId)
+          .eq('verificada', true)
+          .order('criado_em', { ascending: false })
+          .then(res => ({ data: res.data || [] })),
+
+        supabase
+          .from('usuarios')
+          .select('*')
+          .eq('id', p.usuario_id || '')
+          .single()
+          .then(res => ({ data: res.data || null })),
+      ])
+
+      setPlano((assin as any)?.plano_ativo || 'basico')
+      setProp(p)
+      setFotos((fts || []).map((f:any)=>({
+        url:f.url,
+        titulo:f.secao || '',
+        ordem:f.ordem
+      })))
+
+      setVideos(vids || [])
+      setAval((avals || []).length ? avals as Avaliacao[] : AVAL_DEMO)
+      wppRef.current = (p.whatsapp || '').replace(/\D/g, '')
+      setFav(JSON.parse(localStorage.getItem('ventsy_favs') || '[]').includes(propId))
+
+      if (usr){
+        setAnfNome((usr as any).nome || '—')
+        setAnfAv((usr as any).foto_perfil || '')
+
+        if ((usr as any).criado_em){
+          const a = Math.floor((Date.now() - new Date((usr as any).criado_em).getTime()) / 31536000000)
+          setAnfTempo(a >= 1 ? `${a} ano${a > 1 ? 's' : ''}` : 'menos de 1 ano')
+        }
+      }
+
+      try {
+        await supabase.from('analytics_eventos').insert({
+          propriedade_id: propId,
+          evento_tipo: 'view'
+        })
+      } catch (_) {}
+
+    } catch(e) {
+      loadDemo()
+    } finally {
       setLoading(false)
     }
-    const load = async () => {
-      try {
-        if (!propId||propId==='demo'){loadDemo();return}
-        const {data:p} = await supabase.from('propriedades').select('*').eq('id',propId).single()
-        if (!p){loadDemo();return}
-        const { data: fts } = await supabase
-  .from('fotos')
-  .select('*')
-  .eq('propriedade_id', propId)
-  .order('ordem', { ascending: true })
+  }
 
-const [{ data: assin }, { data: vids }, { data: avals }, { data: usr }] = await Promise.all([
-  supabase
-    .from('assinaturas')
-    .select('plano_ativo,status')
-    .eq('usuario_id', p.usuario_id || '')
-    .single()
-    .then(res => ({ data: res.data || null })),
-
-  supabase
-    .from('videos_propriedade')
-    .select('url,titulo')
-    .eq('propriedade_id', propId)
-    .then(res => ({ data: res.data || [] })),
-
-  supabase
-    .from('avaliacoes')
-    .select('*')
-    .eq('propriedade_id', propId)
-    .eq('verificada', true)
-    .order('criado_em', { ascending: false })
-    .then(res => ({ data: res.data || [] })),
-
-  supabase
-    .from('usuarios')
-    .select('*')
-    .eq('id', p.usuario_id || '')
-    .single()
-    .then(res => ({ data: res.data || null })),
-])
-        setPlano((assin as any)?.plano_ativo||'basico')
-        setProp(p)
-        setFotos((fts||[]).map((f:any)=>({url:f.url,titulo:f.secao||'',ordem:f.ordem})))
-        setVideos(vids||[])
-        setAval((avals||[]).length?avals as Avaliacao[]:AVAL_DEMO)
-        wppRef.current=(p.whatsapp||'').replace(/\D/g,'')
-        setFav(JSON.parse(localStorage.getItem('ventsy_favs')||'[]').includes(propId))
-        if (usr){
-          setAnfNome((usr as any).nome||'—'); setAnfAv((usr as any).foto_perfil||'')
-          if ((usr as any).criado_em){const a=Math.floor((Date.now()-new Date((usr as any).criado_em).getTime())/31536000000);setAnfTempo(a>=1?`${a} ano${a>1?'s':''}`:'menos de 1 ano')}
-        }
-        try{await supabase.from('analytics_eventos').insert({propriedade_id:propId,evento_tipo:'view'})}catch(_){}
-      } catch(e){loadDemo()}
-      finally{setLoading(false)}
-    }
-    load()
-  },[propId])
+  load()
+}, [propId])
 
   useEffect(()=>{
     const h=(e:KeyboardEvent)=>{
