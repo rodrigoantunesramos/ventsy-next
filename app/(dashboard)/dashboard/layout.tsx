@@ -60,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
 
       const inicial = (nome.split(' ')[0][0] ?? '?').toUpperCase();
 
-      setProfile({ nome, email: user.email ?? '', usuario, inicial, plano, validade });
+      setProfile({ nome, email: user.email ?? '', usuario_id, plano_ativo, fim_periodo, validade });
       setLoading(false);
     })();
   }, [router]);
