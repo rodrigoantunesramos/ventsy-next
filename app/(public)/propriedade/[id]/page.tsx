@@ -80,7 +80,7 @@ function PropriedadeContent() {
   const [formTel,setFormTel]   = useState('')
   const [formEmail,setFormEmail] = useState('')
   const [formTipo,setFormTipo] = useState('')
-  const [formModo,setFormModo] = useState<'hora'|'diaria'>('')
+  const [formModo,setFormModo] = useState<'hora'|'diaria'>()
   const [formHoras,setFormHoras] = useState(2)
   const [formInicio,setFormInicio] = useState('')
   const [formFim,setFormFim]   = useState('')
