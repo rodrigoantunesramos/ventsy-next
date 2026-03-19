@@ -1,96 +1,78 @@
-// ventsy-next/app/(dashboard)/dashboard/layout.tsx
-//
-// Layout principal do admin — substitui o <header> + <aside> + estrutura do index.html
-// Requer: Supabase client-side via @supabase/ssr ou @supabase/supabase-js
-
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation'; // Importação correta para App Router
 import Link from 'next/link';
-import Image from 'next/image';
 
-// ── Supabase ──────────────────────────────────────────────────────────────────
 const sb = createClient(
   process.env.NEXT_PUBLIC_SUPA_URL!,
   process.env.NEXT_PUBLIC_SUPA_KEY!
 );
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
+// ... (Mantenha as Interfaces e MENU_ITEMS iguais)
 
-interface UserProfile {
-  nome: string;
-  email: string;
-  usuario: string;
-  inicial: string;
-  plano: string;
-  validade: string | null;
-}
+export default function Layout({ children }: LayoutProps) {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [sidebarOpen, setSidebar] = useState(false);
+  const [avatarOpen, setAvatar] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const router = useRouter(); // Hook do Next.js
+  const avatarRef = useRef<HTMLDivElement>(null);
 
-// ── Itens do menu lateral ─────────────────────────────────────────────────────
-const MENU_ITEMS = [
-  { rota: 'dashboard',         label: '🏠 Dashboard',             group: null },
-  { rota: 'minhapropriedade',  label: '📍 Minha Propriedade',     group: 'Minha Propriedade' },
-  { rota: 'fotos',             label: '📸 Fotos',                 group: null },
-  { rota: 'leads',             label: '🎉 Clientes & Eventos',     group: 'Gestão' },
-  { rota: 'calendario',        label: '📅 Disponibilidade',        group: null },
-  { rota: 'relatorio',         label: '📊 Relatório',              group: null },
-  { rota: 'financeiro',        label: '💰 Financeiro',             group: null },
-  { rota: 'documentos',        label: '📄 Documentos',             group: null },
-  { rota: 'equipe',            label: '👥 Equipe & Folha',         group: null },
-  { rota: 'indique',           label: '🎁 Programa de Indicação',  group: 'Conta' },
-  { rota: 'planos',            label: '💳 Planos Ventsy',          group: null },
-  { rota: 'configuracoes',     label: '⚙️ Configurações',          group: null },
-];
-
- getAssinatura(userId: string) {"{"}
-  const {"{"} data, error {"}"} = await sb .from('assinaturas') .select('plano, validade') .eq('usuario_id', userId) // Certifique-off que o nome da coluna está correto 
-  .single(); if (error) return null; return data; {"}"}
-
-
-
-
-// ── Componente ────────────────────────────────────────────────────────────────
-export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [profile, setProfile]       = useState<UserProfile | null>(null);
-  const [sidebarOpen, setSidebar]   = useState(false);
-  const [avatarOpen, setAvatar]     = useState(false);
-  const [loading, setLoading]       = useState(true);
-  const avatarRef                   = useRef<HTMLDivElement>(null);
-
-  // ── Carrega sessão e perfil ───────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) { window.location.href = '/login'; return; }
+      
+      if (!session) {
+        router.push('/login'); // Navegação SPA
+        return;
+      }
 
       const user = session.user;
-      let nome    = user.email ?? '';
+      let nome = user.email ?? '';
       let usuario = '';
-      let plano   = 'basico';
+      let plano = 'basico';
       let validade: string | null = null;
 
+      // Busca Perfil
       try {
         const { data: perfil } = await sb
-          .from('usuarios').select('*').eq('id', user.id).single();
-        if (perfil) { nome = perfil.nome || nome; usuario = perfil.usuario || ''; }
-      } catch (_) {}
+          .from('usuarios')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        if (perfil) {
+          nome = perfil.nome || nome;
+          usuario = perfil.usuario || '';
+        }
+      } catch (e) { console.error("Erro perfil:", e) }
 
-    
-      <>
-  // Adicione isto antes do componente AdminLayout async function
- 
-</>
+      // Busca Assinatura (Correção da Linha 75)
+      try {
+        const assin = await fetchAssinatura(user.id);
+        if (assin) {
+          plano = (assin.plano || 'basico').toLowerCase();
+          validade = assin.validade || null;
+        }
+      } catch (e) { console.error("Erro assinatura:", e) }
 
       const inicial = (nome.split(' ')[0][0] ?? '?').toUpperCase();
 
       setProfile({ nome, email: user.email ?? '', usuario, inicial, plano, validade });
       setLoading(false);
     })();
-  }, []);
+  }, [router]);
+
+  const handleSair = async () => {
+    await sb.auth.signOut();
+    router.push('/login');
+  };
+
+  // ... (Restante do JSX do Header e Sidebar)
+
+
 
   // ── Fecha avatar ao clicar fora ───────────────────────────────────────────
   useEffect(() => {
