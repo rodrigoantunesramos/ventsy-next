@@ -35,7 +35,7 @@ export default function Header() {
 
       <div className="header-right">
         {isLoggedIn
-          ? <Link href="/dashboard" className="btn-login btn-dashboard-header">Dashboard</Link>
+          ? <Link href="(dashboard)/dashboard/page.tsx" className="btn-login btn-dashboard-header">Dashboard</Link>
           : <Link href="/login" className="btn-login">Entrar</Link>
         }
         <div className="menu-hamburguer-container" ref={menuRef}>
