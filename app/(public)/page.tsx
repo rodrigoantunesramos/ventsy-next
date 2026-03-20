@@ -5,7 +5,7 @@ import HomeFeed from '@/components/HomeFeed'
 export default function Home() {
   return (
     <>
-      <Header isLoggedIn={undefined} menuOpen={undefined} setMenuOpen={undefined} menuRef={undefined} />
+      <Header isLoggedIn={false} menuOpen={false} setMenuOpen={() => {}} menuRef={{ current: null }} />
       <main>
         <HomeFeed />
       </main>

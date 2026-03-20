@@ -152,7 +152,12 @@ function PlanosContent() {
 
   return (
     <>
-      <Header isLoggedIn={undefined} menuOpen={undefined} setMenuOpen={undefined} menuRef={undefined} />
+      <Header 
+        isLoggedIn={false} 
+        menuOpen={false} 
+        setMenuOpen={() => {}} 
+        menuRef={{ current: null }} 
+      />
 
       {alerta && (
         <AlertaFlutuante msg={alerta.msg} cor={alerta.cor} onClose={() => setAlerta(null)} />
