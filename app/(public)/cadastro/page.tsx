@@ -357,7 +357,7 @@ function CadastroContent() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={undefined} menuOpen={undefined} setMenuOpen={undefined} menuRef={undefined} />
 
       <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '120px 5% 64px' }}>
         <div className="cadastro-wrap">
