@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [emailRecuperar, setEmailRecuperar] = useState('')
   const [recuperacaoEnviada, setRecuperacaoEnviada] = useState(false)
   const [loadingRecuperar, setLoadingRecuperar] = useState(false)
+
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Redireciona se já logado
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header isLoggedIn={false} menuOpen={false} setMenuOpen={() => {}} menuRef={null} />
+      <Header isLoggedIn={false} menuOpen={false} setMenuOpen={() => {}} menuRef={menuRef} />
 
       <main className="ln-main">
         <div className="ln-wrap">
@@ -201,6 +203,3 @@ export default function LoginPage() {
     </>
   )
 }
-
-
-
