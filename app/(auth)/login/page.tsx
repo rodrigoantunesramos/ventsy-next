@@ -64,7 +64,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={false} menuOpen={false} setMenuOpen={() => {}} menuRef={null} />
 
       <main className="ln-main">
         <div className="ln-wrap">
@@ -201,3 +201,6 @@ export default function LoginPage() {
     </>
   )
 }
+
+
+
