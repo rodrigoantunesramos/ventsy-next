@@ -50,7 +50,7 @@ export default function AdminPage() {
          O app.js importa os demais via import relativo — funciona direto da pasta public.
       */}
       <Script
-        src="(dashboard)/dashboard/js/app.js"
+        src="/dashboard/js/app.js"
         type="module"
         strategy="afterInteractive"
       />
