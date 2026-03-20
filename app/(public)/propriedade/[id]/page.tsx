@@ -171,7 +171,7 @@ function PropriedadeContent() {
           .then(res => ({ data: res.data || [] })),
 
         supabase
-          .from('usuarios')
+          .from('usuarios')a
           .select('*')
           .eq('id_prop', p.usuario_id || '')
           .single()
