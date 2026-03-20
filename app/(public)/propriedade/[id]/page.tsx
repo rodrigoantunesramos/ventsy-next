@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
@@ -53,8 +53,8 @@ function FaqItem({pergunta,resposta}:{pergunta:string;resposta:string}) {
 }
 
 function PropriedadeContent() {
-  const params = useSearchParams()
-  const propId = params.get('id')
+  const params = useParams()
+  const propId = params.id as string
 
   const [prop,setProp]         = useState<any>(null)
   const [fotos,setFotos]       = useState<Foto[]>([])
