@@ -186,13 +186,13 @@ export default function AdminPage() {
       </select>
       <button
         className="btn-fin btn-fin-ghost"
-        onclick="finOpenModal('despesa')"
+        onClick={() => (window as any).finOpenModal('despesa')}
       >
         + Despesa
       </button>
       <button
         className="btn-fin btn-fin-primary"
-        onclick="finOpenModal('receita')"
+        onClick={() => (window as any).finOpenModal('receita')}
       >
         + Receita
       </button>
@@ -200,19 +200,19 @@ export default function AdminPage() {
   </div>
   {/* Sub-abas internas */}
   <div className="fin-tabs">
-    <button className="fin-tab-btn ativo" onclick="finMudarAba('painel', this)">
+    <button className="fin-tab-btn ativo" onClick={(e: any) => (window as any).finMudarAba('painel', e.target)}>
       📊 Painel
     </button>
-    <button className="fin-tab-btn" onclick="finMudarAba('receitas', this)"> 
+    <button className="fin-tab-btn" onClick={(e: any) => (window as any).finMudarAba('receitas', e.target)}> 
       💚 Receitas
     </button>
-    <button className="fin-tab-btn" onclick="finMudarAba('despesas', this)">
+    <button className="fin-tab-btn" onClick={(e: any) => (window as any).finMudarAba('despesas', e.target)}>
       🔴 Despesas
     </button>
-    <button className="fin-tab-btn" onclick="finMudarAba('eventos', this)">
+    <button className="fin-tab-btn" onClick={(e: any) => (window as any).finMudarAba('eventos', e.target)}>
       📅 Eventos
     </button>
-    <button className="fin-tab-btn" onclick="finMudarAba('relatorios', this)">
+    <button className="fin-tab-btn" onClick={(e: any) => (window as any).finMudarAba('relatorios', e.target)}>
       📋 Relatórios
     </button>
   </div>
@@ -306,7 +306,7 @@ export default function AdminPage() {
           <button
             className="btn-fin btn-fin-ghost"
             style={{ fontSize: "0.78rem", padding: "6px 14px" }}
-            onclick="finOpenModal('meta')"
+            onClick={() => (window as any).finOpenModal('meta')}
           >
             Editar
           </button>
@@ -404,7 +404,7 @@ export default function AdminPage() {
         </div>
         <button
           className="btn-fin btn-fin-primary"
-          onclick="finOpenModal('receita')"
+          onClick={() => (window as any).finOpenModal('receita')}
         >
           + Nova Receita
         </button>
@@ -594,7 +594,7 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="docs-header-right">
-      <button className="btn-fin btn-fin-ghost" onclick="docsExport()">
+      <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).docsExport()}>
         <svg
           width={13}
           height={13}
@@ -609,7 +609,7 @@ export default function AdminPage() {
         </svg>
         Exportar Lista
       </button>
-      <button className="btn-fin btn-fin-primary" onclick="docsOpenAddModal()">
+      <button className="btn-fin btn-fin-primary" onClick={() => (window as any).docsOpenAddModal()}>
         <svg
           width={13}
           height={13}
@@ -723,35 +723,35 @@ export default function AdminPage() {
   <div className="docs-filter-bar">
     <button
       className="docs-filter-pill active"
-      onclick="docsSetFilter('todos',this)"
+      onClick={(e: any) => (window as any).docsSetFilter('todos',e.target)}
     >
       Todos
     </button>
     <button
       className="docs-filter-pill"
-      onclick="docsSetFilter('juridico',this)"
+      onClick={(e: any) => (window as any).docsSetFilter('juridico',e.target)}
     >
       Jurídico
     </button>
     <button
       className="docs-filter-pill"
-      onclick="docsSetFilter('licencas',this)"
+      onClick={(e: any) => (window as any).docsSetFilter('licencas',e.target)}
     >
       Licenças
     </button>
-    <button className="docs-filter-pill" onclick="docsSetFilter('fiscal',this)">
+    <button className="docs-filter-pill" onClick={(e: any) => (window as any).docsSetFilter('fiscal',e.target)}>
       Fiscal
     </button>
     <button
       className="docs-filter-pill"
-      onclick="docsSetFilter('seguros',this)"
+      onClick={(e: any) => (window as any).docsSetFilter('seguros',e.target)}
     >
       Seguros
     </button>
-    <button className="docs-filter-pill" onclick="docsSetFilter('alvara',this)">
+    <button className="docs-filter-pill" onClick={(e: any) => (window as any).docsSetFilter('alvara',e.target)}>
       Alvarás
     </button>
-    <button className="docs-filter-pill" onclick="docsSetFilter('outros',this)">
+    <button className="docs-filter-pill" onClick={(e: any) => (window as any).docsSetFilter('outros',e.target)}>
       Outros
     </button>
     <div className="docs-search-box">
@@ -767,7 +767,7 @@ export default function AdminPage() {
       <input
         type="text"
         placeholder="Buscar documento..."
-        oninput="docsSearch(this.value)"
+        onInput={(e: any) => (window as any).docsSearch(e.target.value)}
       />
     </div>
   </div>
@@ -798,7 +798,7 @@ export default function AdminPage() {
     <div className="eq-header-right">
       <button
         className="btn-fin btn-fin-ghost"
-        onclick="eqSwitchTab('impostos')"
+        onClick={() => (window as any).eqSwitchTab('impostos')}
       >
         <svg
           width={13}
@@ -813,7 +813,7 @@ export default function AdminPage() {
         </svg>
         Configurar Encargos
       </button>
-      <button className="btn-fin btn-fin-primary" onclick="eqOpenEmpModal()">
+      <button className="btn-fin btn-fin-primary" onClick={() => (window as any).eqOpenEmpModal()}>
         <svg
           width={13}
           height={13}
@@ -867,17 +867,17 @@ export default function AdminPage() {
     <button
       className="eq-tab active"
       id="eq-tab-equipe"
-      onclick="eqSwitchTab('equipe')"
+      onClick={() => (window as any).eqSwitchTab('equipe')}
     >
       Equipe
     </button>
-    <button className="eq-tab" id="eq-tab-folha" onclick="eqSwitchTab('folha')">
+    <button className="eq-tab" id="eq-tab-folha" onClick={() => (window as any).eqSwitchTab('folha')}>
       Folha de Pagamento
     </button>
     <button
       className="eq-tab"
       id="eq-tab-impostos"
-      onclick="eqSwitchTab('impostos')"
+      onClick={() => (window as any).eqSwitchTab('impostos')}
     >
       Encargos &amp; Impostos
     </button>
@@ -887,17 +887,17 @@ export default function AdminPage() {
     <div className="eq-filter-bar">
       <button
         className="eq-filter-pill active"
-        onclick="eqFilterEmp('todos',this)"
+        onClick={(e: any) => (window as any).eqFilterEmp('todos',e.target)}
       >
         Todos
       </button>
-      <button className="eq-filter-pill" onclick="eqFilterEmp('ativo',this)">
+      <button className="eq-filter-pill" onClick={(e: any) => (window as any).eqFilterEmp('ativo',e.target)}>
         Ativos
       </button>
-      <button className="eq-filter-pill" onclick="eqFilterEmp('ferias',this)">
+      <button className="eq-filter-pill" onClick={(e: any) => (window as any).eqFilterEmp('ferias',e.target)}>
         Férias
       </button>
-      <button className="eq-filter-pill" onclick="eqFilterEmp('horista',this)">
+      <button className="eq-filter-pill" onClick={(e: any) => (window as any).eqFilterEmp('horista',e.target)}>
         Horista
       </button>
       <div className="eq-search-box">
@@ -913,7 +913,7 @@ export default function AdminPage() {
         <input
           type="text"
           placeholder="Buscar funcionário..."
-          oninput="eqSearchEmp(this.value)"
+          onInput={(e: any) => (window as any).eqSearchEmp(e.target.value)}
         />
       </div>
     </div>
@@ -923,14 +923,14 @@ export default function AdminPage() {
   <div id="eq-panel-folha" className="eq-panel">
     <div className="eq-payroll-header">
       <div className="eq-month-nav">
-        <button onclick="eqChangeMonth(-1)">‹</button>
+        <button onClick={() => (window as any).eqChangeMonth(-1)}>‹</button>
         <div className="eq-month-label" id="eqMonthLabel">
           —
         </div>
-        <button onclick="eqChangeMonth(1)">›</button>
+        <button onClick={() => (window as any).eqChangeMonth(1)}>›</button>
       </div>
       <div style={{ display: "flex", gap: 10 }}>
-        <button className="btn-fin btn-fin-ghost" onclick="eqExportPayroll()">
+        <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).eqExportPayroll()}>
           <svg
             width={13}
             height={13}
@@ -1063,7 +1063,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1082,7 +1082,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1101,7 +1101,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1120,7 +1120,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1139,7 +1139,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1184,7 +1184,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1203,7 +1203,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1222,7 +1222,7 @@ export default function AdminPage() {
                 min={0}
                 max={6}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1240,7 +1240,7 @@ export default function AdminPage() {
                 defaultValue={0}
                 min={0}
                 step={10}
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">R$</span>
             </div>
@@ -1259,7 +1259,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1302,7 +1302,7 @@ export default function AdminPage() {
                 defaultValue={550}
                 min={0}
                 step={10}
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">R$</span>
             </div>
@@ -1320,7 +1320,7 @@ export default function AdminPage() {
                 defaultValue={220}
                 min={0}
                 step={10}
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">R$</span>
             </div>
@@ -1338,7 +1338,7 @@ export default function AdminPage() {
                 defaultValue={0}
                 min={0}
                 step={50}
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">R$</span>
             </div>
@@ -1356,7 +1356,7 @@ export default function AdminPage() {
                 defaultValue={0}
                 min={0}
                 step={10}
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">R$</span>
             </div>
@@ -1400,7 +1400,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.01"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1419,7 +1419,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.01"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1438,7 +1438,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1457,7 +1457,7 @@ export default function AdminPage() {
                 min={0}
                 max={100}
                 step="0.1"
-                oninput="eqUpdateTax()"
+                onInput={() => (window as any).eqUpdateTax()}
               />
               <span className="eq-tax-suffix">%</span>
             </div>
@@ -1488,7 +1488,7 @@ export default function AdminPage() {
                 defaultValue={2500}
                 min={0}
                 step={100}
-                oninput="eqRunSimulator()"
+                onInput={() => (window as any).eqRunSimulator()}
               />
             </div>
             <div>
@@ -1513,7 +1513,7 @@ export default function AdminPage() {
                 min={0}
                 max={80}
                 step={1}
-                oninput="eqRunSimulator()"
+                onInput={() => (window as any).eqRunSimulator()}
                 style={{ fontSize: ".9rem" }}
               />
             </div>
@@ -1526,7 +1526,7 @@ export default function AdminPage() {
                 defaultValue={0}
                 min={0}
                 step={50}
-                oninput="eqRunSimulator()"
+                onInput={() => (window as any).eqRunSimulator()}
                 style={{ fontSize: ".9rem" }}
               />
             </div>
@@ -1567,10 +1567,10 @@ export default function AdminPage() {
       </p>
     </div>
     <div className="fotos-header-acoes">
-      <button className="fotos-btn-salvar-tudo" onclick="fotosSalvarTudo()">
+      <button className="fotos-btn-salvar-tudo" onClick={() => (window as any).fotosSalvarTudo()}>
         💾 Salvar
       </button>
-      <button className="fotos-btn-nova-secao" onclick="fotosCriarSecao()">
+      <button className="fotos-btn-nova-secao" onClick={() => (window as any).fotosCriarSecao()}>
         + Nova seção
       </button>
     </div>
@@ -1590,14 +1590,14 @@ export default function AdminPage() {
     <button
       className="fotos-tab-btn active"
       id="fotos-tab-espaco"
-      onclick="fotosMudarAba('espaco')"
+      onClick={() => (window as any).fotosMudarAba('espaco')}
     >
       📷 Fotos do Espaço
     </button>
     <button
       className="fotos-tab-btn"
       id="fotos-tab-evento"
-      onclick="fotosMudarAba('evento')"
+      onClick={() => (window as any).fotosMudarAba('evento')}
     >
       🎉 Fotos de Eventos
     </button>
@@ -1634,7 +1634,7 @@ export default function AdminPage() {
         <div
           className="fotos-destaque-slot slot-main"
           id="fotos-dslot-1"
-          onclick="fotosAtivarSlot(1)"
+          onClick={() => (window as any).fotosAtivarSlot(1)}
           title="Posição 1 — principal"
         >
           <img id="fotos-dslot-img-1" src="" alt="Posição 1" />
@@ -1649,7 +1649,7 @@ export default function AdminPage() {
           <button
             className="fotos-btn-limpar-dslot"
             title="Remover"
-            onclick="event.stopPropagation(); fotosLimparDestaquePos(1)"
+            onClick={(e) => { e.stopPropagation(); (window as any).fotosLimparDestaquePos(1) }}
           >
             ✕
           </button>
@@ -1657,7 +1657,7 @@ export default function AdminPage() {
         <div
           className="fotos-destaque-slot"
           id="fotos-dslot-2"
-          onclick="fotosAtivarSlot(2)"
+          onClick={() => (window as any).fotosAtivarSlot(2)}
           title="Posição 2"
         >
           <img id="fotos-dslot-img-2" src="" alt="Posição 2" />
@@ -1669,7 +1669,7 @@ export default function AdminPage() {
           <button
             className="fotos-btn-limpar-dslot"
             title="Remover"
-            onclick="event.stopPropagation(); fotosLimparDestaquePos(2)"
+            onClick={(e) => { e.stopPropagation(); (window as any).fotosLimparDestaquePos(2) }}
           >
             ✕
           </button>
@@ -1677,7 +1677,7 @@ export default function AdminPage() {
         <div
           className="fotos-destaque-slot"
           id="fotos-dslot-3"
-          onclick="fotosAtivarSlot(3)"
+          onClick={() => (window as any).fotosAtivarSlot(3)}
           title="Posição 3"
         >
           <img id="fotos-dslot-img-3" src="" alt="Posição 3" />
@@ -1689,7 +1689,7 @@ export default function AdminPage() {
           <button
             className="fotos-btn-limpar-dslot"
             title="Remover"
-            onclick="event.stopPropagation(); fotosLimparDestaquePos(3)"
+            onClick={(e) => { e.stopPropagation(); (window as any).fotosLimparDestaquePos(3) }}
           >
             ✕
           </button>
@@ -1697,7 +1697,7 @@ export default function AdminPage() {
         <div
           className="fotos-destaque-slot"
           id="fotos-dslot-4"
-          onclick="fotosAtivarSlot(4)"
+          onClick={() => (window as any).fotosAtivarSlot(4)}
           title="Posição 4"
         >
           <img id="fotos-dslot-img-4" src="" alt="Posição 4" />
@@ -1709,7 +1709,7 @@ export default function AdminPage() {
           <button
             className="fotos-btn-limpar-dslot"
             title="Remover"
-            onclick="event.stopPropagation(); fotosLimparDestaquePos(4)"
+            onClick={(e) => { e.stopPropagation(); (window as any).fotosLimparDestaquePos(4) }}
           >
             ✕
           </button>
@@ -1717,7 +1717,7 @@ export default function AdminPage() {
         <div
           className="fotos-destaque-slot"
           id="fotos-dslot-5"
-          onclick="fotosAtivarSlot(5)"
+          onClick={() => (window as any).fotosAtivarSlot(5)}
           title="Posição 5"
         >
           <img id="fotos-dslot-img-5" src="" alt="Posição 5" />
@@ -1729,7 +1729,7 @@ export default function AdminPage() {
           <button
             className="fotos-btn-limpar-dslot"
             title="Remover"
-            onclick="event.stopPropagation(); fotosLimparDestaquePos(5)"
+            onClick={(e) => { e.stopPropagation(); (window as any).fotosLimparDestaquePos(5) }}
           >
             ✕
           </button>
@@ -1779,7 +1779,7 @@ export default function AdminPage() {
   <div className="fotos-footer-acoes">
     <button
       className="fotos-btn-salvar fotos-btn-salvar"
-      onclick="fotosSalvarTudo()"
+      onClick={() => (window as any).fotosSalvarTudo()}
     >
       💾 Salvar alterações
     </button>
@@ -1805,7 +1805,7 @@ export default function AdminPage() {
     <button
       className="prop-btn-visualizar"
       id="prop-btn-visualizar"
-      onclick="propVerAnuncio()"
+      onClick={() => (window as any).propVerAnuncio()}
       style={{ opacity: "0.5" }}
     >
       👁 Ver Anúncio Público
@@ -1816,56 +1816,56 @@ export default function AdminPage() {
     <button
       className="prop-tab-link active"
       data-tab="contato"
-      onclick="propOpenTab(event,'contato')"
+      onClick={() => (window as any).propOpenTab(event,'contato')}
     >
       1. Contato
     </button>
     <button
       className="prop-tab-link"
       data-tab="sobre"
-      onclick="propOpenTab(event,'sobre')"
+      onClick={() => (window as any).propOpenTab(event,'sobre')}
     >
       2. Sobre
     </button>
     <button
       className="prop-tab-link"
       data-tab="valores"
-      onclick="propOpenTab(event,'valores')"
+      onClick={() => (window as any).propOpenTab(event,'valores')}
     >
       3. Valores
     </button>
     <button
       className="prop-tab-link"
       data-tab="endereco"
-      onclick="propOpenTab(event,'endereco')"
+      onClick={() => (window as any).propOpenTab(event,'endereco')}
     >
       4. Endereço
     </button>
     <button
       className="prop-tab-link"
       data-tab="eventos"
-      onclick="propOpenTab(event,'eventos')"
+      onClick={() => (window as any).propOpenTab(event,'eventos')}
     >
       5. Eventos
     </button>
     <button
       className="prop-tab-link"
       data-tab="faq"
-      onclick="propOpenTab(event,'faq')"
+      onClick={() => (window as any).propOpenTab(event,'faq')}
     >
       6. FAQ
     </button>
     <button
       className="prop-tab-link"
       data-tab="servicos"
-      onclick="propOpenTab(event,'servicos')"
+      onClick={() => (window as any).propOpenTab(event,'servicos')}
     >
       7. Serviços
     </button>
     <button
       className="prop-tab-link"
       data-tab="forca"
-      onclick="propOpenTab(event,'forca')"
+      onClick={() => (window as any).propOpenTab(event,'forca')}
     >
       ⚡ Força do Anúncio
     </button>
@@ -1988,7 +1988,7 @@ export default function AdminPage() {
             </div>
             <button
               className="btn-trocar-foto"
-              onclick="document.getElementById('prop-input-foto-resp').click()"
+              onClick={() => document.getElementById('prop-input-foto-resp')?.click()}
             >
               Trocar Foto
             </button>
@@ -2079,7 +2079,7 @@ export default function AdminPage() {
         <button
           type="button"
           className="prop-btn-add-faq"
-          onclick="propAdicionarCusto()"
+          onClick={() => (window as any).propAdicionarCusto()}
         >
           + Adicionar item
         </button>
@@ -2101,7 +2101,7 @@ export default function AdminPage() {
               type="text"
               id="prop-cep"
               placeholder="00000-000"
-              onblur="propBuscarCEP()"
+              onBlur={() => (window as any).propBuscarCEP()}
             />
           </div>
           <div className="campo-largo">
@@ -2136,7 +2136,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="AC"
-                onclick="propSelecionarUF(this,'AC')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'AC')}
               >
                 AC
               </button>
@@ -2144,7 +2144,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="AL"
-                onclick="propSelecionarUF(this,'AL')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'AL')}
               >
                 AL
               </button>
@@ -2152,7 +2152,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="AP"
-                onclick="propSelecionarUF(this,'AP')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'AP')}
               >
                 AP
               </button>
@@ -2160,7 +2160,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="AM"
-                onclick="propSelecionarUF(this,'AM')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'AM')}
               >
                 AM
               </button>
@@ -2168,7 +2168,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="BA"
-                onclick="propSelecionarUF(this,'BA')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'BA')}
               >
                 BA
               </button>
@@ -2176,7 +2176,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="CE"
-                onclick="propSelecionarUF(this,'CE')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'CE')}
               >
                 CE
               </button>
@@ -2184,7 +2184,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="DF"
-                onclick="propSelecionarUF(this,'DF')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'DF')}
               >
                 DF
               </button>
@@ -2192,7 +2192,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="ES"
-                onclick="propSelecionarUF(this,'ES')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'ES')}
               >
                 ES
               </button>
@@ -2200,7 +2200,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="GO"
-                onclick="propSelecionarUF(this,'GO')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'GO')}
               >
                 GO
               </button>
@@ -2208,7 +2208,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="MA"
-                onclick="propSelecionarUF(this,'MA')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'MA')}
               >
                 MA
               </button>
@@ -2216,7 +2216,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="MT"
-                onclick="propSelecionarUF(this,'MT')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'MT')}
               >
                 MT
               </button>
@@ -2224,7 +2224,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="MS"
-                onclick="propSelecionarUF(this,'MS')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'MS')}
               >
                 MS
               </button>
@@ -2232,7 +2232,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="MG"
-                onclick="propSelecionarUF(this,'MG')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'MG')}
               >
                 MG
               </button>
@@ -2240,7 +2240,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="PA"
-                onclick="propSelecionarUF(this,'PA')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'PA')}
               >
                 PA
               </button>
@@ -2248,7 +2248,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="PB"
-                onclick="propSelecionarUF(this,'PB')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'PB')}
               >
                 PB
               </button>
@@ -2256,7 +2256,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="PR"
-                onclick="propSelecionarUF(this,'PR')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'PR')}
               >
                 PR
               </button>
@@ -2264,7 +2264,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="PE"
-                onclick="propSelecionarUF(this,'PE')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'PE')}
               >
                 PE
               </button>
@@ -2272,7 +2272,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="PI"
-                onclick="propSelecionarUF(this,'PI')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'PI')}
               >
                 PI
               </button>
@@ -2280,7 +2280,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="RJ"
-                onclick="propSelecionarUF(this,'RJ')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'RJ')}
               >
                 RJ
               </button>
@@ -2288,7 +2288,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="RN"
-                onclick="propSelecionarUF(this,'RN')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'RN')}
               >
                 RN
               </button>
@@ -2296,7 +2296,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="RS"
-                onclick="propSelecionarUF(this,'RS')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'RS')}
               >
                 RS
               </button>
@@ -2304,7 +2304,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="RO"
-                onclick="propSelecionarUF(this,'RO')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'RO')}
               >
                 RO
               </button>
@@ -2312,7 +2312,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="RR"
-                onclick="propSelecionarUF(this,'RR')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'RR')}
               >
                 RR
               </button>
@@ -2320,7 +2320,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="SC"
-                onclick="propSelecionarUF(this,'SC')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'SC')}
               >
                 SC
               </button>
@@ -2328,7 +2328,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="SP"
-                onclick="propSelecionarUF(this,'SP')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'SP')}
               >
                 SP
               </button>
@@ -2336,7 +2336,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="SE"
-                onclick="propSelecionarUF(this,'SE')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'SE')}
               >
                 SE
               </button>
@@ -2344,7 +2344,7 @@ export default function AdminPage() {
                 type="button"
                 className="prop-uf-btn"
                 data-uf="TO"
-                onclick="propSelecionarUF(this,'TO')"
+                onClick={(e: any) => (window as any).propSelecionarUF(e.target,'TO')}
               >
                 TO
               </button>
@@ -2366,7 +2366,7 @@ export default function AdminPage() {
               fontWeight: 600,
               fontSize: "0.88rem"
             }}
-            onclick="propAtualizarMapa()"
+            onClick={() => (window as any).propAtualizarMapa()}
           >
             📍 Atualizar Mapa
           </button>
@@ -2551,7 +2551,7 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
-        <button className="prop-btn-adicionar-faq" onclick="propAdicionarFAQ()">
+        <button className="prop-btn-adicionar-faq" onClick={() => (window as any).propAdicionarFAQ()}>
           + Adicionar Nova Pergunta
         </button>
       </div>
@@ -2813,10 +2813,10 @@ export default function AdminPage() {
   {/* /prop-container-abas */}
   {/* FOOTER AÇÕES (sticky) */}
   <div className="prop-footer-acoes">
-    <button className="prop-btn-cancelar" onclick="navegar('dashboard')">
+    <button className="prop-btn-cancelar" onClick={() => (window as any).navegar('dashboard')}>
       Cancelar
     </button>
-    <button className="prop-btn-salvar" onclick="propSalvar()">
+    <button className="prop-btn-salvar" onClick={() => (window as any).propSalvar()}>
       💾 Salvar Alterações
     </button>
   </div>
@@ -2847,13 +2847,13 @@ export default function AdminPage() {
       </p>
     </div>
     <div className="header-acoes">
-      <button className="btn-outline" onclick="leadsExportarExcel()">
+      <button className="btn-outline" onClick={() => (window as any).leadsExportarExcel()}>
         📊 Excel
       </button>
-      <button className="btn-outline" onclick="leadsExportarPDF()">
+      <button className="btn-outline" onClick={() => (window as any).leadsExportarPDF()}>
         📄 PDF
       </button>
-      <button className="btn-primary" onclick="leadsAbrirModalNovo()">
+      <button className="btn-primary" onClick={() => (window as any).leadsAbrirModalNovo()}>
         ＋ Novo Cliente
       </button>
     </div>
@@ -2947,7 +2947,7 @@ export default function AdminPage() {
           className="input-busca"
           id="leads-input-busca"
           placeholder="Buscar por nome..."
-          oninput="leadsAplicarFiltros()"
+          onInput={() => (window as any).leadsAplicarFiltros()}
         />
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -2968,7 +2968,7 @@ export default function AdminPage() {
         <thead>
           <tr>
             <th className="td-seta" />
-            <th className="leads-th" onclick="leadsOrdenarPor('nome_evento')">
+            <th className="leads-th" onClick={() => (window as any).leadsOrdenarPor('nome_evento')}>
               Nome do Evento{" "}
               <span className="leads-sort-icon" id="leads-sort-nome_evento">
                 ↕
@@ -2976,14 +2976,14 @@ export default function AdminPage() {
             </th>
             <th
               className="leads-th"
-              onclick="leadsOrdenarPor('quem_contratou')"
+              onClick={() => (window as any).leadsOrdenarPor('quem_contratou')}
             >
               Quem Contratou{" "}
               <span className="leads-sort-icon" id="leads-sort-quem_contratou">
                 ↕
               </span>
             </th>
-            <th className="leads-th" onclick="leadsOrdenarPor('data_inicio')">
+            <th className="leads-th" onClick={() => (window as any).leadsOrdenarPor('data_inicio')}>
               Data do Evento{" "}
               <span className="leads-sort-icon" id="leads-sort-data_inicio">
                 ↕
@@ -3012,7 +3012,7 @@ export default function AdminPage() {
   {/* MODAL: Atualizar Status */}
   <div className="modal-overlay" id="leads-modal-status">
     <div className="modal-box">
-      <button className="btn-fechar-modal" onclick="leadsFecharModalStatus()">
+      <button className="btn-fechar-modal" onClick={() => (window as any).leadsFecharModalStatus()}>
         ✕
       </button>
       <h3>Atualizar Status</h3>
@@ -3024,7 +3024,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="lead"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#f59e0b" }} />
           <div>
@@ -3037,7 +3037,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="consultada"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#3b82f6" }} />
           <div>
@@ -3050,7 +3050,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="visita"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#8b5cf6" }} />
           <div>
@@ -3063,7 +3063,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="negociacao"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#ec4899" }} />
           <div>
@@ -3076,7 +3076,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="reserva"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#f97316" }} />
           <div>
@@ -3088,7 +3088,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="contratado"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#10b981" }} />
           <div>
@@ -3099,7 +3099,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="briefing"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#0ea5e9" }} />
           <div>
@@ -3110,7 +3110,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="pronto"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#14b8a6" }} />
           <div>
@@ -3123,7 +3123,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="montagem"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#f97316" }} />
           <div>
@@ -3135,7 +3135,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="finalizado"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#1ebc54" }} />
           <div>
@@ -3146,7 +3146,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="pos"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#22c55e" }} />
           <div>
@@ -3157,7 +3157,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="perdido"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#ef4444" }} />
           <div>
@@ -3170,7 +3170,7 @@ export default function AdminPage() {
         <div
           className="opcao-status"
           data-status="recontactar"
-          onclick="leadsSelecionarStatus(this)"
+          onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
           <div className="dot" style={{ background: "#6b7280" }} />
           <div>
@@ -3186,7 +3186,7 @@ export default function AdminPage() {
   {/* MODAL: Novo Cliente */}
   <div className="modal-overlay" id="leads-modal-novo">
     <div className="modal-box modal-novo">
-      <button className="btn-fechar-modal" onclick="leadsFecharModalNovo()">
+      <button className="btn-fechar-modal" onClick={() => (window as any).leadsFecharModalNovo()}>
         ✕
       </button>
       <h3>➕ Novo Cliente / Evento</h3>
@@ -3233,14 +3233,14 @@ export default function AdminPage() {
         <button
           className="btn-outline"
           style={{ flex: 1 }}
-          onclick="leadsFecharModalNovo()"
+          onClick={() => (window as any).leadsFecharModalNovo()}
         >
           Cancelar
         </button>
         <button
           className="btn-primary"
           style={{ flex: 1, justifyContent: "center" }}
-          onclick="leadsCriarCliente()"
+          onClick={() => (window as any).leadsCriarCliente()}
         >
           Criar Cliente
         </button>
@@ -3308,7 +3308,7 @@ export default function AdminPage() {
   >
     <div className="checkout-inline-header">
       <h3 id="planos-checkout-titulo">🛒 Finalizar Assinatura</h3>
-      <button className="btn-fechar-checkout" onclick="planosFecharCheckout()">
+      <button className="btn-fechar-checkout" onClick={() => (window as any).planosFecharCheckout()}>
         ✕
       </button>
     </div>
@@ -3333,28 +3333,28 @@ export default function AdminPage() {
           <button
             className="planos-duracao-btn ativo"
             data-meses={1}
-            onclick="planosSelecionarDuracao(1)"
+            onClick={() => (window as any).planosSelecionarDuracao(1)}
           >
             1 mês
           </button>
           <button
             className="planos-duracao-btn"
             data-meses={3}
-            onclick="planosSelecionarDuracao(3)"
+            onClick={() => (window as any).planosSelecionarDuracao(3)}
           >
             3 meses
           </button>
           <button
             className="planos-duracao-btn"
             data-meses={6}
-            onclick="planosSelecionarDuracao(6)"
+            onClick={() => (window as any).planosSelecionarDuracao(6)}
           >
             6 meses
           </button>
           <button
             className="planos-duracao-btn"
             data-meses={12}
-            onclick="planosSelecionarDuracao(12)"
+            onClick={() => (window as any).planosSelecionarDuracao(12)}
           >
             12 meses <span className="duracao-badge-anual">−20%</span>
           </button>
@@ -3368,12 +3368,12 @@ export default function AdminPage() {
             id="planos-input-cupom"
             placeholder="CODIGO123"
             maxLength={30}
-            oninput="this.value=this.value.toUpperCase()"
+            onInput={(e: any) => { e.target.value = e.target.value.toUpperCase() }}
           />
           <button
             className="btn-aplicar-cupom"
             id="planos-btn-aplicar-cupom"
-            onclick="planosAplicarCupom()"
+            onClick={() => (window as any).planosAplicarCupom()}
           >
             Aplicar
           </button>
@@ -3507,7 +3507,7 @@ export default function AdminPage() {
               id="planos-cartao-numero"
               placeholder="Número do Cartão"
               maxLength={19}
-              oninput="planosMascaraCartao(this)"
+              onInput={(e: any) => (window as any).planosMascaraCartao(e.target)}
             />
             <div className="input-duplo">
               <input
@@ -3516,7 +3516,7 @@ export default function AdminPage() {
                 id="planos-cartao-validade"
                 placeholder="Validade (MM/AA)"
                 maxLength={5}
-                oninput="planosMascaraValidade(this)"
+                onInput={(e: any) => (window as any).planosMascaraValidade(e.target)}
               />
               <input
                 type="text"
@@ -3541,7 +3541,7 @@ export default function AdminPage() {
               id="planos-cartao-cpf"
               placeholder="CPF ou CNPJ do titular"
               maxLength={18}
-              oninput="planosMascaraCPFCNPJ(this)"
+              onInput={(e: any) => (window as any).planosMascaraCPFCNPJ(e.target)}
             />
           </div>
           <p
@@ -3567,11 +3567,11 @@ export default function AdminPage() {
             id="planos-boleto-cpf"
             placeholder="CPF ou CNPJ do pagador"
             maxLength={18}
-            oninput="planosMascaraCPFCNPJ(this)"
+            onInput={(e: any) => (window as any).planosMascaraCPFCNPJ(e.target)}
           />
         </div>
         {/* NF-e */}
-        <div className="nfe-toggle" onclick="planosToggleNFe()">
+        <div className="nfe-toggle" onClick={() => (window as any).planosToggleNFe()}>
           <span id="planos-nfe-seta">▶</span> 📋 Inserir dados para Nota Fiscal
           (NF-e) — opcional
         </div>
@@ -3583,7 +3583,7 @@ export default function AdminPage() {
             id="planos-nfe-cpfcnpj"
             placeholder="000.000.000-00 ou 00.000.000/0000-00"
             maxLength={18}
-            oninput="planosMascaraCPFCNPJ(this)"
+            onInput={(e: any) => (window as any).planosMascaraCPFCNPJ(e.target)}
           />
           <label className="form-label">Nome / Razão Social</label>
           <input
@@ -3617,7 +3617,7 @@ export default function AdminPage() {
                 id="planos-nfe-cep"
                 placeholder="00000-000"
                 maxLength={9}
-                oninput="planosMascaraCEP(this)"
+                onInput={(e: any) => (window as any).planosMascaraCEP(e.target)}
               />
             </div>
           </div>
@@ -3704,7 +3704,7 @@ export default function AdminPage() {
           className="btn-finalizar"
           id="planos-btn-finalizar"
           disabled=""
-          onclick="planosFinalizarCompra()"
+          onClick={() => (window as any).planosFinalizarCompra()}
         >
           ✅ Confirmar e Finalizar Pagamento
         </button>
@@ -3726,7 +3726,7 @@ export default function AdminPage() {
     <div className="downgrade-box">
       <button
         className="btn-fechar-modal"
-        onclick="planosFecharModal('planos-modal-downgrade')"
+        onClick={() => (window as any).planosFecharModal('planos-modal-downgrade')}
       >
         ✕
       </button>
@@ -3753,13 +3753,13 @@ export default function AdminPage() {
           type="text"
           id="planos-input-confirma-downgrade"
           placeholder="Digite CONFIRMAR"
-          oninput="planosValidarDowngrade(this.value)"
+          onInput={(e: any) => (window as any).planosValidarDowngrade(e.target.value)}
         />
       </div>
       <div className="modal-acoes">
         <button
           className="btn-cancelar-modal"
-          onclick="planosFecharModal('planos-modal-downgrade')"
+          onClick={() => (window as any).planosFecharModal('planos-modal-downgrade')}
         >
           Cancelar
         </button>
@@ -3767,7 +3767,7 @@ export default function AdminPage() {
           className="btn-confirmar-downgrade"
           id="planos-btn-ok-downgrade"
           disabled=""
-          onclick="planosExecutarDowngrade()"
+          onClick={() => (window as any).planosExecutarDowngrade()}
         >
           Confirmar downgrade
         </button>
@@ -3815,26 +3815,26 @@ export default function AdminPage() {
       <div className="filtro-periodo">
         <button
           className="rel-btn-periodo btn-periodo"
-          onclick="relSetPeriodo('semana', this)"
+          onClick={(e: any) => (window as any).relSetPeriodo('semana', e.target)}
         >
           Semana
         </button>
         <button
           className="rel-btn-periodo btn-periodo ativo"
           id="rel-btn-mes"
-          onclick="relSetPeriodo('mes', this)"
+          onClick={(e: any) => (window as any).relSetPeriodo('mes', e.target)}
         >
           Mês
         </button>
         <button
           className="rel-btn-periodo btn-periodo"
-          onclick="relSetPeriodo('ano', this)"
+          onClick={(e: any) => (window as any).relSetPeriodo('ano', e.target)}
         >
           Ano
         </button>
         <button
           className="rel-btn-periodo btn-periodo"
-          onclick="relSetPeriodo('personalizado', this)"
+          onClick={(e: any) => (window as any).relSetPeriodo('personalizado', e.target)}
         >
           📅 Período
         </button>
@@ -3939,7 +3939,7 @@ export default function AdminPage() {
           <button
             className="indique-btn-copiar-codigo"
             id="indique-btn-copiar-codigo"
-            onclick="indiqueCopiarCodigo()"
+            onClick={() => (window as any).indiqueCopiarCodigo()}
           >
             📋 Copiar
           </button>
@@ -3979,7 +3979,7 @@ export default function AdminPage() {
         <button
           className="indique-btn-copiar"
           id="indique-btn-copiar"
-          onclick="indiqueCopiarLink()"
+          onClick={() => (window as any).indiqueCopiarLink()}
         >
           📋 Copiar
         </button>
@@ -3988,13 +3988,13 @@ export default function AdminPage() {
     <div className="indique-botoes-share">
       <button
         className="indique-share-btn indique-share-whatsapp"
-        onclick="indiqueEnviarWhats()"
+        onClick={() => (window as any).indiqueEnviarWhats()}
       >
         📱 Enviar pelo WhatsApp
       </button>
       <button
         className="indique-share-btn indique-share-email"
-        onclick="indiqueEnviarEmail()"
+        onClick={() => (window as any).indiqueEnviarEmail()}
       >
         📧 Enviar por E-mail
       </button>
@@ -4109,7 +4109,7 @@ export default function AdminPage() {
         </div>
         <button
           className="cfg-btn-trocar-avatar"
-          onclick="document.getElementById('cfg-input-foto-perfil').click()"
+          onClick={() => document.getElementById('cfg-input-foto-perfil')?.click()}
           title="Trocar foto"
         >
           📷
@@ -4170,7 +4170,7 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="cfg-acoes-linha">
-      <button className="cfg-btn-primario" onclick="cfgSalvarPerfil()">
+      <button className="cfg-btn-primario" onClick={() => (window as any).cfgSalvarPerfil()}>
         💾 Salvar Alterações
       </button>
     </div>
@@ -4192,12 +4192,12 @@ export default function AdminPage() {
             type="password"
             id="cfg-nova-senha"
             placeholder="Mínimo 8 caracteres"
-            oninput="cfgCalcularForcaSenha(this.value)"
+            onInput={(e: any) => (window as any).cfgCalcularForcaSenha(e.target.value)}
           />
           <button
             className="cfg-btn-olho"
             type="button"
-            onclick="cfgToggleSenha('cfg-nova-senha', this)"
+            onClick={(e: any) => (window as any).cfgToggleSenha('cfg-nova-senha', e.target)}
           >
             👁
           </button>
@@ -4259,7 +4259,7 @@ export default function AdminPage() {
           <button
             className="cfg-btn-olho"
             type="button"
-            onclick="cfgToggleSenha('cfg-confirmar-senha', this)"
+            onClick={(e: any) => (window as any).cfgToggleSenha('cfg-confirmar-senha', e.target)}
           >
             👁
           </button>
@@ -4267,12 +4267,12 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="cfg-acoes-linha">
-      <button className="cfg-btn-secundario" onclick="cfgAlterarSenha()">
+      <button className="cfg-btn-secundario" onClick={() => (window as any).cfgAlterarSenha()}>
         🔑 Atualizar Senha
       </button>
       <button
         className="cfg-btn-secundario"
-        onclick="cfgEnviarLinkRedefinicao()"
+        onClick={() => (window as any).cfgEnviarLinkRedefinicao()}
       >
         📧 Receber link por e-mail
       </button>
@@ -4348,7 +4348,7 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="cfg-acoes-linha">
-      <button className="cfg-btn-primario" onclick="cfgSalvarNotificacoes()">
+      <button className="cfg-btn-primario" onClick={() => (window as any).cfgSalvarNotificacoes()}>
         💾 Salvar Preferências
       </button>
     </div>
@@ -4370,7 +4370,7 @@ export default function AdminPage() {
           ○ Não configurado
         </span>
       </div>
-      <button className="cfg-btn-secundario" onclick="cfgAbrirModal2FA()">
+      <button className="cfg-btn-secundario" onClick={() => (window as any).cfgAbrirModal2FA()}>
         Configurar
       </button>
     </div>
@@ -4379,7 +4379,7 @@ export default function AdminPage() {
         <strong>Sessões Ativas</strong>
         <p>Encerre o acesso de todos os dispositivos conectados à sua conta.</p>
       </div>
-      <button className="cfg-btn-secundario" onclick="cfgEncerrarSessoes()">
+      <button className="cfg-btn-secundario" onClick={() => (window as any).cfgEncerrarSessoes()}>
         Encerrar todas
       </button>
     </div>
@@ -4390,7 +4390,7 @@ export default function AdminPage() {
       </div>
       <button
         className="cfg-btn-secundario"
-        onclick="mostrarToast('📋 Funcionalidade em breve!')"
+        onClick={() => (window as any).mostrarToast('📋 Funcionalidade em breve!')}
       >
         Ver histórico
       </button>
@@ -4417,7 +4417,7 @@ export default function AdminPage() {
       </div>
       <button
         className="cfg-btn-secundario"
-        onclick="mostrarToast('👁‍🗨 Anúncio despublicado temporariamente.')"
+        onClick={() => (window as any).mostrarToast('👁‍🗨 Anúncio despublicado temporariamente.')}
       >
         Despublicar
       </button>
@@ -4432,7 +4432,7 @@ export default function AdminPage() {
       </div>
       <button
         className="cfg-btn-secundario"
-        onclick="mostrarToast('💳 Solicitação enviada. Em breve entraremos em contato.')"
+        onClick={() => (window as any).mostrarToast('💳 Solicitação enviada. Em breve entraremos em contato.')}
       >
         Cancelar plano
       </button>
@@ -4445,7 +4445,7 @@ export default function AdminPage() {
           <strong>não pode ser desfeita</strong>.
         </p>
       </div>
-      <button className="cfg-btn-perigo" onclick="cfgAbrirModalExcluir()">
+      <button className="cfg-btn-perigo" onClick={() => (window as any).cfgAbrirModalExcluir()}>
         🗑️ Excluir conta
       </button>
     </div>
@@ -4474,7 +4474,7 @@ export default function AdminPage() {
           <h2 id="fin-modal-title">Novo Lançamento</h2>
           <p id="fin-modal-desc">Registre a movimentação financeira abaixo.</p>
         </div>
-        <button className="fin-modal-close" onclick="finCloseModal()">
+        <button className="fin-modal-close" onClick={() => (window as any).finCloseModal()}>
           ✕
         </button>
       </div>
@@ -4532,12 +4532,12 @@ export default function AdminPage() {
         </div>
       </div>
       <div className="fin-modal-actions">
-        <button className="btn-fin btn-fin-ghost" onclick="finCloseModal()">
+        <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).finCloseModal()}>
           Cancelar
         </button>
         <button
           className="btn-fin btn-fin-primary"
-          onclick="finSaveTransaction()"
+          onClick={() => (window as any).finSaveTransaction()}
         >
           Salvar
         </button>
@@ -4556,7 +4556,7 @@ export default function AdminPage() {
           <h2 id="docsFormTitle">Novo Documento</h2>
           <p>Preencha os dados e anexe o arquivo do documento.</p>
         </div>
-        <button className="docs-modal-close" onclick="docsCloseAddModal()">
+        <button className="docs-modal-close" onClick={() => (window as any).docsCloseAddModal()}>
           ✕
         </button>
       </div>
@@ -4622,10 +4622,10 @@ export default function AdminPage() {
             <div
               className="docs-upload-zone"
               id="docsUploadZone"
-              onclick="document.getElementById('docsFileInput').click()"
-              ondragover="docsDragOver(event)"
-              ondragleave="docsDragLeave()"
-              ondrop="docsDropFile(event)"
+              onClick={() => document.getElementById('docsFileInput')?.click()}
+              onDragover={() => (window as any).docsDragOver(event)}
+              onDragleave={() => (window as any).docsDragLeave()}
+              onDrop={() => (window as any).docsDropFile(event)}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -4669,10 +4669,10 @@ export default function AdminPage() {
         </div>
       </div>
       <div className="docs-modal-footer">
-        <button className="btn-fin btn-fin-ghost" onclick="docsCloseAddModal()">
+        <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).docsCloseAddModal()}>
           Cancelar
         </button>
-        <button className="btn-fin btn-fin-primary" onclick="docsSaveDoc()">
+        <button className="btn-fin btn-fin-primary" onClick={() => (window as any).docsSaveDoc()}>
           Salvar Documento
         </button>
       </div>
@@ -4702,7 +4702,7 @@ export default function AdminPage() {
           </div>
           <h2 id="docs-view-nome">—</h2>
         </div>
-        <button className="docs-modal-close" onclick="docsCloseViewModal()">
+        <button className="docs-modal-close" onClick={() => (window as any).docsCloseViewModal()}>
           ✕
         </button>
       </div>
@@ -4745,7 +4745,7 @@ export default function AdminPage() {
         </div>
       </div>
       <div className="docs-modal-footer">
-        <button className="btn-fin btn-fin-ghost" onclick="docsEditDoc()">
+        <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).docsEditDoc()}>
           Editar
         </button>
         <button className="btn-fin btn-fin-primary">
@@ -4779,7 +4779,7 @@ export default function AdminPage() {
           <h2 id="eqEmpModalTitle">Novo Funcionário</h2>
           <p>Preencha os dados do colaborador.</p>
         </div>
-        <button className="eq-modal-close" onclick="eqCloseEmpModal()">
+        <button className="eq-modal-close" onClick={() => (window as any).eqCloseEmpModal()}>
           ✕
         </button>
       </div>
@@ -4856,10 +4856,10 @@ export default function AdminPage() {
         </div>
       </div>
       <div className="eq-modal-foot">
-        <button className="btn-fin btn-fin-ghost" onclick="eqCloseEmpModal()">
+        <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).eqCloseEmpModal()}>
           Cancelar
         </button>
-        <button className="btn-fin btn-fin-primary" onclick="eqSaveEmployee()">
+        <button className="btn-fin btn-fin-primary" onClick={() => (window as any).eqSaveEmployee()}>
           Salvar
         </button>
       </div>
@@ -4879,7 +4879,7 @@ export default function AdminPage() {
         </div>
         <button
           className="eq-modal-close"
-          onclick="document.getElementById('eqPayModal').classList.remove('open')"
+          onClick={() => document.getElementById('eqPayModal')?.classList.remove('open')}
         >
           ✕
         </button>
@@ -4904,7 +4904,7 @@ export default function AdminPage() {
       <div className="eq-modal-foot">
         <button
           className="btn-fin btn-fin-ghost"
-          onclick="document.getElementById('eqPayModal').classList.remove('open')"
+          onClick={() => document.getElementById('eqPayModal')?.classList.remove('open')}
         >
           Fechar
         </button>
