@@ -67,7 +67,7 @@ export default function ComoFuncionaPage() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={undefined} menuOpen={undefined} setMenuOpen={undefined} menuRef={undefined} />
 
       {/* ── HERO ── */}
       <div className="cf-hero">

@@ -25,7 +25,7 @@ const sections = [
 export default function PrivacidadePage() {
   return (
     <>
-      <Header />
+      <Header isLoggedIn={undefined} menuOpen={undefined} setMenuOpen={undefined} menuRef={undefined} />
 
       {/* ── HERO ── */}
       <section className="page-hero">
