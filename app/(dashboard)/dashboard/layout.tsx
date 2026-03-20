@@ -1,14 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-const sb = createClient(
-  process.env.NEXT_PUBLIC_SUPA_URL!,
-  process.env.NEXT_PUBLIC_SUPA_KEY!
-);
+import { supabase as sb } from '@/lib/supabase';
+import '@/styles/dashboard.css';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 interface UserProfile {
@@ -198,10 +194,10 @@ export default function Layout({ children }: LayoutProps) {
                 <div style={{ fontSize: '.78rem', color: '#999', marginTop: 2 }}>{profile?.email}</div>
               </div>
               {[
-                { href: '/admin',                    label: '🏠 Dashboard' },
-                { href: '/admin#minhapropriedade',   label: '🏡 Minha Propriedade' },
-                { href: '/admin#configuracoes',      label: '⚙️ Configurações' },
-                { href: '/admin#planos',             label: '💳 Planos Ventsy' },
+                { href: '/dashboard',                    label: '🏠 Dashboard' },
+                { href: '/dashboard#minhapropriedade',   label: '🏡 Minha Propriedade' },
+                { href: '/dashboard#configuracoes',      label: '⚙️ Configurações' },
+                { href: '/dashboard#planos',             label: '💳 Planos Ventsy' },
               ].map(item => (
                 <Link key={item.href} href={item.href} style={{
                   display: 'block', padding: '9px 16px',
