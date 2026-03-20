@@ -179,7 +179,7 @@ export default function AdminPage() {
       <div className="nome-propriedade" id="fin-data-atual" />
     </div>
     <div className="fin-header-right">
-      <select className="fin-select" onchange="finUpdatePeriod(this.value)">
+      <select className="fin-select" onChange={(e: any) => (window as any).finUpdatePeriod(e.target.value)}>
         <option value="mes">Este Mês</option>
         <option value="trimestre">Trimestre</option>
         <option value="ano">Este Ano</option>
@@ -360,7 +360,7 @@ export default function AdminPage() {
             <select
               className="fin-select"
               style={{ fontSize: "0.78rem", padding: "6px 12px" }}
-              onchange="finFilterTable(this.value)"
+              onChange={(e: any) => (window as any).finFilterTable(e.target.value)}
             >
               <option value="todos">Todos</option>
               <option value="receita">Receitas</option>
@@ -1496,7 +1496,7 @@ export default function AdminPage() {
               <select
                 className="eq-sim-select"
                 id="eq-sim-tipo"
-                onchange="eqRunSimulator()"
+                onChange={() => (window as any).eqRunSimulator()}
               >
                 <option value="clt">CLT — Integral</option>
                 <option value="horista">CLT — Horista</option>
@@ -1997,7 +1997,7 @@ export default function AdminPage() {
               id="prop-input-foto-resp"
               accept="image/*"
               hidden=""
-              onchange="propPreviewFoto(this)"
+              onChange={(e: any) => (window as any).propPreviewFoto(e.target)}
             />
             <input type="hidden" id="prop-foto-resp-data" />
           </div>
@@ -2912,7 +2912,7 @@ export default function AdminPage() {
         <select
           className="select-filtro"
           id="leads-filtro-status"
-          onchange="leadsAplicarFiltros()"
+          onChange={() => (window as any).leadsAplicarFiltros()}
         >
           <option value="">Todos os status</option>
           <option value="lead">Lead / Novo Contato</option>
@@ -2932,7 +2932,7 @@ export default function AdminPage() {
         <select
           className="select-filtro"
           id="leads-filtro-tipo"
-          onchange="leadsAplicarFiltros()"
+          onChange={() => (window as any).leadsAplicarFiltros()}
         >
           <option value="">Todos os tipos</option>
           <option value="Casamento">Casamento</option>
@@ -2955,7 +2955,7 @@ export default function AdminPage() {
         <select
           className="select-filtro"
           id="leads-por-pagina"
-          onchange="leadsMudarPorPagina()"
+          onChange={() => (window as any).leadsMudarPorPagina()}
         >
           <option value={10}>10</option>
           <option value={50}>50</option>
@@ -3441,7 +3441,7 @@ export default function AdminPage() {
               name="planos-pagamento"
               defaultValue="pix"
               defaultChecked=""
-              onchange="planosTrocarMetodo('pix')"
+              onChange={() => (window as any).planosTrocarMetodo('pix')}
             />
             <div className="metodo-box">
               ⚡ Pix
@@ -3456,7 +3456,7 @@ export default function AdminPage() {
               type="radio"
               name="planos-pagamento"
               defaultValue="cartao"
-              onchange="planosTrocarMetodo('cartao')"
+              onChange={() => (window as any).planosTrocarMetodo('cartao')}
             />
             <div className="metodo-box">
               💳 Cartão
@@ -3471,7 +3471,7 @@ export default function AdminPage() {
               type="radio"
               name="planos-pagamento"
               defaultValue="boleto"
-              onchange="planosTrocarMetodo('boleto')"
+              onChange={() => (window as any).planosTrocarMetodo('boleto')}
             />
             <div className="metodo-box">
               📄 Boleto
@@ -3679,7 +3679,7 @@ export default function AdminPage() {
             <input
               type="checkbox"
               id="planos-check-termos"
-              onchange="planosValidarBtnFinalizar()"
+              onChange={() => (window as any).planosValidarBtnFinalizar()}
             />
             <span>
               Li e aceito os{" "}
@@ -3847,13 +3847,13 @@ export default function AdminPage() {
         <input
           type="date"
           id="rel-data-inicio"
-          onchange="relAplicarPersonalizado()"
+          onChange={() => (window as any).relAplicarPersonalizado()}
         />
         <span>até</span>
         <input
           type="date"
           id="rel-data-fim"
-          onchange="relAplicarPersonalizado()"
+          onChange={() => (window as any).relAplicarPersonalizado()}
         />
       </div>
     </div>
@@ -4119,7 +4119,7 @@ export default function AdminPage() {
           id="cfg-input-foto-perfil"
           accept="image/*"
           hidden=""
-          onchange="cfgPreviewAvatar(this)"
+          onChange={(e: any) => (window as any).cfgPreviewAvatar(e.target)}
         />
       </div>
       <div className="cfg-perfil-info-texto">
@@ -4663,7 +4663,7 @@ export default function AdminPage() {
               id="docsFileInput"
               accept=".pdf,.jpg,.jpeg,.png"
               style={{ display: "none" }}
-              onchange="docsFileSelected(this)"
+              onChange={(e: any) => (window as any).docsFileSelected(e.target)}
             />
           </div>
         </div>
