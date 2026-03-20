@@ -143,7 +143,7 @@ function PropriedadeContent() {
       }
 
       const { data: fts } = await supabase
-        .from('fotos')
+        .from('fotos_imovel')
         .select('*')
         .eq('propriedade_id', propId)
         .order('ordem', { ascending: true }); // ✅ CORREÇÃO AQUI
@@ -173,7 +173,7 @@ function PropriedadeContent() {
         supabase
           .from('usuarios')
           .select('*')
-          .eq('id', p.usuario_id || '')
+          .eq('id_prop', p.usuario_id || '')
           .single()
           .then(res => ({ data: res.data || null })),
       ])
