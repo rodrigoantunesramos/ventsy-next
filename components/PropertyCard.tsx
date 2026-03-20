@@ -24,7 +24,7 @@ export default function PropertyCard({ prop, delay = 0 }: Props) {
     <div
       className={cls}
       style={{ animationDelay: `${delay}s` }}
-      onClick={() => window.location.href = `/propriedade?id=${id}`}
+      onClick={() => window.location.href = `/propriedade/${id}`}
       title={nome}
     >
       {isUltra && <div className="ribbon">Premium</div>}

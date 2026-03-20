@@ -26,7 +26,7 @@ export default function SearchResultCard({ prop, isUltra = false }: Props) {
   return (
     <div
       className={`card-espaco-vertical${isUltra ? ' card-ultra' : ''}`}
-      onClick={() => router.push(`/propriedade?id=${prop.id}`)}
+      onClick={() => router.push(`/propriedade/${prop.id}`)}
     >
       <div className="foto-card-v">
         <img src={imagem} alt={nome} loading="lazy"
