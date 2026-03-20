@@ -1996,7 +1996,7 @@ export default function AdminPage() {
               type="file"
               id="prop-input-foto-resp"
               accept="image/*"
-              hidden=""
+              hidden
               onChange={(e: any) => (window as any).propPreviewFoto(e.target)}
             />
             <input type="hidden" id="prop-foto-resp-data" />
@@ -2534,7 +2534,7 @@ export default function AdminPage() {
               <input
                 type="text"
                 defaultValue="Regras de Cobrança"
-                readOnly=""
+                readOnly
                 style={{
                   background: "#f5f5f5",
                   color: "#555",
@@ -3440,7 +3440,7 @@ export default function AdminPage() {
               type="radio"
               name="planos-pagamento"
               defaultValue="pix"
-              defaultChecked=""
+              defaultChecked
               onChange={() => (window as any).planosTrocarMetodo('pix')}
             />
             <div className="metodo-box">
@@ -3703,7 +3703,7 @@ export default function AdminPage() {
         <button
           className="btn-finalizar"
           id="planos-btn-finalizar"
-          disabled=""
+          disabled
           onClick={() => (window as any).planosFinalizarCompra()}
         >
           ✅ Confirmar e Finalizar Pagamento
@@ -3766,7 +3766,7 @@ export default function AdminPage() {
         <button
           className="btn-confirmar-downgrade"
           id="planos-btn-ok-downgrade"
-          disabled=""
+          disabled
           onClick={() => (window as any).planosExecutarDowngrade()}
         >
           Confirmar downgrade
@@ -3974,7 +3974,7 @@ export default function AdminPage() {
           type="text"
           id="indique-link-ref"
           defaultValue="ventsy.com/anunciar?ref=..."
-          readOnly=""
+          readOnly
         />
         <button
           className="indique-btn-copiar"
@@ -4118,7 +4118,7 @@ export default function AdminPage() {
           type="file"
           id="cfg-input-foto-perfil"
           accept="image/*"
-          hidden=""
+          hidden
           onChange={(e: any) => (window as any).cfgPreviewAvatar(e.target)}
         />
       </div>
@@ -4143,7 +4143,7 @@ export default function AdminPage() {
       </div>
       <div className="campo">
         <label>E-mail de Login</label>
-        <input type="email" id="cfg-campo-email" disabled="" />
+        <input type="email" id="cfg-campo-email" disabled />
         <span className="dica">
           Para alterar o e-mail entre em contato com o suporte
         </span>
@@ -4297,7 +4297,7 @@ export default function AdminPage() {
           </p>
         </div>
         <label className="switch">
-          <input type="checkbox" id="cfg-notif-lead-email" defaultChecked="" />
+          <input type="checkbox" id="cfg-notif-lead-email" defaultChecked />
           <span className="switch-slider" />
         </label>
       </div>
@@ -4329,7 +4329,7 @@ export default function AdminPage() {
           </p>
         </div>
         <label className="switch">
-          <input type="checkbox" id="cfg-notif-promo" defaultChecked="" />
+          <input type="checkbox" id="cfg-notif-promo" defaultChecked />
           <span className="switch-slider" />
         </label>
       </div>
@@ -4342,7 +4342,7 @@ export default function AdminPage() {
           </p>
         </div>
         <label className="switch">
-          <input type="checkbox" id="cfg-notif-relatorio" defaultChecked="" />
+          <input type="checkbox" id="cfg-notif-relatorio" defaultChecked />
           <span className="switch-slider" />
         </label>
       </div>
