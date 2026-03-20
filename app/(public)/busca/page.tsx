@@ -122,7 +122,7 @@ function BuscaContent() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={undefined} menuOpen={undefined} setMenuOpen={undefined} menuRef={undefined} />
 
       <div className="listagem-split">
         <section className="coluna-cards">
