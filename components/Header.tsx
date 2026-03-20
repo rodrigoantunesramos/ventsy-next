@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 
-export default function Header({ isLoggedIn, menuOpen, setMenuOpen, menuRef }) {
+interface HeaderProps {
+  isLoggedIn: boolean;
+  menuOpen: boolean;
+  setMenuOpen: (open: boolean) => void;
+  menuRef: React.RefObject<HTMLDivElement>;
+}
+
+export default function Header({
+  isLoggedIn,
+  menuOpen,
+  setMenuOpen,
+  menuRef,
+}: HeaderProps) {
   return (
     <div className="header-right">
       
