@@ -1,7 +1,7 @@
 'use client';
 // ventsy-next/app/(dashboard)/dashboard/page.tsx
 //
-// Página principal do admin.
+// Página principal do usuario.
 // Renderiza toda a estrutura de seções HTML (igual ao index.html original)
 // e carrega os módulos JS via Script tags para manter a lógica existente intacta.
 
@@ -58,12 +58,12 @@ export default function AdminPage() {
         {/* ══════════════════════════════════
             PÁGINA: DASHBOARD
         ══════════════════════════════════ */}
-        <div className="page-section ativa" id="pagina-dashboard">
+        <div className="page-section ativa" id="propriedades">
 
           <div className="boas-vindas">
             <div className="bv-inner">
               <p className="bv-tag">Área do proprietário(a)</p>
-              <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
+              <h3>Bem-vindo(a), <em id="nome">...</em>!</h3>
               <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
             </div>
             <div className="bv-acao">
