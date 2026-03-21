@@ -1,3 +1,4 @@
+'use client';
 // ventsy-next/app/(dashboard)/dashboard/page.tsx
 //
 // Página principal do admin.
@@ -5,10 +6,6 @@
 // e carrega os módulos JS via Script tags para manter a lógica existente intacta.
 
 import Script from 'next/script';
-
-export const metadata = {
-  title: 'Dashboard — VENTSY',
-};
 
 export default function AdminPage() {
   return (
@@ -436,7 +433,7 @@ export default function AdminPage() {
         </div>
         <button
           className="btn-fin btn-fin-ghost"
-          onClick="finOpenModal('despesa')"
+          onClick={() => (window as any).finOpenModal?.('despesa')}
         >
           + Nova Despesa
         </button>
@@ -2110,7 +2107,7 @@ export default function AdminPage() {
           </div>
           <div className="campo-curto">
             <span className="campo-label">Número</span>
-            <input type="text" id="prop-numero" placeholder={123} />
+            <input type="text" id="prop-numero" placeholder="123" />
           </div>
           <div className="campo-medio">
             <span className="campo-label">Complemento</span>
@@ -4623,9 +4620,9 @@ export default function AdminPage() {
               className="docs-upload-zone"
               id="docsUploadZone"
               onClick={() => document.getElementById('docsFileInput')?.click()}
-              onDragover={() => (window as any).docsDragOver(event)}
-              onDragleave={() => (window as any).docsDragLeave()}
-              onDrop={() => (window as any).docsDropFile(event)}
+              onDragOver={() => (window as any).docsDragOver?.(event)}
+              onDragLeave={() => (window as any).docsDragLeave?.()}
+              onDrop={() => (window as any).docsDropFile?.(event)}
             >
               <svg
                 viewBox="0 0 24 24"
