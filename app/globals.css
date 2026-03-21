@@ -425,8 +425,8 @@ main { width: 100%; margin-top: 88px; }
 .secao h2 {
   font-family: 'Playfair Display', serif;
   font-size: 1.35rem; font-weight: 900;
-  color: var(--preto); margin-bottom: 16px;
-  padding-bottom: 12px; border-bottom: 2px solid var(--borda);
+  color: var(--preto);
+  border-bottom: 2px solid var(--borda);
 }
 .secao p {
   font-size: .93rem; line-height: 1.75;
