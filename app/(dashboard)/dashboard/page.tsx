@@ -1,7 +1,7 @@
 'use client';
 // ventsy-next/app/(dashboard)/dashboard/page.tsx
 //
-// Página principal do usuario.
+// Página principal do admin.
 // Renderiza toda a estrutura de seções HTML (igual ao index.html original)
 // e carrega os módulos JS via Script tags para manter a lógica existente intacta.
 
@@ -58,12 +58,12 @@ export default function AdminPage() {
         {/* ══════════════════════════════════
             PÁGINA: DASHBOARD
         ══════════════════════════════════ */}
-        <div className="page-section ativa" id="propriedades">
+        <div className="page-section ativa" id="pagina-dashboard">
 
           <div className="boas-vindas">
             <div className="bv-inner">
               <p className="bv-tag">Área do proprietário(a)</p>
-              <h3>Bem-vindo(a), <em id="nome">...</em>!</h3>
+              <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
               <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
             </div>
             <div className="bv-acao">
@@ -784,7 +784,6 @@ export default function AdminPage() {
         ══════════════════════════════════ */}
         {/* pagina-equipe */}
         <div className="page-section" id="pagina-equipe">
-          <div className="page-section" id="pagina-equipe">
   <div className="eq-header">
     <div>
       <h2>👥 Equipe &amp; Folha</h2>
@@ -1542,12 +1541,145 @@ export default function AdminPage() {
   </div>
 </div>
 
-        </div>
 
 
 
 
 
+
+        {/* ══════════════════════════════════
+            PÁGINA: calendario
+        ══════════════════════════════════ */}
+        <div className="page-section" id="pagina-calendario">
+
+          {/* Header */}
+          <div className="dash-header-fixo">
+            <div>
+              <h2>📅 Calendário</h2>
+              <div className="nome-propriedade">Gerencie a disponibilidade da sua propriedade</div>
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button className="cal-btn-acao" onClick={() => (window as any).calBloquearFimsDeSemana?.()}>🔒 Bloquear FDS</button>
+              <button className="cal-btn-acao" onClick={() => (window as any).calLiberarTodoMes?.()}>🔓 Liberar mês</button>
+              <button className="cal-btn-acao primario" onClick={() => (window as any).calSalvarDisponibilidade?.()}>💾 Salvar</button>
+            </div>
+          </div>
+
+          {/* Legenda */}
+          <div className="cal-legenda" style={{ marginBottom:20 }}>
+            <div className="cal-legenda-item"><div className="cal-cor livre" /><span>Disponível</span></div>
+            <div className="cal-legenda-item"><div className="cal-cor bloqueado" /><span>Bloqueado</span></div>
+            <div className="cal-legenda-item"><div className="cal-cor hoje-leg" /><span>Hoje</span></div>
+          </div>
+
+          {/* Layout: calendário + painel */}
+          <div className="cal-layout">
+
+            {/* Calendário */}
+            <div className="cal-container">
+              <div className="cal-mes-controle" id="cal-mes-controle">
+                <button className="cal-btn-mes" onClick={() => (window as any).calMudarMes?.(-1)}>‹</button>
+                <h3>
+                  <span className="cal-sel-mes-label" onClick={() => (window as any).calAbrirSeletorMes?.()}>
+                    <span id="cal-titulo-mes">—</span>
+                  </span>
+                  {' '}
+                  <span className="cal-sel-ano-label" onClick={() => (window as any).calAbrirSeletorAno?.()}>
+                    <span id="cal-titulo-ano">—</span>
+                  </span>
+                  {/* Pickers */}
+                  <div className="cal-picker-overlay" id="cal-picker-mes">
+                    <div className="cal-meses-grid" id="cal-meses-grid" />
+                  </div>
+                  <div className="cal-picker-overlay" id="cal-picker-ano">
+                    <div className="cal-anos-lista" id="cal-anos-lista" />
+                  </div>
+                </h3>
+                <button className="cal-btn-mes" onClick={() => (window as any).calMudarMes?.(1)}>›</button>
+              </div>
+              <div className="cal-grid" id="cal-grid" />
+            </div>
+
+            {/* Painel lateral */}
+            <div className="cal-painel">
+              <div className="cal-card-painel">
+                <h4>📊 Resumo do Mês</h4>
+                <div className="cal-resumo">
+                  <div className="cal-resumo-item"><span>Total de dias</span><strong id="cal-res-total">—</strong></div>
+                  <div className="cal-resumo-item"><span>Dias livres</span><span className="cal-badge-livre" id="cal-res-livres">—</span></div>
+                  <div className="cal-resumo-item"><span>Dias bloqueados</span><span className="cal-badge-ocup" id="cal-res-bloqueados">—</span></div>
+                </div>
+              </div>
+              <div className="cal-card-painel">
+                <h4>⚡ Ações Rápidas</h4>
+                <div className="cal-acoes">
+                  <button className="cal-btn-acao" onClick={() => (window as any).calBloquearFimsDeSemana?.()}>🔒 Bloquear fins de semana</button>
+                  <button className="cal-btn-acao" onClick={() => (window as any).calLiberarTodoMes?.()}>🔓 Liberar todo o mês</button>
+                  <button className="cal-btn-acao primario" onClick={() => (window as any).calSalvarDisponibilidade?.()}>💾 Salvar disponibilidade</button>
+                </div>
+              </div>
+              <div className="cal-card-painel">
+                <h4>🔒 Dias Bloqueados</h4>
+                <div className="cal-lista-bloqueios" id="cal-lista-bloqueios" />
+              </div>
+            </div>
+          </div>
+
+          {/* Modal: bloquear dia */}
+          <div className="cal-modal-overlay" id="cal-modal-bloqueio">
+            <div className="cal-modal-box">
+              <button className="cal-btn-fechar" onClick={() => (window as any).calFecharModal?.()}>✕</button>
+              <h3 id="cal-modal-titulo">🔒 Bloquear dia</h3>
+              <p className="cal-modal-data" id="cal-modal-data" />
+              <div className="cal-chips">
+                {['Evento particular','Manutenção','Reserva externa','Indisponível','Outro'].map(chip => (
+                  <button key={chip} className="cal-chip" onClick={(e) => (window as any).calSelecionarChip?.(e.currentTarget)}>{chip}</button>
+                ))}
+              </div>
+              <label className="cal-label-campo">Motivo</label>
+              <input className="cal-input" id="cal-input-motivo" type="text" placeholder="Ex: Evento de família..." />
+              <div className="cal-modal-acoes">
+                <button className="cal-btn-cancel" onClick={() => (window as any).calFecharModal?.()}>Cancelar</button>
+                <button className="cal-btn-confirm" onClick={() => (window as any).calConfirmarBloqueio?.()}>🔒 Bloquear</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Modal: liberar dia */}
+          <div className="cal-modal-overlay" id="cal-modal-liberar-dia">
+            <div className="cal-modal-box">
+              <button className="cal-btn-fechar" onClick={() => (window as any).calFecharModalLiberarDia?.()}>✕</button>
+              <h3>🔓 Liberar dia</h3>
+              <p style={{ color:'#666', fontSize:'.88rem', marginBottom:20 }}>
+                Dia <strong id="cal-liberar-dia-num">—</strong> de <strong id="cal-liberar-dia-mes">—</strong>
+                <br />Motivo: <em id="cal-liberar-dia-motivo">—</em>
+              </p>
+              <div className="cal-modal-acoes">
+                <button className="cal-btn-cancel" onClick={() => (window as any).calFecharModalLiberarDia?.()}>Cancelar</button>
+                <button className="cal-btn-confirm" style={{ background:'#0ca678' }} onClick={() => (window as any).calConfirmarLiberarDia?.()}>✅ Liberar</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Modal: liberar todos */}
+          <div className="cal-modal-overlay" id="cal-modal-liberar-todos">
+            <div className="cal-modal-box">
+              <button className="cal-btn-fechar" onClick={() => (window as any).calFecharModalLiberarTodos?.()}>✕</button>
+              <h3 id="cal-modal-liberar-titulo">⚠️ Liberar todos</h3>
+              <p id="cal-modal-liberar-subtitulo" style={{ color:'#666', fontSize:'.85rem', marginBottom:16 }} />
+              <label className="cal-label-campo">Digite LIBERAR para confirmar:</label>
+              <input className="cal-input" id="cal-input-confirmar" type="text" placeholder="LIBERAR"
+                onChange={() => (window as any).calValidarTextoLiberarTodos?.()} />
+              <div className="cal-modal-acoes">
+                <button className="cal-btn-cancel" onClick={() => (window as any).calFecharModalLiberarTodos?.()}>Cancelar</button>
+                <button id="cal-btn-confirmar-liberar" className="cal-btn-confirm" disabled
+                  style={{ opacity:0.4, cursor:'not-allowed' }}
+                  onClick={() => (window as any).calExecutarLiberarTodos?.()}>Liberar todos</button>
+              </div>
+            </div>
+          </div>
+
+        </div>{/* /pagina-calendario */}
 
 
         {/* ══════════════════════════════════

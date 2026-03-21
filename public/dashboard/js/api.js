@@ -3,8 +3,17 @@
 // ─────────────────────────────────────────
 import { SUPA_URL, SUPA_KEY } from './config.js';
 
-const { createClient } = supabase;
-export const sb = createClient(SUPA_URL, SUPA_KEY);
+// Lazy init: evita ReferenceError caso o CDN do Supabase ainda não tenha
+// carregado no momento em que este módulo é avaliado pelo browser.
+let _sb = null;
+function client() {
+    if (!_sb) _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    return _sb;
+}
+// Proxy transparente: sb.from(...), sb.auth.getSession(), sb.storage... etc.
+export const sb = new Proxy({}, {
+    get(_, prop) { return client()[prop]; },
+});
 
 // ── Auth ──────────────────────────────────
 export async function getSession() {
