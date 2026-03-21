@@ -22,12 +22,18 @@ interface LayoutProps {
 
 // ── Menu items ────────────────────────────────────────────────────────────────
 const MENU_ITEMS = [
-  { rota: 'dashboard',        label: '🏠 Dashboard',         group: 'Geral' },
-  { rota: 'minhapropriedade', label: '🏡 Minha Propriedade', group: 'Geral' },
-  { rota: 'reservas',         label: '📅 Reservas',          group: 'Gestão' },
-  { rota: 'financeiro',       label: '💰 Financeiro',        group: 'Gestão' },
-  { rota: 'configuracoes',    label: '⚙️ Configurações',     group: 'Conta' },
-  { rota: 'planos',           label: '💳 Planos Ventsy',     group: 'Conta' },
+  { rota: 'dashboard',        label: '🏠 Dashboard',          group: 'Geral'  },
+  { rota: 'minhapropriedade', label: '🏡 Minha Propriedade',  group: 'Geral'  },
+  { rota: 'fotos',            label: '📸 Fotos',              group: 'Geral'  },
+  { rota: 'calendario',       label: '📅 Calendário',         group: 'Gestão' },
+  { rota: 'financeiro',       label: '💰 Financeiro',         group: 'Gestão' },
+  { rota: 'leads',            label: '🎯 Leads',              group: 'Gestão' },
+  { rota: 'relatorio',        label: '📋 Relatório',          group: 'Gestão' },
+  { rota: 'documentos',       label: '📄 Documentos',         group: 'Gestão' },
+  { rota: 'equipe',           label: '👥 Equipe',             group: 'Gestão' },
+  { rota: 'indique',          label: '🎁 Indique & Ganhe',    group: 'Conta'  },
+  { rota: 'configuracoes',    label: '⚙️ Configurações',      group: 'Conta'  },
+  { rota: 'planos',           label: '💳 Planos Ventsy',      group: 'Conta'  },
 ];
 
 // ── Layout ────────────────────────────────────────────────────────────────────

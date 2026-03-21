@@ -33,7 +33,7 @@ export async function getAssinatura(userId) {
 // ── Propriedade ───────────────────────────
 export async function getPropriedade(userId) {
     const { data } = await sb.from('propriedades')
-        .select('id,nome,slug')
+        .select('*')
         .eq('usuario_id', userId)
         .order('created_at', { ascending: true })
         .limit(1);
