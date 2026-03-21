@@ -310,7 +310,11 @@ export default function Layout({ children }: LayoutProps) {
                     <a
                       href={`#${item.rota}`}
                       data-rota={item.rota}
-                      onClick={() => setSidebar(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSidebar(false);
+                        (window as any).navegar?.(item.rota);
+                      }}
                       style={{
                         display: 'block',
                         padding: '9px 20px',

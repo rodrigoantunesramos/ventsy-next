@@ -45,6 +45,13 @@ window.addEventListener('popstate', e => {
     _mostrarPagina(rota);
 });
 
+// ── Fallback: hashchange direto (âncoras, deep links) ─
+window.addEventListener('hashchange', () => {
+    const hash = location.hash.replace('#', '');
+    const rota = ROUTES.includes(hash) ? hash : 'dashboard';
+    _mostrarPagina(rota);
+});
+
 // ── Troca de seção visível ────────────────
 function _mostrarPagina(rota) {
     // Mostra/oculta seções
