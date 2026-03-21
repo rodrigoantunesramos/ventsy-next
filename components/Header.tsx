@@ -1,53 +1,65 @@
-'use client'
-import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
-import SearchBar from './SearchBar'
+"use client";
 
-export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+import Link from "next/link";
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session)
-    })
-  }, [])
+interface HeaderProps {
+  isLoggedIn: boolean;
+  menuOpen: boolean;
+  setMenuOpen: (open: boolean) => void;
+  menuRef: React.RefObject<HTMLDivElement>;
+}
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false)
-    }
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
-  }, [])
-
+export default function Header({
+  isLoggedIn,
+  menuOpen,
+  setMenuOpen,
+  menuRef,
+}: HeaderProps) {
   return (
-    <header className="header">
-      <div className="header-left">
-        <Link href="/" className="logo">VENTSY</Link>
-      </div>
+    <div className="header-right">
+      
+      {isLoggedIn ? (
+        <Link
+          href="/dashboard"
+          className="btn-login btn-dashboard-header"
+        >
+          Dashboard
+        </Link>
+      ) : (
+        <Link href="/login" className="btn-login">
+          Entrar
+        </Link>
+      )}
 
-      <nav className="header-center">
-        <SearchBar />
-      </nav>
+      <div className="menu-hamburguer-container" ref={menuRef}>
+        
+        <button
+          className="btn-menu"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          ☰ Menu
+        </button>
 
-      <div className="header-right">
-        {isLoggedIn
-          ? <Link href="(dashboard)/dashboard/page.tsx" className="btn-login btn-dashboard-header">Dashboard</Link>
-          : <Link href="/login" className="btn-login">Entrar</Link>
-        }
-        <div className="menu-hamburguer-container" ref={menuRef}>
-          <button className="btn-menu" onClick={() => setMenuOpen(!menuOpen)}>☰ Menu</button>
-          <div className={`extra-menu-dropdown${menuOpen ? ' open' : ''}`}>
-            <Link href="/cadastro" onClick={() => setMenuOpen(false)}>✏️ Cadastre seu espaço</Link>
-            <Link href="/planos" onClick={() => setMenuOpen(false)}>💳 Planos</Link>
-            <Link href="/como-funciona" onClick={() => setMenuOpen(false)}>💡 Como Funciona</Link>
-            <Link href="/fale-conosco" onClick={() => setMenuOpen(false)}>💬 Fale Conosco</Link>
-          </div>
+        <div className={`extra-menu-dropdown${menuOpen ? " open" : ""}`}>
+          
+          <Link href="/cadastro" onClick={() => setMenuOpen(false)}>
+            ✏️ Cadastre seu espaço
+          </Link>
+
+          <Link href="/planos" onClick={() => setMenuOpen(false)}>
+            💳 Planos
+          </Link>
+
+          <Link href="/como-funciona" onClick={() => setMenuOpen(false)}>
+            💡 Como Funciona
+          </Link>
+
+          <Link href="/fale-conosco" onClick={() => setMenuOpen(false)}>
+            💬 Fale Conosco
+          </Link>
+
         </div>
       </div>
-    </header>
-  )
+    </div>
+  );
 }

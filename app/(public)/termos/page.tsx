@@ -27,7 +27,7 @@ const sections = [
 export default function TermosPage() {
   return (
     <>
-      <Header />
+      <Header isLoggedIn={false} menuOpen={false} setMenuOpen={() => {}} menuRef={{ current: null }} />
 
       {/* ── HERO ── */}
       <section className="page-hero">

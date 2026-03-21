@@ -122,7 +122,9 @@ function BuscaContent() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={false} menuOpen={false} setMenuOpen={function (open: boolean): void {
+        throw new Error('Function not implemented.')
+      } } menuRef={{ current: null }} />
 
       <div className="listagem-split">
         <section className="coluna-cards">

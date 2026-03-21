@@ -267,7 +267,12 @@ function PropriedadeContent() {
 
   return (
     <>
-      <Header />
+      <Header 
+        isLoggedIn={false} 
+        menuOpen={false} 
+        setMenuOpen={() => {}} 
+        menuRef={{ current: null }} 
+      />
       <div className="pp-page">
 
         {/* Título */}
