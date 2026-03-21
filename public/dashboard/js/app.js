@@ -107,10 +107,10 @@ async function buscarDados30Dias(tipo) {
     let valores = new Array(30).fill(0);
     try {
         if (tipo === 'nota') {
-            const { data } = await sb.from('avaliacoes').select('nota,criado_em').eq('propriedade_id', propId).gte('criado_em', inicio.toISOString());
+            const { data } = await sb.from('avaliacoes_evento').select('nota,created_at').eq('propriedade_id', propId).gte('created_at', inicio.toISOString());
             const cnt={}, soma={};
             KEYS_30D.forEach(k => { cnt[k]=0; soma[k]=0; });
-            (data||[]).forEach(a => { const k=a.criado_em?.split('T')[0]; if (cnt[k]!==undefined) { cnt[k]++; soma[k]+=Number(a.nota)||0; } });
+            (data||[]).forEach(a => { const k=a.created_at?.split('T')[0]; if (cnt[k]!==undefined) { cnt[k]++; soma[k]+=Number(a.nota)||0; } });
             valores = KEYS_30D.map(k => cnt[k]>0 ? +(soma[k]/cnt[k]).toFixed(2) : null);
         } else {
             const { data } = await sb.from('analytics_eventos').select('created_at').eq('propriedade_id', propId).eq('evento_tipo', tipo).gte('created_at', inicio.toISOString());
@@ -188,15 +188,26 @@ async function solicitarLiberacao() {
 }
 
 // ── Verificar passos ──────────────────────────────────
-function verificarPassos(prop) {
+async function verificarPassos(prop) {
     const t = v => v !== null && v !== undefined && v !== '';
     marcarPasso(1);
-    if (prop?.fotos_destaque?.length >= 5)          marcarPasso(2);
-    if (t(prop?.sobre))                              marcarPasso(3);
-    if (t(prop?.cep) && t(prop?.rua))               marcarPasso(4);
-    if (t(prop?.whatsapp) && t(prop?.email_contato)) marcarPasso(5);
-    if (t(prop?.valor_hora) || t(prop?.valor_diaria)) marcarPasso(6);
-    if (t(prop?.tipo_evento))                        marcarPasso(7);
+    // Passo 2: fotos (consulta separada à tabela fotos_imovel)
+    try {
+        const { data: fotos } = await sb.from('fotos_imovel')
+            .select('id', { count: 'exact' })
+            .eq('propriedade_id', prop.id);
+        if ((fotos?.length || 0) >= 5) marcarPasso(2);
+    } catch (_) {}
+    // Passo 3: descrição
+    if (t(prop?.descricao) && prop.descricao.trim().length > 20) marcarPasso(3);
+    // Passo 4: endereço
+    if (t(prop?.cep) && t(prop?.rua))                            marcarPasso(4);
+    // Passo 5: contato
+    if (t(prop?.whatsapp) || t(prop?.email))                     marcarPasso(5);
+    // Passo 6: valores
+    if (t(prop?.preco) || t(prop?.preco_minimo))                 marcarPasso(6);
+    // Passo 7: tipo de propriedade/evento
+    if (t(prop?.tipo_propriedade))                               marcarPasso(7);
     atualizarProgresso();
 }
 
@@ -264,4 +275,10 @@ async function init() {
 }
 
 // ── Arrancar ──────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', init);
+// Next.js carrega este script após DOMContentLoaded já ter disparado,
+// então precisamos chamar init() diretamente se o DOM já estiver pronto.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
