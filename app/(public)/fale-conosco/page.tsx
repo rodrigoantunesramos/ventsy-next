@@ -90,12 +90,7 @@ export default function FaleConoscoPage() {
 
   return (
     <>
-      <Header 
-        isLoggedIn={false} 
-        menuOpen={false} 
-        setMenuOpen={() => {}} 
-        menuRef={{ current: null }} 
-      />
+      <Header />
 
       {/* ── HERO ── */}
       <div className="fc-hero">
