@@ -416,7 +416,7 @@ main { width: 100%; margin-top: 88px; }
 .indice ol li a:hover { color: var(--vermelho); }
 
 /* Seções legais */
-.secao { margin-bottom: 44px; scroll-margin-top: 100px; }
+.secao { scroll-margin-top: 100px; }
 .secao-num {
   font-size: .68rem; font-weight: 800; color: var(--vermelho);
   text-transform: uppercase; letter-spacing: .14em;
