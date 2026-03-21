@@ -124,6 +124,9 @@ function PropriedadeContent() {
     setLoading(false)
   }
 
+  const withTimeout = <T,>(promise: PromiseLike<T>, ms: number): Promise<T> =>
+    Promise.race([Promise.resolve(promise), new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))])
+
   const load = async () => {
     try {
       if (!propId || propId === 'demo') {
@@ -131,24 +134,22 @@ function PropriedadeContent() {
         return
       }
 
-      const { data: p } = await supabase
-        .from('propriedades')
-        .select('*')
-        .eq('id', propId)
-        .single()
+      const { data: p } = await withTimeout(
+        supabase.from('propriedades').select('*').eq('id', propId).single(),
+        8000
+      )
 
       if (!p) {
         loadDemo()
         return
       }
 
-      const { data: fts } = await supabase
-        .from('fotos_imovel')
-        .select('*')
-        .eq('propriedade_id', propId)
-        .order('ordem', { ascending: true }); // ✅ CORREÇÃO AQUI
+      const { data: fts } = await withTimeout(
+        supabase.from('fotos_imovel').select('*').eq('propriedade_id', propId).order('ordem', { ascending: true }) as PromiseLike<{data: any[]}>,
+        8000
+      ).catch(() => ({ data: [] as any[] }))
 
-      const [{ data: assin }, { data: vids }, { data: avals }, { data: usr }] = await Promise.all([
+      const [{ data: assin }, { data: vids }, { data: avals }, { data: usr }] = await withTimeout(Promise.all([
         supabase
           .from('assinaturas')
           .select('plano_ativo,status')
@@ -176,7 +177,7 @@ function PropriedadeContent() {
           .eq('id_prop', p.usuario_id || '')
           .single()
           .then(res => ({ data: res.data || null })),
-      ])
+      ]), 8000).catch(() => [{ data: null }, { data: [] }, { data: [] }, { data: null }])
 
       setPlano((assin as any)?.plano_ativo || 'basico')
       setProp(p)
