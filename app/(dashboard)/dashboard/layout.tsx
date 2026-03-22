@@ -31,6 +31,7 @@ const MENU_ITEMS = [
   { rota: 'relatorio',        label: '📋 Relatório',          group: 'Gestão' },
   { rota: 'documentos',       label: '📄 Documentos',         group: 'Gestão' },
   { rota: 'equipe',           label: '👥 Equipe',             group: 'Gestão' },
+  { rota: 'diario',           label: '📒 Diário Inteligente', group: 'Gestão', href: '/dashboard/diario' },
   { rota: 'indique',          label: '🎁 Indique & Ganhe',    group: 'Conta'  },
   { rota: 'configuracoes',    label: '⚙️ Configurações',      group: 'Conta'  },
   { rota: 'planos',           label: '💳 Planos Ventsy',      group: 'Conta'  },
@@ -307,26 +308,44 @@ export default function Layout({ children }: LayoutProps) {
                         {item.group}
                       </div>
                     )}
-                    <a
-                      href={`#${item.rota}`}
-                      data-rota={item.rota}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSidebar(false);
-                        (window as any).navegar?.(item.rota);
-                      }}
-                      style={{
-                        display: 'block',
-                        padding: '9px 20px',
-                        fontSize: '.88rem', color: '#444',
-                        textDecoration: 'none',
-                        borderLeft: '3px solid transparent',
-                        transition: 'all .15s',
-                      }}
-                      className="dash-menu-link"
-                    >
-                      {item.label}
-                    </a>
+                    {(item as any).href ? (
+                      <Link
+                        href={(item as any).href}
+                        onClick={() => setSidebar(false)}
+                        style={{
+                          display: 'block',
+                          padding: '9px 20px',
+                          fontSize: '.88rem', color: '#444',
+                          textDecoration: 'none',
+                          borderLeft: '3px solid transparent',
+                          transition: 'all .15s',
+                        }}
+                        className="dash-menu-link"
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={`#${item.rota}`}
+                        data-rota={item.rota}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSidebar(false);
+                          (window as any).navegar?.(item.rota);
+                        }}
+                        style={{
+                          display: 'block',
+                          padding: '9px 20px',
+                          fontSize: '.88rem', color: '#444',
+                          textDecoration: 'none',
+                          borderLeft: '3px solid transparent',
+                          transition: 'all .15s',
+                        }}
+                        className="dash-menu-link"
+                      >
+                        {item.label}
+                      </a>
+                    )}
                   </div>
                 );
               });
