@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase
     .from('propriedades')
     .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
+    .eq('publicada', true)
     .ilike('nome', `%${q}%`)
     .limit(8)
 

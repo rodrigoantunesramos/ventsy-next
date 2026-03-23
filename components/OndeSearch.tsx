@@ -69,14 +69,9 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    // Buscar por nome e por localização (apenas propriedades publicadas)
-    const [{ data: propsByName }, { data: locationProps }] = await Promise.all([
-      supabase
-        .from('propriedades')
-        .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
-        .eq('publicada', true)
-        .ilike('nome', `%${q}%`)
-        .limit(5),
+    // Buscar por nome via API (server-side, contorna RLS do cliente) e por localização
+    const [buscaRes, { data: locationProps }] = await Promise.all([
+      fetch(`/api/busca?q=${encodeURIComponent(q)}`).then(r => r.json()).catch(() => ({ data: [] })),
       supabase
         .from('propriedades')
         .select('cidade, estado, bairro')
@@ -84,6 +79,7 @@ export default function OndeSearch({ onSelect }: Props) {
         .or(`cidade.ilike.%${q}%,bairro.ilike.%${q}%`)
         .limit(30),
     ])
+    const propsByName = buscaRes?.data ?? []
 
     // Filtrar estados localmente
     const estadosMatch = ESTADOS.filter(e => norm(e.n).includes(nq) || norm(e.s).includes(nq))
@@ -115,7 +111,7 @@ export default function OndeSearch({ onSelect }: Props) {
     // Grupo: Espaços (matched por nome)
     if (propsByNome.length) {
       nodes.push(<div key="prop-label" className="onde-group-label">🏠 Espaços</div>)
-      propsByNome.slice(0, 5).forEach(p => {
+      propsByNome.slice(0, 5).forEach((p: { id: string; nome: string; cidade?: string; estado?: string; imagem_url?: string; foto_capa?: string }) => {
         nodes.push(
           <div key={p.id} className="onde-result" onClick={() => select({ tipo: 'prop', id: p.id, estado: p.estado || '', cidade: p.cidade || '', label: p.nome })}>
             <div className="onde-result-icon">

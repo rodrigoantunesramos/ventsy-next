@@ -49,6 +49,13 @@ export default function SearchBar() {
 
   const handleSearch = async () => {
     if (!ondeSelected) return
+
+    // Se selecionou um espaço específico (por nome), vai direto para a página da propriedade
+    if (ondeSelected.tipo === 'prop' && ondeSelected.id) {
+      router.push(`/propriedade/${ondeSelected.id}`)
+      return
+    }
+
     const params = new URLSearchParams()
     if (ondeSelected.estado) params.set('estado', ondeSelected.estado)
     if (ondeSelected.cidade) params.set('cidade', ondeSelected.cidade)
