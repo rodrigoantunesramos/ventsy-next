@@ -69,32 +69,40 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    // Buscar em nome, cidade e bairro com uma única query
-    const { data: props } = await supabase
-      .from('propriedades')
-      .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
-      .eq('publicada', true)
-      .or(`nome.ilike.%${q}%,cidade.ilike.%${q}%,bairro.ilike.%${q}%`)
-      .limit(20)
+    // Buscar por nome (só publicadas) e por localização (todas, independente de publicação)
+    const [{ data: propsByName }, { data: locationProps }] = await Promise.all([
+      supabase
+        .from('propriedades')
+        .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
+        .eq('publicada', true)
+        .ilike('nome', `%${q}%`)
+        .limit(5),
+      supabase
+        .from('propriedades')
+        .select('cidade, estado, bairro')
+        .or(`cidade.ilike.%${q}%,bairro.ilike.%${q}%`)
+        .limit(30),
+    ])
 
     // Filtrar estados localmente
     const estadosMatch = ESTADOS.filter(e => norm(e.n).includes(nq) || norm(e.s).includes(nq))
 
-    // Propriedades que batem pelo nome
-    const propsByNome = props?.filter(p => norm(p.nome).includes(nq)) || []
+    // Propriedades que batem pelo nome (apenas publicadas)
+    const propsByNome = propsByName || []
 
-    // Bairros únicos que batem
+    // Bairros únicos que batem (de todas as propriedades)
+    const allLocations = [...(locationProps || []), ...(propsByName || [])]
     const bairroMap = new Map<string, { bairro: string; cidade: string; estado: string }>()
-    props?.forEach(p => {
+    allLocations.forEach(p => {
       if (p.bairro && norm(p.bairro).includes(nq)) {
         const key = `${p.bairro}-${p.cidade}-${p.estado}`
         if (!bairroMap.has(key)) bairroMap.set(key, { bairro: p.bairro, cidade: p.cidade || '', estado: p.estado || '' })
       }
     })
 
-    // Cidades únicas que batem
+    // Cidades únicas que batem (de todas as propriedades)
     const cidadeMap = new Map<string, { cidade: string; estado: string }>()
-    props?.forEach(p => {
+    allLocations.forEach(p => {
       if (p.cidade && norm(p.cidade).includes(nq)) {
         const key = `${p.cidade}-${p.estado}`
         if (!cidadeMap.has(key)) cidadeMap.set(key, { cidade: p.cidade, estado: p.estado || '' })
