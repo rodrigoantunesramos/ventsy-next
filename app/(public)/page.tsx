@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main>
+      <main className="mt-[88px]">
         <HomeFeed />
       </main>
       <Footer />

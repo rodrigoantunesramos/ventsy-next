@@ -18,20 +18,20 @@ const SIGLA_PARA_NOME: Record<string, string> = {
 }
 
 function BuscaContent() {
-  const params  = useSearchParams()
-  const router  = useRouter()
+  const params = useSearchParams()
+  const router = useRouter()
 
-  const estadoParam  = params.get('estado')?.toUpperCase() || ''
-  const cidadeParam  = params.get('cidade') || ''
-  const bairroParam  = params.get('bairro') || ''
-  const tipoParam    = params.get('tipo') || params.get('evento') || ''
-  const dataParam    = params.get('data') || ''
+  const estadoParam = params.get('estado')?.toUpperCase() || ''
+  const cidadeParam = params.get('cidade') || ''
+  const bairroParam = params.get('bairro') || ''
+  const tipoParam   = params.get('tipo') || params.get('evento') || ''
+  const dataParam   = params.get('data') || ''
 
-  const [props, setProps]           = useState<any[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [planosMap, setPlanosMap]   = useState<Record<string, string>>({})
-  const [filtroOpen, setFiltroOpen] = useState(false)
-  const [filtros, setFiltros]       = useState<Filtros | null>(null)
+  const [props, setProps]             = useState<any[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [planosMap, setPlanosMap]     = useState<Record<string, string>>({})
+  const [filtroOpen, setFiltroOpen]   = useState(false)
+  const [filtros, setFiltros]         = useState<Filtros | null>(null)
   const [contFiltros, setContFiltros] = useState(0)
 
   useEffect(() => {
@@ -44,13 +44,13 @@ function BuscaContent() {
     setLoading(true)
     let query = supabase.from('propriedades').select('*').eq('publicada', true)
 
-    const estado  = f?.estado || estadoParam
-    const cidade  = f?.cidade || cidadeParam
-    const bairro  = bairroParam
+    const estado = f?.estado || estadoParam
+    const cidade = f?.cidade || cidadeParam
+    const bairro = bairroParam
 
     if (estado) query = query.eq('estado', estado)
-    if (cidade)  query = query.ilike('cidade', `%${cidade}%`)
-    if (bairro)  query = query.ilike('bairro', `%${bairro}%`)
+    if (cidade) query = query.ilike('cidade', `%${cidade}%`)
+    if (bairro) query = query.ilike('bairro', `%${bairro}%`)
 
     if (f) {
       if (f.precoMin > 0)     query = query.gte('valor_hora', f.precoMin)
@@ -68,15 +68,13 @@ function BuscaContent() {
         const orStr = f.tiposEvento.map(t => `tipo_evento.ilike.%${t}%`).join(',')
         query = query.or(orStr)
       }
-
       if (f.categorias.length > 0) {
         const orStr = f.categorias.flatMap(v => [
           `tipo_propriedade.eq.${v}`,
-          `categoria.eq.${v}`
+          `categoria.eq.${v}`,
         ]).join(',')
         query = query.or(orStr)
       }
-
       if (f.ultra) {
         const res = await fetch('/api/planos')
         const { planos } = await res.json()
@@ -120,63 +118,75 @@ function BuscaContent() {
   const titulo = cidadeParam
     ? `Espaços em ${cidadeParam}${estadoParam ? `, ${estadoParam}` : ''}`
     : estadoParam ? `Espaços em ${nomeEstado}`
-    : tipoParam ? tipoParam
+    : tipoParam   ? tipoParam
     : 'Todos os espaços'
 
   return (
     <>
       <Header />
 
-      <div className="listagem-split">
-        <section className="coluna-cards">
-          <div className="header-listagem">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
-              <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d0d0d', margin: 0 }}>{titulo}</h1>
-              <button className="btn-abrir-filtro" onClick={() => setFiltroOpen(true)}>
-                ⚙ Filtros{contFiltros > 0 && (
-                  <span style={{
-                    background: 'var(--vermelho)', color: '#fff', borderRadius: '50%',
-                    width: 18, height: 18, display: 'inline-flex', alignItems: 'center',
-                    justifyContent: 'center', fontSize: '.7rem', fontWeight: 800
-                  }}>{contFiltros}</span>
-                )}
-              </button>
-            </div>
-            {!loading && (
-              <p style={{ color: '#888', fontSize: '.88rem' }}>
-                {props.length} espaço{props.length !== 1 ? 's' : ''} encontrado{props.length !== 1 ? 's' : ''}
-                {dataParam ? ` · ${dataParam}` : ''}
-              </p>
-            )}
+      {/* Layout split: cards + mapa */}
+      <div className="mt-20 flex h-[calc(100vh-80px)]">
+
+        {/* Coluna de cards */}
+        <section className="flex-1 overflow-y-auto px-5 py-5 min-w-0">
+
+          {/* Título + botão de filtros */}
+          <div className="flex items-center gap-4 flex-wrap mb-2">
+            <h1 className="text-[1.4rem] font-extrabold text-[#0d0d0d] m-0">{titulo}</h1>
+            <button
+              className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 cursor-pointer transition-colors font-[inherit]"
+              onClick={() => setFiltroOpen(true)}
+            >
+              ⚙ Filtros
+              {contFiltros > 0 && (
+                <span className="bg-[#ff385c] text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[.7rem] font-extrabold">
+                  {contFiltros}
+                </span>
+              )}
+            </button>
           </div>
 
+          {!loading && (
+            <p className="text-gray-400 text-[.88rem] mb-4">
+              {props.length} espaço{props.length !== 1 ? 's' : ''} encontrado{props.length !== 1 ? 's' : ''}
+              {dataParam ? ` · ${dataParam}` : ''}
+            </p>
+          )}
+
+          {/* Estados da busca */}
           {loading ? (
-            <div style={{ color: '#aaa', padding: '40px 0', textAlign: 'center' }}>Carregando...</div>
+            <div className="text-gray-400 py-10 text-center">Carregando...</div>
           ) : props.length === 0 ? (
-            <div style={{ padding: '60px 0', textAlign: 'center' }}>
-              <p style={{ fontSize: '1.1rem', marginBottom: 12 }}>😕 Nenhum espaço encontrado</p>
-              <p style={{ color: '#888', marginBottom: 24, fontSize: '.9rem' }}>Tente ajustar os filtros ou buscar em outra região.</p>
-              <button onClick={() => router.push('/')}
-                style={{ background: 'var(--vermelho)', color: '#fff', border: 'none', borderRadius: 10, padding: '12px 28px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '.9rem' }}>
+            <div className="py-16 text-center">
+              <p className="text-[1.1rem] mb-3">😕 Nenhum espaço encontrado</p>
+              <p className="text-gray-400 mb-6 text-[.9rem]">Tente ajustar os filtros ou buscar em outra região.</p>
+              <button
+                onClick={() => router.push('/')}
+                className="bg-[#ff385c] hover:bg-[#e0304f] text-white border-none rounded-xl px-7 py-3 cursor-pointer font-[inherit] font-bold text-[.9rem] transition-colors"
+              >
                 Ver todos os espaços
               </button>
             </div>
           ) : (
-            <div className="grid-resultados-split">
+            <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
               {props.map(p => (
-                <SearchResultCard key={p.id} prop={p} plano={(p.usuario_id && planosMap[p.usuario_id]) || 'basico'} />
+                <SearchResultCard
+                  key={p.id}
+                  prop={p}
+                  plano={(p.usuario_id && planosMap[p.usuario_id]) || 'basico'}
+                />
               ))}
             </div>
           )}
         </section>
 
-        <section className="coluna-mapa">
-          <div style={{ width: '100%', height: '100%', background: '#e8eaed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ color: '#aaa', fontSize: '.9rem', textAlign: 'center', padding: 20 }}>
-              🗺️ Mapa integrado<br />
-              <span style={{ fontSize: '.8rem' }}>Integre Google Maps ou Leaflet aqui</span>
-            </p>
-          </div>
+        {/* Coluna do mapa */}
+        <section className="hidden lg:flex w-[420px] xl:w-[480px] flex-shrink-0 bg-gray-100 items-center justify-center sticky top-0">
+          <p className="text-gray-400 text-[.9rem] text-center px-5">
+            🗺️ Mapa integrado<br />
+            <span className="text-[.8rem]">Integre Google Maps ou Leaflet aqui</span>
+          </p>
         </section>
       </div>
 
@@ -195,7 +205,11 @@ function BuscaContent() {
 
 export default function BuscaPage() {
   return (
-    <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#aaa' }}>Carregando...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen text-gray-400">
+        Carregando...
+      </div>
+    }>
       <BuscaContent />
     </Suspense>
   )
