@@ -325,6 +325,7 @@ main { width: 100%; margin-top: 88px; }
 .badge-prop { background: #fff0f3; color: var(--vermelho); }
 .badge-cidade { background: #eff6ff; color: #3b82f6; }
 .badge-estado { background: #f0fdf4; color: #22c55e; }
+.badge-bairro { background: #fdf4ff; color: #a855f7; }
 .badge-cat { background: #faf5ff; color: #8b5cf6; }
 .onde-loading, .onde-empty { padding: 24px 16px; text-align: center; font-size: .84rem; color: #bbb; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .onde-spinner { width: 16px; height: 16px; border: 2px solid #eee; border-top-color: var(--vermelho); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }

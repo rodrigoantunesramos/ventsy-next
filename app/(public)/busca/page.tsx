@@ -21,10 +21,11 @@ function BuscaContent() {
   const params  = useSearchParams()
   const router  = useRouter()
 
-  const estadoParam = params.get('estado')?.toUpperCase() || ''
-  const cidadeParam = params.get('cidade') || ''
-  const tipoParam   = params.get('tipo') || params.get('evento') || ''
-  const dataParam   = params.get('data') || ''
+  const estadoParam  = params.get('estado')?.toUpperCase() || ''
+  const cidadeParam  = params.get('cidade') || ''
+  const bairroParam  = params.get('bairro') || ''
+  const tipoParam    = params.get('tipo') || params.get('evento') || ''
+  const dataParam    = params.get('data') || ''
 
   const [props, setProps]           = useState<any[]>([])
   const [loading, setLoading]       = useState(true)
@@ -40,17 +41,19 @@ function BuscaContent() {
       })
   }, [])
 
-  useEffect(() => { buscar(null) }, [estadoParam, cidadeParam, tipoParam])
+  useEffect(() => { buscar(null) }, [estadoParam, cidadeParam, bairroParam, tipoParam])
 
   async function buscar(f: Filtros | null) {
     setLoading(true)
     let query = supabase.from('propriedades').select('*').eq('publicada', true)
 
-    const estado = f?.estado || estadoParam
-    const cidade = f?.cidade || cidadeParam
+    const estado  = f?.estado || estadoParam
+    const cidade  = f?.cidade || cidadeParam
+    const bairro  = bairroParam
 
     if (estado) query = query.eq('estado', estado)
-    if (cidade) query = query.ilike('cidade', `%${cidade}%`)
+    if (cidade)  query = query.ilike('cidade', `%${cidade}%`)
+    if (bairro)  query = query.ilike('bairro', `%${bairro}%`)
 
     if (f) {
       if (f.precoMin > 0)     query = query.gte('valor_hora', f.precoMin)
