@@ -156,13 +156,8 @@ function PropriedadeContent() {
         8000
       ).catch(() => ({ data: [] as any[] }))
 
-      const [{ data: assin }, { data: vids }, { data: avals }, { data: usr }] = await withTimeout(Promise.all([
-        supabase
-          .from('assinaturas')
-          .select('plano_ativo,status')
-          .eq('usuario_id', p.usuario_id || '')
-          .single()
-          .then(res => ({ data: res.data || null })),
+      const [planoRes, { data: vids }, { data: avals }, { data: usr }] = await withTimeout(Promise.all([
+        fetch(`/api/planos?usuario_id=${encodeURIComponent(p.usuario_id || '')}`).then(r => r.json()).then(j => j.plano || 'basico').catch(() => 'basico'),
 
         supabase
           .from('videos_propriedade')
@@ -184,9 +179,9 @@ function PropriedadeContent() {
           .eq('id_prop', p.usuario_id || '')
           .single()
           .then(res => ({ data: res.data || null })),
-      ]), 8000).catch(() => [{ data: null }, { data: [] }, { data: [] }, { data: null }])
+      ]), 8000).catch(() => ['basico', { data: [] }, { data: [] }, { data: null }])
 
-      setPlano((assin as any)?.plano_ativo || 'basico')
+      setPlano(typeof planoRes === 'string' ? planoRes : 'basico')
       setProp(p)
       setFotos((fts || []).map((f:any)=>({
         url:f.url,

@@ -29,16 +29,13 @@ function BuscaContent() {
 
   const [props, setProps]           = useState<any[]>([])
   const [loading, setLoading]       = useState(true)
-  const [ultraIds, setUltraIds]     = useState<Set<string>>(new Set())
+  const [planosMap, setPlanosMap]   = useState<Record<string, string>>({})
   const [filtroOpen, setFiltroOpen] = useState(false)
   const [filtros, setFiltros]       = useState<Filtros | null>(null)
   const [contFiltros, setContFiltros] = useState(0)
 
   useEffect(() => {
-    supabase.from('assinaturas').select('usuario_id').eq('plano_ativo', 'ultra').eq('status', 'ativa')
-      .then(({ data }) => {
-        if (data) setUltraIds(new Set(data.map((p: any) => p.usuario_id)))
-      })
+    fetch('/api/planos').then(r => r.json()).then(json => setPlanosMap(json.planos || {}))
   }, [])
 
   useEffect(() => { buscar(null) }, [estadoParam, cidadeParam, bairroParam, tipoParam])
@@ -81,10 +78,13 @@ function BuscaContent() {
       }
 
       if (f.ultra) {
-        const { data: planos } = await supabase.from('assinaturas').select('usuario_id')
-          .eq('plano_ativo', 'ultra').eq('status', 'ativa')
-        if (planos && planos.length > 0) {
-          query = query.in('usuario_id', planos.map((p: any) => p.usuario_id))
+        const res = await fetch('/api/planos')
+        const { planos } = await res.json()
+        const ultraUserIds = Object.entries(planos || {})
+          .filter(([, p]) => p === 'ultra')
+          .map(([uid]) => uid)
+        if (ultraUserIds.length > 0) {
+          query = query.in('usuario_id', ultraUserIds)
         } else {
           setProps([]); setLoading(false); return
         }
@@ -164,7 +164,7 @@ function BuscaContent() {
           ) : (
             <div className="grid-resultados-split">
               {props.map(p => (
-                <SearchResultCard key={p.id} prop={p} isUltra={!!(p.usuario_id && ultraIds.has(p.usuario_id))} />
+                <SearchResultCard key={p.id} prop={p} plano={(p.usuario_id && planosMap[p.usuario_id]) || 'basico'} />
               ))}
             </div>
           )}

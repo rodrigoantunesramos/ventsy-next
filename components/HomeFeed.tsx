@@ -5,14 +5,11 @@ import { CATS, DEMO_PROPS, ordenar } from '@/lib/data'
 import CategorySection from './CategorySection'
 import Link from 'next/link'
 
-async function planosMap() {
+async function planosMap(): Promise<Record<string, string>> {
   try {
-    const { data } = await supabase.from('assinaturas').select('usuario_id, plano_ativo, status')
-    const m: Record<string, string> = {}
-    ;(data || []).forEach((a: any) => {
-      if (a.status === 'ativa' || a.status === 'trial') m[a.usuario_id] = a.plano_ativo
-    })
-    return m
+    const res = await fetch('/api/planos')
+    const json = await res.json()
+    return json.planos || {}
   } catch { return {} }
 }
 

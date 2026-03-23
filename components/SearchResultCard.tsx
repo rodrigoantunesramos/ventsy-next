@@ -4,10 +4,13 @@ import { useRouter } from 'next/navigation'
 
 interface Props {
   prop: any
-  isUltra?: boolean
+  plano?: 'basico' | 'pro' | 'ultra'
+  isUltra?: boolean // deprecated: use plano
 }
 
-export default function SearchResultCard({ prop, isUltra = false }: Props) {
+export default function SearchResultCard({ prop, plano = 'basico', isUltra }: Props) {
+  const isUltraPlan = plano === 'ultra' || isUltra
+  const isProPlan = plano === 'pro'
   const router = useRouter()
   const [fav, setFav] = useState(false)
 
@@ -25,15 +28,17 @@ export default function SearchResultCard({ prop, isUltra = false }: Props) {
 
   return (
     <div
-      className={`card-espaco-vertical${isUltra ? ' card-ultra' : ''}`}
+      className={`card-espaco-vertical${isUltraPlan ? ' card-ultra' : isProPlan ? ' card-pro' : ''}`}
       onClick={() => router.push(`/propriedade/${prop.id}`)}
     >
       <div className="foto-card-v">
         <img src={imagem} alt={nome} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).src = `https://picsum.photos/seed/err${prop.id}/400/300` }} />
 
-        {isUltra
-          ? <span className="card-badge card-badge-ultra">⭐ Ultra</span>
+        {isUltraPlan
+          ? <span className="card-badge card-badge-ultra">✦ Premium</span>
+          : isProPlan
+          ? <span className="card-badge card-badge-pro">Pro</span>
           : categoria ? <span className="card-badge">{categoria}</span> : null}
 
         <button className="card-fav" onClick={e => { e.stopPropagation(); setFav(!fav) }}>

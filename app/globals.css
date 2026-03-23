@@ -727,6 +727,10 @@ main { width: 100%; margin-top: 88px; }
   background: linear-gradient(135deg, #1a1a1a, #3d3d3d);
   color: #f0c040; border: 1px solid rgba(240,192,64,.4);
 }
+.card-badge-pro {
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  color: #fff; border: 1px solid rgba(255,255,255,.2);
+}
 .card-fav {
   position: absolute; top: 10px; right: 10px;
   background: rgba(255,255,255,.85); border: none; border-radius: 50%;
