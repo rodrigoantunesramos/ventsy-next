@@ -162,26 +162,30 @@ function PropriedadeContent() {
         supabase
           .from('videos_propriedade')
           .select('url,titulo')
-          .eq('propriedade_id', propId)
-          .then(res => ({ data: res.data || [] })),
+          .eq('propriedade_id', propId),
 
         supabase
           .from('avaliacoes')
           .select('*')
           .eq('propriedade_id', propId)
           .eq('verificada', true)
-          .order('criado_em', { ascending: false })
-          .then(res => ({ data: res.data || [] })),
+          .order('criado_em', { ascending: false }),
 
         supabase
           .from('usuarios')
           .select('*')
-          .eq('id_prop', p.usuario_id || '')
-          .single()
-          .then(res => ({ data: res.data || null })),
-      ]), 8000).catch(() => ['basico', { data: [] }, { data: [] }, { data: null }])
+          .eq(
+            p.usuario_id?.length === 36 ? 'id' : 'id_prop',
+            p.usuario_id || ''
+          )
+          .single(),
+      ]), 8000).catch(() => ['basico', { data: [] }, { data: [] }, { data: null }] as any)
 
-      setPlano(typeof planoRes === 'string' ? planoRes : 'basico')
+      if (['basico', 'pro', 'ultra'].includes(planoRes)) {
+        setPlano(planoRes as 'basico' | 'pro' | 'ultra')
+      } else {
+        setPlano('basico')
+      }
       setProp(p)
       setFotos((fts || []).map((f:any)=>({
         url:f.url,
