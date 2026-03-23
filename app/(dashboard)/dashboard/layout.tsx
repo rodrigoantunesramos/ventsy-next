@@ -116,33 +116,31 @@ export default function Layout({ children }: LayoutProps) {
                    : profile?.plano === 'pro'   ? '⭐'
                    : '🏷️';
 
-  // ── Loading screen ────────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <div id="loading-screen" style={{
-        position: 'fixed', inset: 0, background: '#fff',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', zIndex: 9999,
-      }}>
-        <div style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: '2rem', color: '#ff385c' }}>
-          VENTSY
-        </div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{
-              width: 8, height: 8, borderRadius: '50%', background: '#ff385c',
-              animation: `bounce 1s ${i * 0.15}s infinite`,
-            }} />
-          ))}
-        </div>
-        <style>{`@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}`}</style>
-      </div>
-    );
-  }
-
   // ── Layout principal ──────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: '#f7f7f8' }}>
+
+      {/* ── LOADING OVERLAY (shown while fetching session/profile) ─────── */}
+      {loading && (
+        <div id="loading-screen" style={{
+          position: 'fixed', inset: 0, background: '#fff',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+        }}>
+          <div style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: '2rem', color: '#ff385c' }}>
+            VENTSY
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
+            {[0, 1, 2].map(i => (
+              <span key={i} style={{
+                width: 8, height: 8, borderRadius: '50%', background: '#ff385c',
+                animation: `bounce 1s ${i * 0.15}s infinite`,
+              }} />
+            ))}
+          </div>
+          <style>{`@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}`}</style>
+        </div>
+      )}
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <header style={{
