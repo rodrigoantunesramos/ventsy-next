@@ -69,13 +69,15 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    // Buscar por nome (só publicadas) e por localização (todas, independente de publicação)
-    const [{ data: propsByName }, { data: locationProps }] = await Promise.all([
-      supabase
-        .from('propriedades')
-        .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
-        .ilike('nome', `%${q}%`)
-        .limit(5),
+    // Pega token do usuário autenticado para passar ao API route (contorna RLS)
+    const { data: { session } } = await supabase.auth.getSession()
+    const authHeader = session?.access_token ? `Bearer ${session.access_token}` : ''
+
+    // Busca por nome via API route (com auth) e por localização direto no Supabase
+    const [nameRes, { data: locationProps }] = await Promise.all([
+      fetch(`/api/busca?q=${encodeURIComponent(q)}`, {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      }).then(r => r.json()).catch(() => ({ data: [] })),
       supabase
         .from('propriedades')
         .select('cidade, estado, bairro')
@@ -86,8 +88,8 @@ export default function OndeSearch({ onSelect }: Props) {
     // Filtrar estados localmente
     const estadosMatch = ESTADOS.filter(e => norm(e.n).includes(nq) || norm(e.s).includes(nq))
 
-    // Propriedades que batem pelo nome (apenas publicadas)
-    const propsByNome = propsByName || []
+    // Propriedades que batem pelo nome
+    const propsByNome: any[] = nameRes?.data || []
 
     // Bairros únicos que batem (de todas as propriedades)
     const allLocations = [...(locationProps || []), ...(propsByName || [])]
