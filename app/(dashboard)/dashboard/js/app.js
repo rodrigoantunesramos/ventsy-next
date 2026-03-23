@@ -223,8 +223,9 @@ async function init() {
             const assin = await getAssinatura(user.id);
 
             if (assin) {
-                plano    = (assin.plano || 'basico').toLowerCase();
-                validade = assin.validade || null;
+                plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
+                validade = assin.fim_periodo  || assin.validade || null;
+                setState({ assinatura: assin });
             }
             } catch (_) {}
 

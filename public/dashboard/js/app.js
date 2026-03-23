@@ -237,6 +237,7 @@ async function init() {
             if (assin) {
                 plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
                 validade = assin.fim_periodo  || assin.validade || null;
+                setState({ assinatura: assin });
             }
             } catch (_) {}
 
