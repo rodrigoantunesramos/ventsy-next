@@ -69,16 +69,18 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    // Buscar por nome e por localização (RLS desativado — lê todas as propriedades)
+    // Buscar por nome e por localização (apenas propriedades publicadas)
     const [{ data: propsByName }, { data: locationProps }] = await Promise.all([
       supabase
         .from('propriedades')
         .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
+        .eq('publicada', true)
         .ilike('nome', `%${q}%`)
         .limit(5),
       supabase
         .from('propriedades')
         .select('cidade, estado, bairro')
+        .eq('publicada', true)
         .or(`cidade.ilike.%${q}%,bairro.ilike.%${q}%`)
         .limit(30),
     ])
