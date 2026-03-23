@@ -69,15 +69,13 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    // Pega token do usuário autenticado para passar ao API route (contorna RLS)
-    const { data: { session } } = await supabase.auth.getSession()
-    const authHeader = session?.access_token ? `Bearer ${session.access_token}` : ''
-
-    // Busca por nome via API route (com auth) e por localização direto no Supabase
-    const [nameRes, { data: locationProps }] = await Promise.all([
-      fetch(`/api/busca?q=${encodeURIComponent(q)}`, {
-        headers: authHeader ? { Authorization: authHeader } : {},
-      }).then(r => r.json()).catch(() => ({ data: [] })),
+    // Buscar por nome e por localização (RLS desativado — lê todas as propriedades)
+    const [{ data: propsByName }, { data: locationProps }] = await Promise.all([
+      supabase
+        .from('propriedades')
+        .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
+        .ilike('nome', `%${q}%`)
+        .limit(5),
       supabase
         .from('propriedades')
         .select('cidade, estado, bairro')
@@ -89,10 +87,10 @@ export default function OndeSearch({ onSelect }: Props) {
     const estadosMatch = ESTADOS.filter(e => norm(e.n).includes(nq) || norm(e.s).includes(nq))
 
     // Propriedades que batem pelo nome
-    const propsByNome: any[] = nameRes?.data || []
+    const propsByNome = propsByName || []
 
     // Bairros únicos que batem (de todas as propriedades)
-    const allLocations = [...(locationProps || []), ...(propsByNome || [])]
+    const allLocations = [...(locationProps || []), ...propsByNome]
     const bairroMap = new Map<string, { bairro: string; cidade: string; estado: string }>()
     allLocations.forEach(p => {
       if (p.bairro && norm(p.bairro).includes(nq)) {
