@@ -33,7 +33,7 @@ export async function getPerfil(userId) {
 
 export async function getAssinatura(userId) {
     const { data } = await sb.from('assinaturas')
-        .select('plano,validade')
+        .select('plano,validade,plano_ativo,fim_periodo')
         .eq('usuario_id', userId)
         .maybeSingle();
     return data;

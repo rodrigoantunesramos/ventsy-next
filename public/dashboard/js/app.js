@@ -219,6 +219,7 @@ async function init() {
 
         const user = session.user;
         let nome = user.email, usuario = '';
+        let plano = 'basico', validade = null;
 
         // Perfil
         try {
@@ -234,8 +235,8 @@ async function init() {
             const assin = await getAssinatura(user.id);
 
             if (assin) {
-                plano    = (assin.plano || 'basico').toLowerCase();
-                validade = assin.validade || null;
+                plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
+                validade = assin.fim_periodo  || assin.validade || null;
             }
             } catch (_) {}
 
