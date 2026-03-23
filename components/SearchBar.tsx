@@ -52,6 +52,7 @@ export default function SearchBar() {
     const params = new URLSearchParams()
     if (ondeSelected.estado) params.set('estado', ondeSelected.estado)
     if (ondeSelected.cidade) params.set('cidade', ondeSelected.cidade)
+    if (ondeSelected.bairro) params.set('bairro', ondeSelected.bairro)
     if (eventoValue) params.set('evento', eventoValue)
     if (dataDisplay && dataDisplay !== 'Adicionar datas') params.set('data', dataDisplay)
 

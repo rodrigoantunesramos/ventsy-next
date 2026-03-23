@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ESTADOS, norm } from '@/lib/data'
 
-interface OndeSelection {
-  tipo: 'prop' | 'cidade' | 'estado'
+export interface OndeSelection {
+  tipo: 'prop' | 'cidade' | 'bairro' | 'estado'
   id?: string
   label: string
   estado: string
   cidade?: string
+  bairro?: string
 }
 
 interface Props {
@@ -68,22 +69,44 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    // Buscar propriedades
+    // Buscar em nome, cidade e bairro com uma única query
     const { data: props } = await supabase
       .from('propriedades')
-      .select('id, nome, cidade, estado, imagem_url, foto_capa')
+      .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
       .eq('publicada', true)
-      .ilike('nome', `%${q}%`)
-      .limit(5)
+      .or(`nome.ilike.%${q}%,cidade.ilike.%${q}%,bairro.ilike.%${q}%`)
+      .limit(20)
 
-    // Filtrar cidades e estados localmente
+    // Filtrar estados localmente
     const estadosMatch = ESTADOS.filter(e => norm(e.n).includes(nq) || norm(e.s).includes(nq))
+
+    // Propriedades que batem pelo nome
+    const propsByNome = props?.filter(p => norm(p.nome).includes(nq)) || []
+
+    // Bairros únicos que batem
+    const bairroMap = new Map<string, { bairro: string; cidade: string; estado: string }>()
+    props?.forEach(p => {
+      if (p.bairro && norm(p.bairro).includes(nq)) {
+        const key = `${p.bairro}-${p.cidade}-${p.estado}`
+        if (!bairroMap.has(key)) bairroMap.set(key, { bairro: p.bairro, cidade: p.cidade || '', estado: p.estado || '' })
+      }
+    })
+
+    // Cidades únicas que batem
+    const cidadeMap = new Map<string, { cidade: string; estado: string }>()
+    props?.forEach(p => {
+      if (p.cidade && norm(p.cidade).includes(nq)) {
+        const key = `${p.cidade}-${p.estado}`
+        if (!cidadeMap.has(key)) cidadeMap.set(key, { cidade: p.cidade, estado: p.estado || '' })
+      }
+    })
 
     const nodes: React.ReactNode[] = []
 
-    if (props?.length) {
+    // Grupo: Espaços (matched por nome)
+    if (propsByNome.length) {
       nodes.push(<div key="prop-label" className="onde-group-label">🏠 Espaços</div>)
-      props.forEach(p => {
+      propsByNome.slice(0, 5).forEach(p => {
         nodes.push(
           <div key={p.id} className="onde-result" onClick={() => select({ tipo: 'prop', id: p.id, estado: p.estado || '', cidade: p.cidade || '', label: p.nome })}>
             <div className="onde-result-icon">
@@ -101,9 +124,44 @@ export default function OndeSearch({ onSelect }: Props) {
       })
     }
 
+    // Grupo: Bairros
+    if (bairroMap.size > 0) {
+      nodes.push(<div key="bairro-label" className="onde-group-label">🏘️ Bairros</div>)
+      Array.from(bairroMap.values()).slice(0, 4).forEach(b => {
+        nodes.push(
+          <div key={`bairro-${b.bairro}-${b.cidade}`} className="onde-result" onClick={() => select({ tipo: 'bairro', estado: b.estado, cidade: b.cidade, bairro: b.bairro, label: `${b.bairro}, ${b.cidade}` })}>
+            <div className="onde-result-icon">🏘️</div>
+            <div className="onde-result-info">
+              <div className="onde-result-titulo">{b.bairro}</div>
+              <div className="onde-result-sub">{b.cidade} · {b.estado}</div>
+            </div>
+            <span className="onde-result-badge badge-bairro">Bairro</span>
+          </div>
+        )
+      })
+    }
+
+    // Grupo: Cidades
+    if (cidadeMap.size > 0) {
+      nodes.push(<div key="cidade-label" className="onde-group-label">🏙️ Cidades</div>)
+      Array.from(cidadeMap.values()).slice(0, 4).forEach(c => {
+        nodes.push(
+          <div key={`cidade-${c.cidade}-${c.estado}`} className="onde-result" onClick={() => select({ tipo: 'cidade', estado: c.estado, cidade: c.cidade, label: `${c.cidade}, ${c.estado}` })}>
+            <div className="onde-result-icon">🏙️</div>
+            <div className="onde-result-info">
+              <div className="onde-result-titulo">{c.cidade}</div>
+              <div className="onde-result-sub">{c.estado} · Brasil</div>
+            </div>
+            <span className="onde-result-badge badge-cidade">Cidade</span>
+          </div>
+        )
+      })
+    }
+
+    // Grupo: Estados
     if (estadosMatch.length) {
       nodes.push(<div key="est-label" className="onde-group-label">📍 Estados</div>)
-      estadosMatch.forEach(e => {
+      estadosMatch.slice(0, 3).forEach(e => {
         nodes.push(
           <div key={e.s} className="onde-result" onClick={() => select({ tipo: 'estado', estado: e.s, label: `${e.n}, BR` })}>
             <div className="onde-result-icon">📍</div>
@@ -148,7 +206,7 @@ export default function OndeSearch({ onSelect }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
         <input
           className="onde-input"
-          placeholder="Buscar cidade, estado ou espaço..."
+          placeholder="Buscar cidade, bairro, estado ou espaço..."
           value={value}
           onChange={e => handleInput(e.target.value)}
           onFocus={handleFocus}
