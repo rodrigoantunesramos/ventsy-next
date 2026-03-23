@@ -118,85 +118,59 @@ export default function Layout({ children }: LayoutProps) {
 
   // ── Layout principal ──────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#f7f7f8' }}>
+    <div className="min-h-screen bg-[#f7f7f8]">
 
-      {/* ── LOADING OVERLAY (shown while fetching session/profile) ─────── */}
+      {/* ── LOADING OVERLAY ─────────────────────────────────────────────── */}
       {loading && (
-        <div id="loading-screen" style={{
-          position: 'fixed', inset: 0, background: '#fff',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
-        }}>
-          <div style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: '2rem', color: '#ff385c' }}>
-            VENTSY
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
+        <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999]">
+          <div className="font-serif italic text-[2rem] text-[#ff385c]">VENTSY</div>
+          <div className="flex gap-[6px] mt-4">
             {[0, 1, 2].map(i => (
-              <span key={i} style={{
-                width: 8, height: 8, borderRadius: '50%', background: '#ff385c',
-                animation: `bounce 1s ${i * 0.15}s infinite`,
-              }} />
+              <span
+                key={i}
+                className="w-2 h-2 rounded-full bg-[#ff385c]"
+                style={{ animation: `bounce-dot 1s ${i * 0.15}s infinite` }}
+              />
             ))}
           </div>
-          <style>{`@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}`}</style>
         </div>
       )}
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: '#fff', borderBottom: '1px solid #f0f0f0',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px', height: 60,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <header className="sticky top-0 z-[100] bg-white border-b border-[#f0f0f0] flex items-center justify-between px-5 h-[60px]">
+        <div className="flex items-center gap-3">
           {/* Hambúrguer mobile */}
           <button
             onClick={() => setSidebar(!sidebarOpen)}
             aria-label="Menu"
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: 8,
-              flexDirection: 'column', gap: 5,
-            }}
-            className="btn-sidebar-toggle"
+            className="hidden max-md:flex bg-transparent border-none cursor-pointer p-2 flex-col gap-[5px]"
           >
-            <span style={{ display: 'block', width: 22, height: 2, background: '#333', borderRadius: 2 }} />
-            <span style={{ display: 'block', width: 22, height: 2, background: '#333', borderRadius: 2 }} />
-            <span style={{ display: 'block', width: 22, height: 2, background: '#333', borderRadius: 2 }} />
+            <span className="block w-[22px] h-[2px] bg-[#333] rounded-sm" />
+            <span className="block w-[22px] h-[2px] bg-[#333] rounded-sm" />
+            <span className="block w-[22px] h-[2px] bg-[#333] rounded-sm" />
           </button>
 
           <Link href="/">
-            <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: '1.4rem', color: '#ff385c', fontWeight: 700 }}>
+            <span className="font-serif italic text-[1.4rem] text-[#ff385c] font-bold">
               VENTSY
             </span>
           </Link>
         </div>
 
         {/* Avatar dropdown */}
-        <div ref={avatarRef} style={{ position: 'relative' }}>
+        <div ref={avatarRef} className="relative">
           <button
             onClick={() => setAvatar(!avatarOpen)}
-            style={{
-              width: 38, height: 38, borderRadius: '50%',
-              background: '#ff385c', color: '#fff',
-              border: 'none', cursor: 'pointer',
-              fontSize: '1rem', fontWeight: 700,
-            }}
+            className="w-[38px] h-[38px] rounded-full bg-[#ff385c] text-white border-none cursor-pointer text-[1rem] font-bold"
           >
             {profile?.inicial ?? '?'}
           </button>
 
           {avatarOpen && (
-            <div style={{
-              position: 'absolute', top: 46, right: 0,
-              background: '#fff', borderRadius: 12,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '1px solid #f0f0f0',
-              minWidth: 220, padding: '8px 0', zIndex: 200,
-            }}>
-              <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                <div style={{ fontWeight: 700, fontSize: '.9rem' }}>{profile?.nome}</div>
-                <div style={{ fontSize: '.78rem', color: '#999', marginTop: 2 }}>{profile?.email}</div>
+            <div className="absolute top-[46px] right-0 bg-white rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[#f0f0f0] min-w-[220px] py-2 z-[200]">
+              <div className="px-4 py-[10px] border-b border-[#f0f0f0]">
+                <div className="font-bold text-[.9rem]">{profile?.nome}</div>
+                <div className="text-[.78rem] text-[#999] mt-0.5">{profile?.email}</div>
               </div>
               {[
                 { href: '/dashboard',                    label: '🏠 Dashboard' },
@@ -204,10 +178,10 @@ export default function Layout({ children }: LayoutProps) {
                 { href: '/dashboard#configuracoes',      label: '⚙️ Configurações' },
                 { href: '/dashboard#planos',             label: '💳 Planos Ventsy' },
               ].map(item => (
-                <Link key={item.href} href={item.href} style={{
-                  display: 'block', padding: '9px 16px',
-                  fontSize: '.88rem', color: '#333', textDecoration: 'none',
-                }}
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block px-4 py-[9px] text-[.88rem] text-[#333] no-underline hover:bg-[#f7f7f7]"
                   onClick={() => setAvatar(false)}
                 >
                   {item.label}
@@ -215,12 +189,7 @@ export default function Layout({ children }: LayoutProps) {
               ))}
               <button
                 onClick={handleSair}
-                style={{
-                  width: '100%', textAlign: 'left', padding: '9px 16px',
-                  border: 'none', background: 'none', cursor: 'pointer',
-                  fontSize: '.88rem', color: '#ff385c', borderTop: '1px solid #f0f0f0',
-                  marginTop: 4,
-                }}
+                className="w-full text-left px-4 py-[9px] border-none bg-transparent cursor-pointer text-[.88rem] text-[#ff385c] border-t border-[#f0f0f0] mt-1"
               >
                 🚪 Sair da conta
               </button>
@@ -233,62 +202,45 @@ export default function Layout({ children }: LayoutProps) {
       {sidebarOpen && (
         <div
           onClick={() => setSidebar(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-            zIndex: 149,
-          }}
+          className="fixed inset-0 bg-black/40 z-[149]"
         />
       )}
 
       {/* ── LAYOUT ──────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', minHeight: 'calc(100vh - 60px)' }}>
+      <div className="flex min-h-[calc(100vh-60px)]">
 
         {/* ── SIDEBAR ─────────────────────────────────────────────────── */}
         <aside
-          className="dash-sidebar"
-          style={{
-            width: 260, flexShrink: 0,
-            background: '#fff', borderRight: '1px solid #f0f0f0',
-            display: 'flex', flexDirection: 'column',
-            position: 'sticky', top: 60, height: 'calc(100vh - 60px)',
-            overflowY: 'auto',
-          }}
+          className={`dash-sidebar w-[260px] flex-shrink-0 bg-white border-r border-[#f0f0f0] flex flex-col sticky top-[60px] overflow-y-auto
+            max-md:fixed max-md:top-[60px] max-md:z-[150] max-md:transition-[left_.28s_ease]
+            ${sidebarOpen ? 'max-md:left-0' : 'max-md:-left-[280px]'}`}
+          style={{ height: 'calc(100vh - 60px)' }}
         >
           {/* Perfil */}
-          <div style={{ padding: '24px 20px 16px', borderBottom: '1px solid #f5f5f5' }}>
-            <div style={{
-              width: 48, height: 48, borderRadius: '50%',
-              background: '#ff385c', color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: '1.2rem', marginBottom: 10,
-            }}>
+          <div className="px-5 pt-6 pb-4 border-b border-[#f5f5f5]">
+            <div className="w-12 h-12 rounded-full bg-[#ff385c] text-white flex items-center justify-center font-bold text-[1.2rem] mb-2.5">
               {profile?.inicial ?? '?'}
             </div>
-            <div style={{ fontWeight: 700, fontSize: '.95rem', color: '#111' }}>
+            <div className="font-bold text-[.95rem] text-[#111]">
               {profile?.nome}
             </div>
             {profile?.usuario && (
-              <div style={{ fontSize: '.78rem', color: '#aaa', marginTop: 2 }}>
+              <div className="text-[.78rem] text-[#aaa] mt-0.5">
                 @{profile.usuario}
               </div>
             )}
-            <div style={{
-              marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 4,
-              background: '#fff5f6', color: '#ff385c',
-              border: '1px solid rgba(255,56,92,.2)',
-              borderRadius: 20, padding: '3px 10px', fontSize: '.75rem', fontWeight: 600,
-            }}>
+            <div className="mt-2 inline-flex items-center gap-1 bg-[#fff5f6] text-[#ff385c] border border-[rgba(255,56,92,.2)] rounded-[20px] px-2.5 py-[3px] text-[.75rem] font-semibold">
               {planoEmoji} {profile?.plano}
             </div>
             {profile?.validade && (
-              <div style={{ fontSize: '.72rem', color: '#bbb', marginTop: 4 }}>
+              <div className="text-[.72rem] text-[#bbb] mt-1">
                 Válido até {new Date(profile.validade).toLocaleDateString('pt-BR')}
               </div>
             )}
           </div>
 
           {/* Menu */}
-          <nav style={{ padding: '12px 0', flex: 1 }}>
+          <nav className="py-3 flex-1">
             {(() => {
               let lastGroup: string | null = null;
               return MENU_ITEMS.map(item => {
@@ -297,12 +249,7 @@ export default function Layout({ children }: LayoutProps) {
                 return (
                   <div key={item.rota}>
                     {showGroup && (
-                      <div style={{
-                        padding: '10px 20px 4px',
-                        fontSize: '.68rem', fontWeight: 700,
-                        color: '#bbb', letterSpacing: '.08em',
-                        textTransform: 'uppercase',
-                      }}>
+                      <div className="px-5 pt-[10px] pb-1 text-[.68rem] font-bold text-[#bbb] tracking-[.08em] uppercase">
                         {item.group}
                       </div>
                     )}
@@ -310,15 +257,7 @@ export default function Layout({ children }: LayoutProps) {
                       <Link
                         href={(item as any).href}
                         onClick={() => setSidebar(false)}
-                        style={{
-                          display: 'block',
-                          padding: '9px 20px',
-                          fontSize: '.88rem', color: '#444',
-                          textDecoration: 'none',
-                          borderLeft: '3px solid transparent',
-                          transition: 'all .15s',
-                        }}
-                        className="dash-menu-link"
+                        className="dash-menu-link block px-5 py-[9px] text-[.88rem] text-[#444] no-underline border-l-[3px] border-transparent transition-all duration-150"
                       >
                         {item.label}
                       </Link>
@@ -331,15 +270,7 @@ export default function Layout({ children }: LayoutProps) {
                           setSidebar(false);
                           (window as any).navegar?.(item.rota);
                         }}
-                        style={{
-                          display: 'block',
-                          padding: '9px 20px',
-                          fontSize: '.88rem', color: '#444',
-                          textDecoration: 'none',
-                          borderLeft: '3px solid transparent',
-                          transition: 'all .15s',
-                        }}
-                        className="dash-menu-link"
+                        className="dash-menu-link block px-5 py-[9px] text-[.88rem] text-[#444] no-underline border-l-[3px] border-transparent transition-all duration-150"
                       >
                         {item.label}
                       </a>
@@ -352,37 +283,10 @@ export default function Layout({ children }: LayoutProps) {
         </aside>
 
         {/* ── CONTEÚDO ────────────────────────────────────────────────── */}
-        <main style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }}>
+        <main className="flex-1 min-w-0 overflow-x-hidden">
           {children}
         </main>
       </div>
-
-      {/* CSS global específico do admin */}
-      <style>{`
-        .btn-sidebar-toggle { display: none; }
-        @media (max-width: 768px) {
-          .btn-sidebar-toggle { display: flex !important; }
-          .dash-sidebar {
-            position: fixed !important;
-            top: 60px !important;
-            left: ${sidebarOpen ? '0' : '-280px'} !important;
-            z-index: 150 !important;
-            height: calc(100vh - 60px) !important;
-            transition: left .28s ease !important;
-          }
-        }
-        .dash-menu-link:hover {
-          background: #fff5f6;
-          color: #ff385c !important;
-          border-left-color: #ff385c !important;
-        }
-        .dash-menu-link.active {
-          background: #fff5f6;
-          color: #ff385c !important;
-          border-left-color: #ff385c !important;
-          font-weight: 600;
-        }
-      `}</style>
     </div>
   );
 }

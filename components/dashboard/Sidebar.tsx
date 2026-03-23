@@ -1,7 +1,7 @@
 export default function Sidebar() {
   return (
-    <div style={{ width: 250, background: '#111', color: '#fff', padding: 20 }}>
+    <aside className="w-[260px] flex-shrink-0 bg-white border-r border-[#f0f0f0] min-h-screen p-5">
       Sidebar
-    </div>
+    </aside>
   )
 }

@@ -20,26 +20,23 @@ function StatsBar({ entries }: { entries: DiaryEntry[] }) {
   const uniqueTags = new Set(allTags).size;
 
   return (
-    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+    <div className="flex gap-2.5 flex-wrap">
       {[
-        { label: 'Total', value: entries.length, icon: '📒', color: '#ff385c' },
-        { label: 'Importantes', value: importants, icon: '⭐', color: '#b8860b' },
-        { label: 'Lembretes', value: withReminder, icon: '📅', color: '#27ae60' },
-        { label: 'Vencidos', value: overdueReminders, icon: '⏰', color: '#c0392b' },
-        { label: 'Tags', value: uniqueTags, icon: '🏷️', color: '#7c3aed' },
+        { label: 'Total',      value: entries.length,    icon: '📒', color: '#ff385c' },
+        { label: 'Importantes', value: importants,        icon: '⭐', color: '#b8860b' },
+        { label: 'Lembretes',  value: withReminder,      icon: '📅', color: '#27ae60' },
+        { label: 'Vencidos',   value: overdueReminders,  icon: '⏰', color: '#c0392b' },
+        { label: 'Tags',       value: uniqueTags,        icon: '🏷️', color: '#7c3aed' },
       ].map(s => (
-        <div key={s.label} style={{
-          background: '#fff', borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          border: '1px solid #f0f0f0',
-          padding: '12px 16px', flex: '1 1 80px', textAlign: 'center',
-          minWidth: 70,
-        }}>
-          <div style={{ fontSize: '1.2rem' }}>{s.icon}</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: s.color, lineHeight: 1.2, marginTop: 2 }}>
+        <div
+          key={s.label}
+          className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-[#f0f0f0] px-4 py-3 flex-[1_1_80px] text-center min-w-[70px]"
+        >
+          <div className="text-[1.2rem]">{s.icon}</div>
+          <div className="text-[1.4rem] font-extrabold leading-[1.2] mt-0.5" style={{ color: s.color }}>
             {s.value}
           </div>
-          <div style={{ fontSize: '.68rem', color: '#bbb', marginTop: 2 }}>{s.label}</div>
+          <div className="text-[.68rem] text-[#bbb] mt-0.5">{s.label}</div>
         </div>
       ))}
     </div>
@@ -63,29 +60,22 @@ function PopularTags({ entries, activeTag, onTagClick }: {
   if (!tagCounts.length) return null;
 
   return (
-    <div style={{
-      background: '#fff', borderRadius: 14,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-      border: '1px solid #f0f0f0', padding: '14px 16px',
-    }}>
-      <div style={{ fontSize: '.75rem', fontWeight: 700, color: '#bbb', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+    <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] border border-[#f0f0f0] px-4 py-3.5">
+      <div className="text-[.75rem] font-bold text-[#bbb] mb-2 uppercase tracking-[.06em]">
         Tags populares
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      <div className="flex flex-wrap gap-1.5">
         {tagCounts.map(([tag, count]) => (
           <button
             key={tag}
             onClick={() => onTagClick(tag)}
+            className="border border-[rgba(124,58,237,.15)] rounded-[20px] px-2.5 py-[3px] text-[.75rem] font-semibold cursor-pointer transition-all duration-150"
             style={{
               background: activeTag === tag ? '#7c3aed' : '#f5f0ff',
-              color: activeTag === tag ? '#fff' : '#7c3aed',
-              border: '1px solid rgba(124,58,237,.15)',
-              borderRadius: 20, padding: '3px 10px',
-              fontSize: '.75rem', fontWeight: 600, cursor: 'pointer',
-              transition: 'all .15s',
+              color:      activeTag === tag ? '#fff'    : '#7c3aed',
             }}
           >
-            #{tag} <span style={{ opacity: .7 }}>{count}</span>
+            #{tag} <span className="opacity-70">{count}</span>
           </button>
         ))}
       </div>
@@ -202,28 +192,25 @@ export default function DiarioPage() {
   [entries]);
 
   return (
-    <div style={{ padding: '24px', maxWidth: 860, margin: '0 auto' }}>
+    <div className="p-6 max-w-[860px] mx-auto">
 
       {/* ── Cabeçalho ────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{
-          fontSize: '1.5rem', fontWeight: 800, color: '#111',
-          margin: 0, display: 'flex', alignItems: 'center', gap: 10,
-        }}>
+      <div className="mb-6">
+        <h1 className="text-[1.5rem] font-extrabold text-[#111] m-0 flex items-center gap-2.5">
           📒 Diário Inteligente
         </h1>
-        <p style={{ fontSize: '.88rem', color: '#888', margin: '6px 0 0' }}>
+        <p className="text-[.88rem] text-[#888] mt-1.5 mb-0">
           Sua memória de relacionamento com clientes. Registre interações, contextos e lembretes.
         </p>
       </div>
 
       {/* ── Stats ────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 20 }}>
+      <div className="mb-5">
         <StatsBar entries={entries} />
       </div>
 
       {/* ── Editor ───────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 20 }}>
+      <div className="mb-5">
         <DiarioEditor
           existingTags={existingTags}
           onSave={handleSave}
@@ -232,7 +219,7 @@ export default function DiarioPage() {
       </div>
 
       {/* ── Busca + Tags populares ────────────────────────────────── */}
-      <div style={{ marginBottom: 16 }}>
+      <div className="mb-4">
         <DiarioBusca
           search={search}
           onSearchChange={setSearch}
@@ -248,7 +235,7 @@ export default function DiarioPage() {
       </div>
 
       {entries.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
+        <div className="mb-5">
           <PopularTags
             entries={entries}
             activeTag={activeTag}
@@ -268,18 +255,10 @@ export default function DiarioPage() {
 
       {/* ── Toast ────────────────────────────────────────────────── */}
       {toast && (
-        <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          background: '#222', color: '#fff', borderRadius: 10,
-          padding: '10px 20px', fontSize: '.88rem', fontWeight: 500,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 9999,
-          animation: 'slideUp .25s ease',
-        }}>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#222] text-white rounded-[10px] px-5 py-2.5 text-[.88rem] font-medium shadow-[0_4px_20px_rgba(0,0,0,0.2)] z-[9999] animate-[slideUp_.25s_ease]">
           {toast}
         </div>
       )}
-
-      <style>{`@keyframes slideUp{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}`}</style>
     </div>
   );
 }
