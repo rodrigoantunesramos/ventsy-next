@@ -2021,7 +2021,7 @@ export default function AdminPage() {
             <select id="prop-tipo-propriedade">
               <option value="">Selecione o tipo...</option>
               <option value="Sítio">🌿 Sítio</option>
-              <option value="Chácara">🏡 Chácara</option>
+              <option value="Chácaras">🏡 Chácara</option>
               <option value="Salão de Festas">🎉 Salão de Festas</option>
               <option value="Fazenda">🐄 Fazenda</option>
               <option value="Casa de Campo">🏠 Casa de Campo</option>
