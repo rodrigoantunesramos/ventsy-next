@@ -70,7 +70,14 @@ function _abrirAba(tabName) {
 
 // ── Carregar propriedade do Supabase ─────────────────
 async function _carregarPropriedade() {
-    const userId = state.user?.id;
+    let userId = state.user?.id;
+    // Fallback: busca sessão diretamente caso state.user ainda não esteja disponível
+    if (!userId) {
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            userId = session?.user?.id;
+        } catch (_) {}
+    }
     if (!userId) return;
 
     const { data: prop } = await sb
