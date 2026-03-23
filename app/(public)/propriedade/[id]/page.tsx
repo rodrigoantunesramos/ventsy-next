@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
+import ReviewForm from '@/components/client/ReviewForm'
+import type { ReviewFormData } from '@/types/client'
 
 /* ── tipos ── */
 interface Foto { url: string; titulo: string; ordem: number }
@@ -70,11 +72,16 @@ function PropriedadeContent() {
   const [lbFotos,setLbFotos]   = useState<string[]>([])
   const [lbIdx,setLbIdx]       = useState(0)
   const [lbOpen,setLbOpen]     = useState(false)
-  const [shareOpen,setShareOpen]     = useState(false)
-  const [linkCopiado,setLinkCopiado] = useState(false)
-  const [fav,setFav]           = useState(false)
-  const [avalFiltro,setAvalFiltro] = useState('todas')
-  const [avalVis,setAvalVis]   = useState(4)
+  const [shareOpen,setShareOpen]       = useState(false)
+  const [linkCopiado,setLinkCopiado]   = useState(false)
+  const [fav,setFav]                   = useState(false)
+  const [avalFiltro,setAvalFiltro]     = useState('todas')
+  const [avalVis,setAvalVis]           = useState(4)
+  const [reviewModal,setReviewModal]   = useState(false)
+  const [clientUserId,setClientUserId] = useState('')
+  const [clientNome,setClientNome]     = useState('')
+  const [jaAvaliou,setJaAvaliou]       = useState(false)
+  const [reviewToast,setReviewToast]   = useState('')
   const [sobreExp,setSobreExp] = useState(false)
   const [formNome,setFormNome] = useState('')
   const [formTel,setFormTel]   = useState('')
@@ -188,7 +195,7 @@ function PropriedadeContent() {
       })))
 
       setVideos(vids || [])
-      setAval((avals || []).length ? avals as Avaliacao[] : AVAL_DEMO)
+      setAval((avals || []) as Avaliacao[])
       wppRef.current = (p.whatsapp || '').replace(/\D/g, '')
       setFav(JSON.parse(localStorage.getItem('ventsy_favs') || '[]').includes(propId))
 
@@ -219,6 +226,28 @@ function PropriedadeContent() {
   load()
 }, [propId])
 
+  // ── Verificar sessão do cliente ─────────────────────────────────────────
+  useEffect(()=>{
+    (async()=>{
+      const { data: { session } } = await supabase.auth.getSession()
+      if(!session) return
+      setClientUserId(session.user.id)
+      // Buscar nome
+      try{
+        const { data: u } = await supabase.from('usuarios').select('nome').eq('id',session.user.id).single()
+        if(u?.nome) setClientNome(u.nome)
+        else setClientNome(session.user.email ?? '')
+      }catch{ setClientNome(session.user.email ?? '') }
+    })()
+  },[])
+
+  // ── Verificar se já avaliou esta propriedade ─────────────────────────────
+  useEffect(()=>{
+    if(!clientUserId || !propId || propId==='demo') return
+    supabase.from('avaliacoes').select('id').eq('user_id',clientUserId).eq('propriedade_id',propId).maybeSingle()
+      .then(({ data })=>{ if(data) setJaAvaliou(true) })
+  },[clientUserId,propId])
+
   useEffect(()=>{
     const h=(e:KeyboardEvent)=>{
       if(lbOpen){if(e.key==='Escape')setLbOpen(false);if(e.key==='ArrowLeft')setLbIdx(i=>(i-1+lbFotos.length)%lbFotos.length);if(e.key==='ArrowRight')setLbIdx(i=>(i+1)%lbFotos.length)}
@@ -233,7 +262,7 @@ function PropriedadeContent() {
   const toggleFav=()=>{if(!prop?.id)return;const f:string[]=JSON.parse(localStorage.getItem('ventsy_favs')||'[]');const i=f.indexOf(prop.id);if(i>=0)f.splice(i,1);else f.push(prop.id);localStorage.setItem('ventsy_favs',JSON.stringify(f));setFav(i<0)}
   const copiarLink=()=>{navigator.clipboard.writeText(window.location.href);setLinkCopiado(true);setTimeout(()=>setLinkCopiado(false),2000)}
 
-  const avalFil=(()=>{const b=avaliacoes.length?avaliacoes:AVAL_DEMO;if(avalFiltro==='5')return b.filter(a=>a.nota===5);if(avalFiltro==='4')return b.filter(a=>a.nota===4);if(avalFiltro==='3')return b.filter(a=>a.nota<=3);if(avalFiltro==='verificados')return b.filter(a=>a.verificada);return b})()
+  const avalFil=(()=>{const b=avaliacoes;if(avalFiltro==='5')return b.filter(a=>a.nota===5);if(avalFiltro==='4')return b.filter(a=>a.nota===4);if(avalFiltro==='3')return b.filter(a=>a.nota<=3);if(avalFiltro==='verificados')return b.filter(a=>a.verificada);return b})()
   const linhas=(prop?.descricao||'').split('\n').filter((l:string)=>l.trim())
   const sobrePreview=linhas.slice(0,3); const sobreResto=linhas.slice(3)
 
@@ -278,7 +307,7 @@ function PropriedadeContent() {
             <div className="pp-meta">
               {nota&&<span className="pp-nota"><span>★</span> {parseFloat(nota).toFixed(1)}</span>}
               {nota&&<span>•</span>}
-              <span>{avaliacoes.length||AVAL_DEMO.length} avaliações</span>
+              <span>{avaliacoes.length} avaliações</span>
               <span>•</span>
               <span>{[prop?.cidade,prop?.estado].filter(Boolean).join(', ')}</span>
               {plano==='ultra'&&<span className="pp-selo-ultra">✦ ESPAÇO PREMIUM</span>}
@@ -356,8 +385,40 @@ function PropriedadeContent() {
             <div className="pp-avaliacoes">
               <div className="pp-aval-header">
                 <div className="pp-aval-nota">{nota?parseFloat(nota).toFixed(1):'—'}</div>
-                <div><div className="pp-aval-stars">★★★★★</div><div className="pp-aval-total">{avalFil.length} avaliações verificadas</div></div>
+                <div>
+                  <div className="pp-aval-stars">★★★★★</div>
+                  <div className="pp-aval-total">{avaliacoes.length} avaliações verificadas</div>
+                </div>
               </div>
+
+              {/* Botão avaliar — só para clientes logados */}
+              {clientUserId && propId !== 'demo' && (
+                <div style={{margin:'12px 0'}}>
+                  {jaAvaliou ? (
+                    <div style={{fontSize:'.84rem',color:'#27ae60',background:'#f0faf5',borderRadius:10,padding:'8px 14px',display:'inline-flex',alignItems:'center',gap:6}}>
+                      ✅ Você já avaliou este espaço
+                    </div>
+                  ) : (
+                    <button
+                      onClick={()=>setReviewModal(true)}
+                      style={{
+                        background:'#ff385c',color:'#fff',border:'none',
+                        borderRadius:10,padding:'9px 18px',
+                        fontSize:'.86rem',fontWeight:700,cursor:'pointer',
+                        transition:'opacity .15s',
+                      }}
+                    >
+                      ⭐ Avaliar este espaço
+                    </button>
+                  )}
+                </div>
+              )}
+              {!clientUserId && propId !== 'demo' && (
+                <div style={{fontSize:'.82rem',color:'#888',margin:'8px 0 12px',background:'#fafafa',borderRadius:10,padding:'8px 14px'}}>
+                  <a href="/login" style={{color:'#ff385c',fontWeight:600,textDecoration:'none'}}>Faça login</a> para avaliar este espaço.
+                </div>
+              )}
+
               <div className="pp-aval-filtros">
                 {[['todas','Todas'],['5','★★★★★'],['4','★★★★'],['3','★★★ ou menos'],['verificados','✓ Verificados']].map(([k,l])=>(
                   <button key={k} className={`pp-aval-filtro${avalFiltro===k?' pp-aval-ativo':''}`} onClick={()=>{setAvalFiltro(k);setAvalVis(4)}}>{l}</button>
@@ -374,10 +435,67 @@ function PropriedadeContent() {
                     <p className="pp-aval-texto">{a.texto}</p>
                   </div>
                 ))}
-                {!avalFil.length&&<p style={{color:'#aaa',gridColumn:'1/-1'}}>Nenhuma avaliação encontrada com este filtro.</p>}
+                {!avalFil.length&&(
+                  <div style={{color:'#bbb',gridColumn:'1/-1',textAlign:'center',padding:'24px 0'}}>
+                    <div style={{fontSize:'1.6rem',marginBottom:8}}>⭐</div>
+                    <div style={{fontWeight:600,color:'#aaa',marginBottom:4}}>Nenhuma avaliação ainda</div>
+                    <div style={{fontSize:'.82rem'}}>Seja o primeiro a avaliar este espaço!</div>
+                  </div>
+                )}
               </div>
               {avalFil.length>avalVis&&<button className="pp-btn-ver-mais" onClick={()=>setAvalVis(v=>v+4)}>Mostrar mais avaliações</button>}
             </div>
+
+            {/* Modal de avaliação */}
+            {reviewModal && (
+              <ReviewForm
+                propertyName={prop?.nome}
+                onClose={()=>setReviewModal(false)}
+                onSubmit={async(form: ReviewFormData)=>{
+                  const res = await fetch('/api/avaliacoes',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                      user_id:     clientUserId,
+                      propriedade_id: propId,
+                      nota:        form.nota,
+                      texto:       form.texto,
+                      autor:       clientNome || 'Usuário Ventsy',
+                      evento_tipo: form.evento_tipo,
+                    }),
+                  })
+                  const json = await res.json()
+                  if(json.error){ throw new Error(json.error) }
+                  // Adicionar à lista localmente
+                  setAval(prev=>[{
+                    id:         json.data.id,
+                    autor:      clientNome || 'Usuário Ventsy',
+                    avatar:     '',
+                    data:       new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}),
+                    nota:       form.nota,
+                    texto:      form.texto || '',
+                    verificada: true,
+                    evento_tipo:form.evento_tipo,
+                  },...prev])
+                  setJaAvaliou(true)
+                  setReviewModal(false)
+                  setReviewToast('✅ Avaliação enviada com sucesso!')
+                  setTimeout(()=>setReviewToast(''),3500)
+                }}
+              />
+            )}
+
+            {/* Toast avaliação */}
+            {reviewToast&&(
+              <div style={{
+                position:'fixed',bottom:24,left:'50%',transform:'translateX(-50%)',
+                background:'#27ae60',color:'#fff',borderRadius:10,
+                padding:'10px 20px',fontSize:'.88rem',fontWeight:500,
+                boxShadow:'0 4px 20px rgba(0,0,0,.2)',zIndex:9999,
+              }}>
+                {reviewToast}
+              </div>
+            )}
 
             {/* Mapa */}
             {prop?.cidade&&(
