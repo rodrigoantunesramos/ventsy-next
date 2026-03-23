@@ -42,35 +42,33 @@ export default function ClientDashboard() {
   if (loading) return null
 
   const stats = [
-    { icon: '❤️', label: 'Favoritos', value: favoritos.length, href: '/client/favoritos', bg: '#fff5f6', color: '#ff385c' },
-    { icon: '💬', label: 'Conversas', value: conversas.length, href: '/client/conversas',  bg: '#f0f9ff', color: '#3b82f6' },
+    { icon: '❤️', label: 'Favoritos',  value: favoritos.length,  href: '/client/favoritos',  bg: '#fff5f6', color: '#ff385c' },
+    { icon: '💬', label: 'Conversas',  value: conversas.length,  href: '/client/conversas',  bg: '#f0f9ff', color: '#3b82f6' },
     { icon: '⭐', label: 'Avaliações', value: avaliacoes.length, href: '/client/avaliacoes', bg: '#fffbeb', color: '#d97706' },
   ]
 
   return (
-    <div style={{ padding: '28px 24px', maxWidth: 980, margin: '0 auto' }}>
+    <div className="px-6 py-7 max-w-[980px] mx-auto">
 
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111', margin: 0 }}>
-          Bem-vindo à sua área 🎉
-        </h1>
-        <p style={{ fontSize: '.88rem', color: '#888', margin: '6px 0 0' }}>
+      {/* Cabeçalho */}
+      <div className="mb-7">
+        <h1 className="text-[1.5rem] font-extrabold text-gray-900 m-0">Bem-vindo à sua área 🎉</h1>
+        <p className="text-[.88rem] text-gray-400 mt-1.5">
           Gerencie seus favoritos, conversas e avaliações de espaços para eventos.
         </p>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 32 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {stats.map(s => (
-          <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
-            <div className="cl-stat-card" style={{ cursor: 'pointer' }}>
-              <div className="cl-stat-icon" style={{ background: s.bg }}>
+          <Link key={s.label} href={s.href} className="no-underline">
+            <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] px-6 py-5 flex items-center gap-4 cursor-pointer hover:-translate-y-0.5 transition-transform">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[1.4rem] flex-shrink-0" style={{ background: s.bg }}>
                 {s.icon}
               </div>
               <div>
-                <div className="cl-stat-label">{s.label}</div>
-                <div className="cl-stat-value" style={{ color: s.color }}>{s.value}</div>
+                <div className="text-[.78rem] text-gray-400 mb-0.5">{s.label}</div>
+                <div className="text-[1.6rem] font-extrabold leading-none" style={{ color: s.color }}>{s.value}</div>
               </div>
             </div>
           </Link>
@@ -79,16 +77,12 @@ export default function ClientDashboard() {
 
       {/* Favoritos recentes */}
       {favoritos.length > 0 && (
-        <section style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#111' }}>
-              ❤️ Favoritos recentes
-            </h2>
-            <Link href="/client/favoritos" style={{ fontSize: '.82rem', color: '#ff385c', textDecoration: 'none' }}>
-              Ver todos →
-            </Link>
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="m-0 text-[1.05rem] font-bold text-gray-900">❤️ Favoritos recentes</h2>
+            <Link href="/client/favoritos" className="text-[.82rem] text-[#ff385c] no-underline">Ver todos →</Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {favoritos.slice(0, 4).map(fav => fav.propriedade && (
               <PropertyCardClient
                 key={fav.id}
@@ -103,36 +97,24 @@ export default function ClientDashboard() {
 
       {/* Últimas conversas */}
       {conversas.length > 0 && (
-        <section style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#111' }}>
-              💬 Últimas conversas
-            </h2>
-            <Link href="/client/conversas" style={{ fontSize: '.82rem', color: '#ff385c', textDecoration: 'none' }}>
-              Ver todas →
-            </Link>
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="m-0 text-[1.05rem] font-bold text-gray-900">💬 Últimas conversas</h2>
+            <Link href="/client/conversas" className="text-[.82rem] text-[#ff385c] no-underline">Ver todas →</Link>
           </div>
-          <div style={{
-            background: '#fff', borderRadius: 14,
-            boxShadow: '0 2px 12px rgba(0,0,0,.05)',
-            border: '1px solid #f0f0f0', overflow: 'hidden',
-          }}>
+          <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] overflow-hidden">
             {conversas.slice(0, 3).map(conv => (
               <Link
                 key={conv.id}
                 href={`/client/conversas/${conv.id}`}
-                className="cl-conv-item"
+                className="flex items-center gap-3.5 px-5 py-3.5 border-b border-[#f5f5f5] last:border-0 no-underline text-inherit hover:bg-gray-50 transition-colors"
               >
-                <div className="cl-conv-avatar">
+                <div className="w-11 h-11 rounded-full bg-[#ff385c] text-white flex items-center justify-center font-bold text-base flex-shrink-0">
                   {conv.propriedade?.nome?.[0] ?? '?'}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="cl-conv-nome">
-                    {conv.propriedade?.nome ?? 'Espaço'}
-                  </div>
-                  <div className="cl-conv-preview">
-                    {conv.ultima_mensagem ?? 'Nenhuma mensagem ainda'}
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-[.9rem] text-gray-900">{conv.propriedade?.nome ?? 'Espaço'}</div>
+                  <div className="text-[.8rem] text-gray-400 mt-0.5 truncate">{conv.ultima_mensagem ?? 'Nenhuma mensagem ainda'}</div>
                 </div>
               </Link>
             ))}
@@ -143,49 +125,35 @@ export default function ClientDashboard() {
       {/* Avaliações recentes */}
       {avaliacoes.length > 0 && (
         <section>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#111' }}>
-              ⭐ Minhas avaliações
-            </h2>
-            <Link href="/client/avaliacoes" style={{ fontSize: '.82rem', color: '#ff385c', textDecoration: 'none' }}>
-              Ver todas →
-            </Link>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="m-0 text-[1.05rem] font-bold text-gray-900">⭐ Minhas avaliações</h2>
+            <Link href="/client/avaliacoes" className="text-[.82rem] text-[#ff385c] no-underline">Ver todas →</Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="flex flex-col gap-3">
             {avaliacoes.slice(0, 2).map(av => (
-              <div key={av.id} style={{
-                background: '#fff', borderRadius: 14,
-                boxShadow: '0 2px 12px rgba(0,0,0,.05)',
-                border: '1px solid #f0f0f0',
-                padding: '16px 20px',
-              }}>
-                <div style={{ fontWeight: 700, fontSize: '.9rem', marginBottom: 4 }}>
-                  {av.propriedade?.nome ?? 'Espaço'}
-                </div>
-                <div style={{ color: '#f59e0b', fontSize: '.88rem', marginBottom: 6 }}>
+              <div key={av.id} className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] px-5 py-4">
+                <div className="font-bold text-[.9rem] mb-1">{av.propriedade?.nome ?? 'Espaço'}</div>
+                <div className="text-amber-400 text-[.88rem] mb-1.5">
                   {'★'.repeat(av.nota)}{'☆'.repeat(5 - av.nota)}
                 </div>
-                {av.texto && <p style={{ margin: 0, fontSize: '.85rem', color: '#555' }}>{av.texto}</p>}
+                {av.texto && <p className="m-0 text-[.85rem] text-gray-600">{av.texto}</p>}
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Empty state geral */}
+      {/* Empty state */}
       {favoritos.length === 0 && conversas.length === 0 && avaliacoes.length === 0 && (
-        <div className="cl-empty">
-          <div className="cl-empty-icon">🗺️</div>
-          <div className="cl-empty-title">Comece a explorar!</div>
-          <div className="cl-empty-sub">Favorite espaços, entre em contato com proprietários e avalie os locais onde realizou seus eventos.</div>
+        <div className="text-center py-16 px-5 text-gray-300">
+          <div className="text-[3rem] mb-3">🗺️</div>
+          <div className="text-base font-semibold text-gray-400 mb-1.5">Comece a explorar!</div>
+          <div className="text-[.85rem]">
+            Favorite espaços, entre em contato com proprietários e avalie os locais onde realizou seus eventos.
+          </div>
           <Link
             href="/busca"
-            style={{
-              display: 'inline-block', marginTop: 20,
-              background: '#ff385c', color: '#fff',
-              borderRadius: 12, padding: '10px 24px',
-              fontSize: '.9rem', fontWeight: 700, textDecoration: 'none',
-            }}
+            className="inline-block mt-5 bg-[#ff385c] hover:bg-[#e0304f] text-white rounded-xl py-2.5 px-6 text-[.9rem] font-bold no-underline transition-colors"
           >
             🔍 Explorar espaços
           </Link>

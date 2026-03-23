@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import '@/styles/client.css'
 
 interface UserProfile {
   nome: string
@@ -13,17 +12,17 @@ interface UserProfile {
 }
 
 const MENU_ITEMS = [
-  { href: '/client',          label: '🏠 Início',          rota: '/client'          },
-  { href: '/client/favoritos', label: '❤️ Favoritos',       rota: '/client/favoritos' },
-  { href: '/client/conversas', label: '💬 Conversas',       rota: '/client/conversas' },
-  { href: '/client/avaliacoes',label: '⭐ Minhas Avaliações',rota: '/client/avaliacoes'},
+  { href: '/client',           label: '🏠 Início',            rota: '/client'           },
+  { href: '/client/favoritos', label: '❤️ Favoritos',          rota: '/client/favoritos' },
+  { href: '/client/conversas', label: '💬 Conversas',          rota: '/client/conversas' },
+  { href: '/client/avaliacoes',label: '⭐ Minhas Avaliações',  rota: '/client/avaliacoes'},
 ]
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [profile,    setProfile]  = useState<UserProfile | null>(null)
-  const [sidebarOpen, setSidebar] = useState(false)
-  const [avatarOpen,  setAvatar]  = useState(false)
-  const [loading,    setLoading]  = useState(true)
+  const [profile,     setProfile]  = useState<UserProfile | null>(null)
+  const [sidebarOpen, setSidebar]  = useState(false)
+  const [avatarOpen,  setAvatar]   = useState(false)
+  const [loading,     setLoading]  = useState(true)
 
   const router    = useRouter()
   const pathname  = usePathname()
@@ -36,13 +35,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       const user = session.user
       let nome   = user.email ?? ''
-
       try {
-        const { data: perfil } = await supabase
-          .from('usuarios')
-          .select('nome')
-          .eq('id', user.id)
-          .single()
+        const { data: perfil } = await supabase.from('usuarios').select('nome').eq('id', user.id).single()
         if (perfil?.nome) nome = perfil.nome
       } catch { /* silencioso */ }
 
@@ -67,84 +61,62 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   if (loading) {
     return (
-      <div style={{
-        position: 'fixed', inset: 0, background: '#fff',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', zIndex: 9999,
-      }}>
-        <div style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: '2rem', color: '#ff385c' }}>
-          VENTSY
-        </div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
-          {[0,1,2].map(i => (
-            <span key={i} style={{
-              width: 8, height: 8, borderRadius: '50%', background: '#ff385c',
-              animation: `bounce 1s ${i * 0.15}s infinite`,
-            }} />
+      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999]">
+        <span className="font-['Georgia,serif'] italic text-[2rem] text-[#ff385c] font-bold">VENTSY</span>
+        <div className="flex gap-1.5 mt-4">
+          {[0, 1, 2].map(i => (
+            <span
+              key={i}
+              className="w-2 h-2 rounded-full bg-[#ff385c] animate-bounce-dot"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
           ))}
         </div>
-        <style>{`@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}`}</style>
       </div>
     )
   }
 
   return (
-    <div className="cl-root">
+    <div className="min-h-screen bg-[#f7f7f8]">
 
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: '#fff', borderBottom: '1px solid #f0f0f0',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px', height: 60,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* ── HEADER ──────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-[100] bg-white border-b border-[#f0f0f0] flex items-center justify-between px-5 h-[60px]">
+        <div className="flex items-center gap-3">
+          {/* Hambúrguer (só mobile) */}
           <button
             onClick={() => setSidebar(!sidebarOpen)}
             aria-label="Menu"
-            className="cl-btn-toggle"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, flexDirection: 'column', gap: 5 }}
+            className="md:hidden flex flex-col gap-[5px] bg-transparent border-none cursor-pointer p-2"
           >
-            <span style={{ display: 'block', width: 22, height: 2, background: '#333', borderRadius: 2 }} />
-            <span style={{ display: 'block', width: 22, height: 2, background: '#333', borderRadius: 2 }} />
-            <span style={{ display: 'block', width: 22, height: 2, background: '#333', borderRadius: 2 }} />
+            <span className="block w-[22px] h-0.5 bg-gray-700 rounded-sm" />
+            <span className="block w-[22px] h-0.5 bg-gray-700 rounded-sm" />
+            <span className="block w-[22px] h-0.5 bg-gray-700 rounded-sm" />
           </button>
           <Link href="/">
-            <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: '1.4rem', color: '#ff385c', fontWeight: 700 }}>
-              VENTSY
-            </span>
+            <span className="font-['Georgia,serif'] italic text-[1.4rem] text-[#ff385c] font-bold">VENTSY</span>
           </Link>
         </div>
 
         {/* Avatar dropdown */}
-        <div ref={avatarRef} style={{ position: 'relative' }}>
+        <div className="relative" ref={avatarRef}>
           <button
             onClick={() => setAvatar(!avatarOpen)}
-            style={{
-              width: 38, height: 38, borderRadius: '50%',
-              background: '#ff385c', color: '#fff',
-              border: 'none', cursor: 'pointer',
-              fontSize: '1rem', fontWeight: 700,
-            }}
+            className="w-[38px] h-[38px] rounded-full bg-[#ff385c] text-white border-none cursor-pointer text-base font-bold"
           >
             {profile?.inicial ?? '?'}
           </button>
 
           {avatarOpen && (
-            <div style={{
-              position: 'absolute', top: 46, right: 0,
-              background: '#fff', borderRadius: 12,
-              boxShadow: '0 8px 32px rgba(0,0,0,.12)',
-              border: '1px solid #f0f0f0',
-              minWidth: 200, padding: '8px 0', zIndex: 200,
-            }}>
-              <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                <div style={{ fontWeight: 700, fontSize: '.9rem' }}>{profile?.nome}</div>
-                <div style={{ fontSize: '.78rem', color: '#999', marginTop: 2 }}>{profile?.email}</div>
+            <div className="absolute top-12 right-0 bg-white rounded-xl shadow-[0_8px_32px_rgba(0,0,0,.12)] border border-[#f0f0f0] min-w-[200px] py-2 z-[200]">
+              <div className="px-4 py-2.5 border-b border-[#f0f0f0]">
+                <div className="font-bold text-[.9rem]">{profile?.nome}</div>
+                <div className="text-[.78rem] text-gray-400 mt-0.5">{profile?.email}</div>
               </div>
               {MENU_ITEMS.map(item => (
-                <Link key={item.href} href={item.href}
-                  style={{ display: 'block', padding: '9px 16px', fontSize: '.88rem', color: '#333', textDecoration: 'none' }}
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block px-4 py-2.5 text-[.88rem] text-gray-700 no-underline hover:bg-gray-50 transition-colors"
                   onClick={() => setAvatar(false)}
                 >
                   {item.label}
@@ -152,12 +124,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               ))}
               <button
                 onClick={handleSair}
-                style={{
-                  width: '100%', textAlign: 'left', padding: '9px 16px',
-                  border: 'none', background: 'none', cursor: 'pointer',
-                  fontSize: '.88rem', color: '#ff385c',
-                  borderTop: '1px solid #f0f0f0', marginTop: 4,
-                }}
+                className="w-full text-left px-4 py-2.5 border-none bg-transparent cursor-pointer text-[.88rem] text-[#ff385c] border-t border-[#f0f0f0] mt-1 font-[inherit] hover:bg-gray-50 transition-colors"
               >
                 🚪 Sair
               </button>
@@ -166,74 +133,74 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
 
-      {/* ── OVERLAY MOBILE ─────────────────────────────────────────────────── */}
+      {/* ── OVERLAY MOBILE ────────────────────────────────────────── */}
       {sidebarOpen && (
         <div
+          className="fixed inset-0 bg-black/40 z-[149] md:hidden"
           onClick={() => setSidebar(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 149 }}
         />
       )}
 
-      {/* ── CORPO ──────────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', minHeight: 'calc(100vh - 60px)' }}>
+      {/* ── CORPO ─────────────────────────────────────────────────── */}
+      <div className="flex min-h-[calc(100vh-60px)]">
 
-        {/* ── SIDEBAR ────────────────────────────────────────────────────── */}
+        {/* ── SIDEBAR ─────────────────────────────────────────────── */}
         <aside
-          className="cl-sidebar"
-          style={{ left: sidebarOpen ? 0 : undefined } as React.CSSProperties}
+          className={`
+            w-[260px] flex-shrink-0 bg-white border-r border-[#f0f0f0] flex flex-col
+            sticky top-[60px] h-[calc(100vh-60px)] overflow-y-auto
+            max-md:fixed max-md:z-[150] max-md:h-[calc(100vh-60px)] max-md:transition-[left_.28s_ease]
+            ${sidebarOpen ? 'max-md:left-0' : 'max-md:-left-[280px]'}
+          `}
         >
-          <div style={{ padding: '24px 20px 16px', borderBottom: '1px solid #f5f5f5' }}>
-            <div style={{
-              width: 48, height: 48, borderRadius: '50%',
-              background: '#ff385c', color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: '1.2rem', marginBottom: 10,
-            }}>
+          {/* Perfil */}
+          <div className="px-5 pt-6 pb-4 border-b border-[#f5f5f5]">
+            <div className="w-12 h-12 rounded-full bg-[#ff385c] text-white flex items-center justify-center font-bold text-[1.2rem] mb-2.5">
               {profile?.inicial ?? '?'}
             </div>
-            <div style={{ fontWeight: 700, fontSize: '.95rem', color: '#111' }}>{profile?.nome}</div>
-            <div style={{
-              marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 4,
-              background: '#fff5f6', color: '#ff385c',
-              border: '1px solid rgba(255,56,92,.2)',
-              borderRadius: 20, padding: '3px 10px', fontSize: '.75rem', fontWeight: 600,
-            }}>
+            <div className="font-bold text-[.95rem] text-gray-900">{profile?.nome}</div>
+            <div className="mt-2 inline-flex items-center gap-1 bg-[#fff5f6] text-[#ff385c] border border-[rgba(255,56,92,.2)] rounded-full px-2.5 py-[3px] text-[.75rem] font-semibold">
               🎉 Cliente
             </div>
           </div>
 
-          <nav style={{ padding: '12px 0', flex: 1 }}>
-            <div style={{ padding: '10px 20px 4px', fontSize: '.68rem', fontWeight: 700, color: '#bbb', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+          {/* Nav */}
+          <nav className="py-3 flex-1">
+            <div className="px-5 pt-2.5 pb-1 text-[.68rem] font-bold text-gray-300 tracking-[.08em] uppercase">
               Minha Área
             </div>
-            {MENU_ITEMS.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setSidebar(false)}
-                className={`cl-menu-link${pathname === item.rota ? ' active' : ''}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div style={{ borderTop: '1px solid #f5f5f5', margin: '12px 0' }} />
-            <Link href="/busca" className="cl-menu-link">🔍 Explorar espaços</Link>
+            {MENU_ITEMS.map(item => {
+              const isActive = pathname === item.rota
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setSidebar(false)}
+                  className={`block px-5 py-[9px] text-[.88rem] no-underline border-l-[3px] transition-all
+                    ${isActive
+                      ? 'bg-[#fff5f6] text-[#ff385c] border-l-[#ff385c] font-semibold'
+                      : 'text-gray-600 border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c]'
+                    }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+            <div className="border-t border-[#f5f5f5] my-3" />
+            <Link
+              href="/busca"
+              className="block px-5 py-[9px] text-[.88rem] text-gray-600 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
+            >
+              🔍 Explorar espaços
+            </Link>
           </nav>
         </aside>
 
-        {/* ── CONTEÚDO ───────────────────────────────────────────────────── */}
-        <main style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }}>
+        {/* ── CONTEÚDO ──────────────────────────────────────────────── */}
+        <main className="flex-1 min-w-0 overflow-x-hidden">
           {children}
         </main>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .cl-sidebar {
-            left: ${sidebarOpen ? '0' : '-280px'} !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }

@@ -13,10 +13,9 @@ interface Props {
 }
 
 export default function ChatBox({ messages, currentUserId, sending, onSend, loading = false }: Props) {
-  const [text, setText]   = useState('')
-  const bottomRef         = useRef<HTMLDivElement>(null)
+  const [text, setText] = useState('')
+  const bottomRef       = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll para a última mensagem
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -36,18 +35,19 @@ export default function ChatBox({ messages, currentUserId, sending, onSend, load
 
   if (loading) {
     return (
-      <div className="cl-chatbox" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: '#bbb', fontSize: '.88rem' }}>Carregando mensagens...</div>
+      <div className="flex flex-col h-full bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] overflow-hidden items-center justify-center">
+        <div className="text-gray-300 text-[.88rem]">Carregando mensagens...</div>
       </div>
     )
   }
 
   return (
-    <div className="cl-chatbox">
-      <div className="cl-chat-msgs">
+    <div className="flex flex-col h-full bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] overflow-hidden">
+      {/* Mensagens */}
+      <div className="flex-1 overflow-y-auto p-5 flex flex-col">
         {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#bbb', fontSize: '.85rem', margin: 'auto' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 8 }}>💬</div>
+          <div className="text-center text-gray-300 text-[.85rem] m-auto">
+            <div className="text-[2rem] mb-2">💬</div>
             Nenhuma mensagem ainda. Comece a conversa!
           </div>
         ) : (
@@ -58,10 +58,11 @@ export default function ChatBox({ messages, currentUserId, sending, onSend, load
         <div ref={bottomRef} />
       </div>
 
-      <div className="cl-chat-input-row">
+      {/* Input */}
+      <div className="flex gap-2.5 px-4 py-3.5 border-t border-[#f0f0f0] bg-[#fafafa]">
         <input
-          className="cl-chat-input"
           type="text"
+          className="flex-1 px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-full text-[.88rem] font-[inherit] outline-none transition-colors focus:border-[#ff385c] disabled:opacity-50"
           placeholder="Digite uma mensagem..."
           value={text}
           onChange={e => setText(e.target.value)}
@@ -69,7 +70,7 @@ export default function ChatBox({ messages, currentUserId, sending, onSend, load
           disabled={sending}
         />
         <button
-          className="cl-chat-send"
+          className="px-[18px] py-2.5 bg-[#ff385c] text-white border-none rounded-full text-[.88rem] font-semibold cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-default font-[inherit]"
           onClick={handleSend}
           disabled={!text.trim() || sending}
         >

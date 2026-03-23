@@ -12,7 +12,7 @@ const SIZES = { sm: '1rem', md: '1.4rem', lg: '1.8rem' }
 export default function RatingStars({ value, onChange, readonly = false, size = 'md' }: Props) {
   return (
     <div
-      className={`cl-stars${readonly ? ' readonly' : ''}`}
+      className="flex gap-1"
       style={{ fontSize: SIZES[size] }}
       aria-label={`Avaliação: ${value} de 5 estrelas`}
     >
@@ -20,12 +20,10 @@ export default function RatingStars({ value, onChange, readonly = false, size = 
         <button
           key={star}
           type="button"
-          className="cl-star"
           onClick={() => !readonly && onChange?.(star)}
-          style={{
-            color: star <= value ? '#f59e0b' : '#ddd',
-            fontSize: SIZES[size],
-          }}
+          className={`bg-transparent border-none p-0 leading-none transition-transform
+            ${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-115'}`}
+          style={{ color: star <= value ? '#f59e0b' : '#ddd', fontSize: SIZES[size] }}
           aria-label={`${star} estrela${star > 1 ? 's' : ''}`}
         >
           ★

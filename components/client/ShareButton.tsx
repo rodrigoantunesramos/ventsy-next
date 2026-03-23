@@ -8,9 +8,9 @@ interface Props {
 }
 
 export default function ShareButton({ url, title = 'Confira este espaço' }: Props) {
-  const [open, setOpen]     = useState(false)
+  const [open,   setOpen]   = useState(false)
   const [copied, setCopied] = useState(false)
-  const ref                 = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   const href = url || (typeof window !== 'undefined' ? window.location.href : '')
 
@@ -29,31 +29,39 @@ export default function ShareButton({ url, title = 'Confira este espaço' }: Pro
   }
 
   return (
-    <div className="cl-share-wrap" ref={ref}>
-      <button className="cl-share-btn" onClick={() => setOpen(!open)}>
+    <div className="relative" ref={ref}>
+      <button
+        className="flex items-center gap-1.5 px-3.5 py-2 bg-white border-[1.5px] border-gray-200 rounded-full cursor-pointer text-[.82rem] font-medium text-gray-600 transition-colors hover:border-gray-700 hover:text-gray-700 font-[inherit]"
+        onClick={() => setOpen(!open)}
+      >
         <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
-          <polyline points="16 6 12 2 8 6"/>
-          <line x1="12" y1="2" x2="12" y2="15"/>
+          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+          <polyline points="16 6 12 2 8 6" />
+          <line x1="12" y1="2" x2="12" y2="15" />
         </svg>
         Compartilhar
       </button>
 
       {open && (
-        <div className="cl-share-drop">
-          <button onClick={copy}>
+        <div className="absolute top-[calc(100%+8px)] right-0 bg-white rounded-xl shadow-[0_8px_32px_rgba(0,0,0,.12)] border border-[#f0f0f0] min-w-[180px] py-1.5 z-[200]">
+          <button
+            className="block w-full px-4 py-2.5 text-[.86rem] text-gray-700 bg-transparent border-none cursor-pointer text-left transition-colors hover:bg-gray-50 font-[inherit]"
+            onClick={copy}
+          >
             {copied ? '✅ Link copiado!' : '🔗 Copiar link'}
           </button>
           <a
             href={`https://wa.me/?text=${encodeURIComponent(title + ' — ' + href)}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="block w-full px-4 py-2.5 text-[.86rem] text-gray-700 no-underline transition-colors hover:bg-gray-50"
             onClick={() => setOpen(false)}
           >
             💬 WhatsApp
           </a>
           <a
             href={`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent('Confira: ' + href)}`}
+            className="block w-full px-4 py-2.5 text-[.86rem] text-gray-700 no-underline transition-colors hover:bg-gray-50"
             onClick={() => setOpen(false)}
           >
             📧 E-mail

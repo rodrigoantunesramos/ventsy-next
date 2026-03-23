@@ -26,7 +26,6 @@ export default function FavoritosPage() {
     })()
   }, [router])
 
-  // Remover da lista localmente quando desfavoritar
   const handleToggle = async (propertyId: string) => {
     await toggle(propertyId)
     setFavoritos(prev => prev.filter(f => f.property_id !== propertyId))
@@ -35,12 +34,10 @@ export default function FavoritosPage() {
   if (loading) return null
 
   return (
-    <div style={{ padding: '28px 24px', maxWidth: 980, margin: '0 auto' }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111', margin: 0 }}>
-          ❤️ Meus Favoritos
-        </h1>
-        <p style={{ fontSize: '.88rem', color: '#888', margin: '6px 0 0' }}>
+    <div className="px-6 py-7 max-w-[980px] mx-auto">
+      <div className="mb-6">
+        <h1 className="text-[1.5rem] font-extrabold text-gray-900 m-0">❤️ Meus Favoritos</h1>
+        <p className="text-[.88rem] text-gray-400 mt-1.5">
           {favoritos.length > 0
             ? `${favoritos.length} espaço${favoritos.length > 1 ? 's' : ''} salvo${favoritos.length > 1 ? 's' : ''}`
             : 'Nenhum espaço salvo ainda'}
@@ -48,15 +45,13 @@ export default function FavoritosPage() {
       </div>
 
       {favoritos.length === 0 ? (
-        <div className="cl-empty">
-          <div className="cl-empty-icon">❤️</div>
-          <div className="cl-empty-title">Nenhum favorito ainda</div>
-          <div className="cl-empty-sub">
-            Salve os espaços que você curtiu para encontrá-los facilmente depois.
-          </div>
+        <div className="text-center py-16 px-5 text-gray-300">
+          <div className="text-[3rem] mb-3">❤️</div>
+          <div className="text-base font-semibold text-gray-400 mb-1.5">Nenhum favorito ainda</div>
+          <div className="text-[.85rem]">Salve os espaços que você curtiu para encontrá-los facilmente depois.</div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {favoritos.map(fav => fav.propriedade && (
             <PropertyCardClient
               key={fav.id}

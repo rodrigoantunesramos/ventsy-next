@@ -39,29 +39,20 @@ export default function ConversaPage() {
     })()
   }, [convId, router])
 
-  const handleSend = async (text: string) => {
-    return sendMessage(text, userId)
-  }
-
   if (loading) return null
 
   return (
-    <div style={{ padding: '28px 24px', maxWidth: 760, margin: '0 auto', height: 'calc(100vh - 116px)', display: 'flex', flexDirection: 'column' }}>
-
-      {/* Header da conversa */}
-      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <Link href="/client/conversas" style={{ color: '#888', textDecoration: 'none', fontSize: '1.2rem' }}>
-          ←
-        </Link>
+    <div
+      className="px-6 py-7 max-w-[760px] mx-auto flex flex-col"
+      style={{ height: 'calc(100vh - 116px)' }}
+    >
+      {/* Header */}
+      <div className="mb-4 flex items-center gap-3.5">
+        <Link href="/client/conversas" className="text-gray-400 no-underline text-[1.2rem]">←</Link>
         <div>
-          <div style={{ fontWeight: 700, fontSize: '1rem', color: '#111' }}>
-            {conversa?.propriedade?.nome ?? 'Conversa'}
-          </div>
+          <div className="font-bold text-base text-gray-900">{conversa?.propriedade?.nome ?? 'Conversa'}</div>
           {conversa?.propriedade && (
-            <Link
-              href={`/propriedade/${conversa.propriedade_id}`}
-              style={{ fontSize: '.75rem', color: '#ff385c', textDecoration: 'none' }}
-            >
+            <Link href={`/propriedade/${conversa.propriedade_id}`} className="text-[.75rem] text-[#ff385c] no-underline">
               Ver espaço →
             </Link>
           )}
@@ -69,12 +60,12 @@ export default function ConversaPage() {
       </div>
 
       {/* Chat */}
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div className="flex-1 min-h-0">
         <ChatBox
           messages={messages}
           currentUserId={userId}
           sending={sending}
-          onSend={handleSend}
+          onSend={text => sendMessage(text, userId)}
           loading={chatLoading}
         />
       </div>
