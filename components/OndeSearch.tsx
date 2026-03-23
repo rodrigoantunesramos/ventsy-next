@@ -74,7 +74,6 @@ export default function OndeSearch({ onSelect }: Props) {
       supabase
         .from('propriedades')
         .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
-        .eq('publicada', true)
         .ilike('nome', `%${q}%`)
         .limit(5),
       supabase
