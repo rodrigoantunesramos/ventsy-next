@@ -92,7 +92,7 @@ export default function OndeSearch({ onSelect }: Props) {
     const propsByNome: any[] = nameRes?.data || []
 
     // Bairros únicos que batem (de todas as propriedades)
-    const allLocations = [...(locationProps || []), ...(propsByName || [])]
+    const allLocations = [...(locationProps || []), ...(propsByNome || [])]
     const bairroMap = new Map<string, { bairro: string; cidade: string; estado: string }>()
     allLocations.forEach(p => {
       if (p.bairro && norm(p.bairro).includes(nq)) {
