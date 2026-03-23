@@ -1,36 +1,21 @@
 'use client'
 
+import Link from 'next/link'
+
 export default function Header() {
   return (
-    <header>
-      <div className="header-left">
-        <a href="/">
-          <img src="/logovents.png" alt="Logo VENTSY" className="logo" />
-        </a>
+    <header className="w-full h-[60px] bg-white border-b border-[#f0f0f0] flex items-center justify-between px-5 sticky top-0 z-[100]">
+      <div className="flex items-center gap-3">
+        <Link href="/">
+          <span className="font-serif italic text-[1.4rem] text-[#ff385c] font-bold">VENTSY</span>
+        </Link>
       </div>
 
-      <div className="header-right">
-        <button className="btn-sidebar-toggle">
-          <span></span><span></span><span></span>
-        </button>
-
-        <div className="avatar-container">
-          <button className="avatar-btn">
-            <span>?</span>
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <button className="w-[38px] h-[38px] rounded-full bg-[#ff385c] text-white border-none cursor-pointer text-[1rem] font-bold flex items-center justify-center">
+            ?
           </button>
-
-          <div className="avatar-dropdown">
-            <div className="drop-header">
-              <strong>Usuário</strong>
-              <span>email@email.com</span>
-            </div>
-
-            <a href="/dashboard">🏠 Dashboard</a>
-            <a href="/dashboard/propriedade">🏡 Minha Propriedade</a>
-            <a href="/dashboard/configuracoes">⚙️ Configurações</a>
-
-            <button className="drop-sair">🚪 Sair</button>
-          </div>
         </div>
       </div>
     </header>

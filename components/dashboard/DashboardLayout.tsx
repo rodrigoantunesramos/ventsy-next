@@ -5,11 +5,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <>
       <Header />
-
-      <main className="dashboard-container">
+      <main className="flex">
         <Sidebar />
-
-        <section className="dash-content">
+        <section className="flex-1 min-w-0">
           {children}
         </section>
       </main>
