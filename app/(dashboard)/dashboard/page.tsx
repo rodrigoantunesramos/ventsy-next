@@ -108,7 +108,7 @@ export default function AdminPage() {
                   <button className="tab-btn"        data-tipo="nota"       onClick={(e) => (window as any).mudarTab?.(e.currentTarget)}>⭐ Avaliações</button>
                 </div>
               </div>
-              <div style={{ position:'relative', height:'300px', width:'100%' }}>
+              <div className="relative h-[300px] w-full">
                 <canvas id="graficoAnalytics"></canvas>
               </div>
               <p className="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
@@ -218,8 +218,7 @@ export default function AdminPage() {
     {/* KPIs */}
     <div className="fin-kpi-grid">
       <div
-        className="fin-kpi-card verde"
-        style={{ animation: "fadeUp .3s ease both" }}
+        className="fin-kpi-card verde animate-[fadeUp_.3s_ease_both]"
       >
         <div className="fin-kpi-label">Receita Total</div>
         <div className="fin-kpi-value verde" id="fin-kpi-receita">
@@ -228,8 +227,7 @@ export default function AdminPage() {
         <div className="fin-delta up">↑ 12% vs mês anterior</div>
       </div>
       <div
-        className="fin-kpi-card vermelho"
-        style={{ animation: "fadeUp .35s ease both" }}
+        className="fin-kpi-card vermelho animate-[fadeUp_.35s_ease_both]"
       >
         <div className="fin-kpi-label">Despesas Totais</div>
         <div className="fin-kpi-value vermelho" id="fin-kpi-despesa">
@@ -238,8 +236,7 @@ export default function AdminPage() {
         <div className="fin-delta down">↑ 4% vs mês anterior</div>
       </div>
       <div
-        className="fin-kpi-card gold"
-        style={{ animation: "fadeUp .4s ease both" }}
+        className="fin-kpi-card gold animate-[fadeUp_.4s_ease_both]"
       >
         <div className="fin-kpi-label">Lucro Líquido</div>
         <div className="fin-kpi-value gold" id="fin-kpi-lucro">
@@ -248,8 +245,7 @@ export default function AdminPage() {
         <div className="fin-delta up">↑ 18% vs mês anterior</div>
       </div>
       <div
-        className="fin-kpi-card azul"
-        style={{ animation: "fadeUp .45s ease both" }}
+        className="fin-kpi-card azul animate-[fadeUp_.45s_ease_both]"
       >
         <div className="fin-kpi-label">Eventos no Mês</div>
         <div className="fin-kpi-value azul" id="fin-kpi-eventos">
@@ -262,8 +258,7 @@ export default function AdminPage() {
     <div className="fin-mid-grid">
       {/* Gráfico de barras */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .4s ease both" }}
+        className="fin-section animate-[fadeUp_.4s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -276,8 +271,7 @@ export default function AdminPage() {
       </div>
       {/* Donut */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .45s ease both" }}
+        className="fin-section animate-[fadeUp_.45s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -292,8 +286,7 @@ export default function AdminPage() {
       </div>
       {/* Metas */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .5s ease both" }}
+        className="fin-section animate-[fadeUp_.5s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -301,8 +294,7 @@ export default function AdminPage() {
             <div className="fin-section-sub">Progresso até agora</div>
           </div>
           <button
-            className="btn-fin btn-fin-ghost"
-            style={{ fontSize: "0.78rem", padding: "6px 14px" }}
+            className="btn-fin btn-fin-ghost text-[0.78rem] py-[6px] px-[14px]"
             onClick={() => (window as any).finOpenModal('meta')}
           >
             Editar
@@ -312,8 +304,7 @@ export default function AdminPage() {
       </div>
       {/* Próximos Eventos */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .55s ease both" }}
+        className="fin-section animate-[fadeUp_.55s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -324,19 +315,19 @@ export default function AdminPage() {
         <div className="fin-cf-row">
           <div className="fin-cf-box">
             <div className="fin-cf-label">Confirmados</div>
-            <div className="fin-cf-val" style={{ color: "#0ca678" }}>
+            <div className="fin-cf-val text-[#0ca678]">
               R$ 22.400
             </div>
           </div>
           <div className="fin-cf-box">
             <div className="fin-cf-label">Em Negociação</div>
-            <div className="fin-cf-val" style={{ color: "#f59e0b" }}>
+            <div className="fin-cf-val text-[#f59e0b]">
               R$ 8.900
             </div>
           </div>
           <div className="fin-cf-box">
             <div className="fin-cf-label">Pendente Pag.</div>
-            <div className="fin-cf-val" style={{ color: "#ff385c" }}>
+            <div className="fin-cf-val text-[#ff385c]">
               R$ 5.200
             </div>
           </div>
@@ -345,18 +336,16 @@ export default function AdminPage() {
       </div>
       {/* Lançamentos */}
       <div
-        className="fin-section fin-wide"
-        style={{ animation: "fadeUp .6s ease both" }}
+        className="fin-section fin-wide animate-[fadeUp_.6s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
             <div className="fin-section-title">Lançamentos Recentes</div>
             <div className="fin-section-sub">Todas as movimentações do mês</div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="flex gap-2">
             <select
-              className="fin-select"
-              style={{ fontSize: "0.78rem", padding: "6px 12px" }}
+              className="fin-select text-[0.78rem] py-[6px] px-[12px]"
               onChange={(e: any) => (window as any).finFilterTable(e.target.value)}
             >
               <option value="todos">Todos</option>
@@ -365,8 +354,7 @@ export default function AdminPage() {
               <option value="pendente">Pendentes</option>
             </select>
             <button
-              className="btn-fin btn-fin-ghost"
-              style={{ fontSize: "0.78rem", padding: "6px 14px" }}
+              className="btn-fin btn-fin-ghost text-[0.78rem] py-[6px] px-[14px]"
             >
               Exportar
             </button>
@@ -381,7 +369,7 @@ export default function AdminPage() {
                 <th>Categoria</th>
                 <th>Tipo de Evento</th>
                 <th>Status</th>
-                <th style={{ textAlign: "right" }}>Valor</th>
+                <th className="text-right">Valor</th>
               </tr>
             </thead>
             <tbody id="finTransTable" />
@@ -415,7 +403,7 @@ export default function AdminPage() {
               <th>Categoria</th>
               <th>Evento</th>
               <th>Status</th>
-              <th style={{ textAlign: "right" }}>Valor</th>
+              <th className="text-right">Valor</th>
             </tr>
           </thead>
           <tbody id="finReceitasTable" />
@@ -447,7 +435,7 @@ export default function AdminPage() {
               <th>Categoria</th>
               <th>Evento</th>
               <th>Status</th>
-              <th style={{ textAlign: "right" }}>Valor</th>
+              <th className="text-right">Valor</th>
             </tr>
           </thead>
           <tbody id="finDespesasTable" />
@@ -465,9 +453,8 @@ export default function AdminPage() {
         </div>
       </div>
       <div
-        className="fin-event-list"
+        className="fin-event-list max-h-[500px] overflow-y-auto"
         id="finEventListFull"
-        style={{ maxHeight: 500, overflowY: "auto" }}
       />
     </div>
   </div>
