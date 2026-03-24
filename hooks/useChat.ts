@@ -11,8 +11,8 @@ import type { Message } from '@/types/client'
 // ─────────────────────────────────────────────────────────────────────────────
 export function useChat(conversationId: string) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setSending]   = useState(false)
-  const [sending, setLoading]   = useState(true)
+  const [loading, setLoading]   = useState(true)
+  const [sending, setSending]   = useState(false)
   const channelRef              = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   const loadMessages = useCallback(async () => {
@@ -81,5 +81,5 @@ export function useChat(conversationId: string) {
     }
   }, [conversationId])
 
-  return { messages, loading: sending, sending: loading, sendMessage, reload: loadMessages }
+  return { messages, loading, sending, sendMessage, reload: loadMessages }
 }
