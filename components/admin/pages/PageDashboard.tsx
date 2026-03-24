@@ -4,65 +4,65 @@ export default function PageDashboard() {
   return (
     <div className="page active" id="page-dashboard">
       {/* Stats principais */}
-      <div className="stats-grid" id="stats-grid">
-        <div className="stat-card red">
-          <div className="stat-icon red">👥</div>
-          <div className="stat-value loading" id="s-usuarios">—</div>
-          <div className="stat-label">Usuários cadastrados</div>
-          <div className="stat-sub" id="s-usuarios-sub">carregando...</div>
+      <div className="grid grid-cols-4 gap-4 mb-8" id="stats-grid">
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#ff385c] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(255,56,92,0.12)]">👥</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-usuarios">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Usuários cadastrados</div>
+          <div className="text-[0.72rem] text-[#5c5c78] mt-1" id="s-usuarios-sub">carregando...</div>
         </div>
-        <div className="stat-card green">
-          <div className="stat-icon green">🏡</div>
-          <div className="stat-value loading" id="s-props">—</div>
-          <div className="stat-label">Propriedades</div>
-          <div className="stat-sub" id="s-props-sub">carregando...</div>
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#0ca678] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(12,166,120,0.12)]">🏡</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-props">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Propriedades</div>
+          <div className="text-[0.72rem] text-[#5c5c78] mt-1" id="s-props-sub">carregando...</div>
         </div>
-        <div className="stat-card yellow">
-          <div className="stat-icon yellow">👁</div>
-          <div className="stat-value loading" id="s-views">—</div>
-          <div className="stat-label">Visualizações (30d)</div>
-          <div className="stat-sub">Todas as propriedades</div>
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#f59e0b] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(245,158,11,0.12)]">👁</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-views">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Visualizações (30d)</div>
+          <div className="text-[0.72rem] text-[#5c5c78] mt-1">Todas as propriedades</div>
         </div>
-        <div className="stat-card blue">
-          <div className="stat-icon blue">💳</div>
-          <div className="stat-value loading" id="s-assinaturas">—</div>
-          <div className="stat-label">Assinaturas ativas</div>
-          <div className="stat-sub" id="s-assinaturas-sub">carregando...</div>
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#3b82f6] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(59,130,246,0.12)]">💳</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-assinaturas">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Assinaturas ativas</div>
+          <div className="text-[0.72rem] text-[#5c5c78] mt-1" id="s-assinaturas-sub">carregando...</div>
         </div>
       </div>
 
       {/* Stats secundárias */}
-      <div className="stats-grid [grid-template-columns:repeat(3,1fr)] -mt-2">
-        <div className="stat-card purple">
-          <div className="stat-icon purple">📱</div>
-          <div className="stat-value loading" id="s-whatsapp">—</div>
-          <div className="stat-label">Cliques WhatsApp (30d)</div>
+      <div className="grid grid-cols-3 gap-4 mb-8 -mt-2">
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#8b5cf6] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(139,92,246,0.12)]">📱</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-whatsapp">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Cliques WhatsApp (30d)</div>
         </div>
-        <div className="stat-card yellow">
-          <div className="stat-icon yellow">💬</div>
-          <div className="stat-value loading" id="s-form">—</div>
-          <div className="stat-label">Cliques Formulário (30d)</div>
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#f59e0b] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(245,158,11,0.12)]">💬</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-form">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Cliques Formulário (30d)</div>
         </div>
-        <div className="stat-card green">
-          <div className="stat-icon green">⏳</div>
-          <div className="stat-value loading" id="s-pendentes">—</div>
-          <div className="stat-label">Aguardando liberação</div>
-          <div className="stat-sub">Revisão necessária</div>
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden transition-[border-color,transform] duration-200 hover:border-white/[0.12] hover:-translate-y-0.5 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#0ca678] before:to-transparent">
+          <div className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[1.2rem] mb-4 bg-[rgba(12,166,120,0.12)]">⏳</div>
+          <div className="font-['Syne',sans-serif] text-[2rem] font-extrabold text-[#f0f0f5] leading-none mb-1.5 loading" id="s-pendentes">—</div>
+          <div className="text-[0.8rem] text-[#a0a0b8] font-medium">Aguardando liberação</div>
+          <div className="text-[0.72rem] text-[#5c5c78] mt-1">Revisão necessária</div>
         </div>
       </div>
 
       {/* Gráficos */}
-      <div className="charts-grid mt-6">
-        <div className="chart-card">
-          <div className="chart-title">Atividade na plataforma — 30 dias</div>
-          <div className="chart-sub">Visualizações, WhatsApp e Formulários</div>
+      <div className="grid grid-cols-[1.6fr_1fr] gap-4 mb-8 mt-6">
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6">
+          <div className="font-['Syne',sans-serif] text-[0.95rem] font-bold mb-1">Atividade na plataforma — 30 dias</div>
+          <div className="text-[0.75rem] text-[#5c5c78] mb-5">Visualizações, WhatsApp e Formulários</div>
           <div className="h-[220px] relative">
             <canvas id="chart-atividade"></canvas>
           </div>
         </div>
-        <div className="chart-card">
-          <div className="chart-title">Distribuição de planos</div>
-          <div className="chart-sub">Assinaturas ativas</div>
+        <div className="bg-[#111118] border border-white/[0.07] rounded-2xl p-6">
+          <div className="font-['Syne',sans-serif] text-[0.95rem] font-bold mb-1">Distribuição de planos</div>
+          <div className="text-[0.75rem] text-[#5c5c78] mb-5">Assinaturas ativas</div>
           <div className="h-[220px] relative flex items-center justify-center">
             <canvas id="chart-planos"></canvas>
           </div>
@@ -70,10 +70,10 @@ export default function PageDashboard() {
       </div>
 
       {/* Propriedades pendentes */}
-      <div className="section-header">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <div className="section-title">🏡 Propriedades pendentes de liberação</div>
-          <div className="section-count" id="pending-count">Carregando...</div>
+          <div className="font-['Syne',sans-serif] text-[1.05rem] font-bold text-[#f0f0f5]">🏡 Propriedades pendentes de liberação</div>
+          <div className="text-[0.75rem] text-[#5c5c78] mt-0.5" id="pending-count">Carregando...</div>
         </div>
       </div>
       <div id="pendentes-list" className="flex flex-col gap-3 mb-8">
@@ -81,16 +81,16 @@ export default function PageDashboard() {
       </div>
 
       {/* Últimos usuários */}
-      <div className="section-header">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <div className="section-title">👥 Usuários recentes</div>
-          <div className="section-count">Últimos cadastros</div>
+          <div className="font-['Syne',sans-serif] text-[1.05rem] font-bold text-[#f0f0f5]">👥 Usuários recentes</div>
+          <div className="text-[0.75rem] text-[#5c5c78] mt-0.5">Últimos cadastros</div>
         </div>
         <button className="btn btn-ghost btn-sm" onClick={() => (window as any).showPage('usuarios')}>
           Ver todos →
         </button>
       </div>
-      <div className="table-card">
+      <div className="bg-[#111118] border border-white/[0.07] rounded-2xl overflow-hidden">
         <table>
           <thead>
             <tr>
