@@ -160,12 +160,12 @@ export default function LoginPage() {
           <div className="ln-modal-box">
             {recuperacaoEnviada ? (
               <div className="ln-modal-sucesso">
-                <span className="material-icons" style={{ fontSize: '2.5rem', color: 'var(--verde)', marginBottom: 10, display: 'block' }}>
+                <span className="material-icons text-[2.5rem] text-[var(--verde)] mb-[10px] block">
                   mark_email_read
                 </span>
                 <h3>E-mail enviado!</h3>
                 <p>Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
-                <button className="ln-btn-modal-cancelar" style={{ marginTop: 16, width: '100%' }} onClick={fecharModal}>
+                <button className="ln-btn-modal-cancelar mt-4 w-full" onClick={fecharModal}>
                   Fechar
                 </button>
               </div>
