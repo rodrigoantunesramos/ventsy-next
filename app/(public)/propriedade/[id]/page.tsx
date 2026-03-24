@@ -10,7 +10,8 @@ import type { ReviewFormData } from '@/types/client'
 
 /* ── tipos ── */
 interface Foto { url: string; titulo: string; ordem: number }
-interface Avaliacao { id: any; autor: string; avatar: string; data: string; nota: number; texto: string; verificada: boolean; evento_tipo?: string }
+interface Avaliacao { id: string; autor: string; avatar: string; data: string; nota: number; texto: string; verificada: boolean; evento_tipo?: string }
+interface UsuarioPerfil { nome?: string; foto_perfil?: string; criado_em?: string }
 interface Video { url: string; titulo: string }
 
 const AVAL_DEMO: Avaliacao[] = [
@@ -24,7 +25,7 @@ const AVAL_DEMO: Avaliacao[] = [
 
 const TIPOS_EVENTO = ['Casamento','Aniversário','Festa Infantil','Debutante','Formatura','Confraternização','Corporativo','Workshop','Show / Festival','Batizado','Encontro Religioso','Provas Hípicas','Pescaria','Radical','Outro']
 
-function parseArray(val: any): string[] {
+function parseArray(val: unknown): string[] {
   if (Array.isArray(val)) return val
   if (!val) return []
   if (typeof val === 'string') {
@@ -199,11 +200,12 @@ function PropriedadeContent() {
       setFav(JSON.parse(localStorage.getItem('ventsy_favs') || '[]').includes(propId))
 
       if (usr){
-        setAnfNome((usr as any).nome || '—')
-        setAnfAv((usr as any).foto_perfil || '')
+        const u = usr as UsuarioPerfil
+        setAnfNome(u.nome || '—')
+        setAnfAv(u.foto_perfil || '')
 
-        if ((usr as any).criado_em){
-          const a = Math.floor((Date.now() - new Date((usr as any).criado_em).getTime()) / 31536000000)
+        if (u.criado_em){
+          const a = Math.floor((Date.now() - new Date(u.criado_em).getTime()) / 31536000000)
           setAnfTempo(a >= 1 ? `${a} ano${a > 1 ? 's' : ''}` : 'menos de 1 ano')
         }
       }

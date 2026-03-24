@@ -32,7 +32,7 @@ export default function AdminLoginScreen() {
 
         <button
           className="w-full py-3.5 mt-2 bg-[#ff385c] border-none rounded-[10px] font-['Syne',sans-serif] text-[0.95rem] font-bold text-white cursor-pointer transition-all hover:opacity-90 hover:scale-[1.01]"
-          onClick={() => (window as any).doLogin()}
+          onClick={() => window.doLogin()}
         >
           Entrar como Admin
         </button>

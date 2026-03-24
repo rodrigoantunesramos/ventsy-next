@@ -142,7 +142,7 @@ export const DEMO_PROPS = [
 
 export function pesoPlano(p: string) { return p === 'ultra' ? 0 : p === 'pro' ? 1 : 2 }
 
-export function ordenar(lista: any[]) {
+export function ordenar(lista: { _plano?: string; _nota?: string; nome?: string }[]) {
   return [...lista].sort((a, b) => {
     const dp = pesoPlano(a._plano) - pesoPlano(b._plano)
     if (dp !== 0) return dp

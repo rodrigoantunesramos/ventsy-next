@@ -53,7 +53,7 @@ export default function PageQualidade() {
           <div className="font-['Syne',sans-serif] text-[1.05rem] font-bold text-[#f0f0f5]">🏡 Propriedades com perfil incompleto</div>
           <div className="text-[0.75rem] text-[#5c5c78] mt-0.5">Requerem atenção para melhor conversão</div>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => (window as any).exportQualidade()}>
+        <button className="btn btn-ghost btn-sm" onClick={() => window.exportQualidade()}>
           ⬇️ Exportar CSV
         </button>
       </div>
@@ -93,10 +93,10 @@ export default function PageQualidade() {
           <div className="text-[0.75rem] text-[#5c5c78] mt-0.5">Termos que não encontraram propriedades — oportunidade de expansão</div>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-ghost btn-sm" onClick={() => (window as any).recarregarBuscasSemResultado()}>
+          <button className="btn btn-ghost btn-sm" onClick={() => window.recarregarBuscasSemResultado()}>
             🔄 Atualizar
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => (window as any).exportBuscasSemResultado()}>
+          <button className="btn btn-ghost btn-sm" onClick={() => window.exportBuscasSemResultado()}>
             ⬇️ CSV
           </button>
         </div>

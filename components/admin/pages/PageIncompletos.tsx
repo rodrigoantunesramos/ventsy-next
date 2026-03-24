@@ -41,13 +41,13 @@ export default function PageIncompletos() {
         <div className="table-header flex-wrap gap-[10px]">
           <div className="section-title">📋 Lista de cadastros incompletos</div>
           <div className="flex gap-2 flex-wrap">
-            <button className="btn btn-ghost btn-sm" onClick={() => (window as any).recarregarIncompletos()}>
+            <button className="btn btn-ghost btn-sm" onClick={() => window.recarregarIncompletos()}>
               🔄 Atualizar
             </button>
-            <button className="btn btn-warn btn-sm" onClick={() => (window as any).emailTodosIncompletos()}>
+            <button className="btn btn-warn btn-sm" onClick={() => window.emailTodosIncompletos()}>
               📧 E-mail para todos
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => (window as any).exportIncompletos()}>
+            <button className="btn btn-ghost btn-sm" onClick={() => window.exportIncompletos()}>
               ⬇️ Exportar CSV
             </button>
           </div>

@@ -21,7 +21,9 @@ interface LayoutProps {
 }
 
 // ── Menu items ────────────────────────────────────────────────────────────────
-const MENU_ITEMS = [
+type MenuItem = { rota: string; label: string; group: string; href?: string }
+
+const MENU_ITEMS: MenuItem[] = [
   { rota: 'dashboard',        label: '🏠 Dashboard',          group: 'Geral'  },
   { rota: 'minhapropriedade', label: '🏡 Minha Propriedade',  group: 'Geral'  },
   { rota: 'fotos',            label: '📸 Fotos',              group: 'Geral'  },
@@ -252,9 +254,9 @@ export default function Layout({ children }: LayoutProps) {
                         {item.group}
                       </div>
                     )}
-                    {(item as any).href ? (
+                    {item.href ? (
                       <Link
-                        href={(item as any).href}
+                        href={item.href}
                         onClick={() => setSidebar(false)}
                         className="dash-menu-link block px-5 py-[9px] text-[.88rem] text-[#444] no-underline border-l-[3px] border-transparent transition-all duration-150"
                       >
@@ -267,7 +269,7 @@ export default function Layout({ children }: LayoutProps) {
                         onClick={(e) => {
                           e.preventDefault();
                           setSidebar(false);
-                          (window as any).navegar?.(item.rota);
+                          window.navegar?.(item.rota);
                         }}
                         className="dash-menu-link block px-5 py-[9px] text-[.88rem] text-[#444] no-underline border-l-[3px] border-transparent transition-all duration-150"
                       >

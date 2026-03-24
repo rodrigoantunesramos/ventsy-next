@@ -62,8 +62,8 @@ export default function PagePlanos() {
       </div>
 
       <div className="flex justify-end gap-[10px]">
-        <button className="btn btn-ghost" onClick={() => (window as any).carregarPlanos()}>↺ Resetar</button>
-        <button className="btn btn-primary" onClick={() => (window as any).salvarPlanos()}>
+        <button className="btn btn-ghost" onClick={() => window.carregarPlanos()}>↺ Resetar</button>
+        <button className="btn btn-primary" onClick={() => window.salvarPlanos()}>
           💾 Salvar configurações de planos
         </button>
       </div>

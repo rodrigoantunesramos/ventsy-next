@@ -66,7 +66,7 @@ export default function AdminSidebar() {
             <div
               className={`sidebar-link flex items-center gap-3 px-6 py-[11px] text-[0.88rem] font-medium cursor-pointer transition-all relative
                 ${item.isActive ? 'active text-[#ff385c] bg-[rgba(255,56,92,0.12)]' : 'text-[#a0a0b8] hover:text-[#f0f0f5] hover:bg-white/[0.03]'}`}
-              onClick={() => (window as any).showPage(item.page)}
+              onClick={() => window.showPage(item.page)}
             >
               {item.isActive && (
                 <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#ff385c] rounded-r" />
@@ -103,7 +103,7 @@ export default function AdminSidebar() {
         </div>
         <button
           className="w-full bg-transparent border border-white/[0.07] rounded-lg py-[9px] text-[0.82rem] text-[#a0a0b8] cursor-pointer font-['Inter',sans-serif] transition-all hover:border-[#ff385c] hover:text-[#ff385c]"
-          onClick={() => (window as any).doLogout()}
+          onClick={() => window.doLogout()}
         >
           🚪 Sair
         </button>

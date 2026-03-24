@@ -12,7 +12,7 @@ export default function PageComunicacao() {
             <select
               className="form-select"
               id="com-destinatario"
-              onChange={() => (window as any).updateComCount()}
+              onChange={() => window.updateComCount()}
             >
               <option value="todos">Todos os usuários</option>
               <option value="basico">Plano Básico</option>
@@ -47,10 +47,10 @@ export default function PageComunicacao() {
               placeholder="Escreva sua mensagem aqui..."
             />
             <div className="flex gap-[10px] justify-end">
-              <button className="btn btn-ghost" onClick={() => (window as any).clearCompose()}>
+              <button className="btn btn-ghost" onClick={() => window.clearCompose()}>
                 🗑️ Limpar
               </button>
-              <button className="btn btn-primary" onClick={() => (window as any).enviarMensagem()}>
+              <button className="btn btn-primary" onClick={() => window.enviarMensagem()}>
                 📤 Enviar
               </button>
             </div>

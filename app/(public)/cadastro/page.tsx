@@ -322,8 +322,8 @@ function CadastroContent() {
 
       setSucesso(true)
 
-    } catch (err: any) {
-      setAlerta({ tipo: 'erro', msg: err.message || 'Ocorreu um erro. Tente novamente.' })
+    } catch (err: unknown) {
+      setAlerta({ tipo: 'erro', msg: (err instanceof Error ? err.message : null) || 'Ocorreu um erro. Tente novamente.' })
     } finally {
       setEnviando(false)
     }

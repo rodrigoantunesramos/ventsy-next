@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
 import { supabase } from '@/lib/supabase'
+import type { PropertySummary } from '@/types/client'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
   AC:'Acre', AL:'Alagoas', AP:'Amapá', AM:'Amazonas', BA:'Bahia', CE:'Ceará',
@@ -27,7 +28,7 @@ function BuscaContent() {
   const tipoParam   = params.get('tipo') || params.get('evento') || ''
   const dataParam   = params.get('data') || ''
 
-  const [props, setProps]             = useState<any[]>([])
+  const [props, setProps]             = useState<PropertySummary[]>([])
   const [loading, setLoading]         = useState(true)
   const [planosMap, setPlanosMap]     = useState<Record<string, string>>({})
   const [filtroOpen, setFiltroOpen]   = useState(false)
@@ -92,7 +93,7 @@ function BuscaContent() {
     }
 
     const { data } = await query
-    setProps(data || [])
+    setProps((data || []) as PropertySummary[])
     setLoading(false)
   }
 

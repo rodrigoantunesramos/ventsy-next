@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { CATS, DEMO_PROPS, ordenar } from '@/lib/data'
 import CategorySection from './CategorySection'
+import type { PropertySummary } from '@/types/client'
 
 async function fetchPlanosMap(): Promise<Record<string, string>> {
   try {
@@ -14,7 +15,7 @@ async function fetchPlanosMap(): Promise<Record<string, string>> {
 }
 
 export default function HomeFeed() {
-  const [grupos, setGrupos] = useState<Record<string, any[]>>({})
+  const [grupos, setGrupos] = useState<Record<string, PropertySummary[]>>({})
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -24,19 +25,21 @@ export default function HomeFeed() {
         fetchPlanosMap(),
       ])
 
-      let lista: any[] = props || []
+      type RawProp = PropertySummary & { usuario_id?: string }
+      const raw: RawProp[] = (props || []) as RawProp[]
 
-      if (!lista.length || error) {
-        lista = DEMO_PROPS.map(p => ({ ...p, _nota: p.nota_media }))
+      let lista: PropertySummary[]
+      if (!raw.length || error) {
+        lista = DEMO_PROPS.map(p => ({ ...p, _nota: p.nota_media })) as unknown as PropertySummary[]
       } else {
-        lista = lista.map(p => ({
+        lista = raw.map(p => ({
           ...p,
-          _plano: (p.usuario_id && planos[p.usuario_id]) || 'basico',
-          _nota: parseFloat(p.avaliacao || 0),
+          _plano: ((p.usuario_id && planos[p.usuario_id]) || 'basico') as 'basico' | 'pro' | 'ultra',
+          _nota: String(parseFloat(String(p.avaliacao || 0))),
         }))
       }
 
-      const g: Record<string, any[]> = {}
+      const g: Record<string, PropertySummary[]> = {}
       CATS.forEach(c => { g[c.nome] = [] })
       lista.forEach(p => { if (g[p.categoria] !== undefined) g[p.categoria].push(p) })
 

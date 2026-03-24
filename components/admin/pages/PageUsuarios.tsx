@@ -16,7 +16,7 @@ export default function PageUsuarios() {
               type="text"
               placeholder="Buscar usuário..."
               id="search-users"
-              onInput={() => (window as any).filterUsers()}
+              onInput={() => window.filterUsers()}
             />
           </div>
         </div>
