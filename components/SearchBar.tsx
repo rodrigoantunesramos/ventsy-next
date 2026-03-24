@@ -91,7 +91,7 @@ export default function SearchBar() {
             Quando?
           </label>
           <span className="text-[.83rem] text-gray-500 truncate">{dataDisplay}</span>
-          <input ref={inputRef} style={{ display: 'none' }} readOnly />
+          <input ref={inputRef} className="hidden" readOnly />
         </div>
 
         <div className="w-px h-7 bg-gray-200 mx-1 flex-shrink-0" />

@@ -3,7 +3,7 @@
 export default function PageAssinaturas() {
   return (
     <div className="page" id="page-assinaturas">
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginBottom: '24px' }}>
+      <div className="stats-grid grid-cols-3 mb-6">
         <div className="stat-card green">
           <div className="stat-icon green">✅</div>
           <div className="stat-value loading" id="ass-ativas">—</div>

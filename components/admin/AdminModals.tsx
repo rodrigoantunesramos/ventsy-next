@@ -101,7 +101,7 @@ export default function AdminModals() {
 
       {/* ── Modal: Editar Propriedade (WYSIWYG Admin) ── */}
       <div className="modal-overlay" id="modal-edit-prop">
-        <div className="modal" style={{ maxWidth: '680px' }}>
+        <div className="modal max-w-[680px]">
           <button
             className="modal-close"
             onClick={() => (window as any).closeModal('modal-edit-prop')}
@@ -120,11 +120,10 @@ export default function AdminModals() {
               <div className="form-label">Estado (UF)</div>
               <input
                 type="text"
-                className="form-input"
+                className="form-input uppercase"
                 id="mep-estado"
                 placeholder="RJ"
                 maxLength={2}
-                style={{ textTransform: 'uppercase' }}
               />
               <div className="form-label">Capacidade (pessoas)</div>
               <input type="number" className="form-input" id="mep-capacidade" placeholder="100" min={1} />
@@ -150,48 +149,28 @@ export default function AdminModals() {
           <input type="text" className="form-input" id="mep-cep" placeholder="00000-000" />
           <div className="form-label">Endereço completo</div>
           <input type="text" className="form-input" id="mep-endereco" placeholder="Rua, número, bairro" />
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '16px',
-              padding: '12px 14px',
-              background: 'var(--bg3)',
-              borderRadius: '8px',
-            }}
-          >
+          <div className="flex items-center gap-3 mb-4 px-[14px] py-3 bg-[var(--bg3)] rounded-lg">
             <input
               type="checkbox"
               id="mep-publicada"
-              style={{ width: '16px', height: '16px', accentColor: 'var(--green)' }}
+              className="w-4 h-4 accent-[var(--green)]"
             />
             <label
               htmlFor="mep-publicada"
-              style={{ fontSize: '0.88rem', color: 'var(--text2)', cursor: 'pointer' }}
+              className="text-[0.88rem] text-[var(--text2)] cursor-pointer"
             >
               ✅ Propriedade publicada (visível ao público)
             </label>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '16px',
-              padding: '12px 14px',
-              background: 'var(--bg3)',
-              borderRadius: '8px',
-            }}
-          >
+          <div className="flex items-center gap-3 mb-4 px-[14px] py-3 bg-[var(--bg3)] rounded-lg">
             <input
               type="checkbox"
               id="mep-destaque"
-              style={{ width: '16px', height: '16px', accentColor: 'var(--purple)' }}
+              className="w-4 h-4 accent-[var(--purple)]"
             />
             <label
               htmlFor="mep-destaque"
-              style={{ fontSize: '0.88rem', color: 'var(--text2)', cursor: 'pointer' }}
+              className="text-[0.88rem] text-[var(--text2)] cursor-pointer"
             >
               📌 Destaque no topo (fixar na página inicial)
             </label>
@@ -215,7 +194,7 @@ export default function AdminModals() {
 
       {/* ── Modal: E-mail para cadastro incompleto ── */}
       <div className="modal-overlay" id="modal-email-inc">
-        <div className="modal" style={{ maxWidth: '540px' }}>
+        <div className="modal max-w-[540px]">
           <button
             className="modal-close"
             onClick={() => (window as any).closeModal('modal-email-inc')}
@@ -234,9 +213,8 @@ export default function AdminModals() {
           />
           <div className="form-label">Mensagem (HTML aceito)</div>
           <textarea
-            className="compose-textarea"
+            className="compose-textarea min-h-[180px]"
             id="email-inc-corpo"
-            style={{ minHeight: '180px' }}
             defaultValue={`Olá! 👋\n\nNotamos que você criou sua conta na <strong>Ventsy</strong> mas ainda não finalizou o cadastro do seu espaço.\n\nLeva menos de 5 minutos e você começa a receber solicitações de clientes imediatamente!\n\n<a href="https://ventsy.com.br/cadastro" style="background:#ff385c;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">👉 Completar meu cadastro</a>\n\nQualquer dúvida, estamos aqui!\n\nEquipe Ventsy`}
           />
           <div className="modal-footer">

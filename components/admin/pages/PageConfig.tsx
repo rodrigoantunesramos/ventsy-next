@@ -3,11 +3,11 @@
 export default function PageConfig() {
   return (
     <div className="page" id="page-config">
-      <div style={{ maxWidth: '600px' }}>
+      <div className="max-w-[600px]">
         {/* Segurança */}
-        <div className="chart-card" style={{ marginBottom: '20px' }}>
-          <div className="chart-title" style={{ marginBottom: '16px' }}>🔐 Segurança do Admin</div>
-          <div className="detail-grid" style={{ marginBottom: '16px' }}>
+        <div className="chart-card mb-5">
+          <div className="chart-title mb-4">🔐 Segurança do Admin</div>
+          <div className="detail-grid mb-4">
             <div className="detail-row">
               <div className="detail-key">Admin atual</div>
               <div className="detail-val" id="config-admin-email">—</div>
