@@ -108,7 +108,7 @@ export default function AdminPage() {
                   <button className="tab-btn"        data-tipo="nota"       onClick={(e) => (window as any).mudarTab?.(e.currentTarget)}>⭐ Avaliações</button>
                 </div>
               </div>
-              <div style={{ position:'relative', height:'300px', width:'100%' }}>
+              <div className="relative h-[300px] w-full">
                 <canvas id="graficoAnalytics"></canvas>
               </div>
               <p className="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
@@ -218,8 +218,7 @@ export default function AdminPage() {
     {/* KPIs */}
     <div className="fin-kpi-grid">
       <div
-        className="fin-kpi-card verde"
-        style={{ animation: "fadeUp .3s ease both" }}
+        className="fin-kpi-card verde animate-[fadeUp_.3s_ease_both]"
       >
         <div className="fin-kpi-label">Receita Total</div>
         <div className="fin-kpi-value verde" id="fin-kpi-receita">
@@ -228,8 +227,7 @@ export default function AdminPage() {
         <div className="fin-delta up">↑ 12% vs mês anterior</div>
       </div>
       <div
-        className="fin-kpi-card vermelho"
-        style={{ animation: "fadeUp .35s ease both" }}
+        className="fin-kpi-card vermelho animate-[fadeUp_.35s_ease_both]"
       >
         <div className="fin-kpi-label">Despesas Totais</div>
         <div className="fin-kpi-value vermelho" id="fin-kpi-despesa">
@@ -238,8 +236,7 @@ export default function AdminPage() {
         <div className="fin-delta down">↑ 4% vs mês anterior</div>
       </div>
       <div
-        className="fin-kpi-card gold"
-        style={{ animation: "fadeUp .4s ease both" }}
+        className="fin-kpi-card gold animate-[fadeUp_.4s_ease_both]"
       >
         <div className="fin-kpi-label">Lucro Líquido</div>
         <div className="fin-kpi-value gold" id="fin-kpi-lucro">
@@ -248,8 +245,7 @@ export default function AdminPage() {
         <div className="fin-delta up">↑ 18% vs mês anterior</div>
       </div>
       <div
-        className="fin-kpi-card azul"
-        style={{ animation: "fadeUp .45s ease both" }}
+        className="fin-kpi-card azul animate-[fadeUp_.45s_ease_both]"
       >
         <div className="fin-kpi-label">Eventos no Mês</div>
         <div className="fin-kpi-value azul" id="fin-kpi-eventos">
@@ -262,8 +258,7 @@ export default function AdminPage() {
     <div className="fin-mid-grid">
       {/* Gráfico de barras */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .4s ease both" }}
+        className="fin-section animate-[fadeUp_.4s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -276,8 +271,7 @@ export default function AdminPage() {
       </div>
       {/* Donut */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .45s ease both" }}
+        className="fin-section animate-[fadeUp_.45s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -292,8 +286,7 @@ export default function AdminPage() {
       </div>
       {/* Metas */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .5s ease both" }}
+        className="fin-section animate-[fadeUp_.5s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -301,8 +294,7 @@ export default function AdminPage() {
             <div className="fin-section-sub">Progresso até agora</div>
           </div>
           <button
-            className="btn-fin btn-fin-ghost"
-            style={{ fontSize: "0.78rem", padding: "6px 14px" }}
+            className="btn-fin btn-fin-ghost text-[0.78rem] py-[6px] px-[14px]"
             onClick={() => (window as any).finOpenModal('meta')}
           >
             Editar
@@ -312,8 +304,7 @@ export default function AdminPage() {
       </div>
       {/* Próximos Eventos */}
       <div
-        className="fin-section"
-        style={{ animation: "fadeUp .55s ease both" }}
+        className="fin-section animate-[fadeUp_.55s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
@@ -324,19 +315,19 @@ export default function AdminPage() {
         <div className="fin-cf-row">
           <div className="fin-cf-box">
             <div className="fin-cf-label">Confirmados</div>
-            <div className="fin-cf-val" style={{ color: "#0ca678" }}>
+            <div className="fin-cf-val text-[#0ca678]">
               R$ 22.400
             </div>
           </div>
           <div className="fin-cf-box">
             <div className="fin-cf-label">Em Negociação</div>
-            <div className="fin-cf-val" style={{ color: "#f59e0b" }}>
+            <div className="fin-cf-val text-[#f59e0b]">
               R$ 8.900
             </div>
           </div>
           <div className="fin-cf-box">
             <div className="fin-cf-label">Pendente Pag.</div>
-            <div className="fin-cf-val" style={{ color: "#ff385c" }}>
+            <div className="fin-cf-val text-[#ff385c]">
               R$ 5.200
             </div>
           </div>
@@ -345,18 +336,16 @@ export default function AdminPage() {
       </div>
       {/* Lançamentos */}
       <div
-        className="fin-section fin-wide"
-        style={{ animation: "fadeUp .6s ease both" }}
+        className="fin-section fin-wide animate-[fadeUp_.6s_ease_both]"
       >
         <div className="fin-section-header">
           <div>
             <div className="fin-section-title">Lançamentos Recentes</div>
             <div className="fin-section-sub">Todas as movimentações do mês</div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="flex gap-2">
             <select
-              className="fin-select"
-              style={{ fontSize: "0.78rem", padding: "6px 12px" }}
+              className="fin-select text-[0.78rem] py-[6px] px-[12px]"
               onChange={(e: any) => (window as any).finFilterTable(e.target.value)}
             >
               <option value="todos">Todos</option>
@@ -365,8 +354,7 @@ export default function AdminPage() {
               <option value="pendente">Pendentes</option>
             </select>
             <button
-              className="btn-fin btn-fin-ghost"
-              style={{ fontSize: "0.78rem", padding: "6px 14px" }}
+              className="btn-fin btn-fin-ghost text-[0.78rem] py-[6px] px-[14px]"
             >
               Exportar
             </button>
@@ -381,7 +369,7 @@ export default function AdminPage() {
                 <th>Categoria</th>
                 <th>Tipo de Evento</th>
                 <th>Status</th>
-                <th style={{ textAlign: "right" }}>Valor</th>
+                <th className="text-right">Valor</th>
               </tr>
             </thead>
             <tbody id="finTransTable" />
@@ -415,7 +403,7 @@ export default function AdminPage() {
               <th>Categoria</th>
               <th>Evento</th>
               <th>Status</th>
-              <th style={{ textAlign: "right" }}>Valor</th>
+              <th className="text-right">Valor</th>
             </tr>
           </thead>
           <tbody id="finReceitasTable" />
@@ -447,7 +435,7 @@ export default function AdminPage() {
               <th>Categoria</th>
               <th>Evento</th>
               <th>Status</th>
-              <th style={{ textAlign: "right" }}>Valor</th>
+              <th className="text-right">Valor</th>
             </tr>
           </thead>
           <tbody id="finDespesasTable" />
@@ -465,9 +453,8 @@ export default function AdminPage() {
         </div>
       </div>
       <div
-        className="fin-event-list"
+        className="fin-event-list max-h-[500px] overflow-y-auto"
         id="finEventListFull"
-        style={{ maxHeight: 500, overflowY: "auto" }}
       />
     </div>
   </div>
@@ -482,73 +469,48 @@ export default function AdminPage() {
           </div>
         </div>
         <div
-          className="fin-cf-row"
-          style={{ flexDirection: "column", gap: 14 }}
+          className="fin-cf-row flex-col gap-[14px]"
         >
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 14,
-              background: "#f7f7f7",
-              borderRadius: 10,
-              border: "1px solid #eee"
-            }}
+            className="flex justify-between items-center p-[14px] bg-[#f7f7f7] rounded-[10px] border border-[#eee]"
           >
             <span
-              style={{ fontSize: "0.88rem", color: "#444", fontWeight: 600 }}
+              className="text-[0.88rem] text-[#444] font-semibold"
             >
               Total Receitas
             </span>
             <span
-              style={{ fontWeight: 700, color: "#0ca678", fontSize: "1rem" }}
+              className="font-bold text-[#0ca678] text-[1rem]"
               id="rel-receita"
             >
               R$ 48.700
             </span>
           </div>
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 14,
-              background: "#f7f7f7",
-              borderRadius: 10,
-              border: "1px solid #eee"
-            }}
+            className="flex justify-between items-center p-[14px] bg-[#f7f7f7] rounded-[10px] border border-[#eee]"
           >
             <span
-              style={{ fontSize: "0.88rem", color: "#444", fontWeight: 600 }}
+              className="text-[0.88rem] text-[#444] font-semibold"
             >
               Total Despesas
             </span>
             <span
-              style={{ fontWeight: 700, color: "#ff385c", fontSize: "1rem" }}
+              className="font-bold text-[#ff385c] text-[1rem]"
               id="rel-despesa"
             >
               R$ 19.350
             </span>
           </div>
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 14,
-              background: "rgba(255,56,92,0.04)",
-              borderRadius: 10,
-              border: "1px solid rgba(255,56,92,0.15)"
-            }}
+            className="flex justify-between items-center p-[14px] bg-[rgba(255,56,92,0.04)] rounded-[10px] border border-[rgba(255,56,92,0.15)]"
           >
             <span
-              style={{ fontSize: "0.88rem", color: "#444", fontWeight: 700 }}
+              className="text-[0.88rem] text-[#444] font-bold"
             >
               Lucro Líquido
             </span>
             <span
-              style={{ fontWeight: 700, color: "#f59e0b", fontSize: "1.1rem" }}
+              className="font-bold text-[#f59e0b] text-[1.1rem]"
               id="rel-lucro"
             >
               R$ 29.350
@@ -623,7 +585,7 @@ export default function AdminPage() {
     </div>
   </div>
   {/* Alert banner */}
-  <div className="docs-alert" id="docsAlertBanner" style={{ display: "none" }}>
+  <div className="docs-alert hidden" id="docsAlertBanner">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
       <circle cx={12} cy={12} r={10} />
       <line x1={12} y1={8} x2={12} y2={12} />
@@ -640,7 +602,7 @@ export default function AdminPage() {
   {/* Summary */}
   <div className="docs-summary">
     <div className="docs-sum-card">
-      <div className="docs-sum-icon" style={{ background: "#f0fdf4" }}>
+      <div className="docs-sum-icon bg-[#f0fdf4]">
         <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth={2}>
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
           <polyline points="22,4 12,14.01 9,11.01" />
@@ -648,8 +610,7 @@ export default function AdminPage() {
       </div>
       <div>
         <div
-          className="docs-sum-val"
-          style={{ color: "#16a34a" }}
+          className="docs-sum-val text-[#16a34a]"
           id="docsCntOk"
         >
           0
@@ -658,7 +619,7 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="docs-sum-card">
-      <div className="docs-sum-icon" style={{ background: "#fffbeb" }}>
+      <div className="docs-sum-icon bg-[#fffbeb]">
         <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth={2}>
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           <line x1={12} y1={9} x2={12} y2={13} />
@@ -667,8 +628,7 @@ export default function AdminPage() {
       </div>
       <div>
         <div
-          className="docs-sum-val"
-          style={{ color: "#d97706" }}
+          className="docs-sum-val text-[#d97706]"
           id="docsCntWarn"
         >
           0
@@ -677,7 +637,7 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="docs-sum-card">
-      <div className="docs-sum-icon" style={{ background: "#fef2f2" }}>
+      <div className="docs-sum-icon bg-[#fef2f2]">
         <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth={2}>
           <circle cx={12} cy={12} r={10} />
           <line x1={15} y1={9} x2={9} y2={15} />
@@ -686,8 +646,7 @@ export default function AdminPage() {
       </div>
       <div>
         <div
-          className="docs-sum-val"
-          style={{ color: "#dc2626" }}
+          className="docs-sum-val text-[#dc2626]"
           id="docsCntExp"
         >
           0
@@ -696,7 +655,7 @@ export default function AdminPage() {
       </div>
     </div>
     <div className="docs-sum-card">
-      <div className="docs-sum-icon" style={{ background: "#eff6ff" }}>
+      <div className="docs-sum-icon bg-[#eff6ff]">
         <svg viewBox="0 0 24 24" fill="none" stroke="#1a73e8" strokeWidth={2}>
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
           <polyline points="14,2 14,8 20,8" />
@@ -706,8 +665,7 @@ export default function AdminPage() {
       </div>
       <div>
         <div
-          className="docs-sum-val"
-          style={{ color: "#1a73e8" }}
+          className="docs-sum-val text-[#1a73e8]"
           id="docsCntTotal"
         >
           0
@@ -925,7 +883,7 @@ export default function AdminPage() {
         </div>
         <button onClick={() => (window as any).eqChangeMonth(1)}>›</button>
       </div>
-      <div style={{ display: "flex", gap: 10 }}>
+      <div className="flex gap-2.5">
         <button className="btn-fin btn-fin-ghost" onClick={() => (window as any).eqExportPayroll()}>
           <svg
             width={13}
@@ -942,11 +900,7 @@ export default function AdminPage() {
           Exportar CSV
         </button>
         <button
-          className="btn-fin btn-fin-primary"
-          style={{
-            background: "#f59e0b",
-            boxShadow: "0 2px 10px rgba(245,158,11,.25)"
-          }}
+          className="btn-fin btn-fin-primary bg-[#f59e0b] shadow-[0_2px_10px_rgba(245,158,11,.25)]"
         >
           Fechar Folha
         </button>
@@ -956,8 +910,7 @@ export default function AdminPage() {
       <div className="eq-ptotal">
         <div className="eq-ptotal-label">Total Bruto</div>
         <div
-          className="eq-ptotal-val"
-          style={{ color: "#f59e0b" }}
+          className="eq-ptotal-val text-[#f59e0b]"
           id="eq-pt-bruto"
         >
           R$ 0
@@ -966,8 +919,7 @@ export default function AdminPage() {
       <div className="eq-ptotal">
         <div className="eq-ptotal-label">Total Descontos</div>
         <div
-          className="eq-ptotal-val"
-          style={{ color: "#ff385c" }}
+          className="eq-ptotal-val text-[#ff385c]"
           id="eq-pt-descontos"
         >
           R$ 0
@@ -976,8 +928,7 @@ export default function AdminPage() {
       <div className="eq-ptotal">
         <div className="eq-ptotal-label">Total Líquido</div>
         <div
-          className="eq-ptotal-val"
-          style={{ color: "#0ca678" }}
+          className="eq-ptotal-val text-[#0ca678]"
           id="eq-pt-liquido"
         >
           R$ 0
@@ -1004,7 +955,7 @@ export default function AdminPage() {
   </div>
   {/* ── ABA: IMPOSTOS ── */}
   <div id="eq-panel-impostos" className="eq-panel">
-    <div style={{ maxWidth: 900 }}>
+    <div className="max-w-[900px]">
       <div className="eq-tax-notice">
         <svg
           viewBox="0 0 24 24"
@@ -1474,7 +1425,7 @@ export default function AdminPage() {
           do funcionário.
         </div>
         <div className="eq-sim-body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div className="flex flex-col gap-[14px]">
             <div>
               <div className="eq-sim-label">Salário Base (R$)</div>
               <input
@@ -1502,7 +1453,7 @@ export default function AdminPage() {
             <div>
               <div className="eq-sim-label">Horas extras (quantidade)</div>
               <input
-                className="eq-sim-input"
+                className="eq-sim-input text-[.9rem]"
                 type="number"
                 id="eq-sim-he"
                 defaultValue={0}
@@ -1510,20 +1461,18 @@ export default function AdminPage() {
                 max={80}
                 step={1}
                 onInput={() => (window as any).eqRunSimulator()}
-                style={{ fontSize: ".9rem" }}
               />
             </div>
             <div>
               <div className="eq-sim-label">Adicional / Bônus (R$)</div>
               <input
-                className="eq-sim-input"
+                className="eq-sim-input text-[.9rem]"
                 type="number"
                 id="eq-sim-bonus"
                 defaultValue={0}
                 min={0}
                 step={50}
                 onInput={() => (window as any).eqRunSimulator()}
-                style={{ fontSize: ".9rem" }}
               />
             </div>
           </div>
@@ -1558,7 +1507,7 @@ export default function AdminPage() {
               <h2>📅 Calendário</h2>
               <div className="nome-propriedade">Gerencie a disponibilidade da sua propriedade</div>
             </div>
-            <div style={{ display:'flex', gap:8 }}>
+            <div className="flex gap-2">
               <button className="cal-btn-acao" onClick={() => (window as any).calBloquearFimsDeSemana?.()}>🔒 Bloquear FDS</button>
               <button className="cal-btn-acao" onClick={() => (window as any).calLiberarTodoMes?.()}>🔓 Liberar mês</button>
               <button className="cal-btn-acao primario" onClick={() => (window as any).calSalvarDisponibilidade?.()}>💾 Salvar</button>
@@ -1566,7 +1515,7 @@ export default function AdminPage() {
           </div>
 
           {/* Legenda */}
-          <div className="cal-legenda" style={{ marginBottom:20 }}>
+          <div className="cal-legenda mb-5">
             <div className="cal-legenda-item"><div className="cal-cor livre" /><span>Disponível</span></div>
             <div className="cal-legenda-item"><div className="cal-cor bloqueado" /><span>Bloqueado</span></div>
             <div className="cal-legenda-item"><div className="cal-cor hoje-leg" /><span>Hoje</span></div>
@@ -1650,13 +1599,13 @@ export default function AdminPage() {
             <div className="cal-modal-box">
               <button className="cal-btn-fechar" onClick={() => (window as any).calFecharModalLiberarDia?.()}>✕</button>
               <h3>🔓 Liberar dia</h3>
-              <p style={{ color:'#666', fontSize:'.88rem', marginBottom:20 }}>
+              <p className="text-[#666] text-[.88rem] mb-5">
                 Dia <strong id="cal-liberar-dia-num">—</strong> de <strong id="cal-liberar-dia-mes">—</strong>
                 <br />Motivo: <em id="cal-liberar-dia-motivo">—</em>
               </p>
               <div className="cal-modal-acoes">
                 <button className="cal-btn-cancel" onClick={() => (window as any).calFecharModalLiberarDia?.()}>Cancelar</button>
-                <button className="cal-btn-confirm" style={{ background:'#0ca678' }} onClick={() => (window as any).calConfirmarLiberarDia?.()}>✅ Liberar</button>
+                <button className="cal-btn-confirm bg-[#0ca678]" onClick={() => (window as any).calConfirmarLiberarDia?.()}>✅ Liberar</button>
               </div>
             </div>
           </div>
@@ -1666,14 +1615,13 @@ export default function AdminPage() {
             <div className="cal-modal-box">
               <button className="cal-btn-fechar" onClick={() => (window as any).calFecharModalLiberarTodos?.()}>✕</button>
               <h3 id="cal-modal-liberar-titulo">⚠️ Liberar todos</h3>
-              <p id="cal-modal-liberar-subtitulo" style={{ color:'#666', fontSize:'.85rem', marginBottom:16 }} />
+              <p id="cal-modal-liberar-subtitulo" className="text-[#666] text-[.85rem] mb-4" />
               <label className="cal-label-campo">Digite LIBERAR para confirmar:</label>
               <input className="cal-input" id="cal-input-confirmar" type="text" placeholder="LIBERAR"
                 onChange={() => (window as any).calValidarTextoLiberarTodos?.()} />
               <div className="cal-modal-acoes">
                 <button className="cal-btn-cancel" onClick={() => (window as any).calFecharModalLiberarTodos?.()}>Cancelar</button>
-                <button id="cal-btn-confirmar-liberar" className="cal-btn-confirm" disabled
-                  style={{ opacity:0.4, cursor:'not-allowed' }}
+                <button id="cal-btn-confirmar-liberar" className="cal-btn-confirm opacity-40 cursor-not-allowed" disabled
                   onClick={() => (window as any).calExecutarLiberarTodos?.()}>Liberar todos</button>
               </div>
             </div>
@@ -1691,7 +1639,7 @@ export default function AdminPage() {
   <div className="dash-header-fixo">
     <div>
       <h2>📸 Fotos do Espaço</h2>
-      <p style={{ fontSize: "0.82rem", color: "#999", marginTop: 3 }}>
+      <p className="text-[0.82rem] text-[#999] mt-[3px]">
         Organize as fotos por ambiente e defina as 5 fotos em destaque.
       </p>
     </div>
@@ -1706,7 +1654,7 @@ export default function AdminPage() {
   </div>
   {/* Aviso sem propriedade */}
   <div className="fotos-aviso-sem-prop" id="fotos-aviso-sem-prop">
-    <span style={{ fontSize: "1.5rem" }}>⚠️</span>
+    <span className="text-[1.5rem]">⚠️</span>
     <p>
       Você precisa cadastrar sua propriedade antes de adicionar fotos.{" "}
       <a href="minhapropriedade.html">Cadastrar agora →</a>
@@ -1881,7 +1829,7 @@ export default function AdminPage() {
   {/* /fotos-aba-espaco */}
   {/* ═══ ABA: FOTOS DE EVENTOS ═══ */}
   <div className="fotos-aba" id="fotos-aba-evento">
-    <div className="fotos-aviso-intro" style={{ background: "#1b3a5c" }}>
+    <div className="fotos-aviso-intro bg-[#1b3a5c]">
       <span className="fotos-aviso-intro-icon">🎉</span>
       <div className="fotos-aviso-intro-texto">
         <h4>Como o espaço fica decorado nos eventos</h4>
@@ -1932,10 +1880,9 @@ export default function AdminPage() {
   <header className="dash-header-fixo">
     <h2>🏡 Minha Propriedade</h2>
     <button
-      className="prop-btn-visualizar"
+      className="prop-btn-visualizar opacity-50"
       id="prop-btn-visualizar"
       onClick={() => (window as any).propVerAnuncio()}
-      style={{ opacity: "0.5" }}
     >
       👁 Ver Anúncio Público
     </button>
@@ -2257,7 +2204,7 @@ export default function AdminPage() {
             <span className="campo-label">Cidade</span>
             <input type="text" id="prop-cidade" placeholder="Ex: São Paulo" />
           </div>
-          <div style={{ gridColumn: "span 6" }}>
+          <div className="col-span-6">
             <span className="campo-label">Estado</span>
             <input type="hidden" id="prop-uf" />
             <div className="prop-uf-grid" id="prop-uf-grid">
@@ -2480,46 +2427,24 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
-        <div style={{ marginTop: 20 }}>
+        <div className="mt-5">
           <button
             type="button"
-            className="prop-btn-visualizar"
-            style={{
-              background: "#0d0d0d",
-              color: "#fff",
-              padding: "10px 18px",
-              borderRadius: 8,
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              fontWeight: 600,
-              fontSize: "0.88rem"
-            }}
+            className="prop-btn-visualizar bg-[#0d0d0d] text-white py-[10px] px-[18px] rounded-[8px] border-none cursor-pointer font-[inherit] font-semibold text-[0.88rem]"
             onClick={() => (window as any).propAtualizarMapa()}
           >
             📍 Atualizar Mapa
           </button>
-          <div className="prop-mapa-container" style={{ marginTop: 14 }}>
+          <div className="prop-mapa-container mt-[14px]">
             <div
               id="prop-mapa-msg"
-              style={{
-                fontSize: "0.85rem",
-                color: "#aaa",
-                padding: 14,
-                textAlign: "center"
-              }}
+              className="text-[0.85rem] text-[#aaa] p-[14px] text-center"
             >
               Preencha o endereço e clique em "Atualizar Mapa"
             </div>
             <div
               id="prop-mapa-leaflet"
-              style={{
-                display: "none",
-                width: "100%",
-                height: 280,
-                borderRadius: 14,
-                overflow: "hidden"
-              }}
+              className="hidden w-full h-[280px] rounded-[14px] overflow-hidden"
             />
           </div>
         </div>
@@ -2664,17 +2589,12 @@ export default function AdminPage() {
                 type="text"
                 defaultValue="Regras de Cobrança"
                 readOnly
-                style={{
-                  background: "#f5f5f5",
-                  color: "#555",
-                  cursor: "default",
-                  fontWeight: 600
-                }}
+                className="bg-[#f5f5f5] text-[#555] cursor-default font-semibold"
               />
               <textarea
                 id="prop-regras-preco"
                 placeholder="Ex: Valor inclui 6 horas de uso. Mínimo de 4h..."
-                style={{ minHeight: 100 }}
+                className="min-h-[100px]"
                 defaultValue={""}
               />
             </div>
@@ -2918,18 +2838,16 @@ export default function AdminPage() {
         <div className="prop-termometro-header">
           <div className="prop-termometro-titulo">🌡️ Força do seu anúncio</div>
           <div
-            className="prop-termometro-pct"
+            className="prop-termometro-pct text-[#ff385c]"
             id="prop-termo-pct"
-            style={{ color: "#ff385c" }}
           >
             —
           </div>
         </div>
         <div className="prop-termometro-bar-wrap">
           <div
-            className="prop-termometro-bar-fill"
+            className="prop-termometro-bar-fill w-0"
             id="prop-termo-bar"
-            style={{ width: "0%" }}
           />
         </div>
         <div className="prop-termometro-msg" id="prop-termo-msg">
@@ -3079,8 +2997,8 @@ export default function AdminPage() {
           onInput={() => (window as any).leadsAplicarFiltros()}
         />
       </div>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <span style={{ fontSize: "0.78rem", color: "#aaa" }}>Por página:</span>
+      <div className="flex gap-2 items-center">
+        <span className="text-[0.78rem] text-[#aaa]">Por página:</span>
         <select
           className="select-filtro"
           id="leads-por-pagina"
@@ -3126,13 +3044,12 @@ export default function AdminPage() {
     </div>
     <div
       id="leads-estado-vazio"
-      className="estado-vazio"
-      style={{ display: "none" }}
+      className="estado-vazio hidden"
     >
       <div className="icone-vazio">🎉</div>
       <p>Nenhum cliente encontrado. Que tal adicionar o primeiro?</p>
     </div>
-    <div className="paginacao" id="leads-paginacao" style={{ display: "none" }}>
+    <div className="paginacao hidden" id="leads-paginacao">
       <span className="paginacao-info" id="leads-paginacao-info" />
       <div className="paginacao-btns" id="leads-paginacao-btns" />
     </div>
@@ -3155,7 +3072,7 @@ export default function AdminPage() {
           data-status="lead"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#f59e0b" }} />
+          <div className="dot bg-[#f59e0b]" />
           <div>
             <div className="label-status">Lead / Novo Contato</div>
             <div className="desc-status">
@@ -3168,7 +3085,7 @@ export default function AdminPage() {
           data-status="consultada"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#3b82f6" }} />
+          <div className="dot bg-[#3b82f6]" />
           <div>
             <div className="label-status">Data Consultada</div>
             <div className="desc-status">
@@ -3181,7 +3098,7 @@ export default function AdminPage() {
           data-status="visita"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#8b5cf6" }} />
+          <div className="dot bg-[#8b5cf6]" />
           <div>
             <div className="label-status">Visita Agendada</div>
             <div className="desc-status">
@@ -3194,7 +3111,7 @@ export default function AdminPage() {
           data-status="negociacao"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#ec4899" }} />
+          <div className="dot bg-[#ec4899]" />
           <div>
             <div className="label-status">Em Negociação</div>
             <div className="desc-status">
@@ -3207,7 +3124,7 @@ export default function AdminPage() {
           data-status="reserva"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#f97316" }} />
+          <div className="dot bg-[#f97316]" />
           <div>
             <div className="label-status">Reserva Temporária</div>
             <div className="desc-status">Data "segurada" por 24–48h</div>
@@ -3219,7 +3136,7 @@ export default function AdminPage() {
           data-status="contratado"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#10b981" }} />
+          <div className="dot bg-[#10b981]" />
           <div>
             <div className="label-status">Contrato Assinado</div>
             <div className="desc-status">Sinal pago, compromisso firmado</div>
@@ -3230,7 +3147,7 @@ export default function AdminPage() {
           data-status="briefing"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#0ea5e9" }} />
+          <div className="dot bg-[#0ea5e9]" />
           <div>
             <div className="label-status">Montando Briefing</div>
             <div className="desc-status">Coletando detalhes do evento</div>
@@ -3241,7 +3158,7 @@ export default function AdminPage() {
           data-status="pronto"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#14b8a6" }} />
+          <div className="dot bg-[#14b8a6]" />
           <div>
             <div className="label-status">Pronto para Execução</div>
             <div className="desc-status">
@@ -3254,7 +3171,7 @@ export default function AdminPage() {
           data-status="montagem"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#f97316" }} />
+          <div className="dot bg-[#f97316]" />
           <div>
             <div className="label-status">Em Montagem</div>
             <div className="desc-status">Equipe já está no local</div>
@@ -3266,7 +3183,7 @@ export default function AdminPage() {
           data-status="finalizado"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#1ebc54" }} />
+          <div className="dot bg-[#1ebc54]" />
           <div>
             <div className="label-status">Evento Concluído</div>
             <div className="desc-status">A festa aconteceu com sucesso</div>
@@ -3277,7 +3194,7 @@ export default function AdminPage() {
           data-status="pos"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#22c55e" }} />
+          <div className="dot bg-[#22c55e]" />
           <div>
             <div className="label-status">Pós-Evento / Feedback</div>
             <div className="desc-status">Enviando pesquisa de satisfação</div>
@@ -3288,7 +3205,7 @@ export default function AdminPage() {
           data-status="perdido"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#ef4444" }} />
+          <div className="dot bg-[#ef4444]" />
           <div>
             <div className="label-status">Perdido</div>
             <div className="desc-status">
@@ -3301,7 +3218,7 @@ export default function AdminPage() {
           data-status="recontactar"
           onClick={(e: any) => (window as any).leadsSelecionarStatus(e.target)}
         >
-          <div className="dot" style={{ background: "#6b7280" }} />
+          <div className="dot bg-[#6b7280]" />
           <div>
             <div className="label-status">Recontactar</div>
             <div className="desc-status">
@@ -3358,17 +3275,15 @@ export default function AdminPage() {
           <option value="negociacao">Em Negociação</option>
         </select>
       </div>
-      <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+      <div className="flex gap-2.5 mt-1">
         <button
-          className="btn-outline"
-          style={{ flex: 1 }}
+          className="btn-outline flex-1"
           onClick={() => (window as any).leadsFecharModalNovo()}
         >
           Cancelar
         </button>
         <button
-          className="btn-primary"
-          style={{ flex: 1, justifyContent: "center" }}
+          className="btn-primary flex-1 justify-center"
           onClick={() => (window as any).leadsCriarCliente()}
         >
           Criar Cliente
@@ -3417,9 +3332,8 @@ export default function AdminPage() {
         Válido até —
       </span>
       <span
-        className="badge-downgrade-pendente"
+        className="badge-downgrade-pendente hidden"
         id="planos-badge-downgrade"
-        style={{ display: "none" }}
       >
         ⏳ Downgrade agendado
       </span>
@@ -3431,9 +3345,8 @@ export default function AdminPage() {
   </div>
   {/* CHECKOUT INLINE */}
   <div
-    className="checkout-inline"
+    className="checkout-inline hidden"
     id="planos-checkout-inline"
-    style={{ display: "none" }}
   >
     <div className="checkout-inline-header">
       <h3 id="planos-checkout-titulo">🛒 Finalizar Assinatura</h3>
@@ -3508,9 +3421,8 @@ export default function AdminPage() {
           </button>
         </div>
         <div
-          className="cupom-feedback"
+          className="cupom-feedback hidden"
           id="planos-cupom-feedback"
-          style={{ display: "none" }}
         />
         {/* Valores */}
         <div className="resumo-linha">
@@ -3518,34 +3430,30 @@ export default function AdminPage() {
           <span id="planos-val-subtotal">—</span>
         </div>
         <div
-          className="resumo-linha"
+          className="resumo-linha hidden"
           id="planos-linha-desconto-anual"
-          style={{ display: "none" }}
         >
           <span>🎉 Desconto anual (20%)</span>
           <span
-            className="desconto"
-            style={{ color: "#1ebc54" }}
+            className="desconto text-[#1ebc54]"
             id="planos-val-desconto-anual"
           >
             —
           </span>
         </div>
         <div
-          className="resumo-linha credito"
+          className="resumo-linha credito hidden"
           id="planos-linha-credito"
-          style={{ display: "none" }}
         >
           <span>💚 Crédito do plano atual</span>
           <span id="planos-val-credito">—</span>
         </div>
         <div
-          className="resumo-linha desconto"
+          className="resumo-linha desconto hidden"
           id="planos-linha-desconto-cupom"
-          style={{ display: "none" }}
         >
           <span id="planos-label-desconto-cupom">🎟 Desconto (cupom)</span>
-          <span style={{ color: "#1ebc54" }} id="planos-val-desconto-cupom">
+          <span className="text-[#1ebc54]" id="planos-val-desconto-cupom">
             —
           </span>
         </div>
@@ -3575,7 +3483,7 @@ export default function AdminPage() {
             <div className="metodo-box">
               ⚡ Pix
               <br />
-              <small style={{ fontSize: "0.7rem", fontWeight: 400 }}>
+              <small className="text-[0.7rem] font-normal">
                 Aprovação imediata
               </small>
             </div>
@@ -3590,7 +3498,7 @@ export default function AdminPage() {
             <div className="metodo-box">
               💳 Cartão
               <br />
-              <small style={{ fontSize: "0.7rem", fontWeight: 400 }}>
+              <small className="text-[0.7rem] font-normal">
                 Crédito ou débito
               </small>
             </div>
@@ -3605,7 +3513,7 @@ export default function AdminPage() {
             <div className="metodo-box">
               📄 Boleto
               <br />
-              <small style={{ fontSize: "0.7rem", fontWeight: 400 }}>
+              <small className="text-[0.7rem] font-normal">
                 Vence em 3 dias
               </small>
             </div>
@@ -3625,9 +3533,8 @@ export default function AdminPage() {
         </div>
         {/* Área Cartão */}
         <div
-          className="area-pagamento"
+          className="area-pagamento hidden"
           id="planos-area-cartao"
-          style={{ display: "none" }}
         >
           <div id="planos-form-cartao-mp">
             <input
@@ -3674,21 +3581,15 @@ export default function AdminPage() {
             />
           </div>
           <p
-            style={{
-              fontSize: "0.72rem",
-              color: "#aaa",
-              marginTop: 6,
-              textAlign: "center"
-            }}
+            className="text-[0.72rem] text-[#aaa] mt-[6px] text-center"
           >
             🔒 Dados criptografados pelo SDK do Mercado Pago
           </p>
         </div>
         {/* Área Boleto */}
         <div
-          className="area-pagamento"
+          className="area-pagamento hidden"
           id="planos-area-boleto"
-          style={{ display: "none" }}
         >
           <input
             type="text"
@@ -3729,7 +3630,7 @@ export default function AdminPage() {
             placeholder="seu@email.com"
           />
           <div className="nfe-row">
-            <div style={{ flex: 2 }}>
+            <div className="[flex:2]">
               <label className="form-label">Endereço</label>
               <input
                 type="text"
@@ -3738,7 +3639,7 @@ export default function AdminPage() {
                 placeholder="Rua, número"
               />
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="flex-1">
               <label className="form-label">CEP</label>
               <input
                 type="text"
@@ -3751,7 +3652,7 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="nfe-row">
-            <div style={{ flex: 2 }}>
+            <div className="[flex:2]">
               <label className="form-label">Cidade</label>
               <input
                 type="text"
@@ -3760,7 +3661,7 @@ export default function AdminPage() {
                 placeholder="Cidade"
               />
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="flex-1">
               <label className="form-label">Estado</label>
               <select className="select-checkout" id="planos-nfe-estado">
                 <option value="">UF</option>
@@ -3969,9 +3870,8 @@ export default function AdminPage() {
         </button>
       </div>
       <div
-        className="range-personalizado"
+        className="range-personalizado hidden"
         id="rel-range-personalizado"
-        style={{ display: "none" }}
       >
         <input
           type="date"
@@ -4006,9 +3906,9 @@ export default function AdminPage() {
       <thead>
         <tr>
           <th>Métrica</th>
-          <th style={{ textAlign: "right" }}>Total</th>
-          <th style={{ textAlign: "right" }}>Média/dia</th>
-          <th style={{ minWidth: 120 }} />
+          <th className="text-right">Total</th>
+          <th className="text-right">Média/dia</th>
+          <th className="min-w-[120px]" />
         </tr>
       </thead>
       <tbody id="rel-tbody-metricas" />
@@ -4020,14 +3920,14 @@ export default function AdminPage() {
       <h3>🏆 Seu Ranking</h3>
       <div id="rel-ranking-content">
         <div className="ranking-sem-dados">
-          <p style={{ color: "#666" }}>Carregando...</p>
+          <p className="text-[#666]">Carregando...</p>
         </div>
       </div>
     </div>
     <div className="card-tendencias">
       <h3>🔥 Buscas populares na VENTSY</h3>
       <div id="rel-tendencias-content">
-        <p style={{ color: "#bbb", fontSize: "0.85rem" }}>Carregando...</p>
+        <p className="text-[#bbb] text-[0.85rem]">Carregando...</p>
       </div>
     </div>
   </div>
@@ -4162,9 +4062,9 @@ export default function AdminPage() {
     <div className="indique-header-resultados">
       <div>
         <h3>Acompanhe seus resultados</h3>
-        <p style={{ fontSize: "0.78rem", color: "#aaa", marginTop: 4 }}>
+        <p className="text-[0.78rem] text-[#aaa] mt-1">
           O bônus de 1 mês é creditado somente na{" "}
-          <strong style={{ color: "#888" }}>primeira compra</strong> do
+          <strong className="text-[#888]">primeira compra</strong> do
           indicado.
         </p>
       </div>
@@ -4331,46 +4231,22 @@ export default function AdminPage() {
             👁
           </button>
         </div>
-        <div style={{ marginTop: 8, display: "flex", gap: 4 }}>
+        <div className="mt-2 flex gap-1">
           <div
             id="cfg-forca-1"
-            style={{
-              height: 4,
-              flex: 1,
-              borderRadius: 4,
-              background: "#eee",
-              transition: "background .3s"
-            }}
+            className="h-1 flex-1 rounded-[4px] bg-[#eee] transition-[background] duration-300"
           />
           <div
             id="cfg-forca-2"
-            style={{
-              height: 4,
-              flex: 1,
-              borderRadius: 4,
-              background: "#eee",
-              transition: "background .3s"
-            }}
+            className="h-1 flex-1 rounded-[4px] bg-[#eee] transition-[background] duration-300"
           />
           <div
             id="cfg-forca-3"
-            style={{
-              height: 4,
-              flex: 1,
-              borderRadius: 4,
-              background: "#eee",
-              transition: "background .3s"
-            }}
+            className="h-1 flex-1 rounded-[4px] bg-[#eee] transition-[background] duration-300"
           />
           <div
             id="cfg-forca-4"
-            style={{
-              height: 4,
-              flex: 1,
-              borderRadius: 4,
-              background: "#eee",
-              transition: "background .3s"
-            }}
+            className="h-1 flex-1 rounded-[4px] bg-[#eee] transition-[background] duration-300"
           />
         </div>
         <span className="dica" id="cfg-forca-label">
@@ -4527,12 +4403,12 @@ export default function AdminPage() {
   </div>
   {/* ── ZONA DE PERIGO ── */}
   <div className="cfg-secao-perigo">
-    <div className="cfg-secao-header" style={{ borderBottomColor: "#ffe0e0" }}>
-      <div className="cfg-secao-icone" style={{ background: "#fff0f0" }}>
+    <div className="cfg-secao-header border-b-[#ffe0e0]">
+      <div className="cfg-secao-icone bg-[#fff0f0]">
         ⚠️
       </div>
       <div className="cfg-titulo-grupo">
-        <h3 style={{ color: "#ff385c" }}>Zona de Perigo</h3>
+        <h3 className="text-[#ff385c]">Zona de Perigo</h3>
         <p>Ações irreversíveis — leia com atenção antes de continuar</p>
       </div>
     </div>
@@ -4772,9 +4648,8 @@ export default function AdminPage() {
               <p className="ftype">PDF, JPG, PNG — até 20 MB</p>
             </div>
             <div
-              className="docs-file-preview"
+              className="docs-file-preview hidden"
               id="docsFilePreview"
-              style={{ display: "none" }}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -4791,7 +4666,7 @@ export default function AdminPage() {
               type="file"
               id="docsFileInput"
               accept=".pdf,.jpg,.jpeg,.png"
-              style={{ display: "none" }}
+              className="hidden"
               onChange={(e: any) => (window as any).docsFileSelected(e.target)}
             />
           </div>
@@ -4813,18 +4688,11 @@ export default function AdminPage() {
 <>
   {/* MODAL VIEW DOCUMENTOS */}
   <div className="docs-modal-overlay" id="docsViewModal">
-    <div className="docs-modal" style={{ width: 600 }}>
+    <div className="docs-modal w-[600px]">
       <div className="docs-modal-header">
         <div>
           <div
-            style={{
-              fontSize: "0.68rem",
-              color: "#999",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              marginBottom: 5,
-              fontWeight: 700
-            }}
+            className="text-[0.68rem] text-[#999] tracking-[0.1em] uppercase mb-[5px] font-bold"
             id="docs-view-cat"
           >
             —
@@ -4851,22 +4719,15 @@ export default function AdminPage() {
           </svg>
           <p>Pré-visualização não disponível nesta demo</p>
           <p
-            style={{ fontSize: "0.72rem", marginTop: 3, color: "#ccc" }}
+            className="text-[0.72rem] mt-[3px] text-[#ccc]"
             id="docsViewFileName"
           >
             —
           </p>
         </div>
-        <div id="docsViewObsWrap" style={{ marginTop: 16, display: "none" }}>
+        <div id="docsViewObsWrap" className="mt-4 hidden">
           <div
-            style={{
-              fontSize: "0.68rem",
-              color: "#999",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              marginBottom: 6,
-              fontWeight: 700
-            }}
+            className="text-[0.68rem] text-[#999] tracking-[0.1em] uppercase mb-[6px] font-bold"
           >
             Observações
           </div>
@@ -5000,7 +4861,7 @@ export default function AdminPage() {
 <>
   {/* MODAL CONTRACHEQUE */}
   <div className="eq-modal-overlay" id="eqPayModal">
-    <div className="eq-modal" style={{ width: 460 }}>
+    <div className="eq-modal w-[460px]">
       <div className="eq-modal-head">
         <div>
           <h2 id="eq-pay-emp-name">—</h2>
@@ -5023,7 +4884,7 @@ export default function AdminPage() {
         </div>
         <div className="eq-cost-info">
           Custo total para a empresa:{" "}
-          <strong id="eq-pb-custo-empresa" style={{ color: "#f59e0b" }}>
+          <strong id="eq-pb-custo-empresa" className="text-[#f59e0b]">
             R$ 0
           </strong>
           <br />

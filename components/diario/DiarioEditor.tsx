@@ -98,56 +98,35 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
   const charCount = content.length;
 
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 16,
-      boxShadow: '0 2px 20px rgba(0,0,0,0.06)',
-      border: '1px solid #f0f0f0',
-      overflow: 'hidden',
-    }}>
+    <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.06)] border border-[#f0f0f0] overflow-hidden">
       {/* Barra superior */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
-        background: '#fafafa',
-      }}>
-        <span style={{ fontSize: '.82rem', color: '#999', fontWeight: 500 }}>
-          ✏️ Nova anotação
-        </span>
-        <span style={{ fontSize: '.75rem', color: charCount > 1000 ? '#ff385c' : '#bbb' }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5f5f5] bg-[#fafafa]">
+        <span className="text-[.82rem] text-[#999] font-medium">✏️ Nova anotação</span>
+        <span className={`text-[.75rem] ${charCount > 1000 ? 'text-[#ff385c]' : 'text-[#bbb]'}`}>
           {charCount} caracteres
         </span>
       </div>
 
       {/* Textarea */}
-      <div style={{ position: 'relative' }}>
+      <div className="relative">
         <textarea
           value={content}
           onChange={e => handleContentChange(e.target.value)}
           placeholder="O que aconteceu? Com quem você falou? Anote tudo aqui..."
           rows={6}
-          style={{
-            width: '100%', border: 'none', outline: 'none', resize: 'none',
-            padding: '16px', fontSize: '1rem', lineHeight: 1.7,
-            fontFamily: 'inherit', color: '#222',
-            background: 'transparent', boxSizing: 'border-box',
-          }}
+          className="w-full border-none outline-none resize-none p-4 text-[1rem] leading-[1.7] font-[inherit] text-[#222] bg-transparent box-border"
         />
       </div>
 
       {/* Sugestões de tags baseadas no texto */}
       {suggestions.length > 0 && (
-        <div style={{ padding: '0 16px 8px', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '.72rem', color: '#bbb' }}>Sugestões:</span>
+        <div className="px-4 pb-2 flex items-center gap-1.5 flex-wrap">
+          <span className="text-[.72rem] text-[#bbb]">Sugestões:</span>
           {suggestions.map(s => (
             <button
               key={s}
               onClick={() => addTag(s)}
-              style={{
-                background: '#f5f5f5', border: '1px dashed #ddd',
-                borderRadius: 20, padding: '2px 10px',
-                fontSize: '.72rem', color: '#666', cursor: 'pointer',
-              }}
+              className="bg-[#f5f5f5] border border-dashed border-[#ddd] rounded-[20px] px-2.5 py-[2px] text-[.72rem] text-[#666] cursor-pointer"
             >
               + {s}
             </button>
@@ -157,21 +136,16 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
 
       {/* Tags adicionadas */}
       {tags.length > 0 && (
-        <div style={{ padding: '0 16px 8px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        <div className="px-4 pb-2 flex flex-wrap gap-1.5">
           {tags.map(tag => (
             <span
               key={tag}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                background: '#fff0f2', color: '#ff385c',
-                border: '1px solid rgba(255,56,92,.2)',
-                borderRadius: 20, padding: '3px 10px', fontSize: '.78rem', fontWeight: 500,
-              }}
+              className="inline-flex items-center gap-1 bg-[#fff0f2] text-[#ff385c] border border-[rgba(255,56,92,.2)] rounded-[20px] px-2.5 py-[3px] text-[.78rem] font-medium"
             >
               #{tag}
               <button
                 onClick={() => removeTag(tag)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff385c', lineHeight: 1, padding: 0 }}
+                className="bg-transparent border-none cursor-pointer text-[#ff385c] leading-none p-0"
               >
                 ×
               </button>
@@ -181,41 +155,24 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
       )}
 
       {/* Barra de ferramentas inferior */}
-      <div style={{
-        display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8,
-        padding: '12px 16px', borderTop: '1px solid #f5f5f5',
-        background: '#fafafa',
-      }}>
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-t border-[#f5f5f5] bg-[#fafafa]">
         {/* Input de tag */}
-        <div style={{ position: 'relative', flex: '1 1 180px' }}>
+        <div className="relative flex-[1_1_180px]">
           <input
             ref={tagRef}
             value={tagInput}
             onChange={e => handleTagInputChange(e.target.value)}
             onKeyDown={handleTagKey}
             placeholder="+ Adicionar tag (Enter)"
-            style={{
-              width: '100%', border: '1px solid #eee', borderRadius: 8,
-              padding: '6px 10px', fontSize: '.82rem', outline: 'none',
-              background: '#fff', boxSizing: 'border-box',
-            }}
+            className="w-full border border-[#eee] rounded-lg px-2.5 py-[6px] text-[.82rem] outline-none bg-white box-border"
           />
           {tagSuggest.length > 0 && (
-            <div style={{
-              position: 'absolute', bottom: '100%', left: 0, right: 0,
-              background: '#fff', border: '1px solid #eee', borderRadius: 8,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.1)', zIndex: 50,
-              marginBottom: 4, overflow: 'hidden',
-            }}>
+            <div className="absolute bottom-full left-0 right-0 bg-white border border-[#eee] rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.1)] z-50 mb-1 overflow-hidden">
               {tagSuggest.map(t => (
                 <div
                   key={t}
                   onMouseDown={() => addTag(t)}
-                  style={{
-                    padding: '7px 12px', cursor: 'pointer', fontSize: '.82rem',
-                    color: '#333',
-                  }}
-                  className="tag-autocomplete-item"
+                  className="tag-autocomplete-item px-3 py-[7px] cursor-pointer text-[.82rem] text-[#333]"
                 >
                   #{t}
                 </div>
@@ -230,11 +187,7 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
           value={reminder}
           onChange={e => setReminder(e.target.value)}
           min={new Date().toISOString().split('T')[0]}
-          style={{
-            border: '1px solid #eee', borderRadius: 8,
-            padding: '6px 10px', fontSize: '.82rem', outline: 'none',
-            background: reminder ? '#fff8f0' : '#fff', color: '#555',
-          }}
+          className={`border border-[#eee] rounded-lg px-2.5 py-[6px] text-[.82rem] outline-none text-[#555] ${reminder ? 'bg-[#fff8f0]' : 'bg-white'}`}
           title="Lembrete"
         />
 
@@ -242,13 +195,10 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
         <button
           onClick={() => setImportant(!important)}
           title={important ? 'Remover importância' : 'Marcar como importante'}
-          style={{
-            background: important ? '#fffbea' : '#f5f5f5',
-            border: `1px solid ${important ? '#f0c040' : '#eee'}`,
-            borderRadius: 8, padding: '6px 12px',
-            fontSize: '.82rem', cursor: 'pointer', color: important ? '#b8860b' : '#999',
-            fontWeight: important ? 700 : 400, whiteSpace: 'nowrap',
-          }}
+          className={`rounded-lg px-3 py-[6px] text-[.82rem] cursor-pointer whitespace-nowrap transition-all duration-150
+            ${important
+              ? 'bg-[#fffbea] border border-[#f0c040] text-[#b8860b] font-bold'
+              : 'bg-[#f5f5f5] border border-[#eee] text-[#999] font-normal'}`}
         >
           ⭐ {important ? 'Importante' : 'Marcar'}
         </button>
@@ -257,21 +207,16 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
         <button
           onClick={handleSave}
           disabled={saving || !content.trim()}
-          style={{
-            background: content.trim() ? '#ff385c' : '#f0f0f0',
-            color: content.trim() ? '#fff' : '#bbb',
-            border: 'none', borderRadius: 8, padding: '6px 18px',
-            fontSize: '.88rem', fontWeight: 700, cursor: content.trim() ? 'pointer' : 'default',
-            whiteSpace: 'nowrap', transition: 'all .15s',
-          }}
+          className={`border-none rounded-lg px-[18px] py-[6px] text-[.88rem] font-bold whitespace-nowrap transition-all duration-150
+            ${content.trim()
+              ? 'bg-[#ff385c] text-white cursor-pointer'
+              : 'bg-[#f0f0f0] text-[#bbb] cursor-default'}`}
         >
           {saving ? 'Salvando…' : '💾 Salvar'}
         </button>
       </div>
 
-      <style>{`
-        .tag-autocomplete-item:hover { background: #fff5f6; color: #ff385c; }
-      `}</style>
+      <style>{`.tag-autocomplete-item:hover { background: #fff5f6; color: #ff385c; }`}</style>
     </div>
   );
 }

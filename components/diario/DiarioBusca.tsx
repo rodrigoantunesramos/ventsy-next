@@ -19,18 +19,10 @@ export default function DiarioBusca({
   onReminderOnly, reminderOnly,
 }: Props) {
   return (
-    <div style={{
-      background: '#fff', borderRadius: 14,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-      border: '1px solid #f0f0f0',
-      padding: '16px',
-    }}>
+    <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] border border-[#f0f0f0] p-4">
       {/* Campo de busca */}
-      <div style={{ position: 'relative' }}>
-        <span style={{
-          position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-          fontSize: '1rem', pointerEvents: 'none', color: '#bbb',
-        }}>
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[1rem] pointer-events-none text-[#bbb]">
           🔍
         </span>
         <input
@@ -38,23 +30,12 @@ export default function DiarioBusca({
           value={search}
           onChange={e => onSearchChange(e.target.value)}
           placeholder="Buscar por texto, nome, empresa..."
-          style={{
-            width: '100%', border: '1.5px solid #eee', borderRadius: 10,
-            padding: '10px 12px 10px 36px', fontSize: '.9rem',
-            outline: 'none', boxSizing: 'border-box',
-            background: '#fafafa', color: '#333',
-            transition: 'border .15s',
-          }}
-          onFocus={e => (e.target.style.borderColor = '#ff385c')}
-          onBlur={e => (e.target.style.borderColor = '#eee')}
+          className="w-full border-[1.5px] border-[#eee] rounded-[10px] py-2.5 pr-3 pl-9 text-[.9rem] outline-none box-border bg-[#fafafa] text-[#333] transition-[border] duration-150 focus:border-[#ff385c]"
         />
         {search && (
           <button
             onClick={() => onSearchChange('')}
-            style={{
-              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-              background: 'none', border: 'none', cursor: 'pointer', color: '#bbb', fontSize: '1rem',
-            }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#bbb] text-[1rem]"
           >
             ×
           </button>
@@ -62,51 +43,40 @@ export default function DiarioBusca({
       </div>
 
       {/* Filtros rápidos */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10, alignItems: 'center' }}>
+      <div className="flex flex-wrap gap-1.5 mt-2.5 items-center">
         <button
           onClick={() => onImportantOnly(!importantOnly)}
-          style={{
-            background: importantOnly ? '#fffbea' : '#f5f5f5',
-            border: `1px solid ${importantOnly ? '#f0c040' : '#eee'}`,
-            borderRadius: 20, padding: '4px 12px',
-            fontSize: '.78rem', fontWeight: importantOnly ? 700 : 400,
-            cursor: 'pointer', color: importantOnly ? '#b8860b' : '#666',
-          }}
+          className={`rounded-[20px] px-3 py-1 text-[.78rem] cursor-pointer transition-all duration-150
+            ${importantOnly
+              ? 'bg-[#fffbea] border border-[#f0c040] text-[#b8860b] font-bold'
+              : 'bg-[#f5f5f5] border border-[#eee] text-[#666] font-normal'}`}
         >
           ⭐ Importantes
         </button>
 
         <button
           onClick={() => onReminderOnly(!reminderOnly)}
-          style={{
-            background: reminderOnly ? '#f0fff4' : '#f5f5f5',
-            border: `1px solid ${reminderOnly ? '#86efac' : '#eee'}`,
-            borderRadius: 20, padding: '4px 12px',
-            fontSize: '.78rem', fontWeight: reminderOnly ? 700 : 400,
-            cursor: 'pointer', color: reminderOnly ? '#27ae60' : '#666',
-          }}
+          className={`rounded-[20px] px-3 py-1 text-[.78rem] cursor-pointer transition-all duration-150
+            ${reminderOnly
+              ? 'bg-[#f0fff4] border border-[#86efac] text-[#27ae60] font-bold'
+              : 'bg-[#f5f5f5] border border-[#eee] text-[#666] font-normal'}`}
         >
           📅 Com lembrete
         </button>
 
         {activeTag && (
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            background: '#f5f0ff', color: '#7c3aed',
-            border: '1px solid rgba(124,58,237,.2)',
-            borderRadius: 20, padding: '4px 12px', fontSize: '.78rem', fontWeight: 600,
-          }}>
+          <div className="inline-flex items-center gap-1 bg-[#f5f0ff] text-[#7c3aed] border border-[rgba(124,58,237,.2)] rounded-[20px] px-3 py-1 text-[.78rem] font-semibold">
             #{activeTag}
             <button
               onClick={onTagClear}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7c3aed', lineHeight: 1, padding: 0 }}
+              className="bg-transparent border-none cursor-pointer text-[#7c3aed] leading-none p-0"
             >
               ×
             </button>
           </div>
         )}
 
-        <span style={{ marginLeft: 'auto', fontSize: '.75rem', color: '#bbb' }}>
+        <span className="ml-auto text-[.75rem] text-[#bbb]">
           {filtered === total
             ? `${total} anotação${total !== 1 ? 'ões' : ''}`
             : `${filtered} de ${total} anotações`}
