@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import SearchResultCard from '@/components/SearchResultCard'
+import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
 import { supabase } from '@/lib/supabase'
 
@@ -171,10 +171,10 @@ function BuscaContent() {
           ) : (
             <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
               {props.map(p => (
-                <SearchResultCard
+                <PropertyCard
                   key={p.id}
-                  prop={p}
-                  plano={(p.usuario_id && planosMap[p.usuario_id]) || 'basico'}
+                  property={{ ...p, _plano: ((p.usuario_id && planosMap[p.usuario_id]) || 'basico') as 'basico' | 'pro' | 'ultra' }}
+                  variant="grid"
                 />
               ))}
             </div>

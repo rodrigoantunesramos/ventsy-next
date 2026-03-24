@@ -15,6 +15,9 @@ export interface PropertySummary {
   tipo_propriedade: string
   capacidade: string
   _plano?: 'basico' | 'pro' | 'ultra'
+  _nota?: string
+  categoria?: string
+  preco?: number
 }
 
 export interface Favorite {

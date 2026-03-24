@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import PropertyCardClient from '@/components/client/PropertyCardClient'
+import PropertyCard from '@/components/PropertyCard'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Favorite } from '@/types/client'
 
@@ -53,7 +53,7 @@ export default function FavoritosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {favoritos.map(fav => fav.propriedade && (
-            <PropertyCardClient
+            <PropertyCard
               key={fav.id}
               property={fav.propriedade}
               isFavorite={isFavorite(fav.property_id)}
