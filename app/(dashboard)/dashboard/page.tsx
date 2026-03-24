@@ -2860,7 +2860,7 @@ export default function AdminPage() {
   {/* /prop-container-abas */}
   {/* FOOTER AÇÕES (sticky) */}
   <div className="prop-footer-acoes">
-    <button className="prop-btn-cancelar" onClick={() => window.navegar('dashboard')}>
+    <button className="prop-btn-cancelar" onClick={() => window.navegar?.('dashboard')}>
       Cancelar
     </button>
     <button className="prop-btn-salvar" onClick={() => window.propSalvar()}>

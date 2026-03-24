@@ -91,7 +91,7 @@ function PlanosContent() {
         const { data, error } = await supabase.from('planos_config').select('*')
         if (error || !data) return
 
-        type PlanoConfig = { id: string; preco: number }
+        type PlanoConfig = { id: string; preco: number; items?: string[] }
         const cfg: Record<string, PlanoConfig> = {}
         data.forEach((row: PlanoConfig) => { cfg[row.id] = row })
 

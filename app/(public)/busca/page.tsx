@@ -28,7 +28,8 @@ function BuscaContent() {
   const tipoParam   = params.get('tipo') || params.get('evento') || ''
   const dataParam   = params.get('data') || ''
 
-  const [props, setProps]             = useState<PropertySummary[]>([])
+  type RawProperty = PropertySummary & { usuario_id?: string }
+  const [props, setProps]             = useState<RawProperty[]>([])
   const [loading, setLoading]         = useState(true)
   const [planosMap, setPlanosMap]     = useState<Record<string, string>>({})
   const [filtroOpen, setFiltroOpen]   = useState(false)
@@ -93,7 +94,7 @@ function BuscaContent() {
     }
 
     const { data } = await query
-    setProps((data || []) as PropertySummary[])
+    setProps((data || []) as RawProperty[])
     setLoading(false)
   }
 

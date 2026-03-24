@@ -41,7 +41,7 @@ export default function HomeFeed() {
 
       const g: Record<string, PropertySummary[]> = {}
       CATS.forEach(c => { g[c.nome] = [] })
-      lista.forEach(p => { if (g[p.categoria] !== undefined) g[p.categoria].push(p) })
+      lista.forEach(p => { if (p.categoria && g[p.categoria] !== undefined) g[p.categoria].push(p) })
 
       setGrupos(g)
       setLoaded(true)
