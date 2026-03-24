@@ -6,14 +6,14 @@ export default function PageCupons() {
       <div className="two-col-asym">
         {/* Formulário de criação */}
         <div className="compose-card">
-          <div className="section-title" style={{ marginBottom: '20px' }}>➕ Criar cupom</div>
+          <div className="section-title mb-5">➕ Criar cupom</div>
           <div className="form-label">Código do cupom</div>
           <input
             type="text"
             className="form-input"
             id="cup-codigo"
             placeholder="VENTSY30"
-            style={{ textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700 }}
+            className="uppercase tracking-[2px] font-bold"
           />
           <div className="form-label">Valor do desconto</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>

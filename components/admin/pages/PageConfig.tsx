@@ -20,12 +20,12 @@ export default function PageConfig() {
         </div>
 
         {/* Banco de dados */}
-        <div className="chart-card" style={{ marginBottom: '20px' }}>
-          <div className="chart-title" style={{ marginBottom: '16px' }}>🗄️ Banco de Dados</div>
+        <div className="chart-card mb-5">
+          <div className="chart-title mb-4">🗄️ Banco de Dados</div>
           <div className="detail-grid">
             <div className="detail-row">
               <div className="detail-key">Supabase URL</div>
-              <div className="detail-val" style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+              <div className="detail-val text-[0.75rem] break-all">
                 hxvlfalgrduitevbhqvq.supabase.co
               </div>
             </div>
