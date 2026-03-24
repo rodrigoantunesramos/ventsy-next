@@ -4,15 +4,15 @@ export default function PageQualidade() {
   return (
     <div className="page" id="page-qualidade">
       {/* Score geral */}
-      <div className="chart-card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '28px', flexWrap: 'wrap' }}>
+      <div className="chart-card mb-6">
+        <div className="flex items-center gap-7 flex-wrap">
           <div className="quality-score-ring" id="quality-ring">—</div>
-          <div style={{ flex: 1, minWidth: '200px' }}>
-            <div className="chart-title" style={{ marginBottom: '6px' }}>Score de Qualidade da Plataforma</div>
-            <div className="chart-sub" style={{ marginBottom: '12px' }}>
+          <div className="flex-1 min-w-[200px]">
+            <div className="chart-title mb-[6px]">Score de Qualidade da Plataforma</div>
+            <div className="chart-sub mb-3">
               Baseado em completude dos perfis de propriedades
             </div>
-            <div id="quality-desc" style={{ fontSize: '0.84rem', color: 'var(--text2)', lineHeight: '1.8' }}>
+            <div id="quality-desc" className="text-[0.84rem] text-[var(--text2)] leading-[1.8]">
               Calculando...
             </div>
           </div>
@@ -20,7 +20,7 @@ export default function PageQualidade() {
       </div>
 
       {/* Stat cards */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,1fr)', marginBottom: '24px' }}>
+      <div className="stats-grid [grid-template-columns:repeat(4,1fr)] mb-6">
         <div className="stat-card red">
           <div className="stat-icon red">🖼️</div>
           <div className="stat-value loading" id="q-sem-foto">—</div>
@@ -57,7 +57,7 @@ export default function PageQualidade() {
           ⬇️ Exportar CSV
         </button>
       </div>
-      <div className="table-card" style={{ marginBottom: '28px' }}>
+      <div className="table-card mb-7">
         <table>
           <thead>
             <tr>
@@ -75,7 +75,7 @@ export default function PageQualidade() {
           <div className="section-count">Oportunidade de engajamento / ativação</div>
         </div>
       </div>
-      <div className="table-card" style={{ marginBottom: '28px' }}>
+      <div className="table-card mb-7">
         <table>
           <thead>
             <tr>
@@ -92,7 +92,7 @@ export default function PageQualidade() {
           <div className="section-title">🔍 Buscas sem resultado</div>
           <div className="section-count">Termos que não encontraram propriedades — oportunidade de expansão</div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex gap-2">
           <button className="btn btn-ghost btn-sm" onClick={() => (window as any).recarregarBuscasSemResultado()}>
             🔄 Atualizar
           </button>
@@ -102,12 +102,12 @@ export default function PageQualidade() {
         </div>
       </div>
       <div className="table-card">
-        <div className="table-header" style={{ padding: '14px 24px' }}>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text3)' }}>
+        <div className="table-header py-[14px] px-6">
+          <div className="text-[0.78rem] text-[var(--text3)]">
             Total de buscas sem resultado:{' '}
-            <strong id="bsr-total" style={{ color: 'var(--text)' }}>—</strong>
+            <strong id="bsr-total" className="text-[var(--text)]">—</strong>
           </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text3)' }}>Período: últimos 30 dias</div>
+          <div className="text-[0.78rem] text-[var(--text3)]">Período: últimos 30 dias</div>
         </div>
         <table>
           <thead>
@@ -117,7 +117,7 @@ export default function PageQualidade() {
           </thead>
           <tbody id="bsr-tbody">
             <tr>
-              <td colSpan={4} style={{ textAlign: 'center', padding: '30px', color: 'var(--text3)' }}>
+              <td colSpan={4} className="text-center p-[30px] text-[var(--text3)]">
                 Carregando...
               </td>
             </tr>

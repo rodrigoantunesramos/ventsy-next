@@ -3,19 +3,12 @@
 export default function PageLogs() {
   return (
     <div className="page" id="page-logs">
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '20px',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
           <div className="section-title">📋 Log de auditoria do admin</div>
           <div className="section-count" id="logs-count">Carregando...</div>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="flex gap-[10px] items-center">
           <select
             className="select-inline"
             id="log-filter"

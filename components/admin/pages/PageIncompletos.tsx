@@ -4,22 +4,13 @@ export default function PageIncompletos() {
   return (
     <div className="page" id="page-incompletos">
       {/* Banner de aviso */}
-      <div style={{
-        background: 'rgba(245,158,11,0.1)',
-        border: '1px solid rgba(245,158,11,0.3)',
-        borderRadius: '12px',
-        padding: '16px 20px',
-        marginBottom: '20px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px',
-      }}>
-        <span style={{ fontSize: '1.3rem' }}>⚠️</span>
+      <div className="bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] rounded-xl px-5 py-4 mb-5 flex items-start gap-3">
+        <span className="text-[1.3rem]">⚠️</span>
         <div>
-          <div style={{ fontWeight: 700, color: 'var(--yellow)', marginBottom: '4px' }}>
+          <div className="font-bold text-[var(--yellow)] mb-1">
             Usuários que não finalizaram o cadastro
           </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text2)' }}>
+          <div className="text-[0.82rem] text-[var(--text2)]">
             Estas pessoas criaram uma conta mas <strong>não preencheram o perfil</strong>.
             Entre em contato para não perder esses clientes. O e-mail real é enviado via Resend.
           </div>
@@ -27,7 +18,7 @@ export default function PageIncompletos() {
       </div>
 
       {/* Stats */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginBottom: '24px' }}>
+      <div className="stats-grid [grid-template-columns:repeat(3,1fr)] mb-6">
         <div className="stat-card yellow">
           <div className="stat-icon yellow">⚠️</div>
           <div className="stat-value loading" id="inc-total">—</div>
@@ -47,9 +38,9 @@ export default function PageIncompletos() {
 
       {/* Tabela */}
       <div className="table-card">
-        <div className="table-header" style={{ flexWrap: 'wrap', gap: '10px' }}>
+        <div className="table-header flex-wrap gap-[10px]">
           <div className="section-title">📋 Lista de cadastros incompletos</div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="flex gap-2 flex-wrap">
             <button className="btn btn-ghost btn-sm" onClick={() => (window as any).recarregarIncompletos()}>
               🔄 Atualizar
             </button>
@@ -69,7 +60,7 @@ export default function PageIncompletos() {
           </thead>
           <tbody id="inc-tbody">
             <tr>
-              <td colSpan={4} style={{ textAlign: 'center', padding: '30px', color: 'var(--text3)' }}>
+              <td colSpan={4} className="text-center p-[30px] text-[var(--text3)]">
                 Carregando...
               </td>
             </tr>

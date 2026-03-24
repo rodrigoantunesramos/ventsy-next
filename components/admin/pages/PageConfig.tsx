@@ -46,15 +46,15 @@ export default function PageConfig() {
 
         {/* Sobre */}
         <div className="chart-card">
-          <div className="chart-title" style={{ marginBottom: '16px' }}>ℹ️ Sobre o Painel</div>
-          <div style={{ fontSize: '0.84rem', color: 'var(--text2)', lineHeight: '1.8' }}>
+          <div className="chart-title mb-4">ℹ️ Sobre o Painel</div>
+          <div className="text-[0.84rem] text-[var(--text2)] leading-[1.8]">
             Este é o painel de administração central da <strong>VENTSY</strong>.<br /><br />
             Aqui você pode:<br />
             • <strong>Liberar propriedades</strong> para aparecerem na plataforma<br />
             • <strong>Gerenciar usuários</strong> e suas contas<br />
             • <strong>Controlar assinaturas</strong> e planos<br />
             • <strong>Visualizar analytics</strong> completo da plataforma<br /><br />
-            <span style={{ color: 'var(--text3)', fontSize: '0.75rem' }}>v1.0 — Ventsy Admin Central</span>
+            <span className="text-[var(--text3)] text-[0.75rem]">v1.0 — Ventsy Admin Central</span>
           </div>
         </div>
       </div>
