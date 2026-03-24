@@ -55,7 +55,7 @@ export default function PageCupons() {
           />
           <button
             className="btn btn-primary w-full justify-center mt-1"
-            onClick={() => (window as any).criarCupom()}
+            onClick={() => window.criarCupom()}
           >
             ✨ Criar cupom
           </button>

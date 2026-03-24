@@ -91,8 +91,9 @@ function PlanosContent() {
         const { data, error } = await supabase.from('planos_config').select('*')
         if (error || !data) return
 
-        const cfg: Record<string, any> = {}
-        data.forEach((row: any) => { cfg[row.id] = row })
+        type PlanoConfig = { id: string; preco: number }
+        const cfg: Record<string, PlanoConfig> = {}
+        data.forEach((row: PlanoConfig) => { cfg[row.id] = row })
 
         const novosPrecos = { ...PRECOS_DEFAULT }
         if (cfg.pro)   { novosPrecos.pro   = { mensal: cfg.pro.preco,   anual: Math.round(cfg.pro.preco * 0.8)   } }
@@ -138,8 +139,8 @@ function PlanosContent() {
       if (!res.ok) throw new Error(data.error?.message || JSON.stringify(data.error))
       const url = data.sandbox_url || data.checkout_url
       window.location.href = url
-    } catch (err: any) {
-      setAlerta({ msg: 'Erro ao gerar pagamento: ' + err.message, cor: 'red' })
+    } catch (err: unknown) {
+      setAlerta({ msg: 'Erro ao gerar pagamento: ' + (err instanceof Error ? err.message : String(err)), cor: 'red' })
       setLoadingPlano(null)
     }
   }

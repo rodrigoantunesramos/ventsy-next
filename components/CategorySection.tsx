@@ -3,9 +3,11 @@ import { useRouter } from 'next/navigation'
 import PropertyCard from './PropertyCard'
 import { supabase } from '@/lib/supabase'
 
+import type { PropertySummary } from '@/types/client'
+
 interface Props {
   cat: { nome: string; emoji: string }
-  props: any[]
+  props: PropertySummary[]
 }
 
 export default function CategorySection({ cat, props }: Props) {
@@ -39,7 +41,7 @@ export default function CategorySection({ cat, props }: Props) {
       <div className="flex gap-3.5 overflow-x-auto pb-4 scrollbar-hide snap-x">
         {props.map((p, i) => (
           <div key={p.id} className="snap-start">
-            <PropertyCard prop={p} delay={i * 0.055} />
+            <PropertyCard property={p} variant="compact" delay={i * 0.055} />
           </div>
         ))}
       </div>

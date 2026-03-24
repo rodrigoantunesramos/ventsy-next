@@ -12,7 +12,7 @@ export default function PageLogs() {
           <select
             className="select-inline"
             id="log-filter"
-            onChange={() => (window as any).renderLogs()}
+            onChange={() => window.renderLogs()}
           >
             <option value="">Todos os tipos</option>
             <option value="propriedade">Propriedades</option>
@@ -22,7 +22,7 @@ export default function PageLogs() {
             <option value="comunicacao">Comunicação</option>
             <option value="sistema">Sistema</option>
           </select>
-          <button className="btn btn-danger btn-sm" onClick={() => (window as any).clearLogs()}>
+          <button className="btn btn-danger btn-sm" onClick={() => window.clearLogs()}>
             🗑️ Limpar logs
           </button>
         </div>

@@ -4,9 +4,10 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import SearchResultCard from '@/components/SearchResultCard'
+import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
 import { supabase } from '@/lib/supabase'
+import type { PropertySummary } from '@/types/client'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
   AC:'Acre', AL:'Alagoas', AP:'Amapá', AM:'Amazonas', BA:'Bahia', CE:'Ceará',
@@ -27,7 +28,7 @@ function BuscaContent() {
   const tipoParam   = params.get('tipo') || params.get('evento') || ''
   const dataParam   = params.get('data') || ''
 
-  const [props, setProps]             = useState<any[]>([])
+  const [props, setProps]             = useState<PropertySummary[]>([])
   const [loading, setLoading]         = useState(true)
   const [planosMap, setPlanosMap]     = useState<Record<string, string>>({})
   const [filtroOpen, setFiltroOpen]   = useState(false)
@@ -92,7 +93,7 @@ function BuscaContent() {
     }
 
     const { data } = await query
-    setProps(data || [])
+    setProps((data || []) as PropertySummary[])
     setLoading(false)
   }
 
@@ -171,10 +172,10 @@ function BuscaContent() {
           ) : (
             <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
               {props.map(p => (
-                <SearchResultCard
+                <PropertyCard
                   key={p.id}
-                  prop={p}
-                  plano={(p.usuario_id && planosMap[p.usuario_id]) || 'basico'}
+                  property={{ ...p, _plano: ((p.usuario_id && planosMap[p.usuario_id]) || 'basico') as 'basico' | 'pro' | 'ultra' }}
+                  variant="grid"
                 />
               ))}
             </div>

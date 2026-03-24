@@ -23,7 +23,7 @@ export function useFavorites() {
           .from('favoritos')
           .select('property_id')
           .eq('user_id', session.user.id)
-        setFavorites((data || []).map((f: any) => f.property_id as string))
+        setFavorites((data || []).map((f: { property_id: string }) => f.property_id))
       } else {
         const local: string[] = JSON.parse(localStorage.getItem('ventsy_favs') || '[]')
         setFavorites(local)

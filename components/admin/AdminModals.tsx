@@ -9,7 +9,7 @@ export default function AdminModals() {
         <div className="bg-[#111118] border border-white/[0.12] rounded-[20px] p-8 w-full max-w-[520px] max-h-[85vh] overflow-y-auto relative">
           <button
             className="absolute top-5 right-5 bg-transparent border-none text-[#5c5c78] text-[1.2rem] cursor-pointer leading-none hover:text-[#f0f0f5]"
-            onClick={() => (window as any).closeModal('modal-prop')}
+            onClick={() => window.closeModal('modal-prop')}
           >
             ✕
           </button>
@@ -25,7 +25,7 @@ export default function AdminModals() {
         <div className="bg-[#111118] border border-white/[0.12] rounded-[20px] p-8 w-full max-w-[520px] max-h-[85vh] overflow-y-auto relative">
           <button
             className="absolute top-5 right-5 bg-transparent border-none text-[#5c5c78] text-[1.2rem] cursor-pointer leading-none hover:text-[#f0f0f5]"
-            onClick={() => (window as any).closeModal('modal-user')}
+            onClick={() => window.closeModal('modal-user')}
           >
             ✕
           </button>
@@ -41,13 +41,13 @@ export default function AdminModals() {
           <div className="flex gap-2.5 justify-end mt-6 pt-5 border-t border-white/[0.07]">
             <button
               className="btn btn-ghost"
-              onClick={() => (window as any).closeModal('modal-user')}
+              onClick={() => window.closeModal('modal-user')}
             >
               Cancelar
             </button>
             <button
               className="btn btn-primary"
-              onClick={() => (window as any).saveUser()}
+              onClick={() => window.saveUser()}
             >
               💾 Salvar alterações
             </button>
@@ -60,7 +60,7 @@ export default function AdminModals() {
         <div className="bg-[#111118] border border-white/[0.12] rounded-[20px] p-8 w-full max-w-[520px] max-h-[85vh] overflow-y-auto relative">
           <button
             className="absolute top-5 right-5 bg-transparent border-none text-[#5c5c78] text-[1.2rem] cursor-pointer leading-none hover:text-[#f0f0f5]"
-            onClick={() => (window as any).closeModal('modal-ass')}
+            onClick={() => window.closeModal('modal-ass')}
           >
             ✕
           </button>
@@ -85,13 +85,13 @@ export default function AdminModals() {
           <div className="flex gap-2.5 justify-end mt-6 pt-5 border-t border-white/[0.07]">
             <button
               className="btn btn-ghost"
-              onClick={() => (window as any).closeModal('modal-ass')}
+              onClick={() => window.closeModal('modal-ass')}
             >
               Cancelar
             </button>
             <button
               className="btn btn-primary"
-              onClick={() => (window as any).saveAss()}
+              onClick={() => window.saveAss()}
             >
               💾 Salvar
             </button>
@@ -104,7 +104,7 @@ export default function AdminModals() {
         <div className="bg-[#111118] border border-white/[0.12] rounded-[20px] p-8 w-full max-w-[680px] max-h-[85vh] overflow-y-auto relative">
           <button
             className="absolute top-5 right-5 bg-transparent border-none text-[#5c5c78] text-[1.2rem] cursor-pointer leading-none hover:text-[#f0f0f5]"
-            onClick={() => (window as any).closeModal('modal-edit-prop')}
+            onClick={() => window.closeModal('modal-edit-prop')}
           >
             ✕
           </button>
@@ -178,13 +178,13 @@ export default function AdminModals() {
           <div className="flex gap-2.5 justify-end mt-6 pt-5 border-t border-white/[0.07]">
             <button
               className="btn btn-ghost"
-              onClick={() => (window as any).closeModal('modal-edit-prop')}
+              onClick={() => window.closeModal('modal-edit-prop')}
             >
               Cancelar
             </button>
             <button
               className="btn btn-primary"
-              onClick={() => (window as any).saveProp()}
+              onClick={() => window.saveProp()}
             >
               💾 Salvar alterações
             </button>
@@ -197,7 +197,7 @@ export default function AdminModals() {
         <div className="bg-[#111118] border border-white/[0.12] rounded-[20px] p-8 w-full max-w-[540px] max-h-[85vh] overflow-y-auto relative">
           <button
             className="absolute top-5 right-5 bg-transparent border-none text-[#5c5c78] text-[1.2rem] cursor-pointer leading-none hover:text-[#f0f0f5]"
-            onClick={() => (window as any).closeModal('modal-email-inc')}
+            onClick={() => window.closeModal('modal-email-inc')}
           >
             ✕
           </button>
@@ -220,13 +220,13 @@ export default function AdminModals() {
           <div className="flex gap-2.5 justify-end mt-6 pt-5 border-t border-white/[0.07]">
             <button
               className="btn btn-ghost"
-              onClick={() => (window as any).closeModal('modal-email-inc')}
+              onClick={() => window.closeModal('modal-email-inc')}
             >
               Cancelar
             </button>
             <button
               className="btn btn-primary"
-              onClick={() => (window as any).enviarEmailIncompleto()}
+              onClick={() => window.enviarEmailIncompleto()}
             >
               📤 Enviar e-mail
             </button>

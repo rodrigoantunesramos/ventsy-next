@@ -86,7 +86,7 @@ export default function PageDashboard() {
           <div className="font-['Syne',sans-serif] text-[1.05rem] font-bold text-[#f0f0f5]">👥 Usuários recentes</div>
           <div className="text-[0.75rem] text-[#5c5c78] mt-0.5">Últimos cadastros</div>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => (window as any).showPage('usuarios')}>
+        <button className="btn btn-ghost btn-sm" onClick={() => window.showPage('usuarios')}>
           Ver todos →
         </button>
       </div>

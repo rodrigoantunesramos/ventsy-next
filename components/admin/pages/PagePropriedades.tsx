@@ -12,7 +12,7 @@ export default function PagePropriedades() {
               type="text"
               placeholder="Buscar propriedade..."
               id="search-props"
-              onInput={() => (window as any).filterProps()}
+              onInput={() => window.filterProps()}
             />
           </div>
         </div>
