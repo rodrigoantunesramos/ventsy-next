@@ -211,10 +211,9 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* ── SIDEBAR ─────────────────────────────────────────────────── */}
         <aside
-          className={`dash-sidebar w-[260px] flex-shrink-0 bg-white border-r border-[#f0f0f0] flex flex-col sticky top-[60px] overflow-y-auto
+          className={`dash-sidebar w-[260px] flex-shrink-0 bg-white border-r border-[#f0f0f0] flex flex-col sticky top-[60px] overflow-y-auto h-[calc(100vh-60px)]
             max-md:fixed max-md:top-[60px] max-md:z-[150] max-md:transition-[left_.28s_ease]
             ${sidebarOpen ? 'max-md:left-0' : 'max-md:-left-[280px]'}`}
-          style={{ height: 'calc(100vh - 60px)' }}
         >
           {/* Perfil */}
           <div className="px-5 pt-6 pb-4 border-b border-[#f5f5f5]">
