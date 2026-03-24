@@ -1,0 +1,20 @@
+APP/ --» Ficam as páginas e rotas
+
+page.tsx - rota
+layout.tsx - estrutura compartilhada (header, sidebar, etc)
+cada pasta = uma rota
+
+COMPONENTS/ --» Reutilização -- Se usa em mais de um lugar vira componente
+
+LIB/ --» Coisas mais técnicas e utilitárias.
+
+SERVICES/ --» Regras do Negócio - organiza chamadas externas
+         --» Evita misturar lógica dentro do componente
+
+HOOKS/ --»  Custom hooks do React
+
+STYLES/ --» Estilos - CSS 
+
+PUBLIC/ --» Arquivos estáticos
+
+TYPES/ --»  Tipagens - TypeScript

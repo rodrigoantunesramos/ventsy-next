@@ -23,8 +23,8 @@ export default function Header() {
     return () => document.removeEventListener('click', handler)
   }, [])
 
-  return (
-    <header className="w-full h-20 bg-white flex items-center px-[5%] shadow-sm fixed top-0 z-[9999] overflow-visible">
+  return ( 
+    <header className="w-full h-20 bg-white flex items-center px-[5%] shadow-sm fixed top-0 z-[9999] overflow-visible"> 
       {/* Logo */}
       <div className="flex-none flex items-center mr-4">
         <Link href="/" className="font-['Playfair_Display'] text-[1.6rem] font-black text-[#ff385c] no-underline flex items-center">
@@ -66,7 +66,7 @@ export default function Header() {
 
           {menuOpen && (
             <div className="absolute top-12 right-0 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col py-2 z-[2000]">
-              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors"> 
                 ✏️ Cadastre seu espaço
               </Link>
               <Link href="/planos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
