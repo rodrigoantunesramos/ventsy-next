@@ -28,28 +28,24 @@ function groupByDate(entries: DiaryEntry[]) {
 export default function DiarioList({ entries, loading, onTagClick, onDelete, onToggleImportant, showUser }: Props) {
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="flex flex-col gap-3">
         {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            background: '#f5f5f5', borderRadius: 14, height: 120,
-            animation: 'pulse 1.4s ease-in-out infinite',
-            animationDelay: `${i * 0.15}s`,
-          }} />
+          <div
+            key={i}
+            className="bg-[#f5f5f5] rounded-[14px] h-[120px] animate-[pulse_1.4s_ease-in-out_infinite]"
+            style={{ animationDelay: `${i * 0.15}s` }}
+          />
         ))}
-        <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
       </div>
     );
   }
 
   if (!entries.length) {
     return (
-      <div style={{
-        textAlign: 'center', padding: '48px 16px',
-        color: '#bbb', fontSize: '.92rem',
-      }}>
-        <div style={{ fontSize: '3rem', marginBottom: 12 }}>📒</div>
-        <div style={{ fontWeight: 600, color: '#999' }}>Nenhuma anotação encontrada</div>
-        <div style={{ marginTop: 6, fontSize: '.82rem' }}>
+      <div className="text-center px-4 py-12 text-[#bbb] text-[.92rem]">
+        <div className="text-[3rem] mb-3">📒</div>
+        <div className="font-semibold text-[#999]">Nenhuma anotação encontrada</div>
+        <div className="mt-1.5 text-[.82rem]">
           Comece escrevendo sobre suas interações com clientes.
         </div>
       </div>
@@ -59,44 +55,35 @@ export default function DiarioList({ entries, loading, onTagClick, onDelete, onT
   const grouped = groupByDate(entries);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div className="flex flex-col">
       {grouped.map(([dateLabel, dayEntries]) => (
-        <div key={dateLabel} style={{ marginBottom: 24 }}>
+        <div key={dateLabel} className="mb-6">
           {/* Separador de data */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12,
-          }}>
-            <div style={{ flex: 1, height: 1, background: '#f0f0f0' }} />
-            <span style={{
-              fontSize: '.72rem', fontWeight: 700, color: '#ccc',
-              textTransform: 'capitalize', letterSpacing: '.04em',
-              whiteSpace: 'nowrap',
-            }}>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex-1 h-px bg-[#f0f0f0]" />
+            <span className="text-[.72rem] font-bold text-[#ccc] capitalize tracking-[.04em] whitespace-nowrap">
               {dateLabel}
             </span>
-            <div style={{ flex: 1, height: 1, background: '#f0f0f0' }} />
+            <div className="flex-1 h-px bg-[#f0f0f0]" />
           </div>
 
           {/* Cards do dia */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="flex flex-col gap-2.5">
             {dayEntries.map(entry => (
-              <div key={entry.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div key={entry.id} className="flex gap-3 items-start">
                 {/* Linha do tempo */}
-                <div style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  paddingTop: 18, flexShrink: 0,
-                }}>
-                  <div style={{
-                    width: 10, height: 10, borderRadius: '50%',
-                    background: entry.is_important ? '#f0c040' : '#ff385c',
-                    border: '2px solid #fff',
-                    boxShadow: `0 0 0 2px ${entry.is_important ? '#f0c040' : '#ff385c'}44`,
-                    flexShrink: 0,
-                  }} />
+                <div className="flex flex-col items-center pt-[18px] flex-shrink-0">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full border-2 border-white flex-shrink-0"
+                    style={{
+                      background: entry.is_important ? '#f0c040' : '#ff385c',
+                      boxShadow: `0 0 0 2px ${entry.is_important ? '#f0c040' : '#ff385c'}44`,
+                    }}
+                  />
                 </div>
 
                 {/* Card */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="flex-1 min-w-0">
                   <DiarioCard
                     entry={entry}
                     onTagClick={onTagClick}

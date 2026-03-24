@@ -37,7 +37,7 @@ function highlightText(text: string) {
   const parts = text.split(/(\b[A-ZÁÉÍÓÚ][a-záéíóúâêîôûãõ]+\b)/g);
   return parts.map((part, i) =>
     /^[A-ZÁÉÍÓÚ]/.test(part)
-      ? <mark key={i} style={{ background: '#fff8e1', borderRadius: 3, padding: '0 2px' }}>{part}</mark>
+      ? <mark key={i} className="bg-[#fff8e1] rounded-[3px] px-[2px]">{part}</mark>
       : part,
   );
 }
@@ -53,55 +53,40 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
   const reminderPast  = entry.reminder_date && isReminderPast(entry.reminder_date);
   const reminderSoon  = entry.reminder_date && isReminderSoon(entry.reminder_date);
 
+  const cardShadow = entry.is_important
+    ? 'shadow-[0_2px_16px_rgba(255,193,7,0.18),0_1px_4px_rgba(0,0,0,0.04)]'
+    : 'shadow-[0_2px_12px_rgba(0,0,0,0.05)]';
+  const cardBorder = entry.is_important
+    ? 'border-[1.5px] border-[#f0c040]'
+    : 'border border-[#f0f0f0]';
+
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 14,
-      boxShadow: entry.is_important
-        ? '0 2px 16px rgba(255,193,7,0.18), 0 1px 4px rgba(0,0,0,0.04)'
-        : '0 2px 12px rgba(0,0,0,0.05)',
-      border: entry.is_important ? '1.5px solid #f0c040' : '1px solid #f0f0f0',
-      padding: '16px 20px',
-      transition: 'box-shadow .2s',
-      position: 'relative',
-    }}>
+    <div className={`bg-white rounded-[14px] ${cardShadow} ${cardBorder} px-5 py-4 transition-shadow duration-200 relative`}>
       {/* Badge importante */}
       {entry.is_important && (
-        <span style={{
-          position: 'absolute', top: 14, right: 16,
-          fontSize: '.7rem', fontWeight: 700, color: '#b8860b',
-          background: '#fffbea', border: '1px solid #f0c040',
-          borderRadius: 20, padding: '2px 8px',
-        }}>
+        <span className="absolute top-3.5 right-4 text-[.7rem] font-bold text-[#b8860b] bg-[#fffbea] border border-[#f0c040] rounded-[20px] px-2 py-[2px]">
           ⭐ Importante
         </span>
       )}
 
       {/* Data */}
-      <div style={{ fontSize: '.75rem', color: '#bbb', marginBottom: 8 }}>
+      <div className="text-[.75rem] text-[#bbb] mb-2">
         {formatDate(entry.created_at)}
         {showUser && (
-          <span style={{ marginLeft: 8, color: '#ddd' }}>· {entry.user_id.slice(0, 8)}…</span>
+          <span className="ml-2 text-[#ddd]">· {entry.user_id.slice(0, 8)}…</span>
         )}
       </div>
 
       {/* Conteúdo */}
-      <div style={{
-        fontSize: '.92rem', lineHeight: 1.7, color: '#333',
-        whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-      }}>
+      <div className="text-[.92rem] leading-[1.7] text-[#333] whitespace-pre-wrap break-words">
         {highlightText(displayed)}
-        {hasMore && !expanded && <span style={{ color: '#bbb' }}>…</span>}
+        {hasMore && !expanded && <span className="text-[#bbb]">…</span>}
       </div>
 
       {hasMore && (
         <button
           onClick={() => setExpanded(!expanded)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: '#ff385c', fontSize: '.78rem', fontWeight: 600,
-            padding: '4px 0', marginTop: 4,
-          }}
+          className="bg-transparent border-none cursor-pointer text-[#ff385c] text-[.78rem] font-semibold py-1 mt-1"
         >
           {expanded ? '↑ Ver menos' : '↓ Ver mais'}
         </button>
@@ -109,18 +94,12 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
 
       {/* Tags */}
       {entry.tags?.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 10 }}>
+        <div className="flex flex-wrap gap-[5px] mt-2.5">
           {entry.tags.map(tag => (
             <button
               key={tag}
               onClick={() => onTagClick(tag)}
-              style={{
-                background: '#f5f0ff', color: '#7c3aed',
-                border: '1px solid rgba(124,58,237,.15)',
-                borderRadius: 20, padding: '2px 10px',
-                fontSize: '.72rem', fontWeight: 600, cursor: 'pointer',
-                transition: 'all .15s',
-              }}
+              className="bg-[#f5f0ff] text-[#7c3aed] border border-[rgba(124,58,237,.15)] rounded-[20px] px-2.5 py-[2px] text-[.72rem] font-semibold cursor-pointer transition-all duration-150"
             >
               #{tag}
             </button>
@@ -130,50 +109,41 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
 
       {/* Lembrete */}
       {entry.reminder_date && (
-        <div style={{
-          marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 5,
-          background: reminderPast ? '#fff0f0' : reminderSoon ? '#fff8e1' : '#f0fff4',
-          color: reminderPast ? '#c0392b' : reminderSoon ? '#b8860b' : '#27ae60',
-          border: `1px solid ${reminderPast ? '#fca5a5' : reminderSoon ? '#f0c040' : '#86efac'}`,
-          borderRadius: 20, padding: '3px 10px', fontSize: '.75rem', fontWeight: 500,
-        }}>
+        <div className={`mt-2.5 inline-flex items-center gap-[5px] rounded-[20px] px-2.5 py-[3px] text-[.75rem] font-medium
+          ${reminderPast
+            ? 'bg-[#fff0f0] text-[#c0392b] border border-[#fca5a5]'
+            : reminderSoon
+              ? 'bg-[#fff8e1] text-[#b8860b] border border-[#f0c040]'
+              : 'bg-[#f0fff4] text-[#27ae60] border border-[#86efac]'}`}
+        >
           {reminderPast ? '⏰ Lembrete vencido:' : reminderSoon ? '⏳ Em breve:' : '📅 Lembrete:'}{' '}
           {formatReminderDate(entry.reminder_date)}
         </div>
       )}
 
       {/* Ações */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end' }}>
+      <div className="flex gap-2 mt-3 justify-end">
         <button
           onClick={() => onToggleImportant(entry.id, entry.is_important)}
           title={entry.is_important ? 'Remover importância' : 'Marcar como importante'}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: '.8rem', color: entry.is_important ? '#b8860b' : '#bbb',
-            padding: '4px 6px', borderRadius: 6,
-          }}
+          className={`bg-transparent border-none cursor-pointer text-[.8rem] px-1.5 py-1 rounded-md
+            ${entry.is_important ? 'text-[#b8860b]' : 'text-[#bbb]'}`}
         >
           ⭐
         </button>
 
         {confirming ? (
-          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            <span style={{ fontSize: '.75rem', color: '#999' }}>Confirmar?</span>
+          <div className="flex gap-1 items-center">
+            <span className="text-[.75rem] text-[#999]">Confirmar?</span>
             <button
               onClick={() => { onDelete(entry.id); setConfirming(false); }}
-              style={{
-                background: '#ff385c', color: '#fff', border: 'none',
-                borderRadius: 6, padding: '3px 10px', cursor: 'pointer', fontSize: '.75rem',
-              }}
+              className="bg-[#ff385c] text-white border-none rounded-md px-2.5 py-[3px] cursor-pointer text-[.75rem]"
             >
               Sim
             </button>
             <button
               onClick={() => setConfirming(false)}
-              style={{
-                background: '#f5f5f5', border: 'none',
-                borderRadius: 6, padding: '3px 10px', cursor: 'pointer', fontSize: '.75rem',
-              }}
+              className="bg-[#f5f5f5] border-none rounded-md px-2.5 py-[3px] cursor-pointer text-[.75rem]"
             >
               Não
             </button>
@@ -181,10 +151,7 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
         ) : (
           <button
             onClick={() => setConfirming(true)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontSize: '.8rem', color: '#ddd', padding: '4px 6px', borderRadius: 6,
-            }}
+            className="bg-transparent border-none cursor-pointer text-[.8rem] text-[#ddd] px-1.5 py-1 rounded-md"
           >
             🗑️
           </button>
