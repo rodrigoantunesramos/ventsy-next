@@ -65,5 +65,5 @@ export interface Message {
   conversation_id: string
   sender_id: string
   text: string
-  created_at: string
+  created_at: string | null
 }

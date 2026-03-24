@@ -227,10 +227,10 @@ function CadastroContent() {
     try {
       await supabase.rpc('salvar_cadastro_incompleto', {
         p_email:     email.trim(),
-        p_nome:      nome.trim() || null,
-        p_documento: documento.replace(/\D/g, '') || null,
-        p_tipo_doc:  documento ? tipoDoc : null,
-        p_ref:       refCodigo.trim() || null,
+        p_nome:      nome.trim() || undefined,
+        p_documento: documento.replace(/\D/g, '') || undefined,
+        p_tipo_doc:  documento ? tipoDoc : undefined,
+        p_ref:       refCodigo.trim() || undefined,
       })
     } catch (e) { console.warn('Lead incompleto não salvo:', e) }
   }

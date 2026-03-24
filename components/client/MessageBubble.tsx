@@ -7,7 +7,8 @@ interface Props {
   currentUserId: string
 }
 
-function formatTime(iso: string) {
+function formatTime(iso: string | null) {
+  if (!iso) return ''
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 }
 

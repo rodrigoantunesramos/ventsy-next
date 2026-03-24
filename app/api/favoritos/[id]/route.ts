@@ -16,7 +16,7 @@ export async function DELETE(
       .from('favoritos')
       .delete()
       .eq('user_id', userId)
-      .eq('property_id', params.id)
+      .eq('property_id', Number(params.id))
     return Response.json({ error })
   }
 

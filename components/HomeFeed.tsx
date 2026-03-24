@@ -26,7 +26,7 @@ export default function HomeFeed() {
       ])
 
       type RawProp = PropertySummary & { usuario_id?: string }
-      const raw: RawProp[] = (props || []) as RawProp[]
+      const raw: RawProp[] = (props || []) as unknown as RawProp[]
 
       let lista: PropertySummary[]
       if (!raw.length || error) {

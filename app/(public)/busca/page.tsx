@@ -94,7 +94,7 @@ function BuscaContent() {
     }
 
     const { data } = await query
-    setProps((data || []) as RawProperty[])
+    setProps((data || []) as unknown as RawProperty[])
     setLoading(false)
   }
 
