@@ -204,7 +204,7 @@ export default function FaleConoscoPage() {
           </a>
 
           {/* E-mail */}
-          <a href="mailto:contato@ventsy.com.br" className="fc-canal-card fc-reveal" style={{ transitionDelay: '.1s' }}>
+          <a href="mailto:contato@ventsy.com.br" className="fc-canal-card fc-reveal delay-100">
             <div className="fc-canal-icone azul"><IconEmail /></div>
             <div className="fc-canal-info">
               <p className="fc-canal-label">E-mail</p>
@@ -215,7 +215,7 @@ export default function FaleConoscoPage() {
           </a>
 
           {/* Suporte */}
-          <a href="mailto:suporte@ventsy.com.br" className="fc-canal-card fc-reveal" style={{ transitionDelay: '.15s' }}>
+          <a href="mailto:suporte@ventsy.com.br" className="fc-canal-card fc-reveal delay-150">
             <div className="fc-canal-icone verm"><IconSuporte /></div>
             <div className="fc-canal-info">
               <p className="fc-canal-label">Suporte Técnico</p>
@@ -226,7 +226,7 @@ export default function FaleConoscoPage() {
           </a>
 
           {/* Redes sociais */}
-          <div className="fc-redes-card fc-reveal" style={{ transitionDelay: '.2s' }}>
+          <div className="fc-redes-card fc-reveal delay-200">
             <p className="fc-redes-titulo">Redes Sociais</p>
             <p className="fc-redes-sub">Siga a VENTSY e fique por dentro de novidades, dicas e espaços incríveis.</p>
             <div className="fc-redes-grid">
@@ -238,7 +238,7 @@ export default function FaleConoscoPage() {
           </div>
 
           {/* Horário */}
-          <div className="fc-horario-card fc-reveal" style={{ transitionDelay: '.25s' }}>
+          <div className="fc-horario-card fc-reveal delay-[250ms]">
             <p className="fc-horario-titulo">🕐 Horário de atendimento</p>
             <div className="fc-horario-linha">
               <span className="fc-horario-dia">Segunda a Sexta</span>

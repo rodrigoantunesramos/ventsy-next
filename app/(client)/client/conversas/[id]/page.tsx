@@ -43,8 +43,7 @@ export default function ConversaPage() {
 
   return (
     <div
-      className="px-6 py-7 max-w-[760px] mx-auto flex flex-col"
-      style={{ height: 'calc(100vh - 116px)' }}
+      className="px-6 py-7 max-w-[760px] mx-auto flex flex-col h-[calc(100vh-116px)]"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3.5">
