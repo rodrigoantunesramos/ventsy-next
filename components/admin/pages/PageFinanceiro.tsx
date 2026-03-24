@@ -6,7 +6,7 @@ export default function PageFinanceiro() {
       <div id="fin-alerts"></div>
 
       {/* KPIs principais */}
-      <div className="stats-grid" style={{ marginBottom: '16px' }}>
+      <div className="stats-grid mb-4">
         <div className="stat-card green">
           <div className="stat-icon green">💵</div>
           <div className="stat-value loading" id="fin-mrr">—</div>
@@ -33,7 +33,7 @@ export default function PageFinanceiro() {
         </div>
       </div>
 
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginBottom: '24px' }}>
+      <div className="stats-grid [grid-template-columns:repeat(3,1fr)] mb-6">
         <div className="stat-card red">
           <div className="stat-icon red">📉</div>
           <div className="stat-value loading" id="fin-churn">—</div>
@@ -55,28 +55,28 @@ export default function PageFinanceiro() {
       </div>
 
       {/* Gráficos */}
-      <div className="charts-grid" style={{ marginBottom: '24px' }}>
+      <div className="charts-grid mb-6">
         <div className="chart-card">
           <div className="chart-title">Evolução da receita — 6 meses</div>
           <div className="chart-sub">Receita realizada por mês (valor_pago)</div>
-          <div style={{ height: '240px', position: 'relative' }}>
+          <div className="h-[240px] relative">
             <canvas id="chart-receita-mensal"></canvas>
           </div>
         </div>
         <div className="chart-card">
           <div className="chart-title">MRR por plano</div>
           <div className="chart-sub">Distribuição da receita recorrente atual</div>
-          <div style={{ height: '240px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="h-[240px] relative flex items-center justify-center">
             <canvas id="chart-receita-planos"></canvas>
           </div>
         </div>
       </div>
 
       {/* Breakdown por plano */}
-      <div className="section-header" style={{ marginBottom: '16px' }}>
+      <div className="section-header mb-4">
         <div className="section-title">📊 Breakdown por plano</div>
       </div>
-      <div className="table-card" style={{ marginBottom: '28px' }}>
+      <div className="table-card mb-7">
         <table>
           <thead>
             <tr>
@@ -94,7 +94,7 @@ export default function PageFinanceiro() {
           <div className="section-count" id="fin-venc-count">Carregando...</div>
         </div>
       </div>
-      <div className="table-card" style={{ marginBottom: '28px' }}>
+      <div className="table-card mb-7">
         <table>
           <thead>
             <tr>

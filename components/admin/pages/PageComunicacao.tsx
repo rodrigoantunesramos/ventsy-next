@@ -7,7 +7,7 @@ export default function PageComunicacao() {
         {/* Formulário de envio */}
         <div>
           <div className="compose-card">
-            <div className="section-title" style={{ marginBottom: '20px' }}>📝 Nova mensagem</div>
+            <div className="section-title mb-5">📝 Nova mensagem</div>
             <div className="form-label">Destinatários</div>
             <select
               className="form-select"
@@ -21,9 +21,9 @@ export default function PageComunicacao() {
               <option value="trial">Em Trial</option>
               <option value="sem_assinatura">Sem assinatura</option>
             </select>
-            <div className="metric-compare" id="com-count" style={{ marginTop: '-8px', marginBottom: '16px' }}>
+            <div className="metric-compare -mt-2 mb-4" id="com-count">
               👥 Afetará{' '}
-              <strong id="com-count-num" style={{ color: 'var(--text)', margin: '0 3px' }}>0</strong>{' '}
+              <strong id="com-count-num" className="text-[var(--text)] mx-[3px]">0</strong>{' '}
               usuários
             </div>
             <div className="form-label">Tipo</div>
@@ -46,7 +46,7 @@ export default function PageComunicacao() {
               id="com-mensagem"
               placeholder="Escreva sua mensagem aqui..."
             />
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <div className="flex gap-[10px] justify-end">
               <button className="btn btn-ghost" onClick={() => (window as any).clearCompose()}>
                 🗑️ Limpar
               </button>
@@ -59,12 +59,12 @@ export default function PageComunicacao() {
 
         {/* Estatísticas e histórico */}
         <div>
-          <div className="chart-card" style={{ marginBottom: '20px' }}>
-            <div className="section-title" style={{ marginBottom: '16px' }}>📊 Alcance por segmento</div>
-            <div id="com-stats" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}></div>
+          <div className="chart-card mb-5">
+            <div className="section-title mb-4">📊 Alcance por segmento</div>
+            <div id="com-stats" className="flex flex-col gap-0"></div>
           </div>
           <div className="chart-card">
-            <div className="section-title" style={{ marginBottom: '16px' }}>📬 Últimas mensagens enviadas</div>
+            <div className="section-title mb-4">📬 Últimas mensagens enviadas</div>
             <div id="com-historico"></div>
           </div>
         </div>

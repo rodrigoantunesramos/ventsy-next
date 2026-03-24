@@ -3,7 +3,7 @@
 export default function PageAnalytics() {
   return (
     <div className="page" id="page-analytics">
-      <div className="stats-grid" style={{ marginBottom: '24px' }}>
+      <div className="stats-grid mb-6">
         <div className="stat-card red">
           <div className="stat-icon red">👁</div>
           <div className="stat-value loading" id="an-total-views">—</div>
@@ -28,18 +28,18 @@ export default function PageAnalytics() {
         </div>
       </div>
 
-      <div className="stats-grid" style={{ gridTemplateColumns: '1fr', marginBottom: '24px' }}>
+      <div className="stats-grid [grid-template-columns:1fr] mb-6">
         <div className="stat-card yellow">
           <div className="stat-icon yellow">🏆</div>
-          <div className="stat-value loading" id="an-top-prop" style={{ fontSize: '1.2rem' }}>—</div>
+          <div className="stat-value loading text-[1.2rem]" id="an-top-prop">—</div>
           <div className="stat-label">Propriedade mais vista</div>
         </div>
       </div>
 
-      <div className="chart-card" style={{ marginBottom: '24px' }}>
+      <div className="chart-card mb-6">
         <div className="chart-title">Volume de eventos por tipo</div>
         <div className="chart-sub">Distribuição histórica</div>
-        <div style={{ height: '280px', position: 'relative' }}>
+        <div className="h-[280px] relative">
           <canvas id="chart-eventos-tipo"></canvas>
         </div>
       </div>

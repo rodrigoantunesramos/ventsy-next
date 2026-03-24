@@ -32,7 +32,7 @@ export default function PageDashboard() {
       </div>
 
       {/* Stats secundárias */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginTop: '-8px' }}>
+      <div className="stats-grid [grid-template-columns:repeat(3,1fr)] -mt-2">
         <div className="stat-card purple">
           <div className="stat-icon purple">📱</div>
           <div className="stat-value loading" id="s-whatsapp">—</div>
@@ -52,18 +52,18 @@ export default function PageDashboard() {
       </div>
 
       {/* Gráficos */}
-      <div className="charts-grid" style={{ marginTop: '24px' }}>
+      <div className="charts-grid mt-6">
         <div className="chart-card">
           <div className="chart-title">Atividade na plataforma — 30 dias</div>
           <div className="chart-sub">Visualizações, WhatsApp e Formulários</div>
-          <div style={{ height: '220px', position: 'relative' }}>
+          <div className="h-[220px] relative">
             <canvas id="chart-atividade"></canvas>
           </div>
         </div>
         <div className="chart-card">
           <div className="chart-title">Distribuição de planos</div>
           <div className="chart-sub">Assinaturas ativas</div>
-          <div style={{ height: '220px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="h-[220px] relative flex items-center justify-center">
             <canvas id="chart-planos"></canvas>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function PageDashboard() {
           <div className="section-count" id="pending-count">Carregando...</div>
         </div>
       </div>
-      <div id="pendentes-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+      <div id="pendentes-list" className="flex flex-col gap-3 mb-8">
         <div className="empty-state"><div className="icon">⏳</div><p>Carregando...</p></div>
       </div>
 
@@ -99,7 +99,7 @@ export default function PageDashboard() {
           </thead>
           <tbody id="recent-users">
             <tr>
-              <td colSpan={5} className="empty-state" style={{ padding: '40px', textAlign: 'center', color: 'var(--text3)' }}>
+              <td colSpan={5} className="empty-state p-[40px] text-center text-[var(--text3)]">
                 Carregando...
               </td>
             </tr>
