@@ -142,11 +142,11 @@ export const DEMO_PROPS = [
 
 export function pesoPlano(p: string) { return p === 'ultra' ? 0 : p === 'pro' ? 1 : 2 }
 
-export function ordenar(lista: { _plano?: string; _nota?: string; nome?: string }[]) {
+export function ordenar<T extends { _plano?: string; _nota?: string; nome?: string }>(lista: T[]): T[] {
   return [...lista].sort((a, b) => {
-    const dp = pesoPlano(a._plano) - pesoPlano(b._plano)
+    const dp = pesoPlano(a._plano ?? '') - pesoPlano(b._plano ?? '')
     if (dp !== 0) return dp
-    const dn = parseFloat(b._nota) - parseFloat(a._nota)
+    const dn = parseFloat(b._nota ?? '0') - parseFloat(a._nota ?? '0')
     if (dn !== 0) return dn
     return (a.nome || '').localeCompare(b.nome || '', 'pt-BR')
   })
