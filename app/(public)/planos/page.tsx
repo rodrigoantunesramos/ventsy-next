@@ -52,13 +52,10 @@ function AlertaFlutuante({ msg, cor, onClose }: { msg: string; cor: string; onCl
   const colorMap: Record<string, string>  = { green: '#166534', red: '#c0152b', orange: '#92400e' }
 
   return (
-    <div style={{
-      position: 'fixed', top: 90, left: '50%', transform: 'translateX(-50%)',
-      background: '#fff', border: `2px solid ${borderMap[cor] || cor}`,
-      borderRadius: 12, padding: '16px 28px', fontWeight: 600,
-      color: colorMap[cor] || cor, zIndex: 9999,
-      boxShadow: '0 8px 32px rgba(0,0,0,.15)', maxWidth: '90%', textAlign: 'center',
-    }}>
+    <div
+      className="fixed top-[90px] left-1/2 -translate-x-1/2 bg-white rounded-xl py-4 px-7 font-semibold z-[9999] shadow-[0_8px_32px_rgba(0,0,0,0.15)] max-w-[90%] text-center"
+      style={{ border: `2px solid ${borderMap[cor] || cor}`, color: colorMap[cor] || cor }}
+    >
       {msg}
     </div>
   )
@@ -191,7 +188,7 @@ function PlanosContent() {
               </li>
             ))}
           </ul>
-          <Link href="/cadastro" className="pl-btn pl-btn-outline" style={{ display:'block', textAlign:'center', textDecoration:'none', marginTop:20 }}>
+          <Link href="/cadastro" className="pl-btn pl-btn-outline block text-center no-underline mt-5">
             Começar grátis
           </Link>
         </div>
@@ -217,8 +214,7 @@ function PlanosContent() {
             ))}
           </ul>
           <button
-            className="pl-btn pl-btn-dark"
-            style={{ width:'100%', marginTop:20, cursor:'pointer' }}
+            className="pl-btn pl-btn-dark w-full mt-5 cursor-pointer"
             onClick={() => assinarPlano('pro')}
             disabled={loadingPlano === 'pro'}
           >
@@ -246,8 +242,7 @@ function PlanosContent() {
             ))}
           </ul>
           <button
-            className="pl-btn pl-btn-outline"
-            style={{ width:'100%', marginTop:20, cursor:'pointer' }}
+            className="pl-btn pl-btn-outline w-full mt-5 cursor-pointer"
             onClick={() => assinarPlano('ultra')}
             disabled={loadingPlano === 'ultra'}
           >

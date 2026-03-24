@@ -333,11 +333,8 @@ function CadastroContent() {
   function StatusIcon({ st }: { st: FieldStatus }) {
     if (st.ok === null) return null
     return (
-      <span style={{
-        position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-        fontSize: '1rem', color: st.ok ? 'var(--verde)' : 'var(--vermelho)',
-        fontFamily: 'Material Icons', lineHeight: 1, pointerEvents: 'none'
-      }}>
+      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-base leading-none pointer-events-none [font-family:'Material_Icons']"
+        style={{ color: st.ok ? 'var(--verde)' : 'var(--vermelho)' }}>
         {st.ok ? 'check_circle' : 'error_outline'}
       </span>
     )
@@ -346,10 +343,9 @@ function CadastroContent() {
   function HintText({ st }: { st: FieldStatus }) {
     if (!st.hint) return null
     return (
-      <p className={`campo-hint${st.ok === false ? ' erro' : ''}`}
-         style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '.75rem', marginTop: 5 }}>
-        {st.ok === true  && <span className="material-icons" style={{ fontSize: '.85rem', color: 'var(--verde)' }}>check_circle</span>}
-        {st.ok === false && <span className="material-icons" style={{ fontSize: '.85rem' }}>error_outline</span>}
+      <p className={`campo-hint${st.ok === false ? ' erro' : ''} flex items-center gap-1 text-xs mt-[5px]`}>
+        {st.ok === true  && <span className="material-icons text-[.85rem] text-[var(--verde)]">check_circle</span>}
+        {st.ok === false && <span className="material-icons text-[.85rem]">error_outline</span>}
         {st.hint}
       </p>
     )
@@ -359,7 +355,7 @@ function CadastroContent() {
     <>
       <Header />
 
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '120px 5% 64px' }}>
+      <main className="flex-1 flex items-center justify-center px-[5%] pt-[120px] pb-16">
         <div className="cadastro-wrap">
 
           {/* ── TOPO ── */}
@@ -373,9 +369,9 @@ function CadastroContent() {
 
             {/* ── SUCESSO ── */}
             {sucesso ? (
-              <div className="sucesso-screen" style={{ display: 'block', textAlign: 'center', padding: '20px 0' }}>
+              <div className="sucesso-screen block text-center py-5">
                 <div className="sucesso-icone-grande">
-                  <span className="material-icons" style={{ fontSize: '2.2rem', color: 'var(--verde)' }}>check</span>
+                  <span className="material-icons text-[2.2rem] text-[var(--verde)]">check</span>
                 </div>
                 <h2>Conta criada!</h2>
                 <p>Seu cadastro foi realizado com sucesso.<br />Acesse a plataforma para completar seu perfil<br />e começar a usar a VENTSY.</p>
@@ -529,7 +525,7 @@ function CadastroContent() {
                       <strong>Não troque maiúsculo por minúsculo</strong> — cole igualzinho. A VENTSY agradece! 💙
                     </p>
                     <div className="indicacao-input-wrap">
-                      <span className="material-icons icon-left" style={{ color: '#ff385c' }}>card_giftcard</span>
+                      <span className="material-icons icon-left text-[#ff385c]">card_giftcard</span>
                       <input
                         id="ref-codigo"
                         type="text"

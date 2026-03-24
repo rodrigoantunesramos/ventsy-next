@@ -18,7 +18,7 @@ function AdminStatsBar({ entries }: { entries: DiaryEntry[] }) {
   const overdue        = entries.filter(e => e.reminder_date && new Date(e.reminder_date) < new Date()).length;
 
   return (
-    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+    <div className="flex gap-[10px] flex-wrap mb-5">
       {[
         { label: 'Total de anotações', value: entries.length, icon: '📒', color: '#ff385c' },
         { label: 'Usuários ativos', value: uniqueUsers, icon: '👥', color: '#3b82f6' },
@@ -26,17 +26,12 @@ function AdminStatsBar({ entries }: { entries: DiaryEntry[] }) {
         { label: 'Com lembrete', value: withReminder, icon: '📅', color: '#27ae60' },
         { label: 'Lembretes vencidos', value: overdue, icon: '⏰', color: '#c0392b' },
       ].map(s => (
-        <div key={s.label} style={{
-          background: '#fff', borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-          border: '1px solid #f0f0f0',
-          padding: '12px 16px', flex: '1 1 100px', textAlign: 'center', minWidth: 90,
-        }}>
-          <div style={{ fontSize: '1.2rem' }}>{s.icon}</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color, lineHeight: 1.2, marginTop: 2 }}>
+        <div key={s.label} className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-[#f0f0f0] px-4 py-3 flex-[1_1_100px] text-center min-w-[90px]">
+          <div className="text-[1.2rem]">{s.icon}</div>
+          <div className="text-[1.5rem] font-extrabold leading-[1.2] mt-[2px]" style={{ color: s.color }}>
             {s.value}
           </div>
-          <div style={{ fontSize: '.67rem', color: '#bbb', marginTop: 2 }}>{s.label}</div>
+          <div className="text-[.67rem] text-[#bbb] mt-[2px]">{s.label}</div>
         </div>
       ))}
     </div>
@@ -128,28 +123,23 @@ export default function AdminDiarioPage() {
   if (!authorized && !loading) return null;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f7f7f8', padding: '32px 24px' }}>
-      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+    <div className="min-h-screen bg-[#f7f7f8] px-6 py-8">
+      <div className="max-w-[960px] mx-auto">
 
         {/* ── Cabeçalho ──────────────────────────────────────────── */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div className="mb-6">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#111', margin: 0 }}>
+              <h1 className="text-[1.6rem] font-extrabold text-[#111] m-0">
                 📒 Diário Inteligente — Admin
               </h1>
-              <p style={{ fontSize: '.88rem', color: '#888', margin: '6px 0 0' }}>
+              <p className="text-[.88rem] text-[#888] mt-[6px] mb-0">
                 Visualização global de todas as anotações da plataforma.
               </p>
             </div>
             <a
               href="/admin"
-              style={{
-                background: '#f5f5f5', border: '1px solid #eee',
-                borderRadius: 10, padding: '8px 16px',
-                fontSize: '.82rem', color: '#555', textDecoration: 'none',
-                fontWeight: 500,
-              }}
+              className="bg-[#f5f5f5] border border-[#eee] rounded-[10px] px-4 py-2 text-[.82rem] text-[#555] no-underline font-medium"
             >
               ← Voltar ao Admin
             </a>
@@ -160,7 +150,7 @@ export default function AdminDiarioPage() {
         <AdminStatsBar entries={entries} />
 
         {/* ── Busca ──────────────────────────────────────────────── */}
-        <div style={{ marginBottom: 16 }}>
+        <div className="mb-4">
           <DiarioBusca
             search={search}
             onSearchChange={setSearch}
@@ -184,30 +174,18 @@ export default function AdminDiarioPage() {
           const top = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
 
           return top.length > 0 ? (
-            <div style={{
-              background: '#fff', borderRadius: 14,
-              boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-              border: '1px solid #f0f0f0',
-              padding: '14px 16px', marginBottom: 20,
-            }}>
-              <div style={{ fontSize: '.75rem', fontWeight: 700, color: '#bbb', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+            <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] border border-[#f0f0f0] px-4 py-[14px] mb-5">
+              <div className="text-[.75rem] font-bold text-[#bbb] mb-2 uppercase tracking-[.06em]">
                 Tags mais usadas na plataforma
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div className="flex flex-wrap gap-[6px]">
                 {top.map(([tag, count]) => (
                   <button
                     key={tag}
                     onClick={() => setActiveTag(activeTag === tag ? '' : tag)}
-                    style={{
-                      background: activeTag === tag ? '#7c3aed' : '#f5f0ff',
-                      color: activeTag === tag ? '#fff' : '#7c3aed',
-                      border: '1px solid rgba(124,58,237,.15)',
-                      borderRadius: 20, padding: '3px 10px',
-                      fontSize: '.75rem', fontWeight: 600, cursor: 'pointer',
-                      transition: 'all .15s',
-                    }}
+                    className={`border border-[rgba(124,58,237,.15)] rounded-[20px] px-[10px] py-[3px] text-[.75rem] font-semibold cursor-pointer transition-all duration-[150ms] ${activeTag === tag ? 'bg-[#7c3aed] text-white' : 'bg-[#f5f0ff] text-[#7c3aed]'}`}
                   >
-                    #{tag} <span style={{ opacity: .7 }}>{count}</span>
+                    #{tag} <span className="opacity-70">{count}</span>
                   </button>
                 ))}
               </div>
@@ -227,12 +205,7 @@ export default function AdminDiarioPage() {
 
         {/* ── Toast ──────────────────────────────────────────────── */}
         {toast && (
-          <div style={{
-            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-            background: '#222', color: '#fff', borderRadius: 10,
-            padding: '10px 20px', fontSize: '.88rem', fontWeight: 500,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 9999,
-          }}>
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#222] text-white rounded-[10px] px-5 py-[10px] text-[.88rem] font-medium shadow-[0_4px_20px_rgba(0,0,0,0.2)] z-[9999]">
             {toast}
           </div>
         )}

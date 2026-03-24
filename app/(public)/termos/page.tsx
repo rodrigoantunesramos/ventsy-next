@@ -84,7 +84,7 @@ export default function TermosPage() {
           <p>
             Ao acessar, criar uma conta ou utilizar qualquer funcionalidade da VENTSY, o Usuário concorda com estes
             Termos de Uso e com a{' '}
-            <Link href="/privacidade" style={{ color: 'var(--vermelho)' }}>Política de Privacidade</Link>.
+            <Link href="/privacidade" className="text-[var(--vermelho)]">Política de Privacidade</Link>.
           </p>
           <p>Estes termos podem ser atualizados periodicamente. O uso continuado da plataforma após notificação de alterações implica aceitação das novas condições.</p>
         </div>
@@ -236,7 +236,7 @@ export default function TermosPage() {
           <h2>Disposições gerais</h2>
           <p>Estes Termos de Uso são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca do Rio de Janeiro — RJ para dirimir eventuais controvérsias, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
           <p>A eventual invalidade de alguma cláusula não afeta a validade das demais disposições deste instrumento.</p>
-          <p>Para dúvidas ou solicitações relacionadas a estes termos, entre em contato: <strong><a href="mailto:juridico@ventsy.com.br" style={{ color: 'var(--vermelho)' }}>juridico@ventsy.com.br</a></strong>.</p>
+          <p>Para dúvidas ou solicitações relacionadas a estes termos, entre em contato: <strong><a href="mailto:juridico@ventsy.com.br" className="text-[var(--vermelho)]">juridico@ventsy.com.br</a></strong>.</p>
         </div>
 
         {/* ── CARD CONTATO ── */}

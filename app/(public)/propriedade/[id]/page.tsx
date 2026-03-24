@@ -313,7 +313,7 @@ function PropriedadeContent() {
               {plano==='pro'&&<span className="pp-selo-pro">★ PRO</span>}
             </div>
           </div>
-          <div className="pp-acoes" style={{position:'relative'}}>
+          <div className="pp-acoes relative">
             <button className="pp-btn-acao" onClick={()=>setShareOpen(!shareOpen)}>
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
               Compartilhar
@@ -336,7 +336,7 @@ function PropriedadeContent() {
         <div className="pp-galeria-wrapper">
           <div className="pp-galeria-grid">
             {fotos.slice(0,5).map((f,i)=>(
-              <div key={i} className={`pp-foto-slot${i===0?' pp-foto-main':''}`} onClick={()=>setModalGal(true)} style={{cursor:'pointer',position:'relative'}}>
+              <div key={i} className={`pp-foto-slot${i===0?' pp-foto-main':''} cursor-pointer relative`} onClick={()=>setModalGal(true)}>
                 <img src={f.url} alt={f.titulo||`Foto ${i+1}`} loading="lazy" onError={e=>{(e.target as HTMLImageElement).src=`https://picsum.photos/seed/fb${i}/800/600`}}/>
                 {i===4&&fotos.length>5&&<div className="pp-foto-overlay">+{fotos.length-4}</div>}
               </div>
@@ -376,7 +376,7 @@ function PropriedadeContent() {
             {/* Comodidades */}
             <div className="pp-comodidades"><h2>O que o lugar oferece</h2>
               <div className="pp-como-grid">
-                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{c}</div>):<p style={{color:'#aaa',fontSize:'.88rem'}}>Não informado.</p>}
+                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{c}</div>):<p className="text-[#aaa] text-[.88rem]">Não informado.</p>}
               </div>
             </div>
 
@@ -392,20 +392,15 @@ function PropriedadeContent() {
 
               {/* Botão avaliar — só para clientes logados */}
               {clientUserId && propId !== 'demo' && (
-                <div style={{margin:'12px 0'}}>
+                <div className="my-3">
                   {jaAvaliou ? (
-                    <div style={{fontSize:'.84rem',color:'#27ae60',background:'#f0faf5',borderRadius:10,padding:'8px 14px',display:'inline-flex',alignItems:'center',gap:6}}>
+                    <div className="text-[.84rem] text-[#27ae60] bg-[#f0faf5] rounded-[10px] px-[14px] py-2 inline-flex items-center gap-[6px]">
                       ✅ Você já avaliou este espaço
                     </div>
                   ) : (
                     <button
                       onClick={()=>setReviewModal(true)}
-                      style={{
-                        background:'#ff385c',color:'#fff',border:'none',
-                        borderRadius:10,padding:'9px 18px',
-                        fontSize:'.86rem',fontWeight:700,cursor:'pointer',
-                        transition:'opacity .15s',
-                      }}
+                      className="bg-[#ff385c] text-white border-none rounded-[10px] px-[18px] py-[9px] text-[.86rem] font-bold cursor-pointer transition-opacity duration-150"
                     >
                       ⭐ Avaliar este espaço
                     </button>
@@ -413,8 +408,8 @@ function PropriedadeContent() {
                 </div>
               )}
               {!clientUserId && propId !== 'demo' && (
-                <div style={{fontSize:'.82rem',color:'#888',margin:'8px 0 12px',background:'#fafafa',borderRadius:10,padding:'8px 14px'}}>
-                  <a href="/login" style={{color:'#ff385c',fontWeight:600,textDecoration:'none'}}>Faça login</a> para avaliar este espaço.
+                <div className="text-[.82rem] text-[#888] mt-2 mb-3 bg-[#fafafa] rounded-[10px] px-[14px] py-2">
+                  <a href="/login" className="text-[#ff385c] font-semibold no-underline">Faça login</a> para avaliar este espaço.
                 </div>
               )}
 
@@ -430,15 +425,15 @@ function PropriedadeContent() {
                       <img src={a.avatar||`https://i.pravatar.cc/150?u=${a.id}`} alt={a.autor} loading="lazy"/>
                       <div><strong>{a.autor}{a.verificada&&<span className="pp-badge-ver">✓ Verificado</span>}</strong><span>{a.data}{a.evento_tipo?` · ${a.evento_tipo}`:''}</span></div>
                     </div>
-                    <div style={{color:'var(--ouro)',fontSize:'.88rem',marginBottom:6}}>{'★'.repeat(a.nota)}{'☆'.repeat(5-a.nota)}</div>
+                    <div className="text-[var(--ouro)] text-[.88rem] mb-[6px]">{'★'.repeat(a.nota)}{'☆'.repeat(5-a.nota)}</div>
                     <p className="pp-aval-texto">{a.texto}</p>
                   </div>
                 ))}
                 {!avalFil.length&&(
-                  <div style={{color:'#bbb',gridColumn:'1/-1',textAlign:'center',padding:'24px 0'}}>
-                    <div style={{fontSize:'1.6rem',marginBottom:8}}>⭐</div>
-                    <div style={{fontWeight:600,color:'#aaa',marginBottom:4}}>Nenhuma avaliação ainda</div>
-                    <div style={{fontSize:'.82rem'}}>Seja o primeiro a avaliar este espaço!</div>
+                  <div className="text-[#bbb] [grid-column:1/-1] text-center py-6">
+                    <div className="text-[1.6rem] mb-2">⭐</div>
+                    <div className="font-semibold text-[#aaa] mb-1">Nenhuma avaliação ainda</div>
+                    <div className="text-[.82rem]">Seja o primeiro a avaliar este espaço!</div>
                   </div>
                 )}
               </div>
@@ -486,12 +481,7 @@ function PropriedadeContent() {
 
             {/* Toast avaliação */}
             {reviewToast&&(
-              <div style={{
-                position:'fixed',bottom:24,left:'50%',transform:'translateX(-50%)',
-                background:'#27ae60',color:'#fff',borderRadius:10,
-                padding:'10px 20px',fontSize:'.88rem',fontWeight:500,
-                boxShadow:'0 4px 20px rgba(0,0,0,.2)',zIndex:9999,
-              }}>
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#27ae60] text-white rounded-[10px] px-5 py-[10px] text-[.88rem] font-medium shadow-[0_4px_20px_rgba(0,0,0,.2)] z-[9999]">
                 {reviewToast}
               </div>
             )}
@@ -501,7 +491,7 @@ function PropriedadeContent() {
               <div className="pp-mapa"><h2>Onde fica este espaço</h2>
                 <p className="pp-mapa-end">{[prop?.cidade,prop?.estado,'Brasil'].filter(Boolean).join(', ')}</p>
                 <div className="pp-mapa-container">
-                  <iframe title="Localização" width="100%" height="350" style={{border:0}} loading="lazy"
+                  <iframe title="Localização" width="100%" height="350" className="border-0" loading="lazy"
                     src={`https://maps.google.com/maps?q=${encodeURIComponent([prop?.cidade,prop?.estado,'Brasil'].filter(Boolean).join(', '))}&output=embed&hl=pt-BR`}/>
                 </div>
               </div>
@@ -557,9 +547,9 @@ function PropriedadeContent() {
                     </div>
                     {formModo==='hora'&&(
                       <div className="pp-form-grupo"><label>Horas</label>
-                        <div style={{display:'flex',gap:10,alignItems:'center'}}>
-                          <input type="range" min={1} max={24} value={formHoras} onChange={e=>setFormHoras(Number(e.target.value))} style={{flex:1,accentColor:'var(--vermelho)'}}/>
-                          <input type="number" min={1} max={24} value={formHoras} onChange={e=>setFormHoras(Number(e.target.value))} style={{width:64,padding:'4px 8px',border:'1.5px solid #ddd',borderRadius:8,textAlign:'center',fontFamily:'inherit',fontSize:'.85rem'}}/>
+                        <div className="flex gap-[10px] items-center">
+                          <input type="range" min={1} max={24} value={formHoras} onChange={e=>setFormHoras(Number(e.target.value))} className="flex-1 accent-[var(--vermelho)]"/>
+                          <input type="number" min={1} max={24} value={formHoras} onChange={e=>setFormHoras(Number(e.target.value))} className="w-16 px-2 py-1 border-[1.5px] border-[#ddd] rounded-lg text-center font-[inherit] text-[.85rem]"/>
                         </div>
                       </div>
                     )}
@@ -570,9 +560,9 @@ function PropriedadeContent() {
                       </div>
                     )}
                     <div className="pp-form-grupo"><label>Convidados (máx. {prop?.capacidade||500})</label>
-                      <div style={{display:'flex',gap:10,alignItems:'center'}}>
-                        <input type="range" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} style={{flex:1,accentColor:'var(--vermelho)'}}/>
-                        <input type="number" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} style={{width:64,padding:'4px 8px',border:'1.5px solid #ddd',borderRadius:8,textAlign:'center',fontFamily:'inherit',fontSize:'.85rem'}}/>
+                      <div className="flex gap-[10px] items-center">
+                        <input type="range" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} className="flex-1 accent-[var(--vermelho)]"/>
+                        <input type="number" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} className="w-16 px-2 py-1 border-[1.5px] border-[#ddd] rounded-lg text-center font-[inherit] text-[.85rem]"/>
                       </div>
                     </div>
                     <div className="pp-simulador">
@@ -587,7 +577,7 @@ function PropriedadeContent() {
               ):(
                 <div className="pp-basico-cta">
                   <p>Entre em contato com o proprietário para verificar disponibilidade e negociar condições.</p>
-                  {wppRef.current&&<button className="pp-btn-wpp" style={{marginTop:16}} onClick={irWppDireto}>💬 Falar pelo WhatsApp</button>}
+                  {wppRef.current&&<button className="pp-btn-wpp mt-4" onClick={irWppDireto}>💬 Falar pelo WhatsApp</button>}
                 </div>
               )}
             </div>
@@ -620,7 +610,7 @@ function PropriedadeContent() {
                 {v.url?<video controls><source src={v.url}/>Seu navegador não suporta vídeo.</video>:<div className="pp-video-placeholder">Vídeo em breve</div>}
                 <div className="pp-video-titulo">{v.titulo||'Vídeo do espaço'}</div>
               </div>
-            )):<p style={{color:'#888',textAlign:'center',padding:'40px 0'}}>Nenhum vídeo cadastrado ainda.</p>}
+            )):<p className="text-[#888] text-center py-10">Nenhum vídeo cadastrado ainda.</p>}
           </div>
         </div>
       )}

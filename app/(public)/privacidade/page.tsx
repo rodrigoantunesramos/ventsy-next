@@ -149,7 +149,7 @@ export default function PrivacidadePage() {
             <li><strong>Revogação do consentimento:</strong> retirar o consentimento para tratamentos baseados nessa base legal.</li>
             <li><strong>Oposição:</strong> opor-se ao tratamento realizado com base em legítimo interesse.</li>
           </ul>
-          <p>Para exercer qualquer um desses direitos, entre em contato conosco pelo e-mail <strong><a href="mailto:privacidade@ventsy.com.br" style={{ color: 'var(--vermelho)' }}>privacidade@ventsy.com.br</a></strong>.</p>
+          <p>Para exercer qualquer um desses direitos, entre em contato conosco pelo e-mail <strong><a href="mailto:privacidade@ventsy.com.br" className="text-[var(--vermelho)]">privacidade@ventsy.com.br</a></strong>.</p>
         </div>
 
         {/* ── 08 ── */}
@@ -181,7 +181,7 @@ export default function PrivacidadePage() {
           <h2>Contato</h2>
           <p>Para dúvidas, solicitações ou exercício dos seus direitos, entre em contato com nosso Encarregado de Dados (DPO):</p>
           <ul>
-            <li><strong>E-mail:</strong> <a href="mailto:privacidade@ventsy.com.br" style={{ color: 'var(--vermelho)' }}>privacidade@ventsy.com.br</a></li>
+            <li><strong>E-mail:</strong> <a href="mailto:privacidade@ventsy.com.br" className="text-[var(--vermelho)]">privacidade@ventsy.com.br</a></li>
             <li><strong>Atendimento:</strong> Segunda a sexta, das 9h às 18h</li>
             <li><strong>Prazo de resposta:</strong> até 15 dias úteis</li>
           </ul>
