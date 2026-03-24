@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAny } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
 
@@ -57,7 +57,8 @@ function FaqItem({pergunta,resposta}:{pergunta:string;resposta:string}) {
 
 function PropriedadeContent() {
   const params = useParams()
-  const propId = params.id as string
+  const propId    = params.id as string
+  const propIdNum = Number(propId)
 
   const [prop,setProp]         = useState<any>(null)
   const [fotos,setFotos]       = useState<Foto[]>([])
@@ -143,7 +144,7 @@ function PropriedadeContent() {
       }
 
       const { data: p } = await withTimeout(
-        supabase.from('propriedades').select('*').eq('id', propId).single(),
+        supabase.from('propriedades').select('*').eq('id', propIdNum).single(),
         8000
       )
 
@@ -153,7 +154,7 @@ function PropriedadeContent() {
       }
 
       const { data: fts } = await withTimeout(
-        supabase.from('fotos_imovel').select('*').eq('propriedade_id', propId).order('ordem', { ascending: true }) as PromiseLike<{data: any[]}>,
+        supabase.from('fotos_imovel').select('*').eq('propriedade_id', propIdNum).order('ordem', { ascending: true }) as PromiseLike<{data: any[]}>,
         8000
       ).catch(() => ({ data: [] as any[] }))
 
@@ -163,12 +164,12 @@ function PropriedadeContent() {
         supabase
           .from('videos_propriedade')
           .select('url,titulo')
-          .eq('propriedade_id', propId),
+          .eq('propriedade_id', propIdNum),
 
-        supabase
+        supabaseAny
           .from('avaliacoes')
           .select('*')
-          .eq('propriedade_id', propId)
+          .eq('propriedade_id', propIdNum)
           .eq('verificada', true)
           .order('criado_em', { ascending: false }),
 
@@ -245,8 +246,8 @@ function PropriedadeContent() {
   // ── Verificar se já avaliou esta propriedade ─────────────────────────────
   useEffect(()=>{
     if(!clientUserId || !propId || propId==='demo') return
-    supabase.from('avaliacoes').select('id').eq('user_id',clientUserId).eq('propriedade_id',propId).maybeSingle()
-      .then(({ data })=>{ if(data) setJaAvaliou(true) })
+    supabaseAny.from('avaliacoes').select('id').eq('user_id',clientUserId).eq('propriedade_id',propId).maybeSingle()
+      .then(({ data }: { data: any })=>{ if(data) setJaAvaliou(true) })
   },[clientUserId,propId])
 
   useEffect(()=>{

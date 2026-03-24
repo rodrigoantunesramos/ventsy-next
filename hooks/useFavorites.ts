@@ -23,7 +23,7 @@ export function useFavorites() {
           .from('favoritos')
           .select('property_id')
           .eq('user_id', session.user.id)
-        setFavorites((data || []).map((f: { property_id: string }) => f.property_id))
+        setFavorites((data || []).map((f) => String(f.property_id)))
       } else {
         const local: string[] = JSON.parse(localStorage.getItem('ventsy_favs') || '[]')
         setFavorites(local)
@@ -46,10 +46,10 @@ export function useFavorites() {
         await supabase.from('favoritos')
           .delete()
           .eq('user_id', userId)
-          .eq('property_id', propertyId)
+          .eq('property_id', Number(propertyId))
       } else {
         await supabase.from('favoritos')
-          .insert({ user_id: userId, property_id: propertyId })
+          .insert({ user_id: userId, property_id: Number(propertyId) })
       }
     } else {
       const updated = isFav

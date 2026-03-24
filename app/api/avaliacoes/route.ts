@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAny } from '@/lib/supabase'
 
 // GET /api/avaliacoes?user_id=xxx — avaliações feitas pelo cliente
 // GET /api/avaliacoes?propriedade_id=xxx — avaliações de uma propriedade (verificadas)
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const propriedadeId = searchParams.get('propriedade_id')
 
   if (userId) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAny
       .from('avaliacoes')
       .select('*, propriedade:propriedades(id,nome,cidade,estado,foto_capa,imagem_url)')
       .eq('user_id', userId)
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (propriedadeId) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAny
       .from('avaliacoes')
       .select('*')
       .eq('propriedade_id', propriedadeId)
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Verificar se o usuário já avaliou esta propriedade
-  const { data: existing } = await supabase
+  const { data: existing } = await supabaseAny
     .from('avaliacoes')
     .select('id')
     .eq('user_id', user_id)
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     year: 'numeric',
   })
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAny
     .from('avaliacoes')
     .insert({
       user_id,
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
   if (!error) {
     // Recalcular média da propriedade
-    const { data: todas } = await supabase
+    const { data: todas } = await supabaseAny
       .from('avaliacoes')
       .select('nota')
       .eq('propriedade_id', propriedade_id)
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       await supabase
         .from('propriedades')
         .update({ avaliacao: parseFloat(media.toFixed(1)) })
-        .eq('id', propriedade_id)
+        .eq('id', Number(propriedade_id))
     }
   }
 

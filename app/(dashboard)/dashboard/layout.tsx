@@ -82,13 +82,13 @@ export default function Layout({ children }: LayoutProps) {
       try {
         const { data: assin } = await sb
           .from('assinaturas')
-          .select('plano, validade, plano_ativo, fim_periodo')
+          .select('plano_ativo, fim_periodo')
           .eq('usuario_id', user.id)
           .maybeSingle();
 
         if (assin) {
-          plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
-          validade = assin.fim_periodo  || assin.validade || null;
+          plano    = (assin.plano_ativo || 'basico').toLowerCase();
+          validade = assin.fim_periodo  || null;
         }
       } catch (e) { console.error('Erro assinatura:', e); }
 
