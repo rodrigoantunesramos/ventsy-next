@@ -13,7 +13,7 @@ SERVICES/ --» Regras do Negócio - organiza chamadas externas
 
 HOOKS/ --»  Custom hooks do React
 
-STYLES/ --» Estilos - CSS 
+STYLES/ --» Estilos - CSS a
 
 PUBLIC/ --» Arquivos estáticos
 
@@ -22,3 +22,4 @@ TYPES/ --»  Tipagens - TypeScript
 
 
 ver quais plugins podem ser uteis para o desenvolvimento.
+a
