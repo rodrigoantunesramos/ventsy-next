@@ -69,8 +69,8 @@ export default function Header() {
 
           {menuOpen && (
             <div className="absolute top-12 right-0 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col py-2 z-[2000]">
-              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                ✏️ Cadastre seu espaço
+              <Link href="/anunciar" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+                ✏️ Anuncie seu espaço
               </Link>
               <Link href="/planos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
                 💳 Planos
