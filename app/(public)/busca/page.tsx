@@ -6,7 +6,9 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
+import SearchMap from '@/components/SearchMap'
 import { supabase } from '@/lib/supabase'
+import { DEMO_PROPS } from '@/lib/data'
 import type { PropertySummary } from '@/types/client'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
@@ -17,6 +19,19 @@ const SIGLA_PARA_NOME: Record<string, string> = {
   RN:'Rio Grande do Norte', RS:'Rio Grande do Sul', RO:'Rondônia', RR:'Roraima',
   SC:'Santa Catarina', SP:'São Paulo', SE:'Sergipe', TO:'Tocantins',
 }
+
+// Fallback de demonstração (espelha o HomeFeed) — usado quando a busca real
+// não retorna nada, p.ex. base sem propriedades publicadas.
+const DEMO_BUSCA = DEMO_PROPS.map((d) => {
+  const [cidade, estado] = d.cidade.split(',').map((s) => s.trim())
+  return {
+    id: d.id, nome: d.nome, cidade, estado,
+    valor_base: d.preco, valor_hora: 0,
+    avaliacao: d.nota_media, _nota: String(d.nota_media),
+    _plano: d._plano, categoria: d.categoria, imagem_url: d.imagem_url,
+    latitude: d.latitude, longitude: d.longitude,
+  }
+})
 
 function BuscaContent() {
   const params = useSearchParams()
@@ -94,7 +109,8 @@ function BuscaContent() {
     }
 
     const { data } = await query
-    setProps((data || []) as unknown as RawProperty[])
+    const rows = (data || []) as unknown as RawProperty[]
+    setProps(rows.length ? rows : (DEMO_BUSCA as unknown as RawProperty[]))
     setLoading(false)
   }
 
@@ -184,11 +200,21 @@ function BuscaContent() {
         </section>
 
         {/* Coluna do mapa */}
-        <section className="hidden lg:flex w-[420px] xl:w-[480px] flex-shrink-0 bg-gray-100 items-center justify-center sticky top-0">
-          <p className="text-gray-400 text-[.9rem] text-center px-5">
-            🗺️ Mapa integrado<br />
-            <span className="text-[.8rem]">Integre Google Maps ou Leaflet aqui</span>
-          </p>
+        <section className="hidden lg:block w-[420px] xl:w-[480px] flex-shrink-0 sticky top-0 h-full">
+          <SearchMap
+            properties={props.map((p) => {
+              const r = p as RawProperty & { latitude?: number | null; longitude?: number | null }
+              return {
+                id: p.id,
+                nome: p.nome,
+                latitude: r.latitude,
+                longitude: r.longitude,
+                valor_hora: p.valor_hora,
+                valor_base: p.valor_base,
+                _plano: ((p.usuario_id && planosMap[p.usuario_id]) || 'basico') as 'basico' | 'pro' | 'ultra',
+              }
+            })}
+          />
         </section>
       </div>
 

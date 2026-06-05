@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import { supabase, supabaseAny } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
+import './propriedade.css'
 
 /* ── tipos ── */
 interface Foto { url: string; titulo: string; ordem: number }

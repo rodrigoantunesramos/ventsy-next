@@ -128,16 +128,16 @@ export const EVENTOS_CATS = [
 ]
 
 export const DEMO_PROPS = [
-  { id: 'd1', nome: 'Chácara Macacu', cidade: 'Cachoeiras de Macacu, RJ', preco: 3000, nota_media: 4.9, _plano: 'ultra', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara1/420/320' },
-  { id: 'd2', nome: 'Sítio Verde Vale', cidade: 'Guapimirim, RJ', preco: 2200, nota_media: 4.7, _plano: 'pro', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara2/420/320' },
-  { id: 'd3', nome: 'Sítio Brisa', cidade: 'Petrópolis, RJ', preco: 1900, nota_media: 4.5, _plano: 'pro', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara3/420/320' },
-  { id: 'd4', nome: 'Chácara das Flores', cidade: 'Teresópolis, RJ', preco: 1800, nota_media: 4.3, _plano: 'basico', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara4/420/320' },
-  { id: 'd5', nome: 'Espaço Aquarela', cidade: 'Petrópolis, RJ', preco: 3200, nota_media: 4.8, _plano: 'ultra', categoria: 'Casas de Festas', imagem_url: 'https://picsum.photos/seed/salao1/420/320' },
-  { id: 'd6', nome: 'Salão Primavera', cidade: 'Nova Friburgo, RJ', preco: 1500, nota_media: 4.4, _plano: 'pro', categoria: 'Casas de Festas', imagem_url: 'https://picsum.photos/seed/salao2/420/320' },
-  { id: 'd7', nome: 'Espaço Garden', cidade: 'Niterói, RJ', preco: 2100, nota_media: 4.2, _plano: 'basico', categoria: 'Casas de Festas', imagem_url: 'https://picsum.photos/seed/salao3/420/320' },
-  { id: 'd8', nome: 'Rooftop 360°', cidade: 'Rio de Janeiro, RJ', preco: 5000, nota_media: 5.0, _plano: 'ultra', categoria: 'Rooftops', imagem_url: 'https://picsum.photos/seed/roof1/420/320' },
-  { id: 'd9', nome: 'Sky Lounge', cidade: 'São Paulo, SP', preco: 4200, nota_media: 4.9, _plano: 'pro', categoria: 'Rooftops', imagem_url: 'https://picsum.photos/seed/roof2/420/320' },
-  { id: 'd10', nome: 'Terraço Carioca', cidade: 'Rio de Janeiro, RJ', preco: 3800, nota_media: 4.6, _plano: 'basico', categoria: 'Rooftops', imagem_url: 'https://picsum.photos/seed/roof3/420/320' },
+  { id: 'd1', nome: 'Chácara Macacu', cidade: 'Cachoeiras de Macacu, RJ', preco: 3000, nota_media: 4.9, _plano: 'ultra', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara1/420/320', latitude: -22.46, longitude: -42.65 },
+  { id: 'd2', nome: 'Sítio Verde Vale', cidade: 'Guapimirim, RJ', preco: 2200, nota_media: 4.7, _plano: 'pro', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara2/420/320', latitude: -22.535, longitude: -42.99 },
+  { id: 'd3', nome: 'Sítio Brisa', cidade: 'Petrópolis, RJ', preco: 1900, nota_media: 4.5, _plano: 'pro', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara3/420/320', latitude: -22.505, longitude: -43.178 },
+  { id: 'd4', nome: 'Chácara das Flores', cidade: 'Teresópolis, RJ', preco: 1800, nota_media: 4.3, _plano: 'basico', categoria: 'Sítios', imagem_url: 'https://picsum.photos/seed/chacara4/420/320', latitude: -22.412, longitude: -42.966 },
+  { id: 'd5', nome: 'Espaço Aquarela', cidade: 'Petrópolis, RJ', preco: 3200, nota_media: 4.8, _plano: 'ultra', categoria: 'Casas de Festas', imagem_url: 'https://picsum.photos/seed/salao1/420/320', latitude: -22.512, longitude: -43.19 },
+  { id: 'd6', nome: 'Salão Primavera', cidade: 'Nova Friburgo, RJ', preco: 1500, nota_media: 4.4, _plano: 'pro', categoria: 'Casas de Festas', imagem_url: 'https://picsum.photos/seed/salao2/420/320', latitude: -22.282, longitude: -42.531 },
+  { id: 'd7', nome: 'Espaço Garden', cidade: 'Niterói, RJ', preco: 2100, nota_media: 4.2, _plano: 'basico', categoria: 'Casas de Festas', imagem_url: 'https://picsum.photos/seed/salao3/420/320', latitude: -22.883, longitude: -43.103 },
+  { id: 'd8', nome: 'Rooftop 360°', cidade: 'Rio de Janeiro, RJ', preco: 5000, nota_media: 5.0, _plano: 'ultra', categoria: 'Rooftops', imagem_url: 'https://picsum.photos/seed/roof1/420/320', latitude: -22.911, longitude: -43.176 },
+  { id: 'd9', nome: 'Sky Lounge', cidade: 'São Paulo, SP', preco: 4200, nota_media: 4.9, _plano: 'pro', categoria: 'Rooftops', imagem_url: 'https://picsum.photos/seed/roof2/420/320', latitude: -23.55, longitude: -46.633 },
+  { id: 'd10', nome: 'Terraço Carioca', cidade: 'Rio de Janeiro, RJ', preco: 3800, nota_media: 4.6, _plano: 'basico', categoria: 'Rooftops', imagem_url: 'https://picsum.photos/seed/roof3/420/320', latitude: -22.971, longitude: -43.186 },
 ]
 
 export function pesoPlano(p: string) { return p === 'ultra' ? 0 : p === 'pro' ? 1 : 2 }

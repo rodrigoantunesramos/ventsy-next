@@ -18,3 +18,7 @@ STYLES/ --» Estilos - CSS
 PUBLIC/ --» Arquivos estáticos
 
 TYPES/ --»  Tipagens - TypeScript
+
+
+
+ver quais plugins podem ser uteis para o desenvolvimento.

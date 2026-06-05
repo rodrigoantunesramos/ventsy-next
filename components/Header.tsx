@@ -23,11 +23,14 @@ export default function Header() {
     return () => document.removeEventListener('click', handler)
   }, [])
 
-  return ( 
-    <header className="w-full h-20 bg-white flex items-center px-[5%] shadow-sm fixed top-0 z-[9999] overflow-visible"> 
+  return (
+    <header className="w-full h-20 bg-white flex items-center px-[5%] shadow-card fixed top-0 z-[9999] overflow-visible">
       {/* Logo */}
       <div className="flex-none flex items-center mr-4">
-        <Link href="/" className="font-['Playfair_Display'] text-[1.6rem] font-black text-[#ff385c] no-underline flex items-center">
+        <Link
+          href="/"
+          className="font-display text-[1.6rem] font-black tracking-tight text-brand no-underline flex items-center"
+        >
           VENTSY
         </Link>
       </div>
@@ -42,14 +45,14 @@ export default function Header() {
         {isLoggedIn ? (
           <Link
             href="/dashboard"
-            className="bg-[#0d0d0d] hover:bg-gray-800 text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
+            className="bg-ink hover:bg-ink-soft text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
           >
             Dashboard
           </Link>
         ) : (
           <Link
             href="/login"
-            className="bg-[#ff385c] hover:bg-[#e0304f] text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
+            className="bg-brand hover:bg-brand-600 text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
           >
             Entrar
           </Link>
@@ -66,7 +69,7 @@ export default function Header() {
 
           {menuOpen && (
             <div className="absolute top-12 right-0 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col py-2 z-[2000]">
-              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors"> 
+              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
                 ✏️ Cadastre seu espaço
               </Link>
               <Link href="/planos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">

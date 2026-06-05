@@ -46,3 +46,17 @@ body {
 .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--vermelho) !important; border-color: var(--vermelho) !important; }
 .flatpickr-day.inRange { background: #ffe0e6 !important; border-color: #ffe0e6 !important; box-shadow: -5px 0 0 #ffe0e6, 5px 0 0 #ffe0e6 !important; color: #333 !important; }
 .flatpickr-day:hover { background: #ffe0e6 !important; }
+
+/* Leaflet — marcadores de preço (busca) */
+.leaflet-container { font-family: var(--font-sans), 'DM Sans', sans-serif; }
+.price-marker-wrap { background: transparent !important; border: none !important; }
+.price-marker {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #fff; color: #0d0d0d; padding: 6px 12px; border-radius: 999px;
+  font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); border: 1px solid rgba(0, 0, 0, 0.06);
+  transform: translate(-50%, -100%); cursor: pointer;
+  transition: transform 0.12s, background 0.12s, color 0.12s;
+}
+.price-marker:hover { background: #0d0d0d; color: #fff; transform: translate(-50%, -100%) scale(1.06); }
+.price-marker-ultra { background: linear-gradient(135deg, #f59e0b, #ff385c); color: #fff; border: none; }
