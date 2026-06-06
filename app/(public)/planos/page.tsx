@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
+import CheckoutPlano from '@/components/CheckoutPlano'
 
 /* ── preços padrão ── */
 const PRECOS_DEFAULT = {
@@ -70,6 +71,8 @@ function PlanosContent() {
   const [features, setFeatures] = useState(FEATURES)
   const [loadingPlano, setLoadingPlano] = useState<string | null>(null)
   const [alerta, setAlerta]     = useState<{ msg: string; cor: string } | null>(null)
+  const [checkout, setCheckout] = useState<{ plano: string; valor: number; periodo: string } | null>(null)
+  const [userEmail, setUserEmail] = useState('')
 
   // Verifica retorno de pagamento
   useEffect(() => {
@@ -119,30 +122,10 @@ function PlanosContent() {
       return
     }
 
-    setLoadingPlano(plano)
-    try {
-      const periodo = isAnual ? 'anual' : 'mensal'
-      const res = await fetch(`https://hxvlfalgrduitevbhqvq.supabase.co/functions/v1/create-payment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          plano, periodo,
-          usuario_id: session.user.id,
-          email: session.user.email,
-          nome: session.user.user_metadata?.nome || session.user.email,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error?.message || JSON.stringify(data.error))
-      const url = data.sandbox_url || data.checkout_url
-      window.location.href = url
-    } catch (err: unknown) {
-      setAlerta({ msg: 'Erro ao gerar pagamento: ' + (err instanceof Error ? err.message : String(err)), cor: 'red' })
-      setLoadingPlano(null)
-    }
+    const base = plano === 'pro' ? pPro : pUltra
+    const valor = isAnual ? base * 12 : base
+    setUserEmail(session.user.email || '')
+    setCheckout({ plano, valor, periodo: isAnual ? 'anual' : 'mensal' })
   }
 
   const pPro   = isAnual ? precos.pro.anual   : precos.pro.mensal
@@ -273,6 +256,17 @@ function PlanosContent() {
       </div>
 
       <Footer />
+
+      {checkout && (
+        <CheckoutPlano
+          plano={checkout.plano}
+          periodo={checkout.periodo}
+          valor={checkout.valor}
+          email={userEmail}
+          onClose={() => setCheckout(null)}
+          onPaid={() => { setCheckout(null); setAlerta({ msg: '✅ Pagamento aprovado! Seu plano foi ativado.', cor: 'green' }); setTimeout(() => router.push('/dashboard'), 2500) }}
+        />
+      )}
     </>
   )
 }
