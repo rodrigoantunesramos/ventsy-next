@@ -30,7 +30,15 @@ export async function POST(req: NextRequest) {
   const fees = calcularTaxas(Number(reserva.valor_estimado) || 0)
   if (fees.totalHospede <= 0) return Response.json({ error: 'Valor inválido para cobrança.' }, { status: 400 })
 
-  const token = process.env.MERCADOPAGO_ACCESS_TOKEN
+  // Split: se o anfitrião conectou o Mercado Pago, o pagamento cai na conta DELE
+  // e a Ventsy fica só com a comissão (application_fee). Senão, conta-plataforma.
+  const { data: hostMp } = await admin
+    .from('host_mp')
+    .select('mp_access_token, conectado')
+    .eq('usuario_id', reserva.host_id)
+    .maybeSingle()
+  const usaSplit = !!(hostMp?.conectado && hostMp?.mp_access_token)
+  const token = usaSplit ? hostMp.mp_access_token : process.env.MERCADOPAGO_ACCESS_TOKEN
   if (!token) return Response.json({ error: 'Pagamento indisponível (credencial ausente).' }, { status: 503 })
 
   const mp = new MercadoPagoConfig({ accessToken: token })
@@ -42,6 +50,7 @@ export async function POST(req: NextRequest) {
     const result = await payment.create({
       body: {
         transaction_amount: fees.totalHospede,
+        application_fee: usaSplit ? fees.comissaoVentsy : undefined,
         description: `Reserva Ventsy ${reserva_id}`,
         payment_method_id: fd.payment_method_id,
         token: fd.token,

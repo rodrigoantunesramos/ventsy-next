@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { supabase, supabaseAny } from '@/lib/supabase'
+import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
 import CheckoutReserva from '@/components/CheckoutReserva'
 
 type Reserva = {
@@ -104,6 +104,7 @@ export default function ReservasPage() {
   const [toast, setToast] = useState('')
   const [pagar, setPagar] = useState<Reserva | null>(null)
   const [userEmail, setUserEmail] = useState('')
+  const [mpConectado, setMpConectado] = useState<boolean | null>(null)
 
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(''), 4000) }
 
@@ -132,6 +133,17 @@ export default function ReservasPage() {
     })
   }, [load])
 
+  useEffect(() => {
+    if (!userId) return
+    authHeaders().then((h) =>
+      fetch('/api/mp/status', { headers: h }).then((r) => r.json()).then((j) => setMpConectado(!!j.conectado)).catch(() => {}),
+    )
+    const p = new URLSearchParams(window.location.search).get('mp')
+    if (p === 'conectado') { flash('✅ Mercado Pago conectado! Você já pode receber pagamentos.'); window.history.replaceState({}, '', '/reservas') }
+    else if (p === 'erro') { flash('Não foi possível conectar o Mercado Pago. Tente novamente.'); window.history.replaceState({}, '', '/reservas') }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
+
   const onStatus = async (id: string, status: string) => {
     const prev = reservas
     setReservas((p) => p.map((r) => (r.id === id ? { ...r, status } : r)))
@@ -151,6 +163,13 @@ export default function ReservasPage() {
   const desbloquear = async (prop_id: number, data: string) => {
     setBloqueios((b) => b.filter((x) => !(x.prop_id === prop_id && x.data === data)))
     await supabaseAny.from('disponibilidade').delete().eq('prop_id', prop_id).eq('data', data)
+  }
+
+  const conectarMP = async () => {
+    const res = await fetch('/api/mp/oauth/start', { headers: await authHeaders() })
+    const json = await res.json()
+    if (json.url) window.location.href = json.url
+    else flash(json.error || 'Não foi possível iniciar a conexão com o Mercado Pago.')
   }
 
   const minhas = reservas.filter((r) => r.usuario_id === userId)
@@ -193,6 +212,23 @@ export default function ReservasPage() {
                 <div className="grid sm:grid-cols-2 gap-4">{minhas.map((r) => <Card key={r.id} r={r} papel="guest" onStatus={onStatus} onPagar={setPagar} />)}</div>
               )}
             </section>
+
+            {props.length > 0 && (
+              <section>
+                <h2 className="font-display text-xl font-bold text-ink mb-1">Recebimentos</h2>
+                <p className="text-sm text-ink-muted mb-4">Conecte sua conta Mercado Pago para receber os pagamentos direto na sua conta — a Ventsy retém apenas a comissão.</p>
+                <div className="rounded-2xl border border-gray-200 bg-white shadow-card p-5 flex items-center justify-between gap-4 flex-wrap">
+                  {mpConectado === true ? (
+                    <span className="text-sm font-semibold text-emerald-700 inline-flex items-center gap-2">✅ Conta Mercado Pago conectada</span>
+                  ) : (
+                    <>
+                      <span className="text-sm text-ink-soft">Sua conta ainda não está conectada.</span>
+                      <button onClick={conectarMP} className="bg-[#009ee3] hover:brightness-95 text-white text-sm font-bold rounded-xl px-5 py-2.5 transition">Conectar Mercado Pago</button>
+                    </>
+                  )}
+                </div>
+              </section>
+            )}
 
             {props.length > 0 && (
               <section>
