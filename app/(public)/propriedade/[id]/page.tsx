@@ -176,9 +176,9 @@ function PropriedadeContent() {
           .eq('verificada', true)
           .order('criado_em', { ascending: false }),
 
-        supabase
-          .from('usuarios')
-          .select('*')
+        supabaseAny
+          .from('perfis_publicos')
+          .select('id, id_prop, nome, usuario, criado_em')
           .eq(
             p.usuario_id?.length === 36 ? 'id' : 'id_prop',
             p.usuario_id || ''
