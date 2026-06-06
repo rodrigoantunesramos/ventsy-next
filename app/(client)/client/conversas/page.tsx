@@ -28,7 +28,9 @@ export default function ConversasPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
 
-      const res  = await fetch(`/api/conversas?user_id=${session.user.id}`)
+      const res  = await fetch(`/api/conversas?user_id=${session.user.id}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       const json = await res.json()
       setConversas(json.data || [])
       setLoading(false)

@@ -19,7 +19,9 @@ export default function FavoritosPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
 
-      const res  = await fetch(`/api/favoritos?user_id=${session.user.id}`)
+      const res  = await fetch(`/api/favoritos?user_id=${session.user.id}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       const json = await res.json()
       setFavoritos(json.data || [])
       setLoading(false)

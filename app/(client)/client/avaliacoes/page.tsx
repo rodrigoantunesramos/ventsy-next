@@ -17,7 +17,9 @@ export default function AvaliacoesPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
 
-      const res  = await fetch(`/api/avaliacoes?user_id=${session.user.id}`)
+      const res  = await fetch(`/api/avaliacoes?user_id=${session.user.id}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       const json = await res.json()
       setAvaliacoes(json.data || [])
       setLoading(false)

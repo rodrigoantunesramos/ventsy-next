@@ -26,10 +26,11 @@ export default function ClientDashboard() {
       const uid = session.user.id
       setUserId(uid)
 
+      const headers = { Authorization: `Bearer ${session.access_token}` }
       const [favRes, avalRes, convRes] = await Promise.all([
-        fetch(`/api/favoritos?user_id=${uid}`).then(r => r.json()),
-        fetch(`/api/avaliacoes?user_id=${uid}`).then(r => r.json()),
-        fetch(`/api/conversas?user_id=${uid}`).then(r => r.json()),
+        fetch(`/api/favoritos?user_id=${uid}`, { headers }).then(r => r.json()),
+        fetch(`/api/avaliacoes?user_id=${uid}`, { headers }).then(r => r.json()),
+        fetch(`/api/conversas?user_id=${uid}`, { headers }).then(r => r.json()),
       ])
 
       setFavoritos(favRes.data || [])

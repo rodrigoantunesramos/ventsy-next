@@ -1,35 +1,37 @@
 import { NextRequest } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin'
+import { getAuthUser, unauthorized } from '@/lib/apiAuth'
 
-// GET /api/favoritos?user_id=xxx — lista favoritos do usuário com dados da propriedade
+// GET /api/favoritos — favoritos do usuário autenticado (com dados da propriedade)
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('user_id')
-
-  if (!userId) return Response.json({ error: 'user_id obrigatório' }, { status: 400 })
+  const user = await getAuthUser(req)
+  if (!user) return unauthorized()
 
   const { data, error } = await supabase
     .from('favoritos')
     .select('*, propriedade:propriedades(id,nome,cidade,estado,valor_base,valor_hora,avaliacao,foto_capa,imagem_url,tipo_propriedade,capacidade)')
-    .eq('user_id', userId)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   return Response.json({ data, error })
 }
 
-// POST /api/favoritos — favoritar propriedade
+// POST /api/favoritos — favoritar propriedade para o usuário autenticado
 export async function POST(req: NextRequest) {
-  const { user_id, property_id } = await req.json()
+  const user = await getAuthUser(req)
+  if (!user) return unauthorized()
 
-  if (!user_id || !property_id) {
-    return Response.json({ error: 'user_id e property_id são obrigatórios' }, { status: 400 })
+  const { property_id } = await req.json()
+
+  if (!property_id) {
+    return Response.json({ error: 'property_id é obrigatório' }, { status: 400 })
   }
 
   // Evitar duplicata
   const { data: existing } = await supabase
     .from('favoritos')
     .select('id')
-    .eq('user_id', user_id)
+    .eq('user_id', user.id)
     .eq('property_id', property_id)
     .maybeSingle()
 
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('favoritos')
-    .insert({ user_id, property_id })
+    .insert({ user_id: user.id, property_id })
     .select()
     .single()
 

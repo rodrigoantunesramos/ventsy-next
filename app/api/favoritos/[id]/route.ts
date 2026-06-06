@@ -1,30 +1,33 @@
 import { NextRequest } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin'
+import { getAuthUser, unauthorized } from '@/lib/apiAuth'
 
-// DELETE /api/favoritos/[id] — remover favorito por id do registro
-// ou DELETE /api/favoritos/[id]?user_id=xxx — remover por property_id + user_id
+// DELETE /api/favoritos/[id] — remove um favorito DO usuário autenticado.
+// [id] = property_id (padrão) ou id do registro quando ?by=record.
+// Toda remoção é escopada ao usuário autenticado (não confia em user_id do cliente).
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('user_id')
+  const user = await getAuthUser(req)
+  if (!user) return unauthorized()
 
-  if (userId) {
-    // Remover por property_id + user_id
+  const { searchParams } = new URL(req.url)
+
+  if (searchParams.get('by') === 'record') {
     const { error } = await supabase
       .from('favoritos')
       .delete()
-      .eq('user_id', userId)
-      .eq('property_id', Number(params.id))
+      .eq('id', params.id)
+      .eq('user_id', user.id)
     return Response.json({ error })
   }
 
-  // Remover pelo id do registro
   const { error } = await supabase
     .from('favoritos')
     .delete()
-    .eq('id', params.id)
+    .eq('user_id', user.id)
+    .eq('property_id', Number(params.id))
 
   return Response.json({ error })
 }

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { supabase, supabaseAny } from '@/lib/supabase'
+import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
 import './propriedade.css'
@@ -85,6 +85,8 @@ function PropriedadeContent() {
   const [clientNome,setClientNome]     = useState('')
   const [jaAvaliou,setJaAvaliou]       = useState(false)
   const [reviewToast,setReviewToast]   = useState('')
+  const [enviandoReserva,setEnviandoReserva] = useState(false)
+  const [reservaToast,setReservaToast] = useState('')
   const [sobreExp,setSobreExp] = useState(false)
   const [formNome,setFormNome] = useState('')
   const [formTel,setFormTel]   = useState('')
@@ -285,6 +287,33 @@ function PropriedadeContent() {
     window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(txt)}`,'_blank')
   }
 
+  const solicitarReserva=async()=>{
+    if(enviandoReserva)return
+    if(!clientUserId){setReservaToast('Faça login para solicitar uma reserva pela Ventsy.');setTimeout(()=>setReservaToast(''),4000);return}
+    if(!formValido){setReservaToast('Preencha nome, telefone, e-mail, tipo de evento e modo de cobrança.');setTimeout(()=>setReservaToast(''),4000);return}
+    setEnviandoReserva(true)
+    try{
+      const dataRef=formInicio||new Date().toISOString().split('T')[0]
+      if(dataRef){
+        const{data:bloq}=await supabaseAny.from('disponibilidade').select('data').eq('prop_id',prop?.id).eq('data',dataRef).maybeSingle()
+        if(bloq){setReservaToast('Essa data está indisponível neste espaço. Escolha outra.');setEnviandoReserva(false);setTimeout(()=>setReservaToast(''),4000);return}
+      }
+      const{error}=await supabaseAny.from('reservas').insert({
+        propriedade_id:prop?.id, usuario_id:clientUserId,
+        nome:formNome||clientNome, email:formEmail, telefone:formTel,
+        tipo_evento:formTipo, modo:formModo,
+        data_inicio:formInicio||null, data_fim:formModo==='diaria'?(formFim||null):null,
+        horas:formModo==='hora'?formHoras:null, pessoas:formPessoas,
+        valor_estimado:total||null, status:'solicitada',
+      })
+      if(error){setReservaToast('Não foi possível solicitar a reserva: '+error.message)}
+      else{setReservaToast('✅ Reserva solicitada! Acompanhe em "Minhas reservas" — o anfitrião vai aprovar.')}
+      setTimeout(()=>setReservaToast(''),5000)
+    }catch(_){
+      setReservaToast('Erro ao solicitar a reserva. Tente novamente.');setTimeout(()=>setReservaToast(''),4000)
+    }finally{setEnviandoReserva(false)}
+  }
+
   const nota=prop?.avaliacao||prop?.nota_media
   const comodidades=parseArray(prop?.comodidades)
   const faqItems:any[]=Array.isArray(prop?.faq)?prop.faq:[]
@@ -452,9 +481,8 @@ function PropriedadeContent() {
                 onSubmit={async(form: ReviewFormData)=>{
                   const res = await fetch('/api/avaliacoes',{
                     method:'POST',
-                    headers:{'Content-Type':'application/json'},
+                    headers:{'Content-Type':'application/json', ...(await authHeaders())},
                     body:JSON.stringify({
-                      user_id:     clientUserId,
                       propriedade_id: propId,
                       nota:        form.nota,
                       texto:       form.texto,
@@ -487,6 +515,12 @@ function PropriedadeContent() {
             {reviewToast&&(
               <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#27ae60] text-white rounded-[10px] px-5 py-[10px] text-[.88rem] font-medium shadow-[0_4px_20px_rgba(0,0,0,.2)] z-[9999]">
                 {reviewToast}
+              </div>
+            )}
+
+            {reservaToast&&(
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0d0d0d] text-white rounded-[10px] px-5 py-[10px] text-[.88rem] font-medium shadow-[0_4px_20px_rgba(0,0,0,.2)] z-[9999] max-w-[90vw] text-center">
+                {reservaToast}
               </div>
             )}
 
@@ -574,6 +608,15 @@ function PropriedadeContent() {
                       <div className="pp-sim-total"><span>Total estimado:</span><span>{total>0?total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'A consultar'}</span></div>
                       <div className="pp-sim-aviso">*Valor estimado, sujeito a confirmação do proprietário.</div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={solicitarReserva}
+                      disabled={enviandoReserva}
+                      className="w-full bg-[#ff385c] hover:bg-[#e0304f] disabled:opacity-60 text-white font-bold text-[.92rem] rounded-[12px] py-3 transition-colors inline-flex items-center justify-center gap-2"
+                    >
+                      🗓️ {enviandoReserva?'Enviando...':'Solicitar reserva pela Ventsy'}
+                    </button>
+                    <div className="text-center text-[.72rem] text-[#aaa] my-1">ou</div>
                     <button className={`pp-btn-enviar-wpp${formValido?'':' pp-btn-bloqueado'}`} onClick={enviarWpp}>{WPP_SVG} Enviar solicitação pelo WhatsApp</button>
                     <p className="pp-form-hint">Todas as informações serão enviadas ao proprietário via WhatsApp.</p>
                   </div>

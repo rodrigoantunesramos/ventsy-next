@@ -26,7 +26,9 @@ export default function ConversaPage() {
 
       setUserId(session.user.id)
 
-      const res  = await fetch(`/api/conversas/${convId}`)
+      const res  = await fetch(`/api/conversas/${convId}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       const json = await res.json()
 
       if (json.error || !json.data?.conversa) {
