@@ -64,6 +64,7 @@ export default function EditarDocPage() {
           initialForm={initial}
           docId={doc.id}
           arquivoAtual={doc.arquivo_url ? { url: doc.arquivo_url, nome: doc.arquivo_nome, tipo: doc.arquivo_tipo, tamanho: doc.arquivo_tamanho } : null}
+          temSenhaSalva={!!doc.senha_portal}
         />
       </div>
     </div>

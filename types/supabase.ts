@@ -393,6 +393,7 @@ export type Database = {
           tipo_evento: string | null
           usuario_id: string
           valor_total: string | null
+          valor_total_num: number | null
           vip_autoridades: string | null
         }
         Insert: {
@@ -433,6 +434,7 @@ export type Database = {
           tipo_evento?: string | null
           usuario_id: string
           valor_total?: string | null
+          valor_total_num?: number | null
           vip_autoridades?: string | null
         }
         Update: {
@@ -473,6 +475,7 @@ export type Database = {
           tipo_evento?: string | null
           usuario_id?: string
           valor_total?: string | null
+          valor_total_num?: number | null
           vip_autoridades?: string | null
         }
         Relationships: [
@@ -481,6 +484,13 @@ export type Database = {
             columns: ["propriedade_id"]
             isOneToOne: false
             referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clientes_eventos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -595,6 +605,13 @@ export type Database = {
             foreignKeyName: "creditos_bonus_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
+            referencedRelation: "perfis_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditos_bonus_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -685,21 +702,119 @@ export type Database = {
       }
       disponibilidade: {
         Row: {
+          bloqueado: boolean
           data: string
+          min_horas: number | null
           motivo: string | null
+          preco: number | null
           prop_id: number
         }
         Insert: {
+          bloqueado?: boolean
           data: string
+          min_horas?: number | null
           motivo?: string | null
+          preco?: number | null
           prop_id?: number
         }
         Update: {
+          bloqueado?: boolean
           data?: string
+          min_horas?: number | null
           motivo?: string | null
+          preco?: number | null
           prop_id?: number
         }
         Relationships: []
+      }
+      documentos: {
+        Row: {
+          arquivo_nome: string | null
+          arquivo_tamanho: number | null
+          arquivo_tipo: string | null
+          arquivo_url: string | null
+          categoria: string
+          created_at: string
+          dias_aviso: number
+          emissao: string | null
+          endereco_orgao: string | null
+          horario_orgao: string | null
+          id: number
+          link_renovacao: string | null
+          login_portal: string | null
+          nome: string
+          numero: string | null
+          obs: string | null
+          orgao: string | null
+          passo_online: string | null
+          passo_presencial: string | null
+          prop_id: number | null
+          senha_portal: string | null
+          telefone_orgao: string | null
+          usuario_id: string
+          vencimento: string | null
+        }
+        Insert: {
+          arquivo_nome?: string | null
+          arquivo_tamanho?: number | null
+          arquivo_tipo?: string | null
+          arquivo_url?: string | null
+          categoria?: string
+          created_at?: string
+          dias_aviso?: number
+          emissao?: string | null
+          endereco_orgao?: string | null
+          horario_orgao?: string | null
+          id?: never
+          link_renovacao?: string | null
+          login_portal?: string | null
+          nome: string
+          numero?: string | null
+          obs?: string | null
+          orgao?: string | null
+          passo_online?: string | null
+          passo_presencial?: string | null
+          prop_id?: number | null
+          senha_portal?: string | null
+          telefone_orgao?: string | null
+          usuario_id: string
+          vencimento?: string | null
+        }
+        Update: {
+          arquivo_nome?: string | null
+          arquivo_tamanho?: number | null
+          arquivo_tipo?: string | null
+          arquivo_url?: string | null
+          categoria?: string
+          created_at?: string
+          dias_aviso?: number
+          emissao?: string | null
+          endereco_orgao?: string | null
+          horario_orgao?: string | null
+          id?: never
+          link_renovacao?: string | null
+          login_portal?: string | null
+          nome?: string
+          numero?: string | null
+          obs?: string | null
+          orgao?: string | null
+          passo_online?: string | null
+          passo_presencial?: string | null
+          prop_id?: number | null
+          senha_portal?: string | null
+          telefone_orgao?: string | null
+          usuario_id?: string
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_prop_id_fkey"
+            columns: ["prop_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documentos_restaurante: {
         Row: {
@@ -738,6 +853,62 @@ export type Database = {
             columns: ["restaurante_id"]
             isOneToOne: false
             referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipe: {
+        Row: {
+          admissao: string | null
+          cargo: string | null
+          contrato: string
+          created_at: string
+          departamento: string | null
+          id: number
+          nome: string
+          obs: string | null
+          prop_id: number | null
+          salario: number
+          status: string
+          telefone: string | null
+          usuario_id: string
+        }
+        Insert: {
+          admissao?: string | null
+          cargo?: string | null
+          contrato?: string
+          created_at?: string
+          departamento?: string | null
+          id?: never
+          nome: string
+          obs?: string | null
+          prop_id?: number | null
+          salario?: number
+          status?: string
+          telefone?: string | null
+          usuario_id: string
+        }
+        Update: {
+          admissao?: string | null
+          cargo?: string | null
+          contrato?: string
+          created_at?: string
+          departamento?: string | null
+          id?: never
+          nome?: string
+          obs?: string | null
+          prop_id?: number | null
+          salario?: number
+          status?: string
+          telefone?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipe_prop_id_fkey"
+            columns: ["prop_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
             referencedColumns: ["id"]
           },
         ]
@@ -924,7 +1095,10 @@ export type Database = {
       }
       fotos_imovel: {
         Row: {
+          alt: string | null
           created_at: string | null
+          focal_x: number | null
+          focal_y: number | null
           id: string
           ordem: number | null
           propriedade_id: number | null
@@ -933,7 +1107,10 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          alt?: string | null
           created_at?: string | null
+          focal_x?: number | null
+          focal_y?: number | null
           id?: string
           ordem?: number | null
           propriedade_id?: number | null
@@ -942,7 +1119,10 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          alt?: string | null
           created_at?: string | null
+          focal_x?: number | null
+          focal_y?: number | null
           id?: string
           ordem?: number | null
           propriedade_id?: number | null
@@ -1081,6 +1261,39 @@ export type Database = {
         }
         Relationships: []
       }
+      host_mp: {
+        Row: {
+          atualizado_em: string
+          conectado: boolean
+          mp_access_token: string | null
+          mp_public_key: string | null
+          mp_refresh_token: string | null
+          mp_user_id: string | null
+          oauth_state: string | null
+          usuario_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          conectado?: boolean
+          mp_access_token?: string | null
+          mp_public_key?: string | null
+          mp_refresh_token?: string | null
+          mp_user_id?: string | null
+          oauth_state?: string | null
+          usuario_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          conectado?: boolean
+          mp_access_token?: string | null
+          mp_public_key?: string | null
+          mp_refresh_token?: string | null
+          mp_user_id?: string | null
+          oauth_state?: string | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       indicacoes: {
         Row: {
           bonus_creditado: boolean
@@ -1117,6 +1330,13 @@ export type Database = {
             foreignKeyName: "indicacoes_indicado_id_fkey"
             columns: ["indicado_id"]
             isOneToOne: false
+            referencedRelation: "perfis_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicado_id_fkey"
+            columns: ["indicado_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -1124,7 +1344,113 @@ export type Database = {
             foreignKeyName: "indicacoes_indicador_id_fkey"
             columns: ["indicador_id"]
             isOneToOne: false
+            referencedRelation: "perfis_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integracoes: {
+        Row: {
+          api_key: string | null
+          atualizado_em: string
+          criado_em: string
+          id: number
+          modelo: string | null
+          provider: string
+          usuario_id: string
+        }
+        Insert: {
+          api_key?: string | null
+          atualizado_em?: string
+          criado_em?: string
+          id?: never
+          modelo?: string | null
+          provider?: string
+          usuario_id: string
+        }
+        Update: {
+          api_key?: string | null
+          atualizado_em?: string
+          criado_em?: string
+          id?: never
+          modelo?: string | null
+          provider?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
+      lancamentos: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          data: string
+          descricao: string | null
+          id: number
+          metodo_pagamento: string | null
+          observacao: string | null
+          prop_id: number | null
+          recorrente: boolean
+          reserva_id: string | null
+          status: string
+          tipo: string
+          tipo_evento: string | null
+          usuario_id: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: never
+          metodo_pagamento?: string | null
+          observacao?: string | null
+          prop_id?: number | null
+          recorrente?: boolean
+          reserva_id?: string | null
+          status?: string
+          tipo: string
+          tipo_evento?: string | null
+          usuario_id: string
+          valor: number
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: never
+          metodo_pagamento?: string | null
+          observacao?: string | null
+          prop_id?: number | null
+          recorrente?: boolean
+          reserva_id?: string | null
+          status?: string
+          tipo?: string
+          tipo_evento?: string | null
+          usuario_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lancamentos_prop_id_fkey"
+            columns: ["prop_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
             referencedColumns: ["id"]
           },
         ]
@@ -1161,9 +1487,40 @@ export type Database = {
           },
         ]
       }
+      metas_financeiras: {
+        Row: {
+          alvo: number
+          atualizado_em: string
+          criado_em: string
+          id: number
+          metrica: string
+          periodo: string
+          usuario_id: string
+        }
+        Insert: {
+          alvo: number
+          atualizado_em?: string
+          criado_em?: string
+          id?: never
+          metrica: string
+          periodo?: string
+          usuario_id?: string
+        }
+        Update: {
+          alvo?: number
+          atualizado_em?: string
+          criado_em?: string
+          id?: never
+          metrica?: string
+          periodo?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       pagamentos: {
         Row: {
           atualizado_em: string | null
+          comissao_ventsy: number | null
           criado_em: string | null
           cupom_codigo: string | null
           cupom_id: string | null
@@ -1171,17 +1528,24 @@ export type Database = {
           id: string
           meses: number
           metodo: string
+          modelo_taxa: string | null
           mp_payment_id: string | null
           mp_status: string | null
           mp_status_detail: string | null
           nfe: Json | null
           plano_id: string
+          repasse_anfitriao: number | null
+          reserva_id: string | null
           status: string
+          taxa_anfitriao: number | null
+          taxa_hospede: number | null
           usuario_id: string
           valor: number
+          valor_base: number | null
         }
         Insert: {
           atualizado_em?: string | null
+          comissao_ventsy?: number | null
           criado_em?: string | null
           cupom_codigo?: string | null
           cupom_id?: string | null
@@ -1189,17 +1553,24 @@ export type Database = {
           id?: string
           meses?: number
           metodo: string
+          modelo_taxa?: string | null
           mp_payment_id?: string | null
           mp_status?: string | null
           mp_status_detail?: string | null
           nfe?: Json | null
           plano_id: string
+          repasse_anfitriao?: number | null
+          reserva_id?: string | null
           status?: string
+          taxa_anfitriao?: number | null
+          taxa_hospede?: number | null
           usuario_id: string
           valor: number
+          valor_base?: number | null
         }
         Update: {
           atualizado_em?: string | null
+          comissao_ventsy?: number | null
           criado_em?: string | null
           cupom_codigo?: string | null
           cupom_id?: string | null
@@ -1207,14 +1578,20 @@ export type Database = {
           id?: string
           meses?: number
           metodo?: string
+          modelo_taxa?: string | null
           mp_payment_id?: string | null
           mp_status?: string | null
           mp_status_detail?: string | null
           nfe?: Json | null
           plano_id?: string
+          repasse_anfitriao?: number | null
+          reserva_id?: string | null
           status?: string
+          taxa_anfitriao?: number | null
+          taxa_hospede?: number | null
           usuario_id?: string
           valor?: number
+          valor_base?: number | null
         }
         Relationships: [
           {
@@ -1222,6 +1599,76 @@ export type Database = {
             columns: ["cupom_id"]
             isOneToOne: false
             referencedRelation: "cupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcelas: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          descricao: string | null
+          evento_id: string
+          id: number
+          lancamento_id: number | null
+          metodo_pagamento: string | null
+          numero: number | null
+          pago_em: string | null
+          status: string
+          usuario_id: string
+          valor: number
+          vencimento: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          evento_id: string
+          id?: never
+          lancamento_id?: number | null
+          metodo_pagamento?: string | null
+          numero?: number | null
+          pago_em?: string | null
+          status?: string
+          usuario_id?: string
+          valor?: number
+          vencimento?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          evento_id?: string
+          id?: never
+          lancamento_id?: number | null
+          metodo_pagamento?: string | null
+          numero?: number | null
+          pago_em?: string | null
+          status?: string
+          usuario_id?: string
+          valor?: number
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcelas_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "clientes_eventos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcelas_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "lancamentos"
             referencedColumns: ["id"]
           },
         ]
@@ -1359,6 +1806,7 @@ export type Database = {
           facebook: string | null
           faq: Json | null
           foto_responsavel: string | null
+          fotos_verificadas: boolean | null
           id: number
           imagem_url: string | null
           instagram: string | null
@@ -1414,6 +1862,7 @@ export type Database = {
           facebook?: string | null
           faq?: Json | null
           foto_responsavel?: string | null
+          fotos_verificadas?: boolean | null
           id?: number
           imagem_url?: string | null
           instagram?: string | null
@@ -1469,6 +1918,7 @@ export type Database = {
           facebook?: string | null
           faq?: Json | null
           foto_responsavel?: string | null
+          fotos_verificadas?: boolean | null
           id?: number
           imagem_url?: string | null
           instagram?: string | null
@@ -1515,6 +1965,77 @@ export type Database = {
           propriedadeID?: string
         }
         Relationships: []
+      }
+      reservas: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          data_fim: string | null
+          data_inicio: string | null
+          email: string | null
+          horas: number | null
+          host_id: string | null
+          id: string
+          mensagem: string | null
+          modo: string | null
+          nome: string | null
+          pessoas: number | null
+          propriedade_id: number
+          status: string
+          telefone: string | null
+          tipo_evento: string | null
+          usuario_id: string
+          valor_estimado: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          email?: string | null
+          horas?: number | null
+          host_id?: string | null
+          id?: string
+          mensagem?: string | null
+          modo?: string | null
+          nome?: string | null
+          pessoas?: number | null
+          propriedade_id: number
+          status?: string
+          telefone?: string | null
+          tipo_evento?: string | null
+          usuario_id: string
+          valor_estimado?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          email?: string | null
+          horas?: number | null
+          host_id?: string | null
+          id?: string
+          mensagem?: string | null
+          modo?: string | null
+          nome?: string | null
+          pessoas?: number | null
+          propriedade_id?: number
+          status?: string
+          telefone?: string | null
+          tipo_evento?: string | null
+          usuario_id?: string
+          valor_estimado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservas_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reservas_mesas: {
         Row: {
@@ -1670,7 +2191,7 @@ export type Database = {
           email: string | null
           id: string
           id_prop: number | null
-          is_admin: boolean | null
+          is_admin: boolean
           nascimento: string | null
           nome: string
           seucodigo: string | null
@@ -1685,7 +2206,7 @@ export type Database = {
           email?: string | null
           id: string
           id_prop?: number | null
-          is_admin?: boolean | null
+          is_admin?: boolean
           nascimento?: string | null
           nome: string
           seucodigo?: string | null
@@ -1700,7 +2221,7 @@ export type Database = {
           email?: string | null
           id?: string
           id_prop?: number | null
-          is_admin?: boolean | null
+          is_admin?: boolean
           nascimento?: string | null
           nome?: string
           seucodigo?: string | null
@@ -1736,6 +2257,30 @@ export type Database = {
       }
     }
     Views: {
+      perfis_publicos: {
+        Row: {
+          criado_em: string | null
+          id: string | null
+          id_prop: number | null
+          nome: string | null
+          usuario: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string | null
+          id_prop?: number | null
+          nome?: string | null
+          usuario?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string | null
+          id_prop?: number | null
+          nome?: string | null
+          usuario?: string | null
+        }
+        Relationships: []
+      }
       v_indicacoes_dashboard: {
         Row: {
           data: string | null
@@ -1768,6 +2313,13 @@ export type Database = {
           status_label?: never
         }
         Relationships: [
+          {
+            foreignKeyName: "indicacoes_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_publicos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "indicacoes_indicador_id_fkey"
             columns: ["indicador_id"]
@@ -1823,6 +2375,7 @@ export type Database = {
         Returns: undefined
       }
       gerar_codigo_indicacao: { Args: never; Returns: string }
+      is_admin: { Args: never; Returns: boolean }
       is_rest_owner: { Args: { rid: string }; Returns: boolean }
       limpar_zumbi_auth: { Args: { p_user_id: string }; Returns: undefined }
       limpar_zumbis_auth: { Args: never; Returns: number }
@@ -1989,4 +2542,3 @@ export const Constants = {
     },
   },
 } as const
-

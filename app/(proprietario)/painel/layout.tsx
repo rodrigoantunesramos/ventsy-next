@@ -37,6 +37,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/painel/calendario', label: 'Calendário', icon: 'calendar', enabled: true },
       { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
+      { href: '/painel/recebiveis', label: 'Recebíveis', icon: 'receipt', enabled: true },
       { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
       { href: '/painel/documentos', label: 'Documentos', icon: 'doc', enabled: true },
@@ -268,6 +269,7 @@ const ICONS = {
   image: 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm0 13 5-5 4 4 4-4 5 5M9 9.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z',
   calendar: 'M3 9h18M7 3v4M17 3v4M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
   wallet: 'M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H3Zm0 0v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5M16 13h.01',
+  receipt: 'M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3l-2.5 1.5L14 3l-2 1.5L10 3 7.5 4.5 5 3Zm3.5 6h7M8.5 13h7',
   target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
   chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
   doc: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Zm0 0v6h6M8 13h8M8 17h6',

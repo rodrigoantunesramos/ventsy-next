@@ -1,7 +1,7 @@
 // Núcleo compartilhado do módulo Documentos (/painel/documentos/*).
 // Tipos, constantes (categorias/status), helpers de validade e de Supabase Storage.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
 
 // ── Tipo (espelha a tabela public.documentos) ──────────────────────────────────
 export type Doc = {
@@ -61,7 +61,9 @@ export function docToForm(d: Doc): DocForm {
     nome: d.nome || '', categoria: d.categoria || 'outros', orgao: d.orgao || '', numero: d.numero || '',
     emissao: d.emissao || '', vencimento: d.vencimento || '', dias_aviso: d.dias_aviso ?? 90, obs: d.obs || '',
     link_renovacao: d.link_renovacao || '', passo_online: d.passo_online || '', passo_presencial: d.passo_presencial || '',
-    login_portal: d.login_portal || '', senha_portal: d.senha_portal || '', endereco_orgao: d.endereco_orgao || '',
+    // senha nunca é pré-preenchida no form: vem cifrada do banco e só é revelada
+    // sob demanda via API. Em branco = manter a senha atual ao salvar.
+    login_portal: d.login_portal || '', senha_portal: '', endereco_orgao: d.endereco_orgao || '',
     telefone_orgao: d.telefone_orgao || '', horario_orgao: d.horario_orgao || '',
   };
 }
@@ -238,6 +240,32 @@ export function isImagem(tipo: string | null): boolean {
 }
 export function isPdf(tipo: string | null): boolean {
   return tipo === 'application/pdf';
+}
+
+// ── Criptografia da senha do portal (via API, chave fica no servidor) ───────────
+// Cifra a senha antes de o cliente gravá-la (texto puro nunca vai ao banco).
+export async function encryptSenha(value: string): Promise<string | null> {
+  if (!value.trim()) return null;
+  const res = await fetch('/api/documentos/secret', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+    body: JSON.stringify({ action: 'encrypt', value }),
+  });
+  if (!res.ok) throw new Error('encrypt failed');
+  const j = await res.json();
+  return j.cipher ?? null;
+}
+
+// Revela (descriptografa) a senha de um documento — só o dono, sob demanda.
+export async function revealSenha(id: number): Promise<string> {
+  const res = await fetch('/api/documentos/secret', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+    body: JSON.stringify({ action: 'reveal', id }),
+  });
+  if (!res.ok) throw new Error('reveal failed');
+  const j = await res.json();
+  return j.value ?? '';
 }
 
 // ── Templates de documentos comuns para casas de eventos ───────────────────────

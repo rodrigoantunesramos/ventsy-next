@@ -10,7 +10,7 @@ import { supabaseAny as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import {
   CATS, EMPTY_FORM, type DocForm as FormShape, formToPayload, statusDe, diasRestantes,
-  diasLabel, STATUS_META, uploadArquivo, removeArquivo, formatBytes, isImagem, isPdf, dataAviso,
+  diasLabel, STATUS_META, uploadArquivo, removeArquivo, formatBytes, isImagem, isPdf, dataAviso, encryptSenha,
 } from '../_lib';
 import { CatIcon } from './CatIcon';
 
@@ -22,10 +22,12 @@ export function DocForm({
   initialForm,
   docId,
   arquivoAtual,
+  temSenhaSalva,
 }: {
   initialForm?: FormShape;
   docId?: number;
   arquivoAtual?: ArquivoAtual;
+  temSenhaSalva?: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -83,7 +85,18 @@ export function DocForm({
         arquivoFields = { arquivo_url: null, arquivo_nome: null, arquivo_tipo: null, arquivo_tamanho: null };
       }
 
-      const payload = { ...formToPayload(form), ...arquivoFields };
+      const payload: Record<string, unknown> = { ...formToPayload(form), ...arquivoFields };
+
+      // Senha do portal: cifrar no servidor antes de gravar (texto puro nunca é
+      // persistido). Em branco no modo edição = manter a senha já salva.
+      if (form.senha_portal.trim()) {
+        payload.senha_portal = await encryptSenha(form.senha_portal);
+      } else if (docId && temSenhaSalva) {
+        delete payload.senha_portal;
+      } else {
+        payload.senha_portal = null;
+      }
+
       let savedId = docId;
       if (docId) {
         const { error } = await sb.from('documentos').update(payload).eq('id', docId).eq('usuario_id', uid);
@@ -205,7 +218,7 @@ export function DocForm({
             </Campo>
             <Campo label="Senha do portal">
               <div className="relative">
-                <input type={showSenha ? 'text' : 'password'} value={form.senha_portal} onChange={(e) => set('senha_portal', e.target.value)} className={`${inp} pr-12`} placeholder="••••••••" autoComplete="new-password" />
+                <input type={showSenha ? 'text' : 'password'} value={form.senha_portal} onChange={(e) => set('senha_portal', e.target.value)} className={`${inp} pr-12`} placeholder={temSenhaSalva ? 'deixe em branco para manter a atual' : '••••••••'} autoComplete="new-password" />
                 <button type="button" onClick={() => setShowSenha((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink-muted hover:text-ink">
                   {showSenha ? 'ocultar' : 'mostrar'}
                 </button>
@@ -217,7 +230,7 @@ export function DocForm({
           </div>
           <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-muted">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            As credenciais ficam visíveis só para você (protegidas por RLS).
+            A senha é criptografada em repouso (AES-256). Só você pode revelá-la depois.
           </p>
         </Section>
 
@@ -246,7 +259,7 @@ export function DocForm({
       </div>
 
       {/* Footer fixo */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/[0.06] bg-white/90 backdrop-blur-sm lg:left-[var(--sidebar-w,0px)]">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/[0.06] bg-white/90 backdrop-blur-sm md:left-[260px]">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 sm:px-0">
           <button onClick={salvar} disabled={saving || !form.nome.trim()} className="rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-600 disabled:opacity-60">
             {saving ? 'Salvando…' : docId ? 'Salvar alterações' : 'Adicionar documento'}

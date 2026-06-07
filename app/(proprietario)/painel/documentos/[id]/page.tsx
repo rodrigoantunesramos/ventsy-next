@@ -12,7 +12,7 @@ import { formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
   type Doc, CAT_BY_V, STATUS_META, statusDe, diasRestantes, diasLabel, validadePct,
-  dataAviso, formatBytes, signedUrl, removeArquivo, isImagem, isPdf,
+  dataAviso, formatBytes, signedUrl, removeArquivo, isImagem, isPdf, revealSenha,
 } from '../_lib';
 import { CatIcon } from '../_components/CatIcon';
 
@@ -26,7 +26,8 @@ export default function DocDetailPage() {
   const [doc, setDoc] = useState<Doc | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
-  const [showSenha, setShowSenha] = useState(false);
+  const [senhaRevelada, setSenhaRevelada] = useState<string | null>(null);
+  const [revelando, setRevelando] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -54,6 +55,21 @@ export default function DocDetailPage() {
   function copiar(texto: string | null, label: string) {
     if (!texto) return;
     navigator.clipboard?.writeText(texto).then(() => toast.success(`${label} copiado`));
+  }
+
+  async function revelar(): Promise<string> {
+    if (!doc) return '';
+    setRevelando(true);
+    try {
+      const v = await revealSenha(doc.id);
+      setSenhaRevelada(v);
+      return v;
+    } catch {
+      toast.error('Não foi possível revelar a senha.');
+      return '';
+    } finally {
+      setRevelando(false);
+    }
   }
 
   if (loading) {
@@ -228,9 +244,16 @@ export default function DocDetailPage() {
                   {doc.senha_portal && (
                     <Credencial
                       label="Senha"
-                      valor={showSenha ? doc.senha_portal : '••••••••'}
-                      onCopy={() => copiar(doc.senha_portal, 'Senha')}
-                      extra={<button onClick={() => setShowSenha((s) => !s)} className="text-xs font-semibold text-ink-muted hover:text-ink">{showSenha ? 'ocultar' : 'mostrar'}</button>}
+                      valor={senhaRevelada ?? '••••••••'}
+                      onCopy={async () => { const v = senhaRevelada ?? await revelar(); if (v) copiar(v, 'Senha'); }}
+                      extra={
+                        <button
+                          onClick={async () => { if (senhaRevelada != null) setSenhaRevelada(null); else await revelar(); }}
+                          className="text-xs font-semibold text-ink-muted hover:text-ink"
+                        >
+                          {revelando ? '…' : senhaRevelada != null ? 'ocultar' : 'mostrar'}
+                        </button>
+                      }
                     />
                   )}
                 </div>

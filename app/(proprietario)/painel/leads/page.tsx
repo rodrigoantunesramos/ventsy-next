@@ -7,8 +7,9 @@
 // Valor monetário usa a coluna numérica `valor_total_num` (migration aditiva) + lib/format.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { supabaseAny as sb } from '@/lib/supabase';
-import { formatMoney, formatMoneyShort, formatDateRange, formatPercent } from '@/lib/format';
+import { formatMoney, formatMoneyShort, formatDate, formatDateRange, formatPercent } from '@/lib/format';
 
 // ── Modelo de status ──────────────────────────────────────────────────────
 type Grupo = 'negociando' | 'contratados' | 'finalizados' | 'perdidos';
@@ -57,6 +58,11 @@ const CHECKLIST_ITEMS: [string, string][] = [
 
 // ── Tipos ─────────────────────────────────────────────────────────────────
 type Parcela = { desc?: string; vencimento?: string; valor?: number | string | null };
+type ParcelaRow = {
+  id: number; evento_id: string; numero: number | null; descricao: string | null;
+  valor: number; vencimento: string | null; status: 'pendente' | 'pago' | 'cancelado';
+  pago_em: string | null;
+};
 type Lead = {
   id: string;
   nome_evento: string | null;
@@ -145,23 +151,34 @@ function montarPayload(c: Lead) {
     fornecedores: c.fornecedores || null, necessidades_tecnicas: c.necessidades_tecnicas || null,
     checkin_materiais: c.checkin_materiais || null,
     valor_total_num: c.valor_total_num ?? null, forma_pagamento: c.forma_pagamento || null,
-    parcelas: c.parcelas || [], taxas_extras: c.taxas_extras || null,
+    taxas_extras: c.taxas_extras || null,
     restricoes_alimentares: c.restricoes_alimentares || null, vip_autoridades: c.vip_autoridades || null,
     observacoes: c.observacoes || null, motivo_descarte: c.motivo_descarte || null,
     checklist: c.checklist || {}, propriedade_id: c.propriedade_id ?? null,
   };
 }
-// Sinaliza parcela vencida (< hoje) ou próxima (≤ 7 dias) de um lead.
-function flagParcela(l: Lead): 'vencida' | 'proxima' | null {
+// Sinaliza parcela vencida (< hoje) ou próxima (≤ 7 dias) — sobre a tabela `parcelas`.
+function flagParcela(ps: ParcelaRow[]): 'vencida' | 'proxima' | null {
   const hoje = ymd(new Date());
   const lim = ymd(new Date(Date.now() + 7 * 864e5));
   let prox = false;
-  for (const p of l.parcelas || []) {
-    if (!p.vencimento) continue;
+  for (const p of ps) {
+    if (p.status === 'pago' || p.status === 'cancelado' || !p.vencimento) continue;
     if (p.vencimento < hoje) return 'vencida';
     if (p.vencimento <= lim) prox = true;
   }
   return prox ? 'proxima' : null;
+}
+function normalizarParcela(p: Record<string, unknown>): ParcelaRow {
+  return {
+    id: Number(p.id), evento_id: String(p.evento_id),
+    numero: p.numero == null ? null : Number(p.numero),
+    descricao: (p.descricao as string) ?? null,
+    valor: p.valor == null ? 0 : Number(p.valor),
+    vencimento: (p.vencimento as string) ?? null,
+    status: ((p.status as ParcelaRow['status']) || 'pendente'),
+    pago_em: (p.pago_em as string) ?? null,
+  };
 }
 
 // ── Página ────────────────────────────────────────────────────────────────
@@ -169,6 +186,7 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [parcelas, setParcelas] = useState<ParcelaRow[]>([]);
   const [props, setProps] = useState<Prop[]>([]);
 
   const [view, setView] = useState<'kanban' | 'lista'>('kanban');
@@ -215,12 +233,14 @@ export default function LeadsPage() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { setLoading(false); return; }
       setUserId(session.user.id);
-      const [{ data: ls }, { data: ps }] = await Promise.all([
+      const [{ data: ls }, { data: ps }, { data: pcs }] = await Promise.all([
         sb.from('clientes_eventos').select('*').eq('usuario_id', session.user.id).order('criado_em', { ascending: false }),
         sb.from('propriedades').select('id,nome').eq('usuario_id', session.user.id).order('id'),
+        sb.from('parcelas').select('id,evento_id,numero,descricao,valor,vencimento,status,pago_em').eq('usuario_id', session.user.id),
       ]);
       setLeads((ls || []).map(normalizar));
       setProps((ps || []) as Prop[]);
+      setParcelas((pcs || []).map(normalizarParcela));
       setLoading(false);
     })();
   }, []);
@@ -252,15 +272,17 @@ export default function LeadsPage() {
     return { etapas, max };
   }, [leads]);
 
+  const parcelasDo = useCallback((id: string) => parcelas.filter((p) => p.evento_id === id), [parcelas]);
+
   const alertas = useMemo(() => {
     let venc = 0, prox = 0;
     for (const l of leads) {
-      const f = flagParcela(l);
+      const f = flagParcela(parcelasDo(l.id));
       if (f === 'vencida') venc++;
       else if (f === 'proxima') prox++;
     }
     return { venc, prox };
-  }, [leads]);
+  }, [leads, parcelasDo]);
 
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase();
@@ -401,12 +423,6 @@ export default function LeadsPage() {
     }
     scheduleSave();
   }
-  // parcelas
-  function addParcela() { updateDraft({ parcelas: [...(draft!.parcelas || []), { desc: '', vencimento: '', valor: null }] }); }
-  function setParcela(i: number, patch: Partial<Parcela>) {
-    const arr = [...(draft!.parcelas || [])]; arr[i] = { ...arr[i], ...patch }; updateDraft({ parcelas: arr });
-  }
-  function rmParcela(i: number) { updateDraft({ parcelas: (draft!.parcelas || []).filter((_, j) => j !== i) }); }
   // telefones
   function addFone() { updateDraft({ telefones: [...(draft!.telefones || []), ''] }); }
   function setFone(i: number, v: string) { const arr = [...(draft!.telefones || [])]; arr[i] = v; updateDraft({ telefones: arr }); }
@@ -592,7 +608,7 @@ export default function LeadsPage() {
                     <div className="space-y-2 min-h-[60px]">
                       {items.map((l) => {
                         const sd = STATUS_BY_V[l.status || 'lead'];
-                        const fp = flagParcela(l);
+                        const fp = flagParcela(parcelasDo(l.id));
                         return (
                           <div
                             key={l.id}
@@ -641,7 +657,7 @@ export default function LeadsPage() {
                 <tbody>
                   {filtrados.map((l) => {
                     const g = grupoDe(l.status);
-                    const fp = flagParcela(l);
+                    const fp = flagParcela(parcelasDo(l.id));
                     return (
                       <tr key={l.id} onClick={() => openDrawer(l)} className="cursor-pointer border-b border-black/[0.04] hover:bg-black/[0.015]">
                         <td className="py-2.5 font-semibold text-ink">
@@ -802,21 +818,8 @@ export default function LeadsPage() {
                   <Campo label="Valor total do contrato"><input type="number" min={0} step="0.01" className={inp} value={draft.valor_total_num ?? ''} onChange={(e) => updateDraft({ valor_total_num: e.target.value ? Number(e.target.value) : null })} placeholder="0,00" /></Campo>
                   <Campo label="Forma de pagamento"><select className={inp} value={draft.forma_pagamento || ''} onChange={(e) => updateDraft({ forma_pagamento: e.target.value })}>{PAGAMENTOS.map((o) => <option key={o} value={o}>{o || 'Selecionar…'}</option>)}</select></Campo>
                 </div>
-                <Campo label="Parcelas / vencimentos">
-                  <div className="space-y-2">
-                    {(draft.parcelas || []).map((p, i) => {
-                      const venc = p.vencimento && p.vencimento < ymd(new Date());
-                      return (
-                        <div key={i} className="flex gap-2">
-                          <input className={inp} value={p.desc || ''} onChange={(e) => setParcela(i, { desc: e.target.value })} placeholder="Ex: 1ª parcela" />
-                          <input type="date" className={`${inp} ${venc ? 'border-red-300 text-red-600' : ''}`} value={p.vencimento || ''} onChange={(e) => setParcela(i, { vencimento: e.target.value })} />
-                          <input type="number" min={0} step="0.01" className={`${inp} w-28`} value={p.valor ?? ''} onChange={(e) => setParcela(i, { valor: e.target.value ? Number(e.target.value) : null })} placeholder="R$" />
-                          <button onClick={() => rmParcela(i)} className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl border border-black/10 text-ink-muted hover:text-red-600">✕</button>
-                        </div>
-                      );
-                    })}
-                    <button onClick={addParcela} className="text-xs font-semibold text-brand hover:underline">＋ Adicionar parcela</button>
-                  </div>
+                <Campo label="Parcelamento">
+                  <ParcelasResumo parcelas={parcelasDo(draft.id)} eventoId={draft.id} />
                 </Campo>
                 <Campo label="Taxas extras"><textarea rows={2} className={inp} value={draft.taxas_extras || ''} onChange={(e) => updateDraft({ taxas_extras: e.target.value })} /></Campo>
               </Secao>
@@ -945,5 +948,50 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1.5 block text-xs font-semibold text-ink-soft">{label}</span>
       {children}
     </label>
+  );
+}
+
+// Resumo do parcelamento na ficha do Lead. A gestão (adicionar/baixar) vive em /painel/recebiveis.
+function ParcelasResumo({ parcelas, eventoId }: { parcelas: ParcelaRow[]; eventoId: string }) {
+  const hoje = ymd(new Date());
+  const pago = parcelas.filter((p) => p.status === 'pago').reduce((s, p) => s + p.valor, 0);
+  const aReceber = parcelas.filter((p) => p.status !== 'pago' && p.status !== 'cancelado').reduce((s, p) => s + p.valor, 0);
+  return (
+    <div className="space-y-3">
+      {parcelas.length === 0 ? (
+        <p className="text-xs text-ink-muted">Nenhuma parcela cadastrada ainda.</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg bg-emerald-50 px-3 py-2">
+              <div className="text-[0.65rem] text-emerald-700">Recebido</div>
+              <div className="text-sm font-bold text-emerald-700">{formatMoney(pago)}</div>
+            </div>
+            <div className="rounded-lg bg-amber-50 px-3 py-2">
+              <div className="text-[0.65rem] text-amber-700">A receber</div>
+              <div className="text-sm font-bold text-amber-700">{formatMoney(aReceber)}</div>
+            </div>
+          </div>
+          <div className="space-y-1">
+            {parcelas.map((p) => {
+              const venc = p.status !== 'pago' && p.vencimento && p.vencimento < hoje;
+              return (
+                <div key={p.id} className="flex items-center justify-between gap-2 text-xs">
+                  <span className="min-w-0 flex-1 truncate text-ink-soft">{p.descricao || (p.numero ? `Parcela ${p.numero}` : 'Parcela')}</span>
+                  {p.vencimento && <span className={venc ? 'text-red-600' : 'text-ink-muted'}>{formatDate(p.vencimento, { style: 'short' })}</span>}
+                  <span className="font-semibold text-ink-soft">{formatMoney(p.valor)}</span>
+                  <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[0.6rem] font-semibold ${p.status === 'pago' ? 'bg-emerald-50 text-emerald-700' : venc ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                    {p.status === 'pago' ? 'Pago' : venc ? 'Atrasado' : 'A vencer'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+      <Link href={`/painel/recebiveis?evento=${eventoId}`} className="inline-block text-xs font-semibold text-brand hover:underline">
+        Gerenciar parcelamento em Recebíveis →
+      </Link>
+    </div>
   );
 }
