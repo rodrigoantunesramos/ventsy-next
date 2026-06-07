@@ -295,8 +295,8 @@ function PropriedadeContent() {
     try{
       const dataRef=formInicio||new Date().toISOString().split('T')[0]
       if(dataRef){
-        const{data:bloq}=await supabaseAny.from('disponibilidade').select('data').eq('prop_id',prop?.id).eq('data',dataRef).maybeSingle()
-        if(bloq){setReservaToast('Essa data está indisponível neste espaço. Escolha outra.');setEnviandoReserva(false);setTimeout(()=>setReservaToast(''),4000);return}
+        const{data:bloq}=await supabaseAny.from('disponibilidade').select('bloqueado').eq('prop_id',prop?.id).eq('data',dataRef).maybeSingle()
+        if(bloq?.bloqueado){setReservaToast('Essa data está indisponível neste espaço. Escolha outra.');setEnviandoReserva(false);setTimeout(()=>setReservaToast(''),4000);return}
       }
       const{error}=await supabaseAny.from('reservas').insert({
         propriedade_id:prop?.id, usuario_id:clientUserId,
