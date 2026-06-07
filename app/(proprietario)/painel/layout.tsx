@@ -28,7 +28,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/painel', label: 'Painel', icon: 'home', enabled: true },
       { href: '/painel/minha-propriedade', label: 'Minha Propriedade', icon: 'building', enabled: true },
-      { href: '/painel/fotos', label: 'Fotos', icon: 'image' },
+      { href: '/painel/fotos', label: 'Fotos', icon: 'image', enabled: true },
     ],
   },
   {
