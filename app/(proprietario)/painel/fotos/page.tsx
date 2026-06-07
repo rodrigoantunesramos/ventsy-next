@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
 import { comprimirImagem, uploadComProgresso } from '@/lib/imageUpload';
 
-type Foto = { id: string; url: string | null; ordem: number | null; secao: string | null; tipo: string | null };
+type Foto = { id: string; url: string | null; ordem: number | null; secao: string | null; tipo: string | null; focal_x: number | null; focal_y: number | null; alt: string | null };
 type Video = { id: string | number; url: string | null; titulo: string | null };
 
 const LIMITES: Record<string, number | null> = { basico: 5, pro: null, ultra: null };
@@ -21,6 +21,7 @@ export default function FotosPage() {
   const [loading, setLoading] = useState(true);
   const [propId, setPropId] = useState<number | null>(null);
   const [plano, setPlano] = useState('basico');
+  const [verificada, setVerificada] = useState(false);
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [tab, setTab] = useState<'espaco' | 'eventos' | 'videos'>('espaco');
@@ -30,6 +31,8 @@ export default function FotosPage() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropHover, setDropHover] = useState(false);
+  const [focoId, setFocoId] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
   const [vUrl, setVUrl] = useState('');
   const [vTitulo, setVTitulo] = useState('');
   const [vBusy, setVBusy] = useState(false);
@@ -37,7 +40,7 @@ export default function FotosPage() {
 
   const carregar = useCallback(async (pid: number) => {
     const [{ data: fts }, { data: vds }] = await Promise.all([
-      sb.from('fotos_imovel').select('id,url,ordem,secao,tipo').eq('propriedade_id', pid).order('ordem', { ascending: true }),
+      sb.from('fotos_imovel').select('id,url,ordem,secao,tipo,focal_x,focal_y,alt').eq('propriedade_id', pid).order('ordem', { ascending: true }),
       sb.from('videos_propriedade').select('*').eq('propriedade_id', pid),
     ]);
     setFotos((fts || []) as Foto[]);
@@ -48,9 +51,10 @@ export default function FotosPage() {
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { setLoading(false); return; }
-      const { data: props } = await sb.from('propriedades').select('id').eq('usuario_id', session.user.id).order('id').limit(1);
+      const { data: props } = await sb.from('propriedades').select('id, fotos_verificadas').eq('usuario_id', session.user.id).order('id').limit(1);
       const pid = props?.[0]?.id ?? null;
       setPropId(pid);
+      setVerificada(!!props?.[0]?.fotos_verificadas);
       try {
         const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', session.user.id).maybeSingle();
         const p = (a?.plano_ativo || 'basico').toLowerCase();
@@ -131,6 +135,33 @@ export default function FotosPage() {
     setFotos((arr) => arr.map((f) => (f.id === id ? { ...f, secao } : f)));
     await fetch('/api/fotos', { method: 'PATCH', headers: { ...(await authHeaders()), 'Content-Type': 'application/json' }, body: JSON.stringify({ fotoId: id, secao }) });
   }
+  async function mudarAlt(id: string, alt: string) {
+    setFotos((arr) => arr.map((f) => (f.id === id ? { ...f, alt } : f)));
+    await fetch('/api/fotos', { method: 'PATCH', headers: { ...(await authHeaders()), 'Content-Type': 'application/json' }, body: JSON.stringify({ fotoId: id, alt }) });
+  }
+  async function definirFoco(id: string, fx: number, fy: number) {
+    setFotos((arr) => arr.map((f) => (f.id === id ? { ...f, focal_x: fx, focal_y: fy } : f)));
+    setFocoId(null);
+    await fetch('/api/fotos', { method: 'PATCH', headers: { ...(await authHeaders()), 'Content-Type': 'application/json' }, body: JSON.stringify({ fotoId: id, focal_x: fx, focal_y: fy }) });
+  }
+  async function organizarComIA() {
+    const lista = (tab === 'eventos' ? eventos : espaco).filter((f) => f.url).map((f) => ({ id: f.id, url: f.url }));
+    if (!lista.length) return;
+    setAiBusy(true); setErro(null); setUpgrade(false);
+    try {
+      const res = await fetch('/api/fotos/ia', { method: 'POST', headers: { ...(await authHeaders()), 'Content-Type': 'application/json' }, body: JSON.stringify({ fotos: lista }) });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Falha na IA.');
+      const h = await authHeaders();
+      for (const r of (json.results || []) as { id: string; categoria: string | null; alt: string | null }[]) {
+        const upd: Record<string, unknown> = {};
+        if (tab !== 'eventos' && r.categoria) upd.secao = r.categoria;
+        if (r.alt) upd.alt = r.alt;
+        if (Object.keys(upd).length) await fetch('/api/fotos', { method: 'PATCH', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify({ fotoId: r.id, ...upd }) });
+      }
+      if (propId) await carregar(propId);
+    } catch (e) { setErro(e instanceof Error ? e.message : 'Falha na IA.'); } finally { setAiBusy(false); }
+  }
   async function remover(id: string) {
     await fetch(`/api/fotos/${id}`, { method: 'DELETE', headers: await authHeaders() });
     setFotos((arr) => arr.filter((f) => f.id !== id));
@@ -192,9 +223,12 @@ export default function FotosPage() {
           <h1 className="text-xl font-bold text-ink sm:text-2xl">Fotos</h1>
           <p className="mt-1 text-sm text-ink-muted">Boas fotos atraem muito mais contatos. Arraste para ordenar; a 1ª é a capa.</p>
         </div>
-        <span className="rounded-full border border-brand/20 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand">
-          Plano {plano} · {limite == null ? `${espaco.length} fotos` : `${espaco.length}/${limite} fotos`}
-        </span>
+        <div className="flex items-center gap-2">
+          {verificada && <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">✓ Verificadas</span>}
+          <span className="rounded-full border border-brand/20 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand">
+            Plano {plano} · {limite == null ? `${espaco.length} fotos` : `${espaco.length}/${limite} fotos`}
+          </span>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -215,11 +249,14 @@ export default function FotosPage() {
               <p className="text-sm font-semibold text-ink">{tab === 'espaco' ? 'Galeria do espaço' : 'Fotos de eventos'}</p>
               <p className="text-xs text-ink-muted">{tab === 'espaco' ? (limite != null ? `Plano ${plano}: ${espaco.length} de ${limite}. Fotos comprimidas automaticamente.` : 'Fotos ilimitadas. Comprimidas automaticamente.') : 'Mostre o espaço montado em eventos — vira cards de destaque no anúncio.'}</p>
             </div>
-            {tab === 'espaco' && noLimite ? (
-              <Link href="/painel/planos" className="rounded-xl bg-gradient-to-r from-amber-500 to-brand px-5 py-2.5 text-sm font-bold text-white shadow transition hover:opacity-90">⭐ Fazer upgrade para mais fotos</Link>
-            ) : (
-              <button onClick={() => inputRef.current?.click()} disabled={!!progress} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-60">+ Adicionar fotos</button>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={organizarComIA} disabled={aiBusy || (tab === 'eventos' ? eventos : espaco).length === 0} className="rounded-xl border border-brand/30 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand transition hover:bg-brand-100 disabled:opacity-50">{aiBusy ? 'Analisando…' : '✨ Organizar com IA'}</button>
+              {tab === 'espaco' && noLimite ? (
+                <Link href="/painel/planos" className="rounded-xl bg-gradient-to-r from-amber-500 to-brand px-5 py-2.5 text-sm font-bold text-white shadow transition hover:opacity-90">⭐ Fazer upgrade para mais fotos</Link>
+              ) : (
+                <button onClick={() => inputRef.current?.click()} disabled={!!progress} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-60">+ Adicionar fotos</button>
+              )}
+            </div>
           </div>
 
           {/* Progresso de upload */}
@@ -234,7 +271,7 @@ export default function FotosPage() {
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]"><div className={`h-full rounded-full transition-all ${noLimite ? 'bg-amber-500' : 'bg-brand'}`} style={{ width: `${Math.min(100, Math.round((espaco.length / limite) * 100))}%` }} /></div>
           )}
 
-          {erro && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{erro}{upgrade && <> <Link href="/painel/planos" className="font-bold text-brand underline">Ver planos →</Link></>}</div>}
+          {erro && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{erro}{upgrade && <> <Link href="/painel/planos" className="font-bold text-brand underline">Ver planos →</Link></>}{erro.includes('Integrações') && <> <Link href="/painel/configuracoes" className="font-bold text-brand underline">Abrir Integrações →</Link></>}</div>}
 
           {/* Conteúdo */}
           {tab === 'espaco' ? (
@@ -246,7 +283,8 @@ export default function FotosPage() {
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                     {espaco.map((f, i) => (
                       <Card key={f.id} foto={f} capa={i === 0} secoes={AMBIENTES} selecionada={sel.has(f.id)} onToggleSel={() => toggleSel(f.id)}
-                        onSecao={(s) => mudarSecao(f.id, s)} onRemover={() => remover(f.id)}
+                        onSecao={(s) => mudarSecao(f.id, s)} onAlt={(s) => mudarAlt(f.id, s)} onRemover={() => remover(f.id)}
+                        foco={focoId === f.id} onToggleFoco={() => setFocoId(focoId === f.id ? null : f.id)} onSetFocal={(x, y) => definirFoco(f.id, x, y)}
                         draggable onDragStart={() => setDragId(f.id)} onDropCard={() => soltarSobre(f.id)} arrastando={dragId === f.id} />
                     ))}
                   </div>
@@ -265,7 +303,8 @@ export default function FotosPage() {
                     <div className="mb-3 flex items-center gap-3"><h3 className="text-sm font-bold text-ink">{secName}</h3><div className="h-px flex-1 bg-black/[0.06]" /><span className="text-xs text-ink-muted">{items.length}</span></div>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                       {items.map((f) => (
-                        <Card key={f.id} foto={f} secoes={EVENTOS_SEC} selecionada={sel.has(f.id)} onToggleSel={() => toggleSel(f.id)} onSecao={(s) => mudarSecao(f.id, s)} onRemover={() => remover(f.id)} />
+                        <Card key={f.id} foto={f} secoes={EVENTOS_SEC} selecionada={sel.has(f.id)} onToggleSel={() => toggleSel(f.id)} onSecao={(s) => mudarSecao(f.id, s)} onAlt={(s) => mudarAlt(f.id, s)} onRemover={() => remover(f.id)}
+                          foco={focoId === f.id} onToggleFoco={() => setFocoId(focoId === f.id ? null : f.id)} onSetFocal={(x, y) => definirFoco(f.id, x, y)} />
                       ))}
                     </div>
                   </div>
@@ -310,26 +349,33 @@ function DropEmpty({ onClick, onDrop, onOver, hover, icon, label }: { onClick: (
   );
 }
 
-function Card({ foto, capa, secoes, selecionada, onToggleSel, onSecao, onRemover, draggable, onDragStart, onDropCard, arrastando }: {
-  foto: Foto; capa?: boolean; secoes: string[]; selecionada: boolean; onToggleSel: () => void; onSecao: (s: string) => void; onRemover: () => void;
+function Card({ foto, capa, secoes, selecionada, onToggleSel, onSecao, onAlt, onRemover, foco, onToggleFoco, onSetFocal, draggable, onDragStart, onDropCard, arrastando }: {
+  foto: Foto; capa?: boolean; secoes: string[]; selecionada: boolean; onToggleSel: () => void; onSecao: (s: string) => void; onAlt: (s: string) => void; onRemover: () => void;
+  foco?: boolean; onToggleFoco?: () => void; onSetFocal?: (x: number, y: number) => void;
   draggable?: boolean; onDragStart?: () => void; onDropCard?: () => void; arrastando?: boolean;
 }) {
+  const fx = foto.focal_x ?? 50; const fy = foto.focal_y ?? 50;
   return (
     <div
-      draggable={draggable}
+      draggable={draggable && !foco}
       onDragStart={onDragStart}
       onDragOver={draggable ? (e) => e.preventDefault() : undefined}
       onDrop={onDropCard}
-      className={`group overflow-hidden rounded-2xl border bg-black/[0.03] shadow-card transition ${selecionada ? 'border-brand ring-2 ring-brand/40' : 'border-black/[0.06]'} ${arrastando ? 'opacity-40' : ''} ${draggable ? 'cursor-move' : ''}`}
+      className={`group overflow-hidden rounded-2xl border bg-black/[0.03] shadow-card transition ${selecionada ? 'border-brand ring-2 ring-brand/40' : 'border-black/[0.06]'} ${arrastando ? 'opacity-40' : ''} ${draggable && !foco ? 'cursor-move' : ''}`}
     >
-      <div className="relative">
+      <div
+        className={`relative ${foco ? 'cursor-crosshair ring-2 ring-brand' : ''}`}
+        onClick={foco && onSetFocal ? (e) => { const r = e.currentTarget.getBoundingClientRect(); onSetFocal(Math.round(((e.clientX - r.left) / r.width) * 100), Math.round(((e.clientY - r.top) / r.height) * 100)); } : undefined}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={foto.url || ''} alt={foto.secao || 'Foto'} className="aspect-[4/3] w-full object-cover" />
-        {/* checkbox seleção */}
-        <button onClick={onToggleSel} className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md border text-xs font-bold transition ${selecionada ? 'border-brand bg-brand text-white' : 'border-white/70 bg-black/30 text-transparent hover:text-white'}`}>✓</button>
+        <img src={foto.url || ''} alt={foto.alt || foto.secao || 'Foto'} className="aspect-[4/3] w-full object-cover" style={{ objectPosition: `${fx}% ${fy}%` }} />
+        <button onClick={(e) => { e.stopPropagation(); onToggleSel(); }} className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md border text-xs font-bold transition ${selecionada ? 'border-brand bg-brand text-white' : 'border-white/70 bg-black/30 text-transparent hover:text-white'}`}>✓</button>
         {capa && <span className="absolute left-2 top-2 rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white shadow">★ Capa</span>}
+        <span className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-brand shadow transition-opacity" style={{ left: `${fx}%`, top: `${fy}%`, opacity: foco ? 1 : 0 }} />
+        {foco && <div className="pointer-events-none absolute inset-x-0 top-2 text-center text-xs font-semibold text-white drop-shadow">Clique para definir o foco</div>}
         <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent p-3 transition-transform group-hover:translate-y-0">
-          <button onClick={onRemover} className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-white">Remover</button>
+          {onToggleFoco && <button onClick={(e) => { e.stopPropagation(); onToggleFoco(); }} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${foco ? 'bg-brand text-white' : 'bg-white/95 text-ink-soft hover:bg-white'}`}>🎯 Foco</button>}
+          <button onClick={(e) => { e.stopPropagation(); onRemover(); }} className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-white">Remover</button>
         </div>
       </div>
       <select value={foto.secao || ''} onChange={(e) => onSecao(e.target.value)} className="w-full border-t border-black/[0.06] bg-white px-2 py-1.5 text-xs font-medium text-ink-soft focus:outline-none">
@@ -337,6 +383,7 @@ function Card({ foto, capa, secoes, selecionada, onToggleSel, onSecao, onRemover
         {secoes.map((s) => <option key={s} value={s}>{s}</option>)}
         {foto.secao && !secoes.includes(foto.secao) && <option value={foto.secao}>{foto.secao}</option>}
       </select>
+      <input key={foto.alt || 'na'} defaultValue={foto.alt || ''} onBlur={(e) => { if (e.target.value !== (foto.alt || '')) onAlt(e.target.value); }} placeholder="Descrição (alt/SEO)…" className="w-full border-t border-black/[0.06] bg-white px-2 py-1.5 text-xs text-ink-soft placeholder:text-ink-muted/60 focus:outline-none" />
     </div>
   );
 }

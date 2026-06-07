@@ -9,6 +9,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabaseAny as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
+import { ToastProvider } from '@/components/Toast';
 
 type Profile = {
   nome: string;
@@ -134,6 +135,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
   }
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-[#f7f7f8] text-ink">
       {/* Topbar */}
       <header className="sticky top-0 z-[100] flex h-[60px] items-center justify-between border-b border-black/[0.06] bg-white px-4 sm:px-5">
@@ -255,6 +257,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
         <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
+    </ToastProvider>
   );
 }
 

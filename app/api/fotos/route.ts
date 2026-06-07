@@ -128,13 +128,19 @@ export async function PATCH(req: NextRequest) {
 
   const body = await req.json()
 
-  // ── Atualizar a seção de uma foto ──
-  if (body.fotoId && typeof body.secao === 'string') {
+  // ── Atualizar campos de uma foto (secao, alt, foco) ──
+  if (body.fotoId) {
     const { data: foto } = await admin.from('fotos_imovel').select('id, propriedade_id').eq('id', body.fotoId).maybeSingle()
     if (!foto) return Response.json({ error: 'Foto não encontrada.' }, { status: 404 })
     const prop = await donoDaPropriedade(Number(foto.propriedade_id), user.id)
     if (!prop) return forbidden()
-    const { error } = await admin.from('fotos_imovel').update({ secao: body.secao }).eq('id', body.fotoId)
+    const upd: Record<string, unknown> = {}
+    if (typeof body.secao === 'string') upd.secao = body.secao
+    if (typeof body.alt === 'string') upd.alt = body.alt
+    if (typeof body.focal_x === 'number') upd.focal_x = Math.max(0, Math.min(100, body.focal_x))
+    if (typeof body.focal_y === 'number') upd.focal_y = Math.max(0, Math.min(100, body.focal_y))
+    if (Object.keys(upd).length === 0) return Response.json({ error: 'Nada para atualizar.' }, { status: 400 })
+    const { error } = await admin.from('fotos_imovel').update(upd).eq('id', body.fotoId)
     if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
   }

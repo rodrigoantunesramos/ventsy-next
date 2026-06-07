@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
 
 type Conta = { nome: string; usuario: string; telefone: string; nascimento: string; documento: string };
 const EMPTY: Conta = { nome: '', usuario: '', telefone: '', nascimento: '', documento: '' };
@@ -51,6 +51,12 @@ export default function ConfiguracoesPage() {
   const [excluirTxt, setExcluirTxt] = useState('');
   const [excluirMsg, setExcluirMsg] = useState<string | null>(null);
 
+  const [integ, setInteg] = useState<{ configured: boolean; provider: string; modelo: string; last4: string }>({ configured: false, provider: 'openai', modelo: '', last4: '' });
+  const [integKey, setIntegKey] = useState('');
+  const [integModelo, setIntegModelo] = useState('');
+  const [integMsg, setIntegMsg] = useState<string | null>(null);
+  const [integBusy, setIntegBusy] = useState(false);
+
   const set = <K extends keyof Conta>(k: K, v: Conta[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -66,6 +72,10 @@ export default function ConfiguracoesPage() {
       try {
         const prefs = JSON.parse(localStorage.getItem('ventsy_notificacoes') || '{}');
         setNotif({ ...NOTIF_DEFAULTS, ...prefs });
+      } catch { /* ignore */ }
+      try {
+        const r = await fetch('/api/integracoes', { headers: await authHeaders() });
+        if (r.ok) { const j = await r.json(); setInteg(j); setIntegModelo(j.modelo || ''); }
       } catch { /* ignore */ }
       setLoading(false);
     })();
@@ -114,6 +124,22 @@ export default function ConfiguracoesPage() {
     if (excluirTxt.trim().toUpperCase() !== 'EXCLUIR') return;
     // Exclusão definitiva exige processamento no servidor — registramos a solicitação.
     setExcluirMsg('Solicitação registrada. Nossa equipe concluirá a exclusão em até 48h úteis.');
+  }
+
+  async function salvarIntegracao() {
+    setIntegBusy(true); setIntegMsg(null);
+    try {
+      const r = await fetch('/api/integracoes', { method: 'POST', headers: { ...(await authHeaders()), 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: 'openai', api_key: integKey, modelo: integModelo }) });
+      if (!r.ok) throw new Error();
+      setIntegKey('');
+      const s = await fetch('/api/integracoes', { headers: await authHeaders() }).then((x) => x.json());
+      setInteg(s); setIntegMsg('Integração salva.');
+    } catch { setIntegMsg('Erro ao salvar.'); } finally { setIntegBusy(false); }
+  }
+  async function removerIntegracao() {
+    if (!confirm('Remover a chave de IA?')) return;
+    setIntegBusy(true);
+    try { await fetch('/api/integracoes', { method: 'DELETE', headers: await authHeaders() }); setInteg({ configured: false, provider: 'openai', modelo: '', last4: '' }); setIntegKey(''); setIntegModelo(''); } finally { setIntegBusy(false); }
   }
 
   if (loading) return <div className="mx-auto h-[520px] max-w-3xl animate-pulse rounded-2xl bg-black/[0.05]" />;
@@ -188,6 +214,26 @@ export default function ConfiguracoesPage() {
         <div className="mt-4 flex items-center gap-3">
           <button onClick={salvarNotif} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-600">Salvar preferências</button>
           {notifMsg && <span className="text-sm font-medium text-emerald-600">Preferências salvas.</span>}
+        </div>
+      </section>
+
+      {/* Integrações · IA */}
+      <section className="rounded-2xl bg-white p-6 shadow-card">
+        <h2 className="text-base font-bold text-ink">Integrações · IA</h2>
+        <p className="mt-1 text-sm text-ink-muted">Use sua <strong>própria chave de IA</strong> (OpenAI) para organizar fotos automaticamente, gerar descrições e mais. A chave fica guardada com segurança no servidor e é usada só nas suas ações — não usamos uma IA do sistema.</p>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Campo label="Chave da API OpenAI">
+            <input type="password" className={inp} value={integKey} onChange={(e) => setIntegKey(e.target.value)} placeholder={integ.configured ? `•••••••• ${integ.last4}` : 'sk-...'} />
+          </Campo>
+          <Campo label="Modelo (opcional)">
+            <input className={inp} value={integModelo} onChange={(e) => setIntegModelo(e.target.value)} placeholder="gpt-4o-mini" />
+          </Campo>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button onClick={salvarIntegracao} disabled={integBusy || (!integKey && !integ.configured)} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-600 disabled:opacity-60">{integBusy ? 'Salvando…' : 'Salvar integração'}</button>
+          {integ.configured && <span className="text-sm font-medium text-emerald-600">✓ Conectado (chave •••• {integ.last4})</span>}
+          {integ.configured && <button onClick={removerIntegracao} disabled={integBusy} className="ml-auto text-sm font-semibold text-ink-muted hover:text-red-600">Remover</button>}
+          {integMsg && <span className="text-sm font-medium text-ink-soft">{integMsg}</span>}
         </div>
       </section>
 
