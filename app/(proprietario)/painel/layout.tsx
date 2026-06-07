@@ -38,7 +38,7 @@ const NAV: NavGroup[] = [
       { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
       { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart' },
-      { href: '/painel/documentos', label: 'Documentos', icon: 'doc' },
+      { href: '/painel/documentos', label: 'Documentos', icon: 'doc', enabled: true },
       { href: '/painel/equipe', label: 'Equipe', icon: 'users' },
       { href: '/painel/diario', label: 'Diário', icon: 'book' },
     ],
@@ -47,8 +47,8 @@ const NAV: NavGroup[] = [
     group: 'Conta',
     items: [
       { href: '/painel/indique', label: 'Indique & Ganhe', icon: 'gift' },
-      { href: '/painel/configuracoes', label: 'Configurações', icon: 'cog' },
-      { href: '/painel/planos', label: 'Planos', icon: 'card' },
+      { href: '/painel/configuracoes', label: 'Configurações', icon: 'cog', enabled: true },
+      { href: '/painel/planos', label: 'Planos', icon: 'card', enabled: true },
     ],
   },
 ];
