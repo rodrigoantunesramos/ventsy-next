@@ -10,7 +10,7 @@ import type { ReviewFormData } from '@/types/client'
 import './propriedade.css'
 
 /* ── tipos ── */
-interface Foto { url: string; titulo: string; ordem: number }
+interface Foto { url: string; titulo: string; ordem: number; tipo?: string | null }
 interface Avaliacao { id: string; autor: string; avatar: string; data: string; nota: number; texto: string; verificada: boolean; evento_tipo?: string }
 interface UsuarioPerfil { nome?: string; foto_perfil?: string; criado_em?: string }
 interface Video { url: string; titulo: string }
@@ -195,7 +195,8 @@ function PropriedadeContent() {
       setFotos((fts || []).map((f:any)=>({
         url:f.url,
         titulo:f.secao || '',
-        ordem:f.ordem
+        ordem:f.ordem,
+        tipo:f.tipo,
       })))
 
       setVideos(vids || [])
@@ -316,6 +317,8 @@ function PropriedadeContent() {
 
   const nota=prop?.avaliacao||prop?.nota_media
   const comodidades=parseArray(prop?.comodidades)
+  const fotosEspaco=fotos.filter(f=>!f.tipo||f.tipo==='espaco')
+  const fotosEvento=fotos.filter(f=>f.tipo==='evento')
   const faqItems:any[]=Array.isArray(prop?.faq)?prop.faq:[]
 
   if(loading) return(
@@ -368,16 +371,16 @@ function PropriedadeContent() {
         {/* Galeria */}
         <div className="pp-galeria-wrapper">
           <div className="pp-galeria-grid">
-            {fotos.slice(0,5).map((f,i)=>(
+            {fotosEspaco.slice(0,5).map((f,i)=>(
               <div key={i} className={`pp-foto-slot${i===0?' pp-foto-main':''} cursor-pointer relative`} onClick={()=>setModalGal(true)}>
                 <img src={f.url} alt={f.titulo||`Foto ${i+1}`} loading="lazy" onError={e=>{(e.target as HTMLImageElement).src=`https://picsum.photos/seed/fb${i}/800/600`}}/>
-                {i===4&&fotos.length>5&&<div className="pp-foto-overlay">+{fotos.length-4}</div>}
+                {i===4&&fotosEspaco.length>5&&<div className="pp-foto-overlay">+{fotosEspaco.length-4}</div>}
               </div>
             ))}
           </div>
           <div className="pp-galeria-acoes">
             {plano==='ultra'&&videos.length>0&&<button className="pp-btn-galeria" onClick={()=>setModalVid(true)}>🎬 Ver vídeos / Tour 360°</button>}
-            {plano!=='basico'&&<button className="pp-btn-galeria" onClick={()=>setModalGal(true)}>⊞ {fotos.length>5?`Ver todas as ${fotos.length} fotos`:'Mostrar todas as fotos'}</button>}
+            {plano!=='basico'&&<button className="pp-btn-galeria" onClick={()=>setModalGal(true)}>⊞ {fotosEspaco.length>5?`Ver todas as ${fotosEspaco.length} fotos`:'Mostrar todas as fotos'}</button>}
           </div>
         </div>
 
@@ -412,6 +415,22 @@ function PropriedadeContent() {
                 {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{c}</div>):<p className="text-[#aaa] text-[.88rem]">Não informado.</p>}
               </div>
             </div>
+
+            {/* Espaço em eventos */}
+            {fotosEvento.length>0 && (
+              <div className="mb-6">
+                <h2 className="text-[1.15rem] font-bold text-[#222] mb-1">Este espaço em eventos</h2>
+                <p className="text-[.86rem] text-[#888] mb-3">Veja como o espaço fica montado para diferentes ocasiões.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {fotosEvento.slice(0,6).map((f,i)=>(
+                    <div key={i} className="relative rounded-xl overflow-hidden cursor-pointer aspect-[4/3] group" onClick={()=>abrirLb(fotosEvento.map(x=>x.url),i)}>
+                      <img src={f.url} alt={f.titulo||''} loading="lazy" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                      {f.titulo&&<div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-white text-[.78rem] font-semibold">{f.titulo}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Avaliações */}
             <div className="pp-avaliacoes">
@@ -635,15 +654,19 @@ function PropriedadeContent() {
       {/* Modal galeria */}
       {modalGal&&(
         <div className="pp-modal-galeria">
-          <div className="pp-modal-header"><h3>Todas as fotos ({fotos.length})</h3><button className="pp-btn-fechar" onClick={()=>setModalGal(false)}>✕</button></div>
-          <div className="pp-modal-grid">
-            {fotos.map((f,i)=>(
-              <div key={i} className="pp-modal-foto" onClick={()=>abrirLb(fotos.map(x=>x.url),i)}>
-                <img src={f.url} alt={f.titulo||''} loading="lazy"/>
-                {f.titulo&&<div className="pp-modal-foto-titulo">{f.titulo}</div>}
+          <div className="pp-modal-header"><h3>Todas as fotos ({fotosEspaco.length})</h3><button className="pp-btn-fechar" onClick={()=>setModalGal(false)}>✕</button></div>
+          {Object.entries(fotosEspaco.reduce((acc:Record<string,Foto[]>,f)=>{const k=f.titulo||'Geral';(acc[k]=acc[k]||[]).push(f);return acc},{})).map(([sec,arr])=>(
+            <div key={sec} className="mb-5">
+              <h4 className="text-[1rem] font-bold text-[#222] mb-2.5 px-1">{sec}</h4>
+              <div className="pp-modal-grid">
+                {arr.map((f,i)=>(
+                  <div key={i} className="pp-modal-foto" onClick={()=>abrirLb(fotosEspaco.map(x=>x.url),fotosEspaco.indexOf(f))}>
+                    <img src={f.url} alt={f.titulo||''} loading="lazy"/>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
 

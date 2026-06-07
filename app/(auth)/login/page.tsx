@@ -24,7 +24,7 @@ export default function LoginPage() {
   // Redireciona se já logado
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace('/dashboard')
+      if (data.session) router.replace('/painel')
     })
   }, [router])
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
       setErro(msg)
       setLoading(false)
     } else {
-      router.replace('/dashboard')
+      router.replace('/painel')
     }
   }
 
