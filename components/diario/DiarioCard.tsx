@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useRef, KeyboardEvent } from 'react';
-import { DiaryEntry } from '@/types/diario';
+import { DiaryEntry, LeadRef } from '@/types/diario';
+import DiarioLeadSelect from './DiarioLeadSelect';
 
 interface Props {
   entry: DiaryEntry;
+  leads?: LeadRef[];
   onTagClick: (tag: string) => void;
+  onLeadClick?: (leadId: string) => void;
   onDelete: (id: string) => void;
   onToggleImportant: (id: string, current: boolean) => void;
   onEdit?: (id: string, data: Partial<DiaryEntry>) => Promise<void>;
@@ -40,7 +43,7 @@ function highlightText(text: string) {
   );
 }
 
-export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImportant, onEdit, showUser }: Props) {
+export default function DiarioCard({ entry, leads = [], onTagClick, onLeadClick, onDelete, onToggleImportant, onEdit, showUser }: Props) {
   const [expanded,     setExpanded]     = useState(false);
   const [confirming,   setConfirming]   = useState(false);
   const [editing,      setEditing]      = useState(false);
@@ -48,6 +51,7 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
   const [editTags,     setEditTags]     = useState<string[]>([]);
   const [editTagInput, setEditTagInput] = useState('');
   const [editReminder, setEditReminder] = useState('');
+  const [editLeadId,   setEditLeadId]   = useState<string | null>(null);
   const [editSaving,   setEditSaving]   = useState(false);
   const editTagRef = useRef<HTMLInputElement>(null);
 
@@ -68,7 +72,8 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
   function startEditing() {
     setEditContent(entry.content);
     setEditTags(entry.tags ?? []);
-    setEditReminder(entry.reminder_date ?? '');
+    setEditReminder(entry.reminder_date ? entry.reminder_date.slice(0, 10) : '');
+    setEditLeadId(entry.lead_id ?? null);
     setEditing(true);
   }
 
@@ -84,6 +89,7 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
       content:       editContent,
       tags:          editTags,
       reminder_date: editReminder || null,
+      lead_id:       editLeadId || null,
     });
     setEditSaving(false);
     setEditing(false);
@@ -170,6 +176,14 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
           )}
         </div>
 
+        {/* Vincular a evento/cliente */}
+        {leads.length > 0 && (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-[.75rem] text-ink-muted">🔗 Evento:</span>
+            <DiarioLeadSelect leads={leads} value={editLeadId} onChange={setEditLeadId} className="flex-1" />
+          </div>
+        )}
+
         {/* Ações de edição */}
         <div className="mt-3 flex items-center justify-end gap-2">
           <span className="mr-auto hidden text-[.7rem] text-ink-muted sm:block">
@@ -239,6 +253,20 @@ export default function DiarioCard({ entry, onTagClick, onDelete, onToggleImport
               #{tag}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Evento/cliente vinculado */}
+      {entry.lead && (
+        <div className="mt-2.5">
+          <button
+            onClick={() => onLeadClick?.(entry.lead!.id)}
+            title="Filtrar por este evento"
+            className="inline-flex items-center gap-1.5 rounded-[20px] border border-violet-200 bg-violet-50 px-2.5 py-[3px] text-[.75rem] font-semibold text-violet-700 transition-colors hover:bg-violet-100"
+          >
+            🔗 {entry.lead.nome_evento}
+            <span className="font-normal opacity-70">· {entry.lead.quem_contratou}</span>
+          </button>
         </div>
       )}
 

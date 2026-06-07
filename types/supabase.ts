@@ -648,6 +648,7 @@ export type Database = {
           created_at: string
           id: string
           is_important: boolean
+          lead_id: string | null
           reminder_date: string | null
           tags: string[]
           user_id: string
@@ -657,6 +658,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_important?: boolean
+          lead_id?: string | null
           reminder_date?: string | null
           tags?: string[]
           user_id: string
@@ -666,11 +668,20 @@ export type Database = {
           created_at?: string
           id?: string
           is_important?: boolean
+          lead_id?: string | null
           reminder_date?: string | null
           tags?: string[]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "clientes_eventos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       disponibilidade: {
         Row: {
@@ -1659,6 +1670,7 @@ export type Database = {
           email: string | null
           id: string
           id_prop: number | null
+          is_admin: boolean | null
           nascimento: string | null
           nome: string
           seucodigo: string | null
@@ -1673,6 +1685,7 @@ export type Database = {
           email?: string | null
           id: string
           id_prop?: number | null
+          is_admin?: boolean | null
           nascimento?: string | null
           nome: string
           seucodigo?: string | null
@@ -1687,6 +1700,7 @@ export type Database = {
           email?: string | null
           id?: string
           id_prop?: number | null
+          is_admin?: boolean | null
           nascimento?: string | null
           nome?: string
           seucodigo?: string | null

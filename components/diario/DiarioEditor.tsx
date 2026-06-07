@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, KeyboardEvent } from 'react';
-import { DiaryFormData } from '@/types/diario';
+import { DiaryFormData, LeadRef } from '@/types/diario';
+import DiarioLeadSelect from './DiarioLeadSelect';
 
 const COMMON_ENTITIES = [
   'contrato', 'reunião', 'proposta', 'pagamento', 'visita',
@@ -20,16 +21,18 @@ function suggestTagsFromText(text: string, existing: string[]): string[] {
 
 interface Props {
   existingTags: string[];
+  leads?: LeadRef[];
   onSave: (data: DiaryFormData) => Promise<void>;
   saving: boolean;
 }
 
-export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
+export default function DiarioEditor({ existingTags, leads = [], onSave, saving }: Props) {
   const [content,     setContent]     = useState('');
   const [tags,        setTags]        = useState<string[]>([]);
   const [tagInput,    setTagInput]    = useState('');
   const [reminder,    setReminder]    = useState('');
   const [important,   setImportant]   = useState(false);
+  const [leadId,      setLeadId]      = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [tagSuggest,  setTagSuggest]  = useState<string[]>([]);
   const tagRef = useRef<HTMLInputElement>(null);
@@ -72,11 +75,12 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
 
   const handleSave = async () => {
     if (!content.trim()) return;
-    await onSave({ content, tags, reminder_date: reminder, is_important: important });
+    await onSave({ content, tags, reminder_date: reminder, is_important: important, lead_id: leadId });
     setContent('');
     setTags([]);
     setReminder('');
     setImportant(false);
+    setLeadId(null);
     setSuggestions([]);
   };
 
@@ -179,6 +183,11 @@ export default function DiarioEditor({ existingTags, onSave, saving }: Props) {
           className={`rounded-lg border border-black/[0.08] px-2.5 py-[6px] text-[.82rem] text-ink-muted outline-none focus:border-brand ${reminder ? 'bg-amber-50' : 'bg-white'}`}
           title="Lembrete"
         />
+
+        {/* Vincular a evento/cliente */}
+        {leads.length > 0 && (
+          <DiarioLeadSelect leads={leads} value={leadId} onChange={setLeadId} />
+        )}
 
         {/* Importante */}
         <button

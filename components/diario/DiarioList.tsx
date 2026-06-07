@@ -1,12 +1,14 @@
 'use client';
 
-import { DiaryEntry } from '@/types/diario';
+import { DiaryEntry, LeadRef } from '@/types/diario';
 import DiarioCard from './DiarioCard';
 
 interface Props {
   entries: DiaryEntry[];
   loading: boolean;
+  leads?: LeadRef[];
   onTagClick: (tag: string) => void;
+  onLeadClick?: (leadId: string) => void;
   onDelete: (id: string) => void;
   onToggleImportant: (id: string, current: boolean) => void;
   onEdit?: (id: string, data: Partial<DiaryEntry>) => Promise<void>;
@@ -26,7 +28,7 @@ function groupByDate(entries: DiaryEntry[]) {
 }
 
 export default function DiarioList({
-  entries, loading, onTagClick, onDelete, onToggleImportant, onEdit, showUser,
+  entries, loading, leads, onTagClick, onLeadClick, onDelete, onToggleImportant, onEdit, showUser,
 }: Props) {
   if (loading) {
     return (
@@ -91,7 +93,9 @@ export default function DiarioList({
                 <div className="min-w-0 flex-1">
                   <DiarioCard
                     entry={entry}
+                    leads={leads}
                     onTagClick={onTagClick}
+                    onLeadClick={onLeadClick}
                     onDelete={onDelete}
                     onToggleImportant={onToggleImportant}
                     onEdit={onEdit}

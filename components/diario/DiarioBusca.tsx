@@ -5,6 +5,8 @@ interface Props {
   onSearchChange: (val: string) => void;
   activeTag: string;
   onTagClear: () => void;
+  activeLeadLabel?: string;
+  onLeadClear?: () => void;
   total: number;
   filtered: number;
   onImportantOnly: (val: boolean) => void;
@@ -15,6 +17,7 @@ interface Props {
 
 export default function DiarioBusca({
   search, onSearchChange, activeTag, onTagClear,
+  activeLeadLabel, onLeadClear,
   total, filtered, onImportantOnly, importantOnly,
   onReminderOnly, reminderOnly,
 }: Props) {
@@ -70,6 +73,18 @@ export default function DiarioBusca({
             <button
               onClick={onTagClear}
               className="cursor-pointer border-none bg-transparent p-0 leading-none text-[#7c3aed]"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {activeLeadLabel && (
+          <div className="inline-flex items-center gap-1 rounded-[20px] border border-violet-200 bg-violet-50 px-3 py-1 text-[.78rem] font-semibold text-violet-700">
+            🔗 {activeLeadLabel}
+            <button
+              onClick={onLeadClear}
+              className="cursor-pointer border-none bg-transparent p-0 leading-none text-violet-700"
             >
               ×
             </button>

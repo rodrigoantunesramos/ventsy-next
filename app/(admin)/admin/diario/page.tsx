@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase as sb } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { DiaryEntry } from '@/types/diario';
 import DiarioBusca from '@/components/diario/DiarioBusca';
 import DiarioList  from '@/components/diario/DiarioList';
@@ -76,14 +76,14 @@ export default function AdminDiarioPage() {
 
   const loadAll = useCallback(async () => {
     setLoading(true);
-    const res  = await fetch('/api/diario?admin=true');
+    const res  = await fetch('/api/diario?admin=true', { headers: await authHeaders() });
     const json = await res.json();
     setEntries(json.data ?? []);
     setLoading(false);
   }, []);
 
   const handleDelete = async (id: string) => {
-    await fetch(`/api/diario/${id}`, { method: 'DELETE' });
+    await fetch(`/api/diario/${id}`, { method: 'DELETE', headers: await authHeaders() });
     setEntries(prev => prev.filter(e => e.id !== id));
     showToast('🗑️ Anotação removida.');
   };
@@ -91,7 +91,7 @@ export default function AdminDiarioPage() {
   const handleToggleImportant = async (id: string, current: boolean) => {
     const res  = await fetch(`/api/diario/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
       body: JSON.stringify({ is_important: !current }),
     });
     const json = await res.json();
