@@ -145,7 +145,7 @@ export default function FinanceiroPage() {
       sb.from('metas_financeiras').select('metrica,periodo,alvo').eq('usuario_id', uid),
     ]);
 
-    if (mainRes.error?.code === '42P01') { setNeedsSetup(true); setItens([]); return; }
+    if (mainRes.error && (mainRes.error.code === '42P01' || mainRes.error.code === 'PGRST205')) { setNeedsSetup(true); setItens([]); return; }
     setNeedsSetup(false);
 
     const coerce = (r: Lancamento) => ({ ...r, id: Number(r.id), valor: Number(r.valor) });

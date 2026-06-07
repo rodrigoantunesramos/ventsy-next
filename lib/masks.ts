@@ -11,6 +11,30 @@ export function maskCEP(v: string): string {
   return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d
 }
 
+/** CPF -> "000.000.000-00" */
+export function maskCPF(v: string): string {
+  const d = onlyDigits(v).slice(0, 11)
+  return d
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+}
+
+/** CNPJ -> "00.000.000/0000-00" */
+export function maskCNPJ(v: string): string {
+  const d = onlyDigits(v).slice(0, 14)
+  return d
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+/** Documento livre: aplica CPF (<=11 dígitos) ou CNPJ (>11). */
+export function maskCpfCnpj(v: string): string {
+  return onlyDigits(v).length > 11 ? maskCNPJ(v) : maskCPF(v)
+}
+
 /** Telefone/WhatsApp BR -> "(11) 99999-9999" (aceita fixo e celular) */
 export function maskTelefone(v: string): string {
   const d = onlyDigits(v).slice(0, 11)

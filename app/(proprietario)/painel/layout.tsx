@@ -9,6 +9,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabaseAny as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
+import { applyPrefs } from '@/lib/prefs';
 import { ToastProvider } from '@/components/Toast';
 
 type Profile = {
@@ -38,14 +39,22 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/painel/calendario', label: 'Calendário', icon: 'calendar', enabled: true },
       { href: '/painel/reservas', label: 'Reservas', icon: 'ticket', enabled: true },
+      { href: '/painel/precificacao', label: 'Precificação', icon: 'tag', enabled: true },
       { href: '/painel/ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
       { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
       { href: '/painel/recebiveis', label: 'Recebíveis', icon: 'receipt', enabled: true },
+      { href: '/painel/clientes', label: 'Clientes', icon: 'contacts', enabled: true },
       { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
       { href: '/painel/documentos', label: 'Documentos', icon: 'doc', enabled: true },
       { href: '/painel/equipe', label: 'Equipe', icon: 'users', enabled: true },
       { href: '/painel/diario', label: 'Diário', icon: 'book', enabled: true },
+    ],
+  },
+  {
+    group: 'Suprimentos',
+    items: [
+      { href: '/painel/fornecedores', label: 'Fornecedores', icon: 'truck', enabled: true },
     ],
   },
   {
@@ -97,6 +106,12 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
           validade = assin.fim_periodo || assin.validade || null;
         }
       } catch { /* assinatura opcional */ }
+
+      // Aplica idioma/moeda/fuso (empresa_config) ao painel inteiro via lib/format.
+      try {
+        const { data: cfg } = await sb.from('empresa_config').select('idioma, moeda, fuso, preferencias').eq('usuario_id', user.id).maybeSingle();
+        if (cfg) applyPrefs({ idioma: cfg.idioma, moeda: cfg.moeda, fuso: cfg.fuso, formato_data: cfg.preferencias?.formato_data });
+      } catch { /* sem config — usa defaults/localStorage */ }
 
       const inicial = (nome.split(' ')[0]?.[0] ?? '?').toUpperCase();
       setProfile({ nome, email: user.email ?? '', usuario, inicial, plano, validade });
@@ -284,6 +299,9 @@ const ICONS = {
   spaces: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   ticket: 'M4 7h16a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V8a1 1 0 0 1 1-1ZM15 7v12',
   coins: 'M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6',
+  contacts: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm5.5 6.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM6 16a3.5 3.5 0 0 1 7 0M15.5 9H18M15.5 13H18',
+  truck: 'M1 3h13v11H1zM14 7h4l3 3v4h-7M6 18.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
+  tag: 'M20.59 13.41 12 22l-9-9V3h10l7.59 7.59a2 2 0 0 1 0 2.82ZM7.5 7.5h.01',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

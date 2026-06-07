@@ -48,10 +48,10 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 ### Fase 0 — Fundação (entidades referenciadas por tudo)
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Configurações da empresa & conta | `/painel/configuracoes` | `09-inteligencia-config.md` | 🟡 existe |
-| Clientes (CRM 360º) | `/painel/clientes` | `01-relacionamento.md` | ⬜ |
-| Fornecedores | `/painel/fornecedores` | `04-suprimentos.md` | ⬜ |
-| Precificação & tabela de preços | `/painel/precificacao` | `02-comercial.md` | ⬜ |
+| Configurações da empresa & conta | `/painel/configuracoes` | `09-inteligencia-config.md` | ✅ |
+| Clientes (CRM 360º) | `/painel/clientes` | `01-relacionamento.md` | ✅ |
+| Fornecedores | `/painel/fornecedores` | `04-suprimentos.md` | ✅ |
+| Precificação & tabela de preços | `/painel/precificacao` | `02-comercial.md` | ✅ |
 | Reservas & Calendário multi-espaço | `/painel/reservas` · `/painel/calendario` | `02-comercial.md` | 🟡 existe |
 
 ### Fase 1 — Comercial (gera receita → alimenta o financeiro)
