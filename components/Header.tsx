@@ -44,10 +44,10 @@ export default function Header() {
       <div className="flex-none flex items-center gap-3 ml-4">
         {isLoggedIn ? (
           <Link
-            href="/dashboard"
+            href="/painel"
             className="bg-ink hover:bg-ink-soft text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
           >
-            Dashboard
+            Painel
           </Link>
         ) : (
           <Link

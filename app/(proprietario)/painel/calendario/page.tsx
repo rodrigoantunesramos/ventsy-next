@@ -34,6 +34,34 @@ type Reserva = {
   valor_estimado: number | null;
   status: string;
 };
+type Evento = {
+  id: string;
+  nome_evento: string | null;
+  quem_contratou: string | null;
+  tipo_evento: string | null;
+  status: string | null;
+  data_inicio: string | null;
+  data_fim: string | null;
+  valor_total_num: number | null;
+};
+
+// Grupos de status dos leads (espelhado do leads/page.tsx)
+const LEAD_GRUPO: Record<string, 'negociando' | 'contratados' | 'finalizados'> = {
+  lead: 'negociando', consultada: 'negociando', visita: 'negociando', negociacao: 'negociando', reserva: 'negociando',
+  contratado: 'contratados', briefing: 'contratados', pronto: 'contratados', montagem: 'contratados',
+  finalizado: 'finalizados', pos: 'finalizados',
+};
+const LEAD_STATUS_LABEL: Record<string, string> = {
+  lead: 'Lead', consultada: 'Data Consultada', visita: 'Visita Agendada', negociacao: 'Em Negociação', reserva: 'Reserva Temp.',
+  contratado: 'Contratado', briefing: 'Briefing', pronto: 'Pronto p/ Exec.', montagem: 'Em Montagem',
+  finalizado: 'Finalizado', pos: 'Pós-Evento',
+};
+const LEAD_GRUPO_CLS: Record<string, string> = {
+  negociando: 'bg-amber-100 text-amber-800',
+  contratados: 'bg-emerald-100 text-emerald-800',
+  finalizados: 'bg-blue-100 text-blue-800',
+};
+const EXCLUIR_STATUS = new Set(['perdido', 'recontactar']);
 
 // ── i18n-ready: rótulos derivados do locale + dicionário de copy ──────────────
 const LOCALE = DEFAULT_LOCALE;
@@ -65,9 +93,10 @@ const t = {
   subtitle: 'Reservas, bloqueios e preço por dia — tudo num só lugar. Arraste para selecionar um período.',
   emptyMsg: 'Cadastre um espaço para gerenciar a disponibilidade.',
   emptyCta: 'Anunciar meu espaço',
-  kpi: { occupancy: 'Ocupação', revenue: 'Receita estimada', bookings: 'Reservas no mês', blocked: 'Dias bloqueados' },
-  legend: { available: 'Disponível', today: 'Hoje', booked: 'Reservado', pending: 'Pendente', blocked: 'Bloqueado', special: 'Preço especial' },
-  cell: { booked: 'reserv.', pending: 'pend.', blocked: 'bloq.' },
+  kpi: { occupancy: 'Ocupação', revenue: 'Receita estimada', bookings: 'Reservas ativas', blocked: 'Dias bloqueados', events: 'Eventos (leads)' },
+  legend: { available: 'Disponível', today: 'Hoje', booked: 'Reservado', pending: 'Pendente', blocked: 'Bloqueado', special: 'Preço especial', evento: 'Evento (Lead)', leadNeg: 'Lead em negociação' },
+  cell: { booked: 'reserv.', pending: 'pend.', blocked: 'bloq.', evento: 'evento' },
+  eventos: { title: 'Eventos do mês', empty: 'Nenhum evento de lead neste mês.', cliente: 'Cliente', valor: 'Valor', ver: 'Gerenciar nos Leads →' },
   quick: { title: 'Ações rápidas', weekends: 'Bloquear fins de semana', release: 'Liberar mês', base: 'Preço base' },
   bookingsList: { title: 'Reservas do mês', empty: 'Nenhuma reserva neste mês.' },
   blockedList: { title: 'Dias bloqueados', empty: 'Nenhum dia bloqueado neste mês.', release: 'Liberar' },
@@ -118,6 +147,7 @@ export default function CalendarioPage() {
   const [cursor, setCursor] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [dispMap, setDispMap] = useState<Record<string, Disp>>({});
   const [resvMap, setResvMap] = useState<Record<string, Reserva[]>>({});
+  const [eventoMap, setEventoMap] = useState<Record<string, Evento[]>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -170,12 +200,19 @@ export default function CalendarioPage() {
     const first = ymd(new Date(monthStart.getFullYear(), monthStart.getMonth(), 1));
     const firstNext = ymd(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1));
     const last = ymd(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0));
-    const [dispRes, resvRes] = await Promise.all([
+    const [dispRes, resvRes, evRes] = await Promise.all([
       sb.from('disponibilidade').select('*').eq('prop_id', propId).gte('data', first).lte('data', last),
       sb
         .from('reservas')
         .select('id,propriedade_id,nome,tipo_evento,modo,data_inicio,data_fim,horas,pessoas,valor_estimado,status')
         .eq('propriedade_id', propId)
+        .lt('data_inicio', firstNext)
+        .or(`data_fim.gte.${first},data_inicio.gte.${first}`),
+      sb
+        .from('clientes_eventos')
+        .select('id,nome_evento,quem_contratou,tipo_evento,status,data_inicio,data_fim,valor_total_num')
+        .eq('propriedade_id', propId)
+        .not('data_inicio', 'is', null)
         .lt('data_inicio', firstNext)
         .or(`data_fim.gte.${first},data_inicio.gte.${first}`),
     ]);
@@ -188,8 +225,16 @@ export default function CalendarioPage() {
       const e = r.modo === 'diaria' && r.data_fim ? r.data_fim.slice(0, 10) : s;
       eachDayStr(s, e).forEach((k) => { (rm[k] = rm[k] || []).push(r); });
     });
+    const em: Record<string, Evento[]> = {};
+    (evRes.data || []).forEach((e: Evento) => {
+      if (!e.data_inicio || EXCLUIR_STATUS.has(e.status || '')) return;
+      const s = e.data_inicio.slice(0, 10);
+      const end = e.data_fim ? e.data_fim.slice(0, 10) : s;
+      eachDayStr(s, end).forEach((k) => { (em[k] = em[k] || []).push(e); });
+    });
     setDispMap(dm);
     setResvMap(rm);
+    setEventoMap(em);
   }, []);
 
   useEffect(() => {
@@ -234,16 +279,20 @@ export default function CalendarioPage() {
 
   const dayState = (dateStr: string) => {
     const rs = resvMap[dateStr] || [];
+    const evs = eventoMap[dateStr] || [];
     const active = rs.some((r) => ATIVAS.has(r.status));
     const pending = !active && rs.some((r) => r.status === 'solicitada');
     const disp = dispMap[dateStr];
+    const contratadosEvs = evs.filter((e) => LEAD_GRUPO[e.status || ''] === 'contratados');
+    const negociacaoEvs = evs.filter((e) => LEAD_GRUPO[e.status || ''] === 'negociando');
     return {
-      rs,
-      active,
-      pending,
+      rs, evs, active, pending,
       hasBooking: rs.length > 0,
       blocked: !!disp?.bloqueado,
       preco: disp && !disp.bloqueado ? disp.preco : null,
+      hasEvento: evs.length > 0,
+      contratadosEvs,
+      negociacaoEvs,
     };
   };
 
@@ -252,12 +301,15 @@ export default function CalendarioPage() {
   let diasOcupados = 0;
   const ativasMes = new Map<string, Reserva>();
   const reservasMes = new Map<string, Reserva>();
+  const eventosMesMap = new Map<string, Evento>();
   for (let d = 1; d <= daysInMonth; d++) {
     const st = dayState(ymd(new Date(year, month, d)));
     if (st.blocked) numBloq++;
-    if (st.active || st.blocked) diasOcupados++;
+    if (st.active || st.blocked || st.hasEvento) diasOcupados++;
     st.rs.forEach((r) => { reservasMes.set(r.id, r); if (ATIVAS.has(r.status)) ativasMes.set(r.id, r); });
+    st.evs.forEach((e) => eventosMesMap.set(e.id, e));
   }
+  const eventosMes = [...eventosMesMap.values()].sort((a, b) => (a.data_inicio || '').localeCompare(b.data_inicio || ''));
   const receita = [...ativasMes.values()].reduce((s, r) => s + (r.valor_estimado || 0), 0);
   const ocupacao = daysInMonth ? diasOcupados / daysInMonth : 0;
   const bloqueados = Object.values(dispMap).filter((r) => r.bloqueado).sort((a, b) => a.data.localeCompare(b.data));
@@ -297,7 +349,9 @@ export default function CalendarioPage() {
       return;
     }
     lastClickRef.current = dateStr;
-    if ((resvMap[dateStr] || []).length) setBookingDay(dateStr);
+    const hasReservas = (resvMap[dateStr] || []).length > 0;
+    const hasEventos = (eventoMap[dateStr] || []).length > 0;
+    if (hasReservas || hasEventos) setBookingDay(dateStr);
     else openDay(dateStr);
   }
 
@@ -414,11 +468,12 @@ export default function CalendarioPage() {
       ) : (
         <>
           {/* KPIs */}
-          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
             <Kpi label={t.kpi.occupancy} value={formatPercent(ocupacao)} tone="gold" />
             <Kpi label={t.kpi.revenue} value={formatMoney(receita)} tone="verde" />
             <Kpi label={t.kpi.bookings} value={String(ativasMes.size)} tone="azul" />
             <Kpi label={t.kpi.blocked} value={String(numBloq)} tone="vermelho" />
+            <Kpi label={t.kpi.events} value={String(eventosMes.length)} tone="laranja" />
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
@@ -447,7 +502,17 @@ export default function CalendarioPage() {
                   let sub: ReactNode = null;
                   if (passado) cls = 'bg-black/[0.02] border-black/[0.04] text-ink-muted/40 cursor-not-allowed';
                   else if (st.active) { cls = 'bg-brand-50 border-brand/30 text-brand hover:border-brand'; sub = t.cell.booked; }
+                  else if (st.contratadosEvs.length > 0) {
+                    const ev = st.contratadosEvs[0];
+                    cls = 'bg-orange-50 border-orange-300 text-orange-900 hover:border-orange-400';
+                    sub = <span className="max-w-full truncate px-0.5 text-[9px] leading-tight">{(ev.nome_evento || 'Evento').slice(0, 9)}</span>;
+                  }
                   else if (st.pending) { cls = 'bg-amber-50 border-amber-200 text-amber-700 hover:border-amber-300'; sub = t.cell.pending; }
+                  else if (st.negociacaoEvs.length > 0) {
+                    const ev = st.negociacaoEvs[0];
+                    cls = 'bg-yellow-50 border-yellow-200 text-yellow-800 hover:border-yellow-300';
+                    sub = <span className="max-w-full truncate px-0.5 text-[9px] leading-tight">{(ev.nome_evento || 'Lead').slice(0, 9)}</span>;
+                  }
                   else if (st.blocked) { cls = 'bg-red-50 border-red-200 text-red-700 hover:border-red-300'; sub = t.cell.blocked; }
                   else if (st.preco != null) { cls = 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:border-emerald-300'; sub = formatMoney(Number(st.preco), { maximumFractionDigits: 0 }).replace(/\s/g, ''); }
 
@@ -471,7 +536,9 @@ export default function CalendarioPage() {
               <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-black/[0.06] pt-4 text-xs text-ink-muted">
                 <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-black/15 bg-white" /> {t.legend.available}</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-brand/40 bg-brand-50" /> {t.legend.booked}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-orange-300 bg-orange-100" /> {t.legend.evento}</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-amber-300 bg-amber-100" /> {t.legend.pending}</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-yellow-300 bg-yellow-100" /> {t.legend.leadNeg}</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-red-300 bg-red-100" /> {t.legend.blocked}</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-emerald-300 bg-emerald-100" /> {t.legend.special}</span>
               </div>
@@ -536,6 +603,46 @@ export default function CalendarioPage() {
                   </ul>
                 )}
               </div>
+
+              {/* Eventos do mês (leads) */}
+              <div className="rounded-2xl bg-white p-5 shadow-card">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-ink">📅 {t.eventos.title}</h3>
+                  {eventosMes.length > 0 && (
+                    <Link href="/painel/leads" className="text-xs font-semibold text-brand hover:underline">Ver todos →</Link>
+                  )}
+                </div>
+                {eventosMes.length === 0 ? (
+                  <p className="mt-3 text-sm text-ink-muted">{t.eventos.empty}</p>
+                ) : (
+                  <ul className="mt-3 space-y-2">
+                    {eventosMes.map((ev) => {
+                      const grupo = LEAD_GRUPO[ev.status || ''] || 'negociando';
+                      const badgeCls = LEAD_GRUPO_CLS[grupo];
+                      return (
+                        <li key={ev.id} className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="truncate text-sm font-bold text-orange-900">{ev.nome_evento || '—'}</span>
+                            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.6rem] font-bold ${badgeCls}`}>
+                              {LEAD_STATUS_LABEL[ev.status || ''] || ev.status}
+                            </span>
+                          </div>
+                          <div className="mt-0.5 truncate text-xs text-orange-700">{ev.quem_contratou || '—'}</div>
+                          {ev.data_inicio && (
+                            <div className="mt-0.5 text-xs text-orange-600">
+                              {formatDate(ev.data_inicio, { style: 'short' })}
+                              {ev.data_fim && ev.data_fim !== ev.data_inicio ? ` — ${formatDate(ev.data_fim, { style: 'short' })}` : ''}
+                            </div>
+                          )}
+                          {ev.valor_total_num != null && (
+                            <div className="mt-1 text-xs font-bold text-orange-900">{formatMoney(ev.valor_total_num)}</div>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
         </>
@@ -594,32 +701,71 @@ export default function CalendarioPage() {
         </Modal>
       )}
 
-      {/* Modal: detalhes da reserva */}
+      {/* Modal: detalhes da reserva + eventos de lead */}
       {bookingDay && (
         <Modal onClose={() => setBookingDay(null)}>
           <h3 className="mb-4 font-display text-xl font-bold capitalize text-ink">{longDate(bookingDay)}</h3>
-          <div className="space-y-3">
-            {(resvMap[bookingDay] || []).map((r) => {
-              const s = STATUS[r.status] || { label: r.status, cls: 'bg-gray-100 text-gray-600' };
-              return (
-                <div key={r.id} className="rounded-xl border border-black/[0.06] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="font-display text-base font-bold text-ink">{r.nome || r.tipo_evento || `Reserva #${r.id.slice(0, 6)}`}</div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${s.cls}`}>{s.label}</span>
+
+          {/* Eventos do Lead */}
+          {(eventoMap[bookingDay] || []).length > 0 && (
+            <div className="mb-4 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-orange-600">📅 Eventos (Leads)</p>
+              {(eventoMap[bookingDay] || []).map((ev) => {
+                const grupo = LEAD_GRUPO[ev.status || ''] || 'negociando';
+                const cls = LEAD_GRUPO_CLS[grupo];
+                return (
+                  <div key={ev.id} className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="font-display text-base font-bold text-orange-900">{ev.nome_evento || '—'}</div>
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${cls}`}>
+                        {LEAD_STATUS_LABEL[ev.status || ''] || ev.status}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+                      <div><span className="text-orange-700/70">{t.eventos.cliente}:</span> <span className="font-medium text-orange-900">{ev.quem_contratou || '—'}</span></div>
+                      <div><span className="text-orange-700/70">Tipo:</span> <span className="font-medium text-orange-900">{ev.tipo_evento || '—'}</span></div>
+                      {ev.valor_total_num != null && (
+                        <div className="col-span-2">
+                          <span className="text-orange-700/70">{t.eventos.valor}:</span>{' '}
+                          <span className="font-bold text-orange-900">{formatMoney(ev.valor_total_num)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
-                    <div><span className="text-ink-muted">{t.booking.event}:</span> <span className="font-medium text-ink-soft">{r.tipo_evento || '—'}</span></div>
-                    <div><span className="text-ink-muted">{t.booking.people}:</span> <span className="font-medium text-ink-soft">{r.pessoas || '—'}</span></div>
-                    <div className="col-span-2"><span className="text-ink-muted">{t.booking.estimate}:</span> <span className="font-medium text-ink-soft">{r.valor_estimado && r.valor_estimado > 0 ? formatMoney(r.valor_estimado) : t.booking.toCombine}</span></div>
-                    <div className="col-span-2"><span className="text-ink-muted">{t.booking.requester}:</span> <span className="font-medium text-ink-soft">{r.nome || '—'}</span></div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-5">
-            <Link href="/painel/leads" className="text-sm font-semibold text-brand hover:underline">{t.booking.manage} →</Link>
-          </div>
+                );
+              })}
+              <Link href="/painel/leads" className="block text-sm font-semibold text-brand hover:underline">{t.eventos.ver}</Link>
+            </div>
+          )}
+
+          {/* Reservas do sistema */}
+          {(resvMap[bookingDay] || []).length > 0 && (
+            <>
+              {(eventoMap[bookingDay] || []).length > 0 && <div className="my-3 border-t border-black/[0.06]" />}
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-ink-muted">Reservas do sistema</p>
+              <div className="space-y-3">
+                {(resvMap[bookingDay] || []).map((r) => {
+                  const s = STATUS[r.status] || { label: r.status, cls: 'bg-gray-100 text-gray-600' };
+                  return (
+                    <div key={r.id} className="rounded-xl border border-black/[0.06] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="font-display text-base font-bold text-ink">{r.nome || r.tipo_evento || `Reserva #${r.id.slice(0, 6)}`}</div>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${s.cls}`}>{s.label}</span>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+                        <div><span className="text-ink-muted">{t.booking.event}:</span> <span className="font-medium text-ink-soft">{r.tipo_evento || '—'}</span></div>
+                        <div><span className="text-ink-muted">{t.booking.people}:</span> <span className="font-medium text-ink-soft">{r.pessoas || '—'}</span></div>
+                        <div className="col-span-2"><span className="text-ink-muted">{t.booking.estimate}:</span> <span className="font-medium text-ink-soft">{r.valor_estimado && r.valor_estimado > 0 ? formatMoney(r.valor_estimado) : t.booking.toCombine}</span></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4">
+                <Link href="/painel/leads" className="text-sm font-semibold text-brand hover:underline">{t.booking.manage} →</Link>
+              </div>
+            </>
+          )}
         </Modal>
       )}
 
@@ -685,8 +831,8 @@ export default function CalendarioPage() {
 
 const inp = 'w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20';
 
-function Kpi({ label, value, tone }: { label: string; value: string; tone: 'verde' | 'vermelho' | 'gold' | 'azul' }) {
-  const color = tone === 'verde' ? 'text-emerald-600' : tone === 'vermelho' ? 'text-red-600' : tone === 'gold' ? 'text-amber-600' : 'text-blue-600';
+function Kpi({ label, value, tone }: { label: string; value: string; tone: 'verde' | 'vermelho' | 'gold' | 'azul' | 'laranja' }) {
+  const color = tone === 'verde' ? 'text-emerald-600' : tone === 'vermelho' ? 'text-red-600' : tone === 'gold' ? 'text-amber-600' : tone === 'laranja' ? 'text-orange-600' : 'text-blue-600';
   return (
     <div className="rounded-2xl bg-white p-4 shadow-card">
       <div className="text-xs text-ink-muted">{label}</div>

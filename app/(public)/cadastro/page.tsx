@@ -375,7 +375,7 @@ function CadastroContent() {
                 </div>
                 <h2>Conta criada!</h2>
                 <p>Seu cadastro foi realizado com sucesso.<br />Acesse a plataforma para completar seu perfil<br />e começar a usar a VENTSY.</p>
-                <Link href="/dashboard" className="btn-ir-plataforma">
+                <Link href="/painel" className="btn-ir-plataforma">
                   <span className="material-icons">login</span>
                   Entrar na plataforma
                 </Link>

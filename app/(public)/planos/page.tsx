@@ -79,7 +79,7 @@ function PlanosContent() {
     const status = searchParams.get('pagamento')
     if (status === 'sucesso') {
       setAlerta({ msg: '✅ Pagamento aprovado! Seu plano foi ativado. Redirecionando...', cor: 'green' })
-      setTimeout(() => router.push('/dashboard'), 3000)
+      setTimeout(() => router.push('/painel'), 3000)
     } else if (status === 'erro') {
       setAlerta({ msg: '❌ Houve um problema com o pagamento. Tente novamente.', cor: 'red' })
     } else if (status === 'pendente') {

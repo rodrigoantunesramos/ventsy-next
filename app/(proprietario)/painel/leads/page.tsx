@@ -101,6 +101,17 @@ type Saude = 'idle' | 'saving' | 'saved';
 function ymd(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+function eachDayStr(a: string, b: string): string[] {
+  const start = new Date(a + 'T12:00:00');
+  const end = new Date(b + 'T12:00:00');
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return [];
+  const out: string[] = [];
+  for (let dt = start, i = 0; dt <= end && i < 400; dt = new Date(dt.getTime() + 86400000), i++) out.push(ymd(dt));
+  return out;
+}
+// Statuses que "confirmam" o evento e devem bloquear o calendário automaticamente
+const STATUS_SYNC = new Set(['contratado', 'briefing', 'pronto', 'montagem', 'finalizado', 'pos']);
+
 function soDigitos(s: string) { return (s || '').replace(/\D/g, ''); }
 function waLink(fone: string) {
   const d = soDigitos(fone);
@@ -186,6 +197,11 @@ export default function LeadsPage() {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overGrupo, setOverGrupo] = useState<Grupo | null>(null);
 
+  // calendário sync
+  const [syncing, setSyncing] = useState(false);
+  const [conflito, setConflito] = useState<string[]>([]);
+  const conflictTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // toasts
   const [toasts, setToasts] = useState<{ id: number; msg: string; tone: 'ok' | 'erro' }[]>([]);
   const pushToast = useCallback((msg: string, tone: 'ok' | 'erro' = 'ok') => {
@@ -263,6 +279,41 @@ export default function LeadsPage() {
     return m;
   }, [filtrados]);
 
+  // ── Calendário sync ──────────────────────────────────────────────────────
+  async function syncToCalendario(lead: Lead): Promise<boolean> {
+    if (!lead.propriedade_id || !lead.data_inicio) return false;
+    const dias = eachDayStr(lead.data_inicio, lead.data_fim || lead.data_inicio);
+    if (!dias.length) return false;
+    const rows = dias.map((d) => ({
+      prop_id: lead.propriedade_id as number,
+      data: d,
+      bloqueado: true,
+      preco: null,
+      min_horas: null,
+      motivo: `Evento: ${lead.nome_evento || 'Lead'}`,
+    }));
+    const { error } = await sb.from('disponibilidade').upsert(rows, { onConflict: 'prop_id,data' });
+    return !error;
+  }
+
+  async function checkConflito(lead: Lead) {
+    if (!lead.propriedade_id || !lead.data_inicio) { setConflito([]); return; }
+    const fim = lead.data_fim || lead.data_inicio;
+    const { data } = await sb
+      .from('disponibilidade')
+      .select('data,motivo')
+      .eq('prop_id', lead.propriedade_id)
+      .eq('bloqueado', true)
+      .gte('data', lead.data_inicio)
+      .lte('data', fim);
+    const nomeEvento = lead.nome_evento || '';
+    // Ignora bloqueios originados pelo próprio lead
+    const bloqs = (data || [])
+      .filter((r: { data: string; motivo: string | null }) => !r.motivo?.startsWith(`Evento: ${nomeEvento}`))
+      .map((r: { data: string }) => r.data);
+    setConflito(bloqs);
+  }
+
   // ── CRUD ──
   async function criar() {
     if (!userId || !nNome.trim() || !nQuem.trim()) return;
@@ -283,7 +334,15 @@ export default function LeadsPage() {
     if (draftRef.current?.id === id) { const nd = { ...draftRef.current, status }; draftRef.current = nd; setDraft(nd); }
     if (userId) {
       const { error } = await sb.from('clientes_eventos').update({ status }).eq('id', id).eq('usuario_id', userId);
-      if (error) pushToast('Erro ao atualizar status', 'erro');
+      if (error) { pushToast('Erro ao atualizar status', 'erro'); return; }
+      // Auto-bloqueia o calendário quando o lead entra em status confirmado
+      if (STATUS_SYNC.has(status)) {
+        const lead = leads.find((l) => l.id === id);
+        if (lead?.propriedade_id && lead?.data_inicio) {
+          const ok = await syncToCalendario({ ...lead, status });
+          if (ok) pushToast('📅 Datas bloqueadas no calendário');
+        }
+      }
     }
   }
 
@@ -335,6 +394,11 @@ export default function LeadsPage() {
     const nd = { ...(draftRef.current as Lead), ...patch };
     draftRef.current = nd; setDraft(nd);
     setLeads((arr) => arr.map((l) => (l.id === nd.id ? { ...l, ...patch } : l)));
+    // Verifica conflito de datas no calendário ao alterar datas ou espaço
+    if ('data_inicio' in patch || 'data_fim' in patch || 'propriedade_id' in patch) {
+      if (conflictTimer.current) clearTimeout(conflictTimer.current);
+      conflictTimer.current = setTimeout(() => { void checkConflito(nd); }, 500);
+    }
     scheduleSave();
   }
   // parcelas
@@ -697,6 +761,17 @@ export default function LeadsPage() {
                   <Campo label="Data início"><input type="date" className={inp} value={draft.data_inicio || ''} onChange={(e) => updateDraft({ data_inicio: e.target.value })} /></Campo>
                   <Campo label="Data fim"><input type="date" className={inp} value={draft.data_fim || ''} min={draft.data_inicio || undefined} onChange={(e) => updateDraft({ data_fim: e.target.value })} /></Campo>
                 </div>
+                {/* Alerta de conflito de datas no calendário */}
+                {conflito.length > 0 && (
+                  <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <span className="mt-0.5 shrink-0 text-base">⚠️</span>
+                    <span>
+                      <strong>{conflito.length} dia(s) já bloqueado(s)</strong> no calendário para este espaço:{' '}
+                      <span className="font-mono text-xs">{conflito.slice(0, 5).join(', ')}{conflito.length > 5 ? '…' : ''}</span>.
+                      Verifique antes de confirmar.
+                    </span>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <Campo label="Horário início"><input type="time" className={inp} value={draft.horario_inicio || ''} onChange={(e) => updateDraft({ horario_inicio: e.target.value })} /></Campo>
                   <Campo label="Horário fim"><input type="time" className={inp} value={draft.horario_fim || ''} onChange={(e) => updateDraft({ horario_fim: e.target.value })} /></Campo>
@@ -770,9 +845,23 @@ export default function LeadsPage() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-3 border-t border-black/[0.06] bg-white px-5 py-3">
+            <div className="flex flex-wrap items-center gap-2 border-t border-black/[0.06] bg-white px-5 py-3">
               <button onClick={() => excluir(draft.id)} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">🗑️ Excluir</button>
-              <button onClick={() => exportPdfLead(draft)} className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink-soft hover:border-ink/20">📄 Exportar PDF</button>
+              <button onClick={() => exportPdfLead(draft)} className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink-soft hover:border-ink/20">📄 PDF</button>
+              <button
+                title={!draft.propriedade_id ? 'Vincule um espaço para sincronizar' : !draft.data_inicio ? 'Defina a data do evento' : 'Bloquear as datas no calendário'}
+                disabled={syncing || !draft.propriedade_id || !draft.data_inicio}
+                onClick={async () => {
+                  setSyncing(true);
+                  const ok = await syncToCalendario(draft);
+                  setSyncing(false);
+                  if (ok) pushToast('📅 Calendário atualizado');
+                  else pushToast('Erro ao sincronizar com o calendário', 'erro');
+                }}
+                className="rounded-xl border border-blue-200 px-4 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {syncing ? '⏳ Sincronizando…' : '📅 Calendário'}
+              </button>
               <button onClick={closeDrawer} className="ml-auto rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600">Concluir</button>
             </div>
           </div>
