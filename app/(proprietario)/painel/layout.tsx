@@ -36,7 +36,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/painel/calendario', label: 'Calendário', icon: 'calendar', enabled: true },
       { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
-      { href: '/painel/leads', label: 'Leads', icon: 'target' },
+      { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart' },
       { href: '/painel/documentos', label: 'Documentos', icon: 'doc' },
       { href: '/painel/equipe', label: 'Equipe', icon: 'users' },
