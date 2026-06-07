@@ -29,6 +29,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/painel', label: 'Painel', icon: 'home', enabled: true },
       { href: '/painel/minha-propriedade', label: 'Minha Propriedade', icon: 'building', enabled: true },
+      { href: '/painel/meus-espacos', label: 'Meus Espaços', icon: 'spaces', enabled: true },
       { href: '/painel/fotos', label: 'Fotos', icon: 'image', enabled: true },
     ],
   },
@@ -36,6 +37,8 @@ const NAV: NavGroup[] = [
     group: 'Gestão',
     items: [
       { href: '/painel/calendario', label: 'Calendário', icon: 'calendar', enabled: true },
+      { href: '/painel/reservas', label: 'Reservas', icon: 'ticket', enabled: true },
+      { href: '/painel/ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
       { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
       { href: '/painel/recebiveis', label: 'Recebíveis', icon: 'receipt', enabled: true },
       { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
@@ -278,6 +281,9 @@ const ICONS = {
   gift: 'M20 12v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9M2 7h20v5H2zM12 22V7M12 7S8 7 8 4.5 12 7 12 7Zm0 0s4 0 4-2.5S12 7 12 7Z',
   cog: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-3a8 8 0 0 0-.13-1.4l2-1.55-2-3.46-2.36.95a8 8 0 0 0-2.42-1.4L14.7 2h-4l-.39 2.74a8 8 0 0 0-2.42 1.4L5.53 5.2l-2 3.46 2 1.55A8 8 0 0 0 5.4 12a8 8 0 0 0 .13 1.4l-2 1.55 2 3.46 2.36-.95a8 8 0 0 0 2.42 1.4L10.7 22h4l.39-2.74a8 8 0 0 0 2.42-1.4l2.36.95 2-3.46-2-1.55A8 8 0 0 0 20 12Z',
   card: 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm0 4h18',
+  spaces: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
+  ticket: 'M4 7h16a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V8a1 1 0 0 1 1-1ZM15 7v12',
+  coins: 'M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

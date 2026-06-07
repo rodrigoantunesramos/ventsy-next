@@ -374,7 +374,7 @@ export default function FinanceiroPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-ink sm:text-2xl">Financeiro</h1>
-          <p className="mt-1 text-sm text-ink-muted">Da proposta ao caixa — visão completa do resultado do seu espaço.</p>
+          <p className="mt-1 text-sm text-ink-muted">Da proposta ao caixa — visão completa do seu negócio de eventos. Ganhos de reservas online ficam em <Link href="/painel/ganhos" className="text-brand font-semibold underline">Ganhos</Link>.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select value={periodo} onChange={(e) => setPeriodo(e.target.value as Periodo)} className="rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm focus:border-brand focus:outline-none">

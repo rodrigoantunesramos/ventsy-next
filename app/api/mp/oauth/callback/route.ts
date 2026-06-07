@@ -15,10 +15,10 @@ export async function GET(req: NextRequest) {
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
 
-  if (!code || !state) return Response.redirect(`${base}/reservas?mp=erro`)
+  if (!code || !state) return Response.redirect(`${base}/painel/reservas?mp=erro`)
 
   const { data: row } = await admin.from('host_mp').select('usuario_id').eq('oauth_state', state).maybeSingle()
-  if (!row) return Response.redirect(`${base}/reservas?mp=erro`)
+  if (!row) return Response.redirect(`${base}/painel/reservas?mp=erro`)
 
   try {
     const resp = await fetch('https://api.mercadopago.com/oauth/token', {
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       }),
     })
     const tok = await resp.json()
-    if (!tok?.access_token) return Response.redirect(`${base}/reservas?mp=erro`)
+    if (!tok?.access_token) return Response.redirect(`${base}/painel/reservas?mp=erro`)
 
     await admin
       .from('host_mp')
@@ -48,8 +48,8 @@ export async function GET(req: NextRequest) {
       })
       .eq('usuario_id', row.usuario_id)
 
-    return Response.redirect(`${base}/reservas?mp=conectado`)
+    return Response.redirect(`${base}/painel/reservas?mp=conectado`)
   } catch {
-    return Response.redirect(`${base}/reservas?mp=erro`)
+    return Response.redirect(`${base}/painel/reservas?mp=erro`)
   }
 }
