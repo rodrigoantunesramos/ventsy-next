@@ -110,34 +110,6 @@ function periodoReserva(r: Reserva) {
   return f(r.data_inicio);
 }
 
-// TEMP-DEMO: dados fictícios p/ visualizar o calendário sem login (par com o TEMP-DEMO do layout — remover antes de produção).
-function buildDemo(): { props: Prop[]; dispMap: Record<string, Disp>; resvMap: Record<string, Reserva[]> } {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  const dim = new Date(y, m + 1, 0).getDate();
-  const base = Math.min(now.getDate() + 1, dim - 13);
-  const day = (d: number) => ymd(new Date(y, m, Math.max(1, Math.min(d, dim))));
-  const props: Prop[] = [{ id: 1, nome: 'Espaço Jardim (demo)', valor_hora: 350, valor_base: null }];
-  const dispMap: Record<string, Disp> = {};
-  const blk = (d: number, motivo: string) => { const k = day(d); dispMap[k] = { prop_id: 1, data: k, bloqueado: true, preco: null, min_horas: null, motivo }; };
-  const prc = (d: number, preco: number, min: number) => { const k = day(d); dispMap[k] = { prop_id: 1, data: k, bloqueado: false, preco, min_horas: min, motivo: null }; };
-  blk(base + 4, 'Manutenção');
-  blk(base + 5, 'Manutenção');
-  prc(base + 7, 600, 4);
-  prc(base + 9, 500, 3);
-  const resvMap: Record<string, Reserva[]> = {};
-  const add = (r: Reserva) => {
-    const s = (r.data_inicio || '').slice(0, 10);
-    const e = r.modo === 'diaria' && r.data_fim ? r.data_fim.slice(0, 10) : s;
-    eachDayStr(s, e).forEach((k) => { (resvMap[k] = resvMap[k] || []).push(r); });
-  };
-  add({ id: 'demo-1', propriedade_id: 1, nome: 'Casamento Marina & João', tipo_evento: 'Casamento', modo: 'diaria', data_inicio: day(base + 1), data_fim: day(base + 2), horas: null, pessoas: 180, valor_estimado: 8500, status: 'confirmada' });
-  add({ id: 'demo-2', propriedade_id: 1, nome: 'Aniversário 50 anos', tipo_evento: 'Aniversário', modo: 'hora', data_inicio: day(base + 11), data_fim: null, horas: 6, pessoas: 60, valor_estimado: 2100, status: 'solicitada' });
-  add({ id: 'demo-3', propriedade_id: 1, nome: 'Confraternização Acme', tipo_evento: 'Corporativo', modo: 'diaria', data_inicio: day(base + 13), data_fim: day(base + 13), horas: null, pessoas: 90, valor_estimado: 4300, status: 'paga' });
-  return { props, dispMap, resvMap };
-}
-
 export default function CalendarioPage() {
   const toast = useToast();
 
@@ -177,22 +149,11 @@ export default function CalendarioPage() {
   const dragRef = useRef<{ a: string; b: string } | null>(null);
   const suppressClickRef = useRef(false);
   const lastClickRef = useRef<string | null>(null);
-  const demoRef = useRef(false);
 
   useEffect(() => {
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        // TEMP-DEMO: sem sessão, popula dados fictícios p/ visualizar o calendário (par com o TEMP-DEMO do layout).
-        demoRef.current = true;
-        const d = buildDemo();
-        setProps(d.props);
-        setSelProp(d.props[0].id);
-        setDispMap(d.dispMap);
-        setResvMap(d.resvMap);
-        setLoading(false);
-        return;
-      }
+      if (!session) { setLoading(false); return; }
       const { data } = await sb
         .from('propriedades')
         .select('id,nome,valor_hora,valor_base')

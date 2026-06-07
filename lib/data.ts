@@ -155,3 +155,61 @@ export function ordenar<T extends { _plano?: string; _nota?: string; nome?: stri
 export function norm(s: string) {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 }
+
+// \u2500\u2500 Comodidades (lista can\u00f4nica, estilo Airbnb) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// `slug` \u00e9 o que vai gravado no array `propriedades.comodidades` (lido pela busca
+// e pela vitrine). `boolCol`, quando presente, \u00e9 a coluna boolean que a busca
+// tamb\u00e9m filtra (sincronizada a partir do mesmo item). Os slugs `climatizado`,
+// `estacionamento`, `seguranca` e `espaco-aberto` casam os filtros de array da busca.
+export type ComodidadeBoolCol = 'climatizado' | 'estacionamento' | 'acessibilidade' | 'som_alto' | 'som_tarde'
+export type Comodidade = { slug: string; label: string; emoji: string; grupo: string; boolCol?: ComodidadeBoolCol }
+
+export const COMODIDADES: Comodidade[] = [
+  { slug: 'climatizado', label: 'Climatizado / Ar-condicionado', emoji: '\u2744\ufe0f', grupo: 'Estrutura & Conforto', boolCol: 'climatizado' },
+  { slug: 'wifi', label: 'Wi-Fi', emoji: '\ud83d\udcf6', grupo: 'Estrutura & Conforto' },
+  { slug: 'cozinha-equipada', label: 'Cozinha equipada', emoji: '\ud83c\udf73', grupo: 'Estrutura & Conforto' },
+  { slug: 'mobiliado', label: 'Mobiliado (mesas e cadeiras)', emoji: '\ud83e\ude91', grupo: 'Estrutura & Conforto' },
+  { slug: 'gerador', label: 'Gerador de energia', emoji: '\ud83d\udd0c', grupo: 'Estrutura & Conforto' },
+  { slug: 'banheiros-amplos', label: 'Banheiros amplos', emoji: '\ud83d\udebb', grupo: 'Estrutura & Conforto' },
+  { slug: 'fraldario', label: 'Frald\u00e1rio', emoji: '\ud83c\udf7c', grupo: 'Estrutura & Conforto' },
+  { slug: 'vestiario', label: 'Vesti\u00e1rio / Camarim', emoji: '\ud83d\udc57', grupo: 'Estrutura & Conforto' },
+
+  { slug: 'espaco-aberto', label: 'Espa\u00e7o aberto / ao ar livre', emoji: '\ud83c\udf33', grupo: '\u00c1reas & Lazer' },
+  { slug: 'piscina', label: 'Piscina', emoji: '\ud83c\udfca', grupo: '\u00c1reas & Lazer' },
+  { slug: 'churrasqueira', label: 'Churrasqueira', emoji: '\ud83c\udf56', grupo: '\u00c1reas & Lazer' },
+  { slug: 'jardim', label: 'Jardim', emoji: '\ud83c\udf37', grupo: '\u00c1reas & Lazer' },
+  { slug: 'area-kids', label: '\u00c1rea kids', emoji: '\ud83e\uddd2', grupo: '\u00c1reas & Lazer' },
+  { slug: 'palco', label: 'Palco', emoji: '\ud83c\udfa4', grupo: '\u00c1reas & Lazer' },
+  { slug: 'pista-danca', label: 'Pista de dan\u00e7a', emoji: '\ud83d\udc83', grupo: '\u00c1reas & Lazer' },
+  { slug: 'vista-panoramica', label: 'Vista panor\u00e2mica', emoji: '\ud83c\udf05', grupo: '\u00c1reas & Lazer' },
+
+  { slug: 'estacionamento', label: 'Estacionamento', emoji: '\ud83c\udd7f\ufe0f', grupo: 'Estacionamento & Acesso', boolCol: 'estacionamento' },
+  { slug: 'valet', label: 'Valet', emoji: '\ud83d\ude97', grupo: 'Estacionamento & Acesso' },
+  { slug: 'acessibilidade', label: 'Acessibilidade (PCD)', emoji: '\u267f', grupo: 'Estacionamento & Acesso', boolCol: 'acessibilidade' },
+
+  { slug: 'seguranca', label: 'Seguran\u00e7a / Portaria', emoji: '\ud83d\udee1\ufe0f', grupo: 'Seguran\u00e7a' },
+  { slug: 'cftv', label: 'C\u00e2meras (CFTV)', emoji: '\ud83d\udcf9', grupo: 'Seguran\u00e7a' },
+  { slug: 'brigadista', label: 'Brigadista / Sa\u00edda de emerg\u00eancia', emoji: '\ud83e\uddef', grupo: 'Seguran\u00e7a' },
+
+  { slug: 'som-profissional', label: 'Som profissional / DJ', emoji: '\ud83c\udf9a\ufe0f', grupo: 'Som & Regras' },
+  { slug: 'som-alto', label: 'Permite som alto', emoji: '\ud83d\udd0a', grupo: 'Som & Regras', boolCol: 'som_alto' },
+  { slug: 'som-tarde', label: 'Som permitido at\u00e9 mais tarde', emoji: '\ud83c\udf19', grupo: 'Som & Regras', boolCol: 'som_tarde' },
+
+  { slug: 'buffet-proprio', label: 'Buffet pr\u00f3prio', emoji: '\ud83c\udf7d\ufe0f', grupo: 'Servi\u00e7os' },
+  { slug: 'permite-buffet-externo', label: 'Permite buffet externo', emoji: '\ud83e\udd1d', grupo: 'Servi\u00e7os' },
+  { slug: 'permite-pet', label: 'Pet friendly', emoji: '\ud83d\udc3e', grupo: 'Servi\u00e7os' },
+  { slug: 'hospedagem', label: 'Hospedagem no local', emoji: '\ud83d\udecf\ufe0f', grupo: 'Servi\u00e7os' },
+]
+
+export const COMODIDADES_GRUPOS: string[] = COMODIDADES.reduce<string[]>((acc, c) => {
+  if (!acc.includes(c.grupo)) acc.push(c.grupo)
+  return acc
+}, [])
+
+const COMODIDADE_BY_SLUG = new Map(COMODIDADES.map((c) => [c.slug, c]))
+
+/** R\u00f3tulo amig\u00e1vel (emoji + nome) a partir do slug; cai no slug cru se desconhecido. */
+export function comodidadeLabel(slug: string): string {
+  const c = COMODIDADE_BY_SLUG.get(slug)
+  return c ? `${c.emoji} ${c.label}` : slug
+}

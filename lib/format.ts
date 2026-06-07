@@ -56,7 +56,10 @@ export function formatPercent(
 
 function toDate(value: string | number | Date | null | undefined): Date | null {
   if (value == null || value === '') return null
-  const d = value instanceof Date ? value : new Date(value)
+  // Datas só-data (YYYY-MM-DD) são agnósticas de fuso: ancorar ao meio-dia local
+  // evita o "off-by-one" de new Date('YYYY-MM-DD') ser interpretado como UTC.
+  const v = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + 'T12:00:00' : value
+  const d = v instanceof Date ? v : new Date(v)
   return Number.isNaN(d.getTime()) ? null : d
 }
 

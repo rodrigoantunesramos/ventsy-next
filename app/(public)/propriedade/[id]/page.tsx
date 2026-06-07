@@ -7,6 +7,8 @@ import Footer from '@/components/Footer'
 import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
+import { comodidadeLabel } from '@/lib/data'
+import { formatMoney } from '@/lib/format'
 import './propriedade.css'
 
 /* ── tipos ── */
@@ -323,6 +325,10 @@ function PropriedadeContent() {
   const fotosEspaco=fotos.filter(f=>!f.tipo||f.tipo==='espaco')
   const fotosEvento=fotos.filter(f=>f.tipo==='evento')
   const faqItems:any[]=Array.isArray(prop?.faq)?prop.faq:[]
+  const hostFoto = prop?.foto_responsavel || anfAv
+  const hostNome = prop?.nome_responsavel || anfNome
+  const hostBio  = prop?.bio_responsavel || ''
+  const custosExtras:any[] = Array.isArray(prop?.custos_extras) ? prop.custos_extras.filter((c:any)=>c?.nome) : []
 
   if(loading) return(
     <div className="pp-loading">
@@ -394,8 +400,12 @@ function PropriedadeContent() {
 
             {/* Anfitrião */}
             <div className="pp-anfitriao">
-              {anfAv?<img src={anfAv} alt={anfNome} className="pp-avatar"/>:<div className="pp-avatar-inicial">{anfNome.charAt(0)}</div>}
-              <div><h3 className="pp-anf-nome">{anfNome}</h3><p className="pp-anf-sub">Proprietário • Na VENTSY há {anfTempo}</p></div>
+              {hostFoto?<img src={hostFoto} alt={hostNome} className="pp-avatar"/>:<div className="pp-avatar-inicial">{hostNome.charAt(0)}</div>}
+              <div>
+                <h3 className="pp-anf-nome">{hostNome}</h3>
+                <p className="pp-anf-sub">Proprietário • Na VENTSY há {anfTempo}</p>
+                {hostBio&&<p className="mt-1 text-[.86rem] leading-relaxed text-[#666]">{hostBio}</p>}
+              </div>
             </div>
 
             {/* Detalhes */}
@@ -416,9 +426,24 @@ function PropriedadeContent() {
             {/* Comodidades */}
             <div className="pp-comodidades"><h2>O que o lugar oferece</h2>
               <div className="pp-como-grid">
-                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{c}</div>):<p className="text-[#aaa] text-[.88rem]">Não informado.</p>}
+                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{comodidadeLabel(c)}</div>):<p className="text-[#aaa] text-[.88rem]">Não informado.</p>}
               </div>
             </div>
+
+            {/* Custos extras */}
+            {custosExtras.length>0 && (
+              <div className="mb-6">
+                <h2 className="text-[1.15rem] font-bold text-[#222] mb-3">Serviços e custos extras</h2>
+                <div className="flex flex-col gap-2">
+                  {custosExtras.map((c:any,i:number)=>(
+                    <div key={i} className="flex items-center justify-between rounded-xl border border-[#eee] px-4 py-2.5">
+                      <span className="text-[.9rem] text-[#333]">{c.nome}</span>
+                      <span className="text-[.9rem] font-semibold text-[#222]">{formatMoney(Number(c.valor)||0)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Espaço em eventos */}
             {fotosEvento.length>0 && (
