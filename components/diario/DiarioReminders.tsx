@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { DiaryEntry } from '@/types/diario';
+import { dayDiff, relativeLabel } from '@/lib/diarioDates';
 
 interface Props {
   entries: DiaryEntry[];
@@ -9,42 +10,21 @@ interface Props {
   onOpenLead?: (leadId: string) => void;    // filtrar pelo evento vinculado
 }
 
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function relativeLabel(iso: string): string {
-  const today = startOfToday();
-  const d = new Date(iso);
-  d.setHours(0, 0, 0, 0);
-  const days = Math.round((d.getTime() - today.getTime()) / 86_400_000);
-  if (days === 0)  return 'hoje';
-  if (days === 1)  return 'amanhã';
-  if (days === -1) return 'ontem';
-  if (days < 0)    return `há ${Math.abs(days)} dias`;
-  return `em ${days} dias`;
-}
-
 export default function DiarioReminders({ entries, onResolve, onOpenLead }: Props) {
   const groups = useMemo(() => {
-    const today = startOfToday();
-    const in7   = new Date(today.getTime() + 7 * 86_400_000);
     const overdue: DiaryEntry[] = [];
     const todayList: DiaryEntry[] = [];
     const upcoming: DiaryEntry[] = [];
 
     for (const e of entries) {
       if (!e.reminder_date) continue;
-      const d = new Date(e.reminder_date);
-      const day = new Date(d); day.setHours(0, 0, 0, 0);
-      if (day < today)        overdue.push(e);
-      else if (day.getTime() === today.getTime()) todayList.push(e);
-      else if (day <= in7)    upcoming.push(e);
+      const diff = dayDiff(e.reminder_date);
+      if (diff < 0)        overdue.push(e);
+      else if (diff === 0) todayList.push(e);
+      else if (diff <= 7)  upcoming.push(e);
     }
     const byDate = (a: DiaryEntry, b: DiaryEntry) =>
-      new Date(a.reminder_date!).getTime() - new Date(b.reminder_date!).getTime();
+      dayDiff(a.reminder_date!) - dayDiff(b.reminder_date!);
     return {
       overdue:  overdue.sort(byDate),
       today:    todayList.sort(byDate),

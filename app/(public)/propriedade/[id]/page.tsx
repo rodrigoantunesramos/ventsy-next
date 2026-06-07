@@ -220,13 +220,12 @@ function PropriedadeContent() {
         }
       }
 
-      try {
-        await supabase.from('analytics_eventos').insert({
-          propriedade_id: propId,
-          evento_tipo: 'view',
-          cidade: p.cidade ?? null
-        })
-      } catch (_) {}
+      // Tracking de visualização com geolocalização por IP (fire-and-forget)
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propriedade_id: propId, evento_tipo: 'view' }),
+      }).catch(() => {})
 
     } catch(e) {
       loadDemo()
@@ -282,7 +281,7 @@ function PropriedadeContent() {
   const total=calcTotal()
   const formValido=formNome.trim().length>=3&&/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail)&&formTel.replace(/\D/g,'').length===11&&!!formTipo&&!!formModo
 
-  const irWppDireto=async()=>{const msg=`Olá! Vi seu espaço "${prop?.nome||'no portal VENTSY'}" e gostaria de mais informações.`;try{await supabase.from('analytics_eventos').insert({propriedade_id:prop?.id,evento_tipo:'whatsapp',cidade:prop?.cidade??null})}catch(_){};window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(msg)}`,'_blank')}
+  const irWppDireto=async()=>{const msg=`Olá! Vi seu espaço "${prop?.nome||'no portal VENTSY'}" e gostaria de mais informações.`;fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propriedade_id:prop?.id,evento_tipo:'whatsapp'})}).catch(()=>{});window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(msg)}`,'_blank')}
 
   const enviarWpp=async()=>{
     if(!formValido){const e:Record<string,boolean>={};if(formNome.trim().length<3)e.nome=true;if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail))e.email=true;if(formTel.replace(/\D/g,'').length!==11)e.tel=true;if(!formTipo)e.tipo=true;if(!formModo)e.modo=true;setFormErros(e);return}
@@ -290,7 +289,7 @@ function PropriedadeContent() {
     const fmt=(d:string)=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'A combinar'
     let db='';if(formModo==='hora')db=`⏱ *Tipo de locação:* Por hora (${formHoras}h)`;if(formModo==='diaria')db=`📅 *Período:* ${fmt(formInicio)} até ${fmt(formFim)}`
     const txt=`Olá, tudo bem? Preenchi o formulário na Ventsy e gostaria de mais informações. Seguem os dados do meu evento:\n\n📍 *Espaço:* ${prop?.nome||'—'}\n👤 *Nome:* ${formNome}\n📞 *Telefone:* ${formTel}\n📧 *E-mail:* ${formEmail}\n🎉 *Tipo de evento:* ${formTipo}\n${db}\n👥 *Convidados:* ${formPessoas} pessoas\n💰 *Estimativa de orçamento:* ${total>0?total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'A consultar'}\n\n_Enviado pelo portal VENTSY_`
-    try{await supabase.from('analytics_eventos').insert({propriedade_id:prop?.id,evento_tipo:'formulario',cidade:prop?.cidade??null})}catch(_){}
+    fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propriedade_id:prop?.id,evento_tipo:'formulario'})}).catch(()=>{})
     window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(txt)}`,'_blank')
   }
 

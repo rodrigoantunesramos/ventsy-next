@@ -2,13 +2,14 @@
 
 import { useMemo } from 'react';
 import { DiaryEntry } from '@/types/diario';
+import { dayDiff } from '@/lib/diarioDates';
 
 export default function DiarioStatsBar({ entries }: { entries: DiaryEntry[] }) {
   const stats = useMemo(() => {
     const importants       = entries.filter(e => e.is_important).length;
     const withReminder     = entries.filter(e => e.reminder_date).length;
     const overdueReminders = entries.filter(e =>
-      e.reminder_date && new Date(e.reminder_date) < new Date()
+      e.reminder_date && dayDiff(e.reminder_date) < 0
     ).length;
     const uniqueTags = new Set(entries.flatMap(e => e.tags ?? [])).size;
     return [

@@ -6,10 +6,10 @@
 // Tudo client-side, sem libs de chart (SVG/CSS). PDF via jsPDF (dynamic import).
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
 import { formatNumber, formatMoney } from '@/lib/format';
 
-type Evento = { evento_tipo: string; created_at: string | null };
+type Evento = { evento_tipo: string; created_at: string | null; cidade: string | null };
 type Reserva = { created_at: string | null; status: string | null; valor_estimado: number | null };
 
 const PERIODOS = [
@@ -34,19 +34,23 @@ export default function RelatoriosPage() {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [buscas, setBuscas] = useState<{ nome: string; n: number }[]>([]);
-  const [benchConv, setBenchConv] = useState<number | null>(null);
+  const [benchPlat, setBenchPlat] = useState<number | null>(null);
+  const [benchCat, setBenchCat] = useState<number | null>(null);
+  const [categoria, setCategoria] = useState<string>('');
   const [dias, setDias] = useState(30);
   const [exporting, setExporting] = useState(false);
 
   const carregar = useCallback(async (uid: string) => {
     const { data: props } = await sb
       .from('propriedades')
-      .select('id,nome')
+      .select('id,nome,categoria')
       .eq('usuario_id', uid)
       .order('id')
       .limit(1);
     const pid = props?.[0]?.id;
+    const cat = (props?.[0]?.categoria || '').trim();
     if (!pid) { setTemProp(false); return; }
+    setCategoria(cat);
 
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 365 * 2);
@@ -56,7 +60,7 @@ export default function RelatoriosPage() {
     try {
       const { data } = await sb
         .from('analytics_eventos')
-        .select('evento_tipo,created_at')
+        .select('evento_tipo,created_at,cidade')
         .eq('propriedade_id', String(pid))
         .gte('created_at', cutoffISO)
         .order('created_at', { ascending: false })
@@ -92,22 +96,15 @@ export default function RelatoriosPage() {
       );
     } catch { setBuscas([]); }
 
-    // Benchmark de plataforma — taxa média view→whatsapp (degrada se RLS bloquear)
+    // Benchmark da plataforma — via API com service-role (enxerga todas as
+    // propriedades, ignora RLS). Devolve média geral + média da categoria.
     try {
-      const since = new Date();
-      since.setDate(since.getDate() - 90);
-      const { data } = await sb
-        .from('analytics_eventos')
-        .select('evento_tipo,propriedade_id')
-        .gte('created_at', since.toISOString())
-        .limit(20000);
-      const rows = (data || []) as { evento_tipo: string; propriedade_id: string }[];
-      const props = new Set(rows.map((r) => r.propriedade_id));
-      // Só é um benchmark real se enxergamos mais de uma propriedade.
-      if (props.size > 1) {
-        const v = rows.filter((r) => r.evento_tipo === 'view').length;
-        const w = rows.filter((r) => r.evento_tipo === 'whatsapp').length;
-        if (v > 0) setBenchConv((w / v) * 100);
+      const headers = await authHeaders();
+      const r = await fetch(`/api/relatorios/benchmark?categoria=${encodeURIComponent(cat)}`, { headers });
+      if (r.ok) {
+        const j = await r.json();
+        setBenchPlat(typeof j.plataforma === 'number' ? j.plataforma : null);
+        setBenchCat(typeof j.categoria === 'number' ? j.categoria : null);
       }
     } catch { /* benchmark é opcional */ }
   }, []);
@@ -170,8 +167,15 @@ export default function RelatoriosPage() {
     return c;
   }, [evAtual]);
 
+  const porCidade = useMemo(() => {
+    const c: Record<string, number> = {};
+    evAtual.forEach((e) => { const cid = (e.cidade || '').trim(); if (cid) c[cid] = (c[cid] || 0) + 1; });
+    return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([nome, n]) => ({ nome, n }));
+  }, [evAtual]);
+
   const melhorDiaIdx = porDiaSemana.some((n) => n > 0) ? porDiaSemana.indexOf(Math.max(...porDiaSemana)) : -1;
   const picoHora = porHora.some((n) => n > 0) ? porHora.indexOf(Math.max(...porHora)) : -1;
+  const benchRef = benchCat ?? benchPlat;
 
   // ── Insights automáticos ────────────────────────────────────────────────────
   const insights = useMemo(() => {
@@ -190,10 +194,11 @@ export default function RelatoriosPage() {
       icon: '🗓️', tom: 'neutro',
       texto: `${diaSemanaExtenso(melhorDiaIdx)} é o dia que seu anúncio mais recebe visitas.`,
     });
+    const benchRef = benchCat ?? benchPlat;
     if (taxaConversao != null) out.push({
-      icon: '🎯', tom: taxaConversao >= (benchConv ?? 0) ? 'up' : 'neutro',
+      icon: '🎯', tom: benchRef != null && taxaConversao >= benchRef ? 'up' : 'neutro',
       texto: `Você converte ${taxaConversao.toFixed(1)}% das visitas em contato${
-        benchConv != null ? ` (média da plataforma: ${benchConv.toFixed(1)}%)` : ''
+        benchRef != null ? ` (média ${benchCat != null ? 'da categoria' : 'da plataforma'}: ${benchRef.toFixed(1)}%)` : ''
       }.`,
     });
     if (nReservas > 0) out.push({
@@ -203,7 +208,7 @@ export default function RelatoriosPage() {
       }`,
     });
     return out.slice(0, 4);
-  }, [views, contatos, viewsPrev, contatosPrev, melhorDiaIdx, taxaConversao, benchConv, nReservas, pipeline]);
+  }, [views, contatos, viewsPrev, contatosPrev, melhorDiaIdx, taxaConversao, benchCat, benchPlat, nReservas, pipeline]);
 
   // ── Deltas ──────────────────────────────────────────────────────────────────
   const viewsDelta = pctDelta(views, viewsPrev);
@@ -420,29 +425,31 @@ export default function RelatoriosPage() {
             </div>
           </div>
 
-          {/* Buscas + Benchmark ────────────────────────────────────────────────── */}
+          {/* Visitantes por cidade + Benchmark ─────────────────────────────────── */}
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
             <div className="rounded-2xl bg-white p-5 shadow-card">
               <div className="flex items-baseline justify-between">
-                <h3 className="text-base font-bold text-ink">Buscas populares</h3>
-                <span className="text-xs text-ink-muted">plataforma Ventsy</span>
+                <h3 className="text-base font-bold text-ink">Visitantes por cidade</h3>
+                <span className="text-xs text-ink-muted">por geolocalização</span>
               </div>
-              {buscas.length === 0 ? (
-                <p className="mt-6 text-sm text-ink-muted">Sem dados de buscas.</p>
+              {porCidade.length === 0 ? (
+                <p className="mt-6 text-sm text-ink-muted">
+                  Os dados de localização dos visitantes aparecem aqui conforme novas visitas chegam.
+                </p>
               ) : (
                 <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-                  {buscas.map((b, i) => {
-                    const max = Math.max(1, ...buscas.map((x) => x.n));
+                  {porCidade.map((c, i) => {
+                    const max = Math.max(1, ...porCidade.map((x) => x.n));
                     return (
-                      <div key={b.nome}>
+                      <div key={c.nome}>
                         <div className="mb-1.5 flex items-center justify-between text-xs">
                           <span className="flex items-center gap-1.5 font-semibold text-ink-soft">
-                            <span className="w-4 text-right font-normal tabular-nums text-ink-muted/50">{i + 1}.</span>{b.nome}
+                            <span className="w-4 text-right font-normal tabular-nums text-ink-muted/50">{i + 1}.</span>📍 {c.nome}
                           </span>
-                          <span className="tabular-nums text-ink-muted">{b.n}</span>
+                          <span className="tabular-nums text-ink-muted">{c.n}</span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-black/[0.06]">
-                          <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${Math.round((b.n / max) * 100)}%` }} />
+                          <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${Math.round((c.n / max) * 100)}%` }} />
                         </div>
                       </div>
                     );
@@ -453,20 +460,20 @@ export default function RelatoriosPage() {
 
             <div className="rounded-2xl bg-gradient-to-br from-ink to-ink-soft p-5 text-white shadow-card">
               <h3 className="text-base font-bold">Benchmark</h3>
-              {benchConv != null && taxaConversao != null ? (
+              {benchRef != null && taxaConversao != null ? (
                 <>
-                  <p className="mt-1 text-xs text-white/60">Sua taxa de conversão vs a média da plataforma.</p>
+                  <p className="mt-1 text-xs text-white/60">Sua conversão vs a média {benchCat != null ? `de ${categoria}` : 'da plataforma'}.</p>
                   <div className="mt-4 flex items-end gap-2">
                     <span className="text-3xl font-bold leading-none">{taxaConversao.toFixed(1)}%</span>
                     <span className={`mb-1 rounded-full px-2 py-0.5 text-[0.65rem] font-bold ${
-                      taxaConversao >= benchConv ? 'bg-emerald-400/20 text-emerald-300' : 'bg-amber-400/20 text-amber-300'
+                      taxaConversao >= benchRef ? 'bg-emerald-400/20 text-emerald-300' : 'bg-amber-400/20 text-amber-300'
                     }`}>
-                      {taxaConversao >= benchConv ? 'acima' : 'abaixo'} da média
+                      {taxaConversao >= benchRef ? 'acima' : 'abaixo'} da média
                     </span>
                   </div>
-                  <div className="mt-3 text-xs text-white/60">Média da plataforma: <strong className="text-white/90">{benchConv.toFixed(1)}%</strong></div>
+                  <div className="mt-3 text-xs text-white/60">Média {benchCat != null ? `de ${categoria}` : 'da plataforma'}: <strong className="text-white/90">{benchRef.toFixed(1)}%</strong></div>
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15">
-                    <div className="h-full rounded-full bg-white" style={{ width: `${Math.min(100, Math.round((taxaConversao / Math.max(benchConv * 2, 0.1)) * 100))}%` }} />
+                    <div className="h-full rounded-full bg-white" style={{ width: `${Math.min(100, Math.round((taxaConversao / Math.max(benchRef * 2, 0.1)) * 100))}%` }} />
                   </div>
                 </>
               ) : (
@@ -475,6 +482,36 @@ export default function RelatoriosPage() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Buscas populares ──────────────────────────────────────────────────── */}
+          <div className="rounded-2xl bg-white p-5 shadow-card">
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-base font-bold text-ink">Buscas populares</h3>
+              <span className="text-xs text-ink-muted">plataforma Ventsy</span>
+            </div>
+            {buscas.length === 0 ? (
+              <p className="mt-6 text-sm text-ink-muted">Sem dados de buscas.</p>
+            ) : (
+              <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+                {buscas.map((b, i) => {
+                  const max = Math.max(1, ...buscas.map((x) => x.n));
+                  return (
+                    <div key={b.nome}>
+                      <div className="mb-1.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1.5 font-semibold text-ink-soft">
+                          <span className="w-4 text-right font-normal tabular-nums text-ink-muted/50">{i + 1}.</span>{b.nome}
+                        </span>
+                        <span className="tabular-nums text-ink-muted">{b.n}</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-black/[0.06]">
+                        <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${Math.round((b.n / max) * 100)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </>
       )}

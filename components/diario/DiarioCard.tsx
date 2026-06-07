@@ -2,6 +2,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { DiaryEntry, LeadRef } from '@/types/diario';
+import { reminderStatus, formatReminderLabel, todayYMD } from '@/lib/diarioDates';
 import DiarioLeadSelect from './DiarioLeadSelect';
 
 interface Props {
@@ -22,16 +23,6 @@ function formatDate(iso: string) {
     ' às ' +
     d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   );
-}
-
-function formatReminderDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function isReminderPast(iso: string) { return new Date(iso) < new Date(); }
-function isReminderSoon(iso: string) {
-  const diff = new Date(iso).getTime() - Date.now();
-  return diff > 0 && diff < 1000 * 60 * 60 * 24 * 3;
 }
 
 function highlightText(text: string) {
@@ -59,8 +50,7 @@ export default function DiarioCard({ entry, leads = [], onTagClick, onLeadClick,
   const hasMore   = entry.content.length > 200;
   const displayed = expanded ? entry.content : preview;
 
-  const reminderPast = entry.reminder_date && isReminderPast(entry.reminder_date);
-  const reminderSoon = entry.reminder_date && isReminderSoon(entry.reminder_date);
+  const remStatus = entry.reminder_date ? reminderStatus(entry.reminder_date) : null;
 
   const cardShadow = entry.is_important
     ? 'shadow-[0_2px_16px_rgba(255,193,7,0.18),0_1px_4px_rgba(0,0,0,0.04)]'
@@ -163,7 +153,7 @@ export default function DiarioCard({ entry, leads = [], onTagClick, onLeadClick,
             type="date"
             value={editReminder}
             onChange={e => setEditReminder(e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
+            min={todayYMD()}
             className={`rounded-md border border-black/[0.08] px-2 py-[3px] text-[.78rem] outline-none focus:border-brand ${editReminder ? 'bg-amber-50' : 'bg-white'}`}
           />
           {editReminder && (
@@ -271,17 +261,20 @@ export default function DiarioCard({ entry, leads = [], onTagClick, onLeadClick,
       )}
 
       {/* Lembrete */}
-      {entry.reminder_date && (
+      {entry.reminder_date && remStatus && (
         <div
           className={`mt-2.5 inline-flex items-center gap-[5px] rounded-[20px] px-2.5 py-[3px] text-[.75rem] font-medium
-            ${reminderPast
+            ${remStatus === 'past'
               ? 'border border-red-200 bg-red-50 text-red-700'
-              : reminderSoon
-                ? 'border border-amber-300 bg-amber-50 text-amber-700'
-                : 'border border-emerald-300 bg-emerald-50 text-emerald-700'}`}
+              : remStatus === 'future'
+                ? 'border border-emerald-300 bg-emerald-50 text-emerald-700'
+                : 'border border-amber-300 bg-amber-50 text-amber-700'}`}
         >
-          {reminderPast ? '⏰ Lembrete vencido:' : reminderSoon ? '⏳ Em breve:' : '📅 Lembrete:'}{' '}
-          {formatReminderDate(entry.reminder_date)}
+          {remStatus === 'past'  ? '⏰ Lembrete vencido:'
+            : remStatus === 'today' ? '📅 Hoje:'
+            : remStatus === 'soon'  ? '⏳ Em breve:'
+            : '📅 Lembrete:'}{' '}
+          {formatReminderLabel(entry.reminder_date)}
         </div>
       )}
 

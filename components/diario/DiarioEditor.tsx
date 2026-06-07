@@ -2,6 +2,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { DiaryFormData, LeadRef } from '@/types/diario';
+import { todayYMD } from '@/lib/diarioDates';
 import DiarioLeadSelect from './DiarioLeadSelect';
 
 const COMMON_ENTITIES = [
@@ -23,10 +24,12 @@ interface Props {
   existingTags: string[];
   leads?: LeadRef[];
   onSave: (data: DiaryFormData) => Promise<void>;
+  onAiSuggestTags?: (content: string) => Promise<string[]>;
   saving: boolean;
 }
 
-export default function DiarioEditor({ existingTags, leads = [], onSave, saving }: Props) {
+export default function DiarioEditor({ existingTags, leads = [], onSave, onAiSuggestTags, saving }: Props) {
+  const [aiLoading, setAiLoading] = useState(false);
   const [content,     setContent]     = useState('');
   const [tags,        setTags]        = useState<string[]>([]);
   const [tagInput,    setTagInput]    = useState('');
@@ -58,6 +61,19 @@ export default function DiarioEditor({ existingTags, leads = [], onSave, saving 
   };
 
   const removeTag = (tag: string) => setTags(prev => prev.filter(t => t !== tag));
+
+  const handleAiTags = async () => {
+    if (!onAiSuggestTags || !content.trim() || aiLoading) return;
+    setAiLoading(true);
+    try {
+      const suggested = await onAiSuggestTags(content);
+      if (suggested.length) {
+        setTags(prev => [...new Set([...prev, ...suggested])]);
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleTagKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
@@ -179,7 +195,7 @@ export default function DiarioEditor({ existingTags, leads = [], onSave, saving 
           type="date"
           value={reminder}
           onChange={e => setReminder(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
+          min={todayYMD()}
           className={`rounded-lg border border-black/[0.08] px-2.5 py-[6px] text-[.82rem] text-ink-muted outline-none focus:border-brand ${reminder ? 'bg-amber-50' : 'bg-white'}`}
           title="Lembrete"
         />
@@ -200,6 +216,21 @@ export default function DiarioEditor({ existingTags, leads = [], onSave, saving 
         >
           ⭐ {important ? 'Importante' : 'Marcar'}
         </button>
+
+        {/* Sugerir tags com IA */}
+        {onAiSuggestTags && (
+          <button
+            onClick={handleAiTags}
+            disabled={aiLoading || !content.trim()}
+            title="Sugerir tags com IA"
+            className={`cursor-pointer whitespace-nowrap rounded-lg px-3 py-[6px] text-[.82rem] font-semibold transition-all duration-150
+              ${content.trim() && !aiLoading
+                ? 'border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100'
+                : 'cursor-default border border-black/[0.06] bg-gray-100 text-ink-muted'}`}
+          >
+            {aiLoading ? '✨ Pensando…' : '✨ Tags IA'}
+          </button>
+        )}
 
         {/* Hint atalho */}
         <span className="hidden text-[.7rem] text-ink-muted sm:block">Ctrl+↵</span>

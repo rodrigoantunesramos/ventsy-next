@@ -25,6 +25,8 @@ export default function DiarioPage() {
   const [importantOnly, setImportantOnly] = useState(false);
   const [reminderOnly,  setReminderOnly]  = useState(false);
   const [toast,         setToast]         = useState('');
+  const [aiSummary,     setAiSummary]     = useState('');
+  const [aiBusy,        setAiBusy]        = useState(false);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -148,6 +150,45 @@ export default function DiarioPage() {
     }
   };
 
+  // ── IA: sugerir tags a partir do texto ─────────────────────────────────────
+  const aiSuggestTags = async (content: string): Promise<string[]> => {
+    try {
+      const res  = await fetch('/api/diario/ai', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body:    JSON.stringify({ action: 'tags', content }),
+      });
+      const json = await res.json();
+      if (json.code === 'NO_KEY') { showToast('✨ IA não configurada (AI_GATEWAY_API_KEY).'); return []; }
+      if (json.error) { showToast('Erro na IA. Tente novamente.'); return []; }
+      return json.tags ?? [];
+    } catch {
+      showToast('Erro de conexão com a IA.');
+      return [];
+    }
+  };
+
+  // ── IA: resumir relacionamento do evento + sugerir follow-up ───────────────
+  const runAiSummary = async (leadId: string) => {
+    setAiBusy(true);
+    setAiSummary('');
+    try {
+      const res  = await fetch('/api/diario/ai', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body:    JSON.stringify({ action: 'summary', lead_id: leadId }),
+      });
+      const json = await res.json();
+      if (json.code === 'NO_KEY') { showToast('✨ IA não configurada (AI_GATEWAY_API_KEY).'); return; }
+      if (json.error) { showToast('Erro na IA. Tente novamente.'); return; }
+      setAiSummary(json.summary ?? '');
+    } catch {
+      showToast('Erro de conexão com a IA.');
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   // ── Filtros ────────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     let result = entries;
@@ -171,8 +212,10 @@ export default function DiarioPage() {
   [entries]);
 
   const toggleTag  = (tag: string) => setActiveTag(prev => prev === tag ? '' : tag);
-  const filterLead = (leadId: string) =>
+  const filterLead = (leadId: string) => {
+    setAiSummary('');
     setActiveLead(prev => prev?.id === leadId ? null : (leads.find(l => l.id === leadId) ?? null));
+  };
 
   return (
     <div className="mx-auto max-w-[860px]">
@@ -196,7 +239,13 @@ export default function DiarioPage() {
       </div>
 
       <div className="mb-5">
-        <DiarioEditor existingTags={existingTags} leads={leads} onSave={handleSave} saving={saving} />
+        <DiarioEditor
+          existingTags={existingTags}
+          leads={leads}
+          onSave={handleSave}
+          onAiSuggestTags={aiSuggestTags}
+          saving={saving}
+        />
       </div>
 
       <div className="mb-4">
@@ -214,6 +263,28 @@ export default function DiarioPage() {
       {entries.length > 0 && (
         <div className="mb-5">
           <DiarioPopularTags entries={entries} activeTag={activeTag} onTagClick={toggleTag} />
+        </div>
+      )}
+
+      {activeLead && (
+        <div className="mb-5 overflow-hidden rounded-2xl border border-violet-200 bg-violet-50/50 shadow-card">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-violet-100 bg-violet-50 px-4 py-3">
+            <span className="text-[.85rem] font-bold text-violet-800">
+              🔗 {activeLead.nome_evento} <span className="font-normal text-violet-600">· {activeLead.quem_contratou}</span>
+            </span>
+            <button
+              onClick={() => runAiSummary(activeLead.id)}
+              disabled={aiBusy}
+              className="cursor-pointer rounded-lg border border-violet-300 bg-white px-3 py-[6px] text-[.8rem] font-semibold text-violet-700 transition-colors hover:bg-violet-100 disabled:opacity-60"
+            >
+              {aiBusy ? '✨ Analisando…' : '✨ Resumir relacionamento (IA)'}
+            </button>
+          </div>
+          {aiSummary && (
+            <div className="whitespace-pre-wrap px-4 py-3 text-[.88rem] leading-[1.6] text-ink-soft">
+              {aiSummary}
+            </div>
+          )}
         </div>
       )}
 
