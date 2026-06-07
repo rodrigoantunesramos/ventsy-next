@@ -72,18 +72,6 @@ export default function Header() {
               <Link href="/anunciar" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
                 ✏️ Anuncie seu espaço
               </Link>
-              <Link href="/meus-espacos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                🏠 Meus espaços
-              </Link>
-              <Link href="/reservas" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                🗓️ Minhas reservas
-              </Link>
-              <Link href="/ganhos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                💰 Ganhos
-              </Link>
-              <Link href="/painel/calendario" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                📅 Calendário
-              </Link>
               <Link href="/planos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
                 💳 Planos
               </Link>
