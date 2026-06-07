@@ -119,7 +119,7 @@ export default function ReservasPage() {
     setProps(properties)
     if (properties.length) {
       setSelProp((cur) => (cur === '' ? properties[0].id : cur))
-      const { data: bs } = await supabaseAny.from('disponibilidade').select('prop_id,data,motivo').in('prop_id', properties.map((p) => p.id)).order('data')
+      const { data: bs } = await supabaseAny.from('disponibilidade').select('prop_id,data,motivo').eq('bloqueado', true).in('prop_id', properties.map((p) => p.id)).order('data')
       setBloqueios((bs || []) as Bloqueio[])
     }
     setLoading(false)
