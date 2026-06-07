@@ -78,6 +78,9 @@ export default function Header() {
               <Link href="/reservas" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
                 🗓️ Minhas reservas
               </Link>
+              <Link href="/ganhos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+                💰 Ganhos
+              </Link>
               <Link href="/planos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
                 💳 Planos
               </Link>
