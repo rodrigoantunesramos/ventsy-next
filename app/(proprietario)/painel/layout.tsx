@@ -56,6 +56,12 @@ const NAV: NavGroup[] = [
       { href: '/painel/producao', label: 'Produção', icon: 'clapper', enabled: true },
       { href: '/painel/logistica', label: 'Logística', icon: 'cone', enabled: true },
       { href: '/painel/acesso', label: 'Acesso & Credenciamento', icon: 'shield', enabled: true },
+      { href: '/painel/bilheteria', label: 'Bilheteria', icon: 'tickets', enabled: true },
+      { href: '/painel/expositores', label: 'Expositores & Patrocínios', icon: 'expo', enabled: true },
+      { href: '/painel/catering', label: 'Catering & Bar', icon: 'utensils', enabled: true },
+      { href: '/painel/estacionamento', label: 'Estacionamento & Mobilidade', icon: 'car', enabled: true },
+      { href: '/painel/layouts', label: 'Layouts & Plantas', icon: 'blueprint', enabled: true },
+      { href: '/painel/plano-b', label: 'Clima & Plano B', icon: 'cloud', enabled: true },
     ],
   },
   {
@@ -328,6 +334,7 @@ const ICONS = {
   card: 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm0 4h18',
   spaces: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   ticket: 'M4 7h16a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V8a1 1 0 0 1 1-1ZM15 7v12',
+  tickets: 'M4 8a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4Zm5.5 4.2 1.6 1.6 3.2-3.2',
   coins: 'M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6',
   contacts: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm5.5 6.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM6 16a3.5 3.5 0 0 1 7 0M15.5 9H18M15.5 13H18',
   truck: 'M1 3h13v11H1zM14 7h4l3 3v4h-7M6 18.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
@@ -347,6 +354,11 @@ const ICONS = {
   cone: 'M10.5 3h3l3.6 17.2a.8.8 0 0 1-.8 1H7.7a.8.8 0 0 1-.8-1L10.5 3ZM9 9.5h6M8 15h8',
   shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3ZM9.5 12l2 2 3.5-4',
   clapper: 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm.4-3 14.4-2.6a1 1 0 0 1 1.16.8L19.6 6 3 8.6 2.6 6a1 1 0 0 1 .8-1ZM8 5.2l1 2.6M13 4.3l1 2.6',
+  car: 'M5 11l1.6-4.8A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.2L19 11m-14 0h14a2 2 0 0 1 2 2v4h-2.5M5 11a2 2 0 0 0-2 2v4h2.5m0 0a2 2 0 0 0 4 0m-4 0h4m6 0a2 2 0 0 0 4 0m-4 0h4M7.5 14h2m5 0h2',
+  blueprint: 'M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM3 9h18M9 9v12M14 3v6',
+  utensils: 'M4 3v7a2 2 0 0 0 2 2v9M8 3v7a2 2 0 0 1-2 2M6 3v7M16 3c-1.3 0-2.5 1.7-2.5 4.5S14.7 12 16 12v9',
+  cloud: 'M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.5A4 4 0 0 0 6 19h11.5ZM9 21l-1 1.5M13 21l-1 1.5M16 21l-1 1.5',
+  expo: 'M3 9l1.6-4.2A1 1 0 0 1 5.5 4h13a1 1 0 0 1 .9.8L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18M9 20v-6h6v6',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

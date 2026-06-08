@@ -90,8 +90,8 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 | Produção & Run-of-show (Kanban do evento) | `/painel/producao` | `06-operacoes-eventos.md` | ✅ |
 | Logística: montagem & desmontagem | `/painel/logistica` | `06-operacoes-eventos.md` | ✅ |
 | Segurança, Controle de acesso & Credenciamento | `/painel/acesso` | `06-operacoes-eventos.md` | ✅ |
-| Estacionamento & Mobilidade | `/painel/estacionamento` | `06-operacoes-eventos.md` | ⬜ |
-| Ingressos & Bilheteria | `/painel/bilheteria` | `06-operacoes-eventos.md` | ⬜ |
+| Estacionamento & Mobilidade | `/painel/estacionamento` | `06-operacoes-eventos.md` | ✅ |
+| Ingressos & Bilheteria | `/painel/bilheteria` | `06-operacoes-eventos.md` | ✅ |
 | Expositores & Patrocínios | `/painel/expositores` | `06-operacoes-eventos.md` | ⬜ |
 | Catering, Buffet & Bar | `/painel/catering` | `06-operacoes-eventos.md` | ⬜ |
 | Layouts, Plantas & Capacidade | `/painel/layouts` | `06-operacoes-eventos.md` | ⬜ |
