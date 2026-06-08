@@ -13,6 +13,11 @@
 --   • 'atrasado' é DERIVADO na UI (vencimento < hoje), mas também pode ser
 --     PERSISTIDO pelo cron /api/cron/contas-vencidas — por isso entra no CHECK.
 --
+-- INDEPENDENTE de outras migrations: `fornecedor_id` e `lancamento_id` ficam
+-- como colunas simples; as foreign keys são adicionadas DEPOIS, só se as tabelas
+-- `fornecedores`/`lancamentos` existirem (blocos DO no fim). Pode rodar antes ou
+-- depois de fornecedores.sql — re-rodar este arquivo adiciona a FK que faltava.
+--
 -- Idempotente: pode rodar mais de uma vez. Rode no Supabase (SQL Editor).
 -- Os tipos no app usam `supabaseAny` enquanto esta tabela não entra em
 -- types/supabase.ts (regenere quando puder).
@@ -23,7 +28,7 @@ create table if not exists public.contas_pagar (
   id              uuid primary key default gen_random_uuid(),
   usuario_id      uuid not null references auth.users (id) on delete cascade,
   -- Origem da despesa (todos opcionais — uma conta pode ser avulsa):
-  fornecedor_id   uuid references public.fornecedores (id) on delete set null,
+  fornecedor_id   uuid,                          -- FK -> fornecedores (adicionada no fim, se existir)
   ordem_compra_id uuid,                          -- futuro: módulo Compras (sem FK ainda)
   categoria       text not null default 'outro', -- folha | aluguel | energia | ... (ver _lib CAT_PAGAR)
   plano_conta     text,                          -- código/nome da conta contábil (futuro: plano_contas)
@@ -37,7 +42,7 @@ create table if not exists public.contas_pagar (
   -- Recorrência: recorrencia = {freq: 'mensal'|'semanal'|..., ate: 'YYYY-MM-DD'|null}
   recorrente      boolean not null default false,
   recorrencia     jsonb not null default '{}'::jsonb,
-  recorrencia_pai uuid references public.contas_pagar (id) on delete set null, -- raiz da série
+  recorrencia_pai uuid references public.contas_pagar (id) on delete set null, -- raiz da série (self-FK)
   -- Aprovação (alçada leve): contas podem exigir aprovação antes da baixa.
   aprovado        boolean not null default true,
   aprovado_em     timestamptz,
@@ -45,7 +50,7 @@ create table if not exists public.contas_pagar (
   anexo_url       text,
   anexo_nome      text,
   -- Conciliação contábil: vínculo ao lançamento de caixa gerado na baixa.
-  lancamento_id   bigint references public.lancamentos (id) on delete set null,
+  lancamento_id   bigint,                        -- FK -> lancamentos (adicionada no fim, se compatível)
   obs             text,
   criado_em       timestamptz not null default now(),
   atualizado_em   timestamptz not null default now()
@@ -77,5 +82,38 @@ alter table public.contas_pagar enable row level security;
 drop policy if exists "dono gerencia contas_pagar" on public.contas_pagar;
 create policy "dono gerencia contas_pagar" on public.contas_pagar
   for all using (usuario_id = auth.uid()) with check (usuario_id = auth.uid());
+
+-- 5) FKs opcionais (só se as tabelas-alvo existirem) -------------------------
+-- fornecedor_id -> fornecedores. Se você rodar fornecedores.sql depois, basta
+-- re-rodar este arquivo que a FK passa a ser criada.
+do $$
+begin
+  if exists (select 1 from information_schema.tables
+             where table_schema = 'public' and table_name = 'fornecedores')
+     and not exists (select 1 from pg_constraint where conname = 'contas_pagar_fornecedor_id_fkey')
+  then
+    alter table public.contas_pagar
+      add constraint contas_pagar_fornecedor_id_fkey
+      foreign key (fornecedor_id) references public.fornecedores (id) on delete set null;
+  end if;
+end $$;
+
+-- lancamento_id -> lancamentos (conciliação da baixa). Protegido contra
+-- incompatibilidade de tipo do id (bigint × integer) — se falhar, segue sem a FK.
+do $$
+begin
+  if exists (select 1 from information_schema.tables
+             where table_schema = 'public' and table_name = 'lancamentos')
+     and not exists (select 1 from pg_constraint where conname = 'contas_pagar_lancamento_id_fkey')
+  then
+    begin
+      alter table public.contas_pagar
+        add constraint contas_pagar_lancamento_id_fkey
+        foreign key (lancamento_id) references public.lancamentos (id) on delete set null;
+    exception when others then
+      raise notice 'FK contas_pagar.lancamento_id -> lancamentos não criada (%). Coluna mantida sem FK.', sqlerrm;
+    end;
+  end if;
+end $$;
 
 -- Fim ------------------------------------------------------------------------
