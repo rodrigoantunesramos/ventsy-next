@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/weekly-report", "schedule": "0 12 * * 1" }
+    { "path": "/api/cron/weekly-report", "schedule": "0 12 * * 1" },
+    { "path": "/api/cron/expirar-holds", "schedule": "*/15 * * * *" }
   ]
 }

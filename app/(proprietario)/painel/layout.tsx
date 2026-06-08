@@ -40,6 +40,7 @@ const NAV: NavGroup[] = [
       { href: '/painel/calendario', label: 'Calendário', icon: 'calendar', enabled: true },
       { href: '/painel/reservas', label: 'Reservas', icon: 'ticket', enabled: true },
       { href: '/painel/precificacao', label: 'Precificação', icon: 'tag', enabled: true },
+      { href: '/painel/propostas', label: 'Propostas', icon: 'proposal', enabled: true },
       { href: '/painel/ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
       { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
       { href: '/painel/recebiveis', label: 'Recebíveis', icon: 'receipt', enabled: true },
@@ -47,6 +48,7 @@ const NAV: NavGroup[] = [
       { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
       { href: '/painel/documentos', label: 'Documentos', icon: 'doc', enabled: true },
+      { href: '/painel/contratos', label: 'Contratos', icon: 'signature', enabled: true },
       { href: '/painel/equipe', label: 'Equipe', icon: 'users', enabled: true },
       { href: '/painel/diario', label: 'Diário', icon: 'book', enabled: true },
     ],
@@ -302,6 +304,8 @@ const ICONS = {
   contacts: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm5.5 6.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM6 16a3.5 3.5 0 0 1 7 0M15.5 9H18M15.5 13H18',
   truck: 'M1 3h13v11H1zM14 7h4l3 3v4h-7M6 18.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
   tag: 'M20.59 13.41 12 22l-9-9V3h10l7.59 7.59a2 2 0 0 1 0 2.82ZM7.5 7.5h.01',
+  signature: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M8 16.5c1-1.5 2-1.5 3 0s2 1.5 3 0',
+  proposal: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M9 13l2 2 4-4',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

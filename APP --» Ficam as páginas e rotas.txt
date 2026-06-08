@@ -20,6 +20,4 @@ PUBLIC/ --» Arquivos estáticos
 TYPES/ --»  Tipagens - TypeScript
 
 
-
-
-a
+Conectores de assinatura qualificada (gov.br/ICP, DocuSign, ZapSign) ficaram como gancho futuro — a assinatura
