@@ -52,22 +52,22 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 | Clientes (CRM 360º) | `/painel/clientes` | `01-relacionamento.md` | ✅ |
 | Fornecedores | `/painel/fornecedores` | `04-suprimentos.md` | ✅ |
 | Precificação & tabela de preços | `/painel/precificacao` | `02-comercial.md` | ✅ |
-| Reservas & Calendário multi-espaço | `/painel/reservas` · `/painel/calendario` | `02-comercial.md` | 🟡 existe |
+| Reservas & Calendário multi-espaço | `/painel/reservas` · `/painel/calendario` | `02-comercial.md` | ✅ |
 
 ### Fase 1 — Comercial (gera receita → alimenta o financeiro)
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Orçamentos & Propostas | `/painel/propostas` | `02-comercial.md` | ⬜ |
-| Contratos & Assinatura digital | `/painel/contratos` | `02-comercial.md` | ⬜ |
+| Orçamentos & Propostas | `/painel/propostas` | `02-comercial.md` | ✅ |
+| Contratos & Assinatura digital | `/painel/contratos` | `02-comercial.md` | ✅ |
 
 ### Fase 2 — Financeiro & Contábil
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
 | Financeiro (cockpit CFO) | `/painel/financeiro` | — | ✅ existe |
-| Contabilidade completa | `/painel/contabilidade` | `03-financeiro.md` | ⬜ |
-| Faturamento & Notas fiscais | `/painel/faturamento` | `03-financeiro.md` | ⬜ |
+| Contabilidade completa | `/painel/contabilidade` | `03-financeiro.md` | ✅ |
+| Faturamento & Notas fiscais | `/painel/faturamento` | `03-financeiro.md` | ✅ |
 | Contas a pagar/receber | `/painel/recebiveis` | `03-financeiro.md` | 🟡 existe |
-| Comissões | `/painel/comissoes` | `03-financeiro.md` | ⬜ |
+| Comissões | `/painel/comissoes` | `03-financeiro.md` | ✅ |
 
 ### Fase 3 — Suprimentos & Patrimônio
 | Página | Rota | Arquivo | Status |

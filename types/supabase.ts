@@ -187,6 +187,60 @@ export type Database = {
           },
         ]
       }
+      bloqueios_recorrentes: {
+        Row: {
+          ativo: boolean
+          criado_em: string
+          dia_semana: number
+          espaco_id: number | null
+          hora_fim: string
+          hora_inicio: string
+          id: number
+          motivo: string | null
+          propriedade_id: number
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          criado_em?: string
+          dia_semana: number
+          espaco_id?: number | null
+          hora_fim?: string
+          hora_inicio?: string
+          id?: never
+          motivo?: string | null
+          propriedade_id: number
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          criado_em?: string
+          dia_semana?: number
+          espaco_id?: number | null
+          hora_fim?: string
+          hora_inicio?: string
+          id?: never
+          motivo?: string | null
+          propriedade_id?: number
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bloqueios_recorrentes_espaco_id_fkey"
+            columns: ["espaco_id"]
+            isOneToOne: false
+            referencedRelation: "espacos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bloqueios_recorrentes_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buscas: {
         Row: {
           created_at: string | null
@@ -418,15 +472,7 @@ export type Database = {
           vip?: boolean
           whatsapp?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "clientes_usuario_id_fkey"
-            columns: ["usuario_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       clientes_eventos: {
         Row: {
@@ -636,6 +682,213 @@ export type Database = {
         Update: {
           id?: number
           nome?: string
+        }
+        Relationships: []
+      }
+      contratos: {
+        Row: {
+          assinado_em: string | null
+          atualizado_em: string
+          cancelado_em: string | null
+          cliente_id: string | null
+          conteudo_final: string
+          criado_em: string
+          enviado_em: string | null
+          evento_id: string | null
+          id: string
+          link_token: string | null
+          moeda: string
+          motivo: string | null
+          multa_num: number | null
+          numero: string
+          observacoes: string | null
+          pdf_url: string | null
+          proposta_id: string | null
+          rescindido_em: string | null
+          status: string
+          template_id: string | null
+          titulo: string | null
+          usuario_id: string
+          valor_num: number
+          variaveis: Json
+          vencimento: string | null
+        }
+        Insert: {
+          assinado_em?: string | null
+          atualizado_em?: string
+          cancelado_em?: string | null
+          cliente_id?: string | null
+          conteudo_final?: string
+          criado_em?: string
+          enviado_em?: string | null
+          evento_id?: string | null
+          id?: string
+          link_token?: string | null
+          moeda?: string
+          motivo?: string | null
+          multa_num?: number | null
+          numero: string
+          observacoes?: string | null
+          pdf_url?: string | null
+          proposta_id?: string | null
+          rescindido_em?: string | null
+          status?: string
+          template_id?: string | null
+          titulo?: string | null
+          usuario_id: string
+          valor_num?: number
+          variaveis?: Json
+          vencimento?: string | null
+        }
+        Update: {
+          assinado_em?: string | null
+          atualizado_em?: string
+          cancelado_em?: string | null
+          cliente_id?: string | null
+          conteudo_final?: string
+          criado_em?: string
+          enviado_em?: string | null
+          evento_id?: string | null
+          id?: string
+          link_token?: string | null
+          moeda?: string
+          motivo?: string | null
+          multa_num?: number | null
+          numero?: string
+          observacoes?: string | null
+          pdf_url?: string | null
+          proposta_id?: string | null
+          rescindido_em?: string | null
+          status?: string
+          template_id?: string | null
+          titulo?: string | null
+          usuario_id?: string
+          valor_num?: number
+          variaveis?: Json
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "clientes_eventos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratos_assinaturas: {
+        Row: {
+          assinatura_img: string | null
+          assinou_em: string | null
+          contrato_id: string
+          criado_em: string
+          email: string | null
+          hash: string | null
+          id: string
+          ip: string | null
+          metodo: string | null
+          obrigatorio: boolean
+          ordem: number
+          papel: string
+          signatario_doc: string | null
+          signatario_nome: string
+          user_agent: string | null
+          usuario_id: string
+        }
+        Insert: {
+          assinatura_img?: string | null
+          assinou_em?: string | null
+          contrato_id: string
+          criado_em?: string
+          email?: string | null
+          hash?: string | null
+          id?: string
+          ip?: string | null
+          metodo?: string | null
+          obrigatorio?: boolean
+          ordem?: number
+          papel?: string
+          signatario_doc?: string | null
+          signatario_nome: string
+          user_agent?: string | null
+          usuario_id: string
+        }
+        Update: {
+          assinatura_img?: string | null
+          assinou_em?: string | null
+          contrato_id?: string
+          criado_em?: string
+          email?: string | null
+          hash?: string | null
+          id?: string
+          ip?: string | null
+          metodo?: string | null
+          obrigatorio?: boolean
+          ordem?: number
+          papel?: string
+          signatario_doc?: string | null
+          signatario_nome?: string
+          user_agent?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_assinaturas_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratos_templates: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          clausulas: Json
+          corpo: string
+          criado_em: string
+          id: string
+          nome: string
+          tipo_evento: string | null
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          clausulas?: Json
+          corpo?: string
+          criado_em?: string
+          id?: string
+          nome: string
+          tipo_evento?: string | null
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          clausulas?: Json
+          corpo?: string
+          criado_em?: string
+          id?: string
+          nome?: string
+          tipo_evento?: string | null
+          usuario_id?: string
         }
         Relationships: []
       }
@@ -979,6 +1232,75 @@ export type Database = {
           },
         ]
       }
+      empresa_config: {
+        Row: {
+          atualizado_em: string
+          cnpj: string | null
+          config_fiscal: Json
+          contatos: Json
+          cores_marca: Json
+          criado_em: string
+          endereco: Json
+          exclusao_solicitada_em: string | null
+          fantasia: string | null
+          fuso: string
+          idioma: string
+          ie: string | null
+          im: string | null
+          logo_url: string | null
+          moeda: string
+          notificacoes: Json
+          preferencias: Json
+          razao_social: string | null
+          retencao_meses: number
+          usuario_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          cnpj?: string | null
+          config_fiscal?: Json
+          contatos?: Json
+          cores_marca?: Json
+          criado_em?: string
+          endereco?: Json
+          exclusao_solicitada_em?: string | null
+          fantasia?: string | null
+          fuso?: string
+          idioma?: string
+          ie?: string | null
+          im?: string | null
+          logo_url?: string | null
+          moeda?: string
+          notificacoes?: Json
+          preferencias?: Json
+          razao_social?: string | null
+          retencao_meses?: number
+          usuario_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          cnpj?: string | null
+          config_fiscal?: Json
+          contatos?: Json
+          cores_marca?: Json
+          criado_em?: string
+          endereco?: Json
+          exclusao_solicitada_em?: string | null
+          fantasia?: string | null
+          fuso?: string
+          idioma?: string
+          ie?: string | null
+          im?: string | null
+          logo_url?: string | null
+          moeda?: string
+          notificacoes?: Json
+          preferencias?: Json
+          razao_social?: string | null
+          retencao_meses?: number
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       equipe: {
         Row: {
           admissao: string | null
@@ -1029,6 +1351,65 @@ export type Database = {
           {
             foreignKeyName: "equipe_prop_id_fkey"
             columns: ["prop_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      espacos: {
+        Row: {
+          area_m2: number | null
+          ativo: boolean
+          atualizado_em: string
+          buffer_minutos: number
+          capacidade: number | null
+          cor: string | null
+          criado_em: string
+          id: number
+          nome: string
+          ordem: number
+          propriedade_id: number
+          reservavel_isolado: boolean
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          area_m2?: number | null
+          ativo?: boolean
+          atualizado_em?: string
+          buffer_minutos?: number
+          capacidade?: number | null
+          cor?: string | null
+          criado_em?: string
+          id?: never
+          nome: string
+          ordem?: number
+          propriedade_id: number
+          reservavel_isolado?: boolean
+          tipo?: string
+          usuario_id: string
+        }
+        Update: {
+          area_m2?: number | null
+          ativo?: boolean
+          atualizado_em?: string
+          buffer_minutos?: number
+          capacidade?: number | null
+          cor?: string | null
+          criado_em?: string
+          id?: never
+          nome?: string
+          ordem?: number
+          propriedade_id?: number
+          reservavel_isolado?: boolean
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "espacos_propriedade_id_fkey"
+            columns: ["propriedade_id"]
             isOneToOne: false
             referencedRelation: "propriedades"
             referencedColumns: ["id"]
@@ -1639,6 +2020,53 @@ export type Database = {
         }
         Relationships: []
       }
+      pacotes: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          criado_em: string
+          descricao: string | null
+          id: string
+          itens: Json
+          nome: string
+          propriedade_id: number | null
+          usuario_id: string
+          valor_num: number
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          itens?: Json
+          nome: string
+          propriedade_id?: number | null
+          usuario_id: string
+          valor_num?: number
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          itens?: Json
+          nome?: string
+          propriedade_id?: number | null
+          usuario_id?: string
+          valor_num?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pacotes_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pagamentos: {
         Row: {
           atualizado_em: string | null
@@ -1843,6 +2271,112 @@ export type Database = {
         }
         Relationships: []
       }
+      precos_regras: {
+        Row: {
+          ajuste_tipo: string
+          ajuste_valor: number
+          ativo: boolean
+          condicao: Json
+          criado_em: string
+          id: string
+          nome: string | null
+          prioridade: number
+          tabela_id: string
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          ajuste_tipo?: string
+          ajuste_valor?: number
+          ativo?: boolean
+          condicao?: Json
+          criado_em?: string
+          id?: string
+          nome?: string | null
+          prioridade?: number
+          tabela_id: string
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          ajuste_tipo?: string
+          ajuste_valor?: number
+          ativo?: boolean
+          condicao?: Json
+          criado_em?: string
+          id?: string
+          nome?: string | null
+          prioridade?: number
+          tabela_id?: string
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "precos_regras_tabela_id_fkey"
+            columns: ["tabela_id"]
+            isOneToOne: false
+            referencedRelation: "precos_tabela"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      precos_tabela: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          base: string
+          concorrencia_num: number | null
+          criado_em: string
+          custo_num: number | null
+          espaco_id: number | null
+          id: string
+          moeda: string
+          nome: string
+          propriedade_id: number | null
+          usuario_id: string
+          valor_base_num: number
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          base?: string
+          concorrencia_num?: number | null
+          criado_em?: string
+          custo_num?: number | null
+          espaco_id?: number | null
+          id?: string
+          moeda?: string
+          nome: string
+          propriedade_id?: number | null
+          usuario_id: string
+          valor_base_num?: number
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          base?: string
+          concorrencia_num?: number | null
+          criado_em?: string
+          custo_num?: number | null
+          espaco_id?: number | null
+          id?: string
+          moeda?: string
+          nome?: string
+          propriedade_id?: number | null
+          usuario_id?: string
+          valor_base_num?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "precos_tabela_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promocoes_restaurante: {
         Row: {
           ativa: boolean | null
@@ -1902,6 +2436,147 @@ export type Database = {
           },
         ]
       }
+      propostas: {
+        Row: {
+          aceita_em: string | null
+          atualizado_em: string
+          cliente_id: string | null
+          condicoes: string | null
+          condicoes_pagamento: Json
+          criado_em: string
+          desconto_num: number
+          enviada_em: string | null
+          evento_id: string | null
+          id: string
+          itens: Json
+          link_token: string
+          moeda: string
+          motivo_recusa: string | null
+          numero: number
+          observacoes: string | null
+          propriedade_id: number | null
+          recusada_em: string | null
+          status: string
+          subtotal_num: number
+          titulo: string
+          total_num: number
+          usuario_id: string
+          validade: string | null
+          vista_em: string | null
+        }
+        Insert: {
+          aceita_em?: string | null
+          atualizado_em?: string
+          cliente_id?: string | null
+          condicoes?: string | null
+          condicoes_pagamento?: Json
+          criado_em?: string
+          desconto_num?: number
+          enviada_em?: string | null
+          evento_id?: string | null
+          id?: string
+          itens?: Json
+          link_token?: string
+          moeda?: string
+          motivo_recusa?: string | null
+          numero?: number
+          observacoes?: string | null
+          propriedade_id?: number | null
+          recusada_em?: string | null
+          status?: string
+          subtotal_num?: number
+          titulo?: string
+          total_num?: number
+          usuario_id: string
+          validade?: string | null
+          vista_em?: string | null
+        }
+        Update: {
+          aceita_em?: string | null
+          atualizado_em?: string
+          cliente_id?: string | null
+          condicoes?: string | null
+          condicoes_pagamento?: Json
+          criado_em?: string
+          desconto_num?: number
+          enviada_em?: string | null
+          evento_id?: string | null
+          id?: string
+          itens?: Json
+          link_token?: string
+          moeda?: string
+          motivo_recusa?: string | null
+          numero?: number
+          observacoes?: string | null
+          propriedade_id?: number | null
+          recusada_em?: string | null
+          status?: string
+          subtotal_num?: number
+          titulo?: string
+          total_num?: number
+          usuario_id?: string
+          validade?: string | null
+          vista_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "propostas_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "clientes_eventos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "propostas_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      propostas_templates: {
+        Row: {
+          atualizado_em: string
+          condicoes: string | null
+          condicoes_pagamento: Json
+          criado_em: string
+          id: string
+          itens: Json
+          nome: string
+          observacoes: string | null
+          tipo_evento: string | null
+          titulo: string | null
+          usuario_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          condicoes?: string | null
+          condicoes_pagamento?: Json
+          criado_em?: string
+          id?: string
+          itens?: Json
+          nome: string
+          observacoes?: string | null
+          tipo_evento?: string | null
+          titulo?: string | null
+          usuario_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          condicoes?: string | null
+          condicoes_pagamento?: Json
+          criado_em?: string
+          id?: string
+          itens?: Json
+          nome?: string
+          observacoes?: string | null
+          tipo_evento?: string | null
+          titulo?: string | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       propriedades: {
         Row: {
           acessibilidade: boolean | null
@@ -1929,6 +2604,7 @@ export type Database = {
           faq: Json | null
           foto_responsavel: string | null
           fotos_verificadas: boolean | null
+          ical_token: string
           id: number
           imagem_url: string | null
           instagram: string | null
@@ -1985,6 +2661,7 @@ export type Database = {
           faq?: Json | null
           foto_responsavel?: string | null
           fotos_verificadas?: boolean | null
+          ical_token?: string
           id?: number
           imagem_url?: string | null
           instagram?: string | null
@@ -2041,6 +2718,7 @@ export type Database = {
           faq?: Json | null
           foto_responsavel?: string | null
           fotos_verificadas?: boolean | null
+          ical_token?: string
           id?: number
           imagem_url?: string | null
           instagram?: string | null
@@ -2091,65 +2769,106 @@ export type Database = {
       reservas: {
         Row: {
           atualizado_em: string
+          cor: string | null
           criado_em: string
           data_fim: string | null
           data_inicio: string | null
           email: string | null
+          espaco_id: number | null
+          evento_id: string | null
+          fim: string | null
+          hold_expira_em: string | null
           horas: number | null
           host_id: string | null
           id: string
+          inicio: string | null
           mensagem: string | null
           modo: string | null
           nome: string | null
+          obs: string | null
+          origem: string
           pessoas: number | null
           propriedade_id: number
           status: string
           telefone: string | null
           tipo_evento: string | null
+          titulo: string | null
           usuario_id: string
           valor_estimado: number | null
         }
         Insert: {
           atualizado_em?: string
+          cor?: string | null
           criado_em?: string
           data_fim?: string | null
           data_inicio?: string | null
           email?: string | null
+          espaco_id?: number | null
+          evento_id?: string | null
+          fim?: string | null
+          hold_expira_em?: string | null
           horas?: number | null
           host_id?: string | null
           id?: string
+          inicio?: string | null
           mensagem?: string | null
           modo?: string | null
           nome?: string | null
+          obs?: string | null
+          origem?: string
           pessoas?: number | null
           propriedade_id: number
           status?: string
           telefone?: string | null
           tipo_evento?: string | null
+          titulo?: string | null
           usuario_id: string
           valor_estimado?: number | null
         }
         Update: {
           atualizado_em?: string
+          cor?: string | null
           criado_em?: string
           data_fim?: string | null
           data_inicio?: string | null
           email?: string | null
+          espaco_id?: number | null
+          evento_id?: string | null
+          fim?: string | null
+          hold_expira_em?: string | null
           horas?: number | null
           host_id?: string | null
           id?: string
+          inicio?: string | null
           mensagem?: string | null
           modo?: string | null
           nome?: string | null
+          obs?: string | null
+          origem?: string
           pessoas?: number | null
           propriedade_id?: number
           status?: string
           telefone?: string | null
           tipo_evento?: string | null
+          titulo?: string | null
           usuario_id?: string
           valor_estimado?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reservas_espaco_id_fkey"
+            columns: ["espaco_id"]
+            isOneToOne: false
+            referencedRelation: "espacos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "clientes_eventos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reservas_propriedade_id_fkey"
             columns: ["propriedade_id"]
@@ -2305,6 +3024,53 @@ export type Database = {
         }
         Relationships: []
       }
+      taxas: {
+        Row: {
+          ativo: boolean
+          criado_em: string
+          id: string
+          nome: string
+          obrigatoria: boolean
+          propriedade_id: number | null
+          reembolsavel: boolean
+          tipo: string
+          usuario_id: string
+          valor: number
+        }
+        Insert: {
+          ativo?: boolean
+          criado_em?: string
+          id?: string
+          nome: string
+          obrigatoria?: boolean
+          propriedade_id?: number | null
+          reembolsavel?: boolean
+          tipo?: string
+          usuario_id: string
+          valor?: number
+        }
+        Update: {
+          ativo?: boolean
+          criado_em?: string
+          id?: string
+          nome?: string
+          obrigatoria?: boolean
+          propriedade_id?: number | null
+          reembolsavel?: boolean
+          tipo?: string
+          usuario_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxas_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usuarios: {
         Row: {
           cadastro_completo: boolean | null
@@ -2352,6 +3118,62 @@ export type Database = {
           usuario?: string | null
         }
         Relationships: []
+      }
+      usuarios_papeis: {
+        Row: {
+          atualizado_em: string
+          convite_token: string | null
+          criado_em: string
+          email: string | null
+          equipe_id: number | null
+          id: string
+          membro_id: string | null
+          nome: string
+          papel: string
+          permissoes: Json
+          requer_2fa: boolean
+          status: string
+          usuario_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          convite_token?: string | null
+          criado_em?: string
+          email?: string | null
+          equipe_id?: number | null
+          id?: string
+          membro_id?: string | null
+          nome: string
+          papel?: string
+          permissoes?: Json
+          requer_2fa?: boolean
+          status?: string
+          usuario_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          convite_token?: string | null
+          criado_em?: string
+          email?: string | null
+          equipe_id?: number | null
+          id?: string
+          membro_id?: string | null
+          nome?: string
+          papel?: string
+          permissoes?: Json
+          requer_2fa?: boolean
+          status?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_papeis_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       videos_propriedade: {
         Row: {
@@ -2492,6 +3314,7 @@ export type Database = {
       }
     }
     Functions: {
+      aceitar_proposta: { Args: { p_token: string }; Returns: Json }
       criar_assinatura_basico: {
         Args: { p_user_id: string }
         Returns: undefined

@@ -117,6 +117,18 @@ export function formatDate(
   return new Intl.DateTimeFormat(locale, fmt).format(d)
 }
 
+/** Rótulo de mês a partir de 'YYYY-MM' ou data. Ex.: 'jun. 2026' / 'Jun' (short). */
+export function formatMonth(
+  value: string | Date | null | undefined,
+  opts: { locale?: Locale; withYear?: boolean } = {},
+): string {
+  const { locale = _locale, withYear = true } = opts
+  const raw = typeof value === 'string' && /^\d{4}-\d{2}$/.test(value) ? `${value}-01` : value
+  const d = toDate(raw as string | Date | null | undefined)
+  if (!d) return ''
+  return new Intl.DateTimeFormat(locale, { month: 'short', ...(withYear ? { year: 'numeric' } : {}) }).format(d)
+}
+
 /** Data + hora, aplicando o fuso ativo (preferência do usuário). Para timestamps. */
 export function formatDateTime(
   value: string | number | Date | null | undefined,

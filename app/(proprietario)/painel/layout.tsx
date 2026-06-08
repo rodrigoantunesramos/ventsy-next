@@ -42,8 +42,6 @@ const NAV: NavGroup[] = [
       { href: '/painel/precificacao', label: 'Precificação', icon: 'tag', enabled: true },
       { href: '/painel/propostas', label: 'Propostas', icon: 'proposal', enabled: true },
       { href: '/painel/ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
-      { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
-      { href: '/painel/recebiveis', label: 'Recebíveis', icon: 'receipt', enabled: true },
       { href: '/painel/clientes', label: 'Clientes', icon: 'contacts', enabled: true },
       { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
@@ -51,6 +49,16 @@ const NAV: NavGroup[] = [
       { href: '/painel/contratos', label: 'Contratos', icon: 'signature', enabled: true },
       { href: '/painel/equipe', label: 'Equipe', icon: 'users', enabled: true },
       { href: '/painel/diario', label: 'Diário', icon: 'book', enabled: true },
+    ],
+  },
+  {
+    group: 'Financeiro',
+    items: [
+      { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
+      { href: '/painel/recebiveis', label: 'Contas a pagar/receber', icon: 'receipt', enabled: true },
+      { href: '/painel/faturamento', label: 'Faturamento', icon: 'invoice', enabled: true },
+      { href: '/painel/comissoes', label: 'Comissões', icon: 'commission', enabled: true },
+      { href: '/painel/contabilidade', label: 'Contabilidade', icon: 'ledger', enabled: true },
     ],
   },
   {
@@ -306,6 +314,9 @@ const ICONS = {
   tag: 'M20.59 13.41 12 22l-9-9V3h10l7.59 7.59a2 2 0 0 1 0 2.82ZM7.5 7.5h.01',
   signature: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M8 16.5c1-1.5 2-1.5 3 0s2 1.5 3 0',
   proposal: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M9 13l2 2 4-4',
+  commission: 'M6 18 18 6M8.5 7.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm10 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z',
+  invoice: 'M14 3H6a2 2 0 0 0-2 2v16l2.5-1.5L9 21l1.5-1.5L12 21l1.5-1.5L15 21l2.5-1.5V9l-3.5-6ZM14 3v6h3.5M8 12h6M8 15.5h4',
+  ledger: 'M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM4 8h16M11 8v13',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

@@ -32,6 +32,7 @@ export const MODULOS: { key: string; label: string; grupo: string }[] = [
   { key: 'ganhos', label: 'Ganhos', grupo: 'Gestão' },
   { key: 'financeiro', label: 'Financeiro', grupo: 'Gestão' },
   { key: 'recebiveis', label: 'Recebíveis', grupo: 'Gestão' },
+  { key: 'contabilidade', label: 'Contabilidade', grupo: 'Financeiro' },
   { key: 'leads', label: 'Leads', grupo: 'Gestão' },
   { key: 'relatorios', label: 'Relatórios', grupo: 'Gestão' },
   { key: 'documentos', label: 'Documentos', grupo: 'Gestão' },

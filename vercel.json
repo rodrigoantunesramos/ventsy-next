@@ -1,6 +1,8 @@
 {
   "crons": [
     { "path": "/api/cron/weekly-report", "schedule": "0 12 * * 1" },
-    { "path": "/api/cron/expirar-holds", "schedule": "*/15 * * * *" }
+    { "path": "/api/cron/expirar-holds", "schedule": "*/15 * * * *" },
+    { "path": "/api/cron/apurar-comissoes", "schedule": "0 5 * * *" },
+    { "path": "/api/cron/contas-vencidas", "schedule": "0 6 * * *" }
   ]
 }
