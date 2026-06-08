@@ -72,11 +72,11 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 ### Fase 3 — Suprimentos & Patrimônio
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Compras (requisição→cotação→pedido→entrega) | `/painel/compras` | `04-suprimentos.md` | ⬜ |
-| Estoque / Almoxarifado | `/painel/estoque` | `04-suprimentos.md` | ⬜ |
-| Ativos & Bens (patrimônio) | `/painel/ativos` | `04-suprimentos.md` | ⬜ |
-| Equipamentos & Locação de itens | `/painel/equipamentos` | `04-suprimentos.md` | ⬜ |
-| Manutenção & Ordens de Serviço | `/painel/manutencao` | `04-suprimentos.md` | ⬜ |
+| Compras (requisição→cotação→pedido→entrega) | `/painel/compras` | `04-suprimentos.md` | ✅ |
+| Estoque / Almoxarifado | `/painel/estoque` | `04-suprimentos.md` | ✅ |
+| Ativos & Bens (patrimônio) | `/painel/ativos` | `04-suprimentos.md` | ✅ |
+| Equipamentos & Locação de itens | `/painel/equipamentos` | `04-suprimentos.md` | ✅ |
+| Manutenção & Ordens de Serviço | `/painel/manutencao` | `04-suprimentos.md` | ✅ |
 
 ### Fase 4 — Pessoas (RH)
 | Página | Rota | Arquivo | Status |

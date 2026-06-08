@@ -36,8 +36,12 @@ export const MODULOS: { key: string; label: string; grupo: string }[] = [
   { key: 'leads', label: 'Leads', grupo: 'Gestão' },
   { key: 'relatorios', label: 'Relatórios', grupo: 'Gestão' },
   { key: 'documentos', label: 'Documentos', grupo: 'Gestão' },
-  { key: 'equipe', label: 'Equipe', grupo: 'Gestão' },
   { key: 'diario', label: 'Diário', grupo: 'Gestão' },
+  { key: 'rh', label: 'RH', grupo: 'Pessoas' },
+  { key: 'equipe', label: 'Equipe', grupo: 'Pessoas' },
+  { key: 'ponto', label: 'Ponto & Escala', grupo: 'Pessoas' },
+  { key: 'fornecedores', label: 'Fornecedores', grupo: 'Suprimentos' },
+  { key: 'compras', label: 'Compras', grupo: 'Suprimentos' },
   { key: 'configuracoes', label: 'Configurações', grupo: 'Conta' },
   { key: 'planos', label: 'Planos', grupo: 'Conta' },
 ]
@@ -80,17 +84,17 @@ export const PAPEIS: { v: Papel; label: string; desc: string; perms: Permissoes 
     desc: 'Agenda, reservas, documentos e produção.',
     perms: {
       ...allModulos('leitura'),
-      calendario: 'edicao', reservas: 'edicao', documentos: 'edicao', diario: 'edicao',
+      calendario: 'edicao', reservas: 'edicao', documentos: 'edicao', diario: 'edicao', ponto: 'edicao',
       financeiro: 'nenhum', recebiveis: 'nenhum', configuracoes: 'nenhum',
     },
   },
   {
     v: 'rh',
     label: 'RH / Pessoas',
-    desc: 'Equipe, folha e encargos.',
+    desc: 'Equipe, folha, encargos, ponto e escala.',
     perms: {
       ...allModulos('nenhum'),
-      painel: 'leitura', equipe: 'total', diario: 'leitura', relatorios: 'leitura',
+      painel: 'leitura', rh: 'total', equipe: 'total', ponto: 'total', diario: 'leitura', relatorios: 'leitura',
     },
   },
   {

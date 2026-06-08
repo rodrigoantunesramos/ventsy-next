@@ -8,6 +8,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { supabaseAny as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort } from '@/lib/format';
+// Motor de folha/encargos COMPARTILHADO (fonte única; reusado por /painel/rh).
+import {
+  CONTRATOS, CONTRATO_MAP, STATUS_LIST, STATUS_MAP,
+  DEFAULT_CHARGES, CHARGE_LABELS, calcCusto,
+  type Charges, type ChargeSet,
+} from '@/lib/folha';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Func = {
@@ -16,43 +22,10 @@ type Func = {
   telefone: string | null; obs: string | null;
 };
 
-type ChargeSet = Record<string, number>;
-type Charges = { clt: ChargeSet; horista: ChargeSet; estagio: ChargeSet };
 type TabId = 'equipe' | 'folha' | 'encargos';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const CONTRATOS = [
-  { v: 'clt', l: 'CLT' },
-  { v: 'horista', l: 'Horista' },
-  { v: 'mei', l: 'MEI/PJ' },
-  { v: 'estagio', l: 'Estágio' },
-];
-
-const STATUS_LIST = [
-  { v: 'ativo',    l: 'Ativo',    c: 'bg-emerald-50 text-emerald-700' },
-  { v: 'ferias',   l: 'Férias',   c: 'bg-blue-50 text-blue-700' },
-  { v: 'afastado', l: 'Afastado', c: 'bg-amber-50 text-amber-700' },
-];
-const STATUS_MAP  = Object.fromEntries(STATUS_LIST.map((s) => [s.v, s]));
-const CONTRATO_MAP = Object.fromEntries(CONTRATOS.map((c) => [c.v, c.l]));
 const AVATAR_CORES = ['#0ca678', '#f59e0b', '#ff385c', '#8b5cf6', '#1a73e8', '#fb923c'];
-
-const DEFAULT_CHARGES: Charges = {
-  clt: {
-    inss: 20, fgts: 8, rat: 2, terceiros: 5.8,
-    ferias: 11.11, decimoTerceiro: 8.33,
-    valeTransporte: 6, valeAlimentacao: 10, planoSaude: 8, outros: 0,
-  },
-  horista: { inss: 20, fgts: 8, rat: 2, terceiros: 5.8, outros: 0 },
-  estagio: { outros: 0 },
-};
-
-const CHARGE_LABELS: Record<string, string> = {
-  inss: 'INSS Patronal', fgts: 'FGTS', rat: 'RAT (Risco)', terceiros: 'Terceiros (Sistema S)',
-  ferias: 'Férias + 1/3', decimoTerceiro: '13º Salário',
-  valeTransporte: 'Vale Transporte', valeAlimentacao: 'Vale Alimentação',
-  planoSaude: 'Plano de Saúde', outros: 'Outros',
-};
 
 const EMPTY = {
   nome: '', cargo: '', departamento: 'Operações', salario: '', contrato: 'clt',
@@ -62,13 +35,6 @@ const EMPTY = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function inicial(n: string) {
   return n.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-}
-
-function calcCusto(salario: number, contrato: string, charges: Charges) {
-  if (contrato === 'mei' || contrato === 'estagio') return { salario, encargos: 0, total: salario };
-  const chargeSet = charges[contrato as keyof Charges] ?? charges.clt;
-  const encargos = Object.values(chargeSet).reduce((s, p) => s + salario * (p / 100), 0);
-  return { salario, encargos, total: salario + encargos };
 }
 
 function tenure(admissao: string | null): string {

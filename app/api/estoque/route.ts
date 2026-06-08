@@ -1,17 +1,18 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized, forbidden } from '@/lib/apiAuth'
-import { aplicarUma, recalcular, statusMinimo, num, type MovTipo, type MovCalc } from '@/lib/estoque'
+import { num, type MovTipo } from '@/lib/estoque'
 
-// Movimentação de estoque AUTORITATIVA (Kardex + custo médio móvel).
-// Roda com service-role: valida que o produto é do dono, grava a movimentação
-// com o custo EFETIVO da linha e recalcula `estoque_atual`/`custo_medio_num` do
-// produto a partir de TODO o histórico (motor puro lib/estoque.ts) — assim o
-// saldo e o custo médio são consistentes a cada entrada/saída/ajuste/perda.
+// Movimentação de estoque (Kardex). Roda com service-role e valida posse do
+// produto + regra de saldo (saída/perda não excedem o saldo, salvo ?force).
+// O cálculo de saldo e CUSTO MÉDIO MÓVEL é AUTORITATIVO no banco: triggers em
+// `estoque_mov` (docs/sql/estoque.sql) valoram a linha e recalculam o produto a
+// cada inserção/edição/exclusão — assim qualquer caminho de escrita (esta rota
+// ou o recebimento de Compras) mantém produtos.estoque_atual/custo_medio_num
+// coerentes. A lógica do trigger espelha o motor puro lib/estoque.ts.
 //
-// O Kardex é imutável (boa prática de auditoria): não há edição de movimentação;
-// correções são feitas por nova movimentação de 'ajuste'/'perda' ou por DELETE
-// (que reverte e recalcula). Saídas/perdas além do saldo exigem ?force.
+// O Kardex é imutável (auditoria): não há edição de movimentação; correções via
+// nova 'ajuste'/'perda' ou DELETE (que reverte e recalcula pelo trigger).
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -20,33 +21,25 @@ export const dynamic = 'force-dynamic'
 const admin = supabaseAdmin as any
 
 const TIPOS = new Set<MovTipo>(['entrada', 'saida', 'ajuste', 'perda', 'transferencia'])
-const SELECT_RECALC = 'tipo,quantidade,custo_unit_num,criado_em'
 
 function badRequest(msg: string) {
   return Response.json({ error: msg }, { status: 400 })
 }
 
-/** Produto do dono? Retorna a linha (saldo/custo atuais) ou null. */
-async function produtoDoDono(produtoId: string, userId: string): Promise<{ id: string; estoque_atual: number; custo_medio_num: number } | null> {
-  const { data } = await admin.from('produtos').select('id,usuario_id,estoque_atual,custo_medio_num').eq('id', produtoId).maybeSingle()
+/** Produto do dono? Retorna a linha (saldo/custo/local atuais) ou null. */
+async function produtoDoDono(produtoId: string, userId: string): Promise<{ id: string; estoque_atual: number; custo_medio_num: number; local: string } | null> {
+  const { data } = await admin.from('produtos').select('id,usuario_id,estoque_atual,custo_medio_num,local').eq('id', produtoId).maybeSingle()
   if (!data || data.usuario_id !== userId) return null
-  return { id: data.id, estoque_atual: num(data.estoque_atual), custo_medio_num: num(data.custo_medio_num) }
+  return { id: data.id, estoque_atual: num(data.estoque_atual), custo_medio_num: num(data.custo_medio_num), local: data.local }
 }
 
-/** Recalcula saldo + custo médio do produto a partir do histórico e persiste. */
-async function recomputarProduto(produtoId: string): Promise<{ estoque_atual: number; custo_medio_num: number }> {
-  const { data: movs } = await admin
-    .from('estoque_mov')
-    .select(SELECT_RECALC)
-    .eq('produto_id', produtoId)
-    .order('criado_em', { ascending: true })
-    .order('id', { ascending: true })
-  const estado = recalcular((movs || []) as MovCalc[])
-  await admin.from('produtos').update({ estoque_atual: estado.saldo, custo_medio_num: estado.custo_medio_num }).eq('id', produtoId)
-  return { estoque_atual: estado.saldo, custo_medio_num: estado.custo_medio_num }
+/** Lê o produto já recalculado (após o trigger) para devolver na resposta. */
+async function lerProduto(produtoId: string) {
+  const { data } = await admin.from('produtos').select('id,estoque_atual,custo_medio_num,local').eq('id', produtoId).maybeSingle()
+  return data ? { id: produtoId, estoque_atual: num(data.estoque_atual), custo_medio_num: num(data.custo_medio_num), local: data.local } : { id: produtoId }
 }
 
-// POST /api/estoque — registra uma movimentação e atualiza o produto.
+// POST /api/estoque — registra uma movimentação; o trigger recalcula o produto.
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req)
   if (!user) return unauthorized()
@@ -61,7 +54,7 @@ export async function POST(req: NextRequest) {
   if (!TIPOS.has(tipo)) return badRequest('tipo de movimentação inválido')
   if (tipo === 'ajuste') {
     if (quantidade === 0) return badRequest('o ajuste precisa de um delta diferente de zero')
-  } else if (tipo !== 'transferencia' && quantidade <= 0) {
+  } else if (quantidade <= 0) {
     return badRequest('a quantidade deve ser maior que zero')
   }
 
@@ -69,26 +62,21 @@ export async function POST(req: NextRequest) {
   if (!produto) return forbidden()
 
   // Regra de saldo: saída/perda não podem exceder o saldo (salvo force).
-  const estadoAtual = { saldo: produto.estoque_atual, custo_medio_num: produto.custo_medio_num }
-  if ((tipo === 'saida' || tipo === 'perda') && Math.abs(quantidade) > estadoAtual.saldo && !force) {
-    return Response.json({ error: 'saldo_insuficiente', saldo: estadoAtual.saldo, solicitado: Math.abs(quantidade) }, { status: 409 })
+  if ((tipo === 'saida' || tipo === 'perda') && Math.abs(quantidade) > produto.estoque_atual && !force) {
+    return Response.json({ error: 'saldo_insuficiente', saldo: produto.estoque_atual, solicitado: Math.abs(quantidade) }, { status: 409 })
   }
 
-  // Valoração da linha (append: estado atual = pré-estado cronológico).
-  const mov: MovCalc = { tipo, quantidade, custo_unit_num: tipo === 'entrada' ? num(body.custo_unit_num) : produto.custo_medio_num }
-  const r = aplicarUma(estadoAtual, mov)
-
+  // custo_unit só importa na entrada; nos demais o trigger valora pelo médio.
   const row = {
     usuario_id: user.id,
     produto_id,
     tipo,
     quantidade,
-    custo_unit_num: r.custo_unit_efetivo,
-    custo_total_num: r.custo_total,
+    custo_unit_num: tipo === 'entrada' ? num(body.custo_unit_num) : 0,
     motivo: (body.motivo || '').toString().trim() || null,
     evento_id: body.evento_id || null,
     recebimento_id: body.recebimento_id || null,
-    local_origem: (body.local_origem || '').toString().trim() || null,
+    local_origem: (body.local_origem || '').toString().trim() || produto.local,
     local_destino: (body.local_destino || '').toString().trim() || null,
     lote: (body.lote || '').toString().trim() || null,
     validade: body.validade || null,
@@ -97,16 +85,16 @@ export async function POST(req: NextRequest) {
   const { data: movRow, error } = await admin.from('estoque_mov').insert(row).select('*').single()
   if (error) return Response.json({ error: error.message }, { status: 500 })
 
-  // Transferência pode atualizar o local "corrente" do produto.
+  // Transferência atualiza o local "corrente" do produto (não altera saldo).
   if (tipo === 'transferencia' && row.local_destino) {
     await admin.from('produtos').update({ local: row.local_destino }).eq('id', produto_id)
   }
 
-  const estado = await recomputarProduto(produto_id)
-  return Response.json({ data: { mov: movRow, produto: { id: produto_id, ...estado, nivel: statusMinimo({ estoque_atual: estado.estoque_atual, estoque_minimo: num(body.estoque_minimo) }) } } })
+  const produtoAtual = await lerProduto(produto_id)
+  return Response.json({ data: { mov: movRow, produto: produtoAtual } })
 }
 
-// DELETE /api/estoque?id=<movId> — remove a movimentação e recalcula o produto.
+// DELETE /api/estoque?id=<movId> — remove a movimentação; o trigger recalcula.
 export async function DELETE(req: NextRequest) {
   const user = await getAuthUser(req)
   if (!user) return unauthorized()
@@ -121,6 +109,6 @@ export async function DELETE(req: NextRequest) {
   const { error } = await admin.from('estoque_mov').delete().eq('id', id)
   if (error) return Response.json({ error: error.message }, { status: 500 })
 
-  const estado = await recomputarProduto(mov.produto_id)
-  return Response.json({ data: { id, produto: { id: mov.produto_id, ...estado } } })
+  const produtoAtual = await lerProduto(mov.produto_id)
+  return Response.json({ data: { id, produto: produtoAtual } })
 }

@@ -120,6 +120,9 @@ export type FornecedorLite = { id: string; nome: string; fantasia: string | null
 export type EventoLite = { id: string; nome_evento: string | null; tipo_evento: string | null; data_inicio: string | null };
 export type CentroCustoLite = { id: string; nome: string };
 
+// Abas do módulo (compartilhado entre a shell e o Painel para navegação).
+export type Aba = 'painel' | 'requisicoes' | 'cotacoes' | 'pedidos' | 'recebimentos';
+
 // "Bag" único de dados carregado pela shell e passado para todas as abas.
 export type ComprasBag = {
   userId: string;

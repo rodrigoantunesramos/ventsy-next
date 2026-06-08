@@ -14,7 +14,7 @@ import { formatMoney } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import { num } from '@/lib/estoque';
 import {
-  type Produto, type EventoLite, type MovPayload, MOV_TIPOS, LOCAIS, localLabel, postMov, ymd, inp,
+  type Produto, type EventoLite, type MovPayload, MOV_TIPOS, LOCAIS, localLabel, postMov, inp,
 } from '../_lib';
 import { ModalShell } from './ui';
 import type { MovTipo } from '@/lib/estoque';

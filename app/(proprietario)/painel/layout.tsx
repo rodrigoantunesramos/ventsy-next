@@ -47,8 +47,15 @@ const NAV: NavGroup[] = [
       { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
       { href: '/painel/documentos', label: 'Documentos', icon: 'doc', enabled: true },
       { href: '/painel/contratos', label: 'Contratos', icon: 'signature', enabled: true },
-      { href: '/painel/equipe', label: 'Equipe', icon: 'users', enabled: true },
       { href: '/painel/diario', label: 'Diário', icon: 'book', enabled: true },
+    ],
+  },
+  {
+    group: 'Pessoas',
+    items: [
+      { href: '/painel/rh', label: 'RH', icon: 'people', enabled: true },
+      { href: '/painel/equipe', label: 'Equipe', icon: 'users', enabled: true },
+      { href: '/painel/ponto', label: 'Ponto & Escala', icon: 'clock', enabled: true },
     ],
   },
   {
@@ -65,6 +72,11 @@ const NAV: NavGroup[] = [
     group: 'Suprimentos',
     items: [
       { href: '/painel/fornecedores', label: 'Fornecedores', icon: 'truck', enabled: true },
+      { href: '/painel/compras', label: 'Compras', icon: 'cart', enabled: true },
+      { href: '/painel/estoque', label: 'Estoque', icon: 'package', enabled: true },
+      { href: '/painel/ativos', label: 'Ativos & Bens', icon: 'assets', enabled: true },
+      { href: '/painel/equipamentos', label: 'Equipamentos', icon: 'layers', enabled: true },
+      { href: '/painel/manutencao', label: 'Manutenção', icon: 'wrench', enabled: true },
     ],
   },
   {
@@ -247,7 +259,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
                   {grupo.group}
                 </div>
                 {grupo.items.map((item) => {
-                  const active = pathname === item.href;
+                  const active = pathname === item.href || (item.href !== '/painel' && pathname.startsWith(item.href + '/'));
                   if (item.enabled) {
                     return (
                       <Link
@@ -311,12 +323,19 @@ const ICONS = {
   coins: 'M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6',
   contacts: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm5.5 6.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM6 16a3.5 3.5 0 0 1 7 0M15.5 9H18M15.5 13H18',
   truck: 'M1 3h13v11H1zM14 7h4l3 3v4h-7M6 18.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
+  cart: 'M3 3h2l2.4 12.3a1 1 0 0 0 1 .7h8.7a1 1 0 0 0 1-.8L21 7H6M10 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+  package: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16ZM3.27 6.96 12 12l8.73-5.04M12 22V12',
+  layers: 'M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5',
+  wrench: 'M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8 6.2 21l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-2.3 2.5-2.5Z',
   tag: 'M20.59 13.41 12 22l-9-9V3h10l7.59 7.59a2 2 0 0 1 0 2.82ZM7.5 7.5h.01',
   signature: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M8 16.5c1-1.5 2-1.5 3 0s2 1.5 3 0',
   proposal: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M9 13l2 2 4-4',
   commission: 'M6 18 18 6M8.5 7.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm10 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z',
   invoice: 'M14 3H6a2 2 0 0 0-2 2v16l2.5-1.5L9 21l1.5-1.5L12 21l1.5-1.5L15 21l2.5-1.5V9l-3.5-6ZM14 3v6h3.5M8 12h6M8 15.5h4',
   ledger: 'M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM4 8h16M11 8v13',
+  assets: 'M3 21h18M5 21V10M19 21V10M9 21v-5h6v5M12 3 4 8h16l-8-5Z',
+  clock: 'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z',
+  people: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1M16 15h1a4 4 0 0 1 4 4v1',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

@@ -135,7 +135,7 @@ const svg = (path: ReactNode, size = 15, sw = 1.8) => (
 );
 export const IcoCart = ({ size = 15 }: { size?: number }) => svg(<path d="M3 3h2l2.4 12.3a1 1 0 0 0 1 .7h8.7a1 1 0 0 0 1-.8L21 7H6M10 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />, size);
 export const IcoDoc = ({ size = 15 }: { size?: number }) => svg(<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Zm0 0v6h6M8 13h8M8 17h6" />, size);
-export const IcoCompare = () => svg(<path d="M3 6h7M3 12h7M3 18h7M21 6h-7M21 12h-7M21 18h-7M7 4v4M17 16v4" />, 15);
+export const IcoCompare = ({ size = 15 }: { size?: number }) => svg(<path d="M3 6h7M3 12h7M3 18h7M21 6h-7M21 12h-7M21 18h-7M7 4v4M17 16v4" />, size);
 export const IcoTruck = ({ size = 15 }: { size?: number }) => svg(<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7M5.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm12 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />, size);
 export const IcoInbox = ({ size = 15 }: { size?: number }) => svg(<path d="M3 12h5l2 3h4l2-3h5M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />, size);
 export const IcoWallet = () => svg(<path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H3Zm0 0v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5M16 13h.01" />, 15);

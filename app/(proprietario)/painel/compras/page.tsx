@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseAny as sb } from '@/lib/supabase';
 import {
   type Requisicao, type RequisicaoItem, type Cotacao, type CotacaoItem, type Pedido, type Recebimento,
-  type FornecedorLite, type EventoLite, type CentroCustoLite, type ComprasBag,
+  type FornecedorLite, type EventoLite, type CentroCustoLite, type ComprasBag, type Aba,
   mapRequisicao, mapReqItem, mapCotacao, mapCotacaoItem, mapPedido, mapRecebimento,
   isMissingTable, getAlcada, setAlcada as persistAlcada,
 } from './_lib';
@@ -24,7 +24,6 @@ import Cotacoes from './_components/Cotacoes';
 import Pedidos from './_components/Pedidos';
 import Recebimentos from './_components/Recebimentos';
 
-type Aba = 'painel' | 'requisicoes' | 'cotacoes' | 'pedidos' | 'recebimentos';
 const ABAS: { v: Aba; label: string; icon: (p: { size?: number }) => JSX.Element }[] = [
   { v: 'painel', label: 'Painel', icon: IcoCart },
   { v: 'requisicoes', label: 'Requisições', icon: IcoDoc },

@@ -12,7 +12,7 @@ import {
   type ComprasBag, type Requisicao, type Cotacao, type CotacaoItem, type Pedido, type PedidoItem,
   PEDIDO_STATUS, inp, selCls, fornNomeDe, proximoNumero, ymd, waLink, mailLink, exportPedidosCSV,
 } from '../_lib';
-import { Kpi, ModalShell, Campo, Chip, Empty, IcoTruck, IcoPlus, IcoTrash, IcoDownload, IcoWallet, IcoClock, IcoCheck, IcoAlert, IcoArrow, IcoPaperclip } from './ui';
+import { Kpi, ModalShell, Campo, Chip, Empty, IcoTruck, IcoTrash, IcoDownload, IcoWallet, IcoClock, IcoCheck, IcoAlert, IcoArrow, IcoPaperclip } from './ui';
 
 type EmpresaInfo = { nome: string | null; contato: string | null; cnpj: string | null };
 

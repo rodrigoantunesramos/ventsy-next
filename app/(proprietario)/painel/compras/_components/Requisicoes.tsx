@@ -12,7 +12,7 @@ import { useToast } from '@/components/Toast';
 import {
   type ComprasBag, type Requisicao, type RequisicaoItem, type Prioridade, type ReqStatus,
   PRIORIDADES, PRIORIDADE_BY, REQ_STATUS, UNIDADES, inp, selCls,
-  valorEstimado, precisaAlcada, proximoNumero, ymd,
+  valorEstimado, precisaAlcada, proximoNumero,
 } from '../_lib';
 import { Kpi, ModalShell, Campo, Chip, Empty, IcoDoc, IcoPlus, IcoEdit, IcoTrash, IcoAlert, IcoCheck, IcoSearch, IcoCompare, IcoWallet, IcoClock } from './ui';
 
