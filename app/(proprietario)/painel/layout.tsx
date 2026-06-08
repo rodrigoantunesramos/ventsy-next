@@ -51,6 +51,14 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: 'Operações',
+    items: [
+      { href: '/painel/producao', label: 'Produção', icon: 'clapper', enabled: true },
+      { href: '/painel/logistica', label: 'Logística', icon: 'cone', enabled: true },
+      { href: '/painel/acesso', label: 'Acesso & Credenciamento', icon: 'shield', enabled: true },
+    ],
+  },
+  {
     group: 'Pessoas',
     items: [
       { href: '/painel/rh', label: 'RH', icon: 'people', enabled: true },
@@ -336,6 +344,9 @@ const ICONS = {
   assets: 'M3 21h18M5 21V10M19 21V10M9 21v-5h6v5M12 3 4 8h16l-8-5Z',
   clock: 'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z',
   people: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1M16 15h1a4 4 0 0 1 4 4v1',
+  cone: 'M10.5 3h3l3.6 17.2a.8.8 0 0 1-.8 1H7.7a.8.8 0 0 1-.8-1L10.5 3ZM9 9.5h6M8 15h8',
+  shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3ZM9.5 12l2 2 3.5-4',
+  clapper: 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm.4-3 14.4-2.6a1 1 0 0 1 1.16.8L19.6 6 3 8.6 2.6 6a1 1 0 0 1 .8-1ZM8 5.2l1 2.6M13 4.3l1 2.6',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

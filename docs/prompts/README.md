@@ -81,15 +81,15 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 ### Fase 4 — Pessoas (RH)
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| RH completo (admissão→demissão, folha, férias, docs, recrutamento) | `/painel/rh` | `05-pessoas-rh.md` | 🟡 `equipe` existe |
-| Ponto & Escala (turnos/freelancers de evento) | `/painel/ponto` | `05-pessoas-rh.md` | ⬜ |
+| RH completo (admissão→demissão, folha, férias, docs, recrutamento) | `/painel/rh` | `05-pessoas-rh.md` | ✅ |
+| Ponto & Escala (turnos/freelancers de evento) | `/painel/ponto` | `05-pessoas-rh.md` | ✅ |
 
 ### Fase 5 — Operações de Evento (o diferencial do nicho)
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Produção & Run-of-show (Kanban do evento) | `/painel/producao` | `06-operacoes-eventos.md` | ⬜ |
-| Logística: montagem & desmontagem | `/painel/logistica` | `06-operacoes-eventos.md` | ⬜ |
-| Segurança, Controle de acesso & Credenciamento | `/painel/acesso` | `06-operacoes-eventos.md` | ⬜ |
+| Produção & Run-of-show (Kanban do evento) | `/painel/producao` | `06-operacoes-eventos.md` | ✅ |
+| Logística: montagem & desmontagem | `/painel/logistica` | `06-operacoes-eventos.md` | ✅ |
+| Segurança, Controle de acesso & Credenciamento | `/painel/acesso` | `06-operacoes-eventos.md` | ✅ |
 | Estacionamento & Mobilidade | `/painel/estacionamento` | `06-operacoes-eventos.md` | ⬜ |
 | Ingressos & Bilheteria | `/painel/bilheteria` | `06-operacoes-eventos.md` | ⬜ |
 | Expositores & Patrocínios | `/painel/expositores` | `06-operacoes-eventos.md` | ⬜ |
