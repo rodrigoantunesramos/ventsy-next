@@ -81,7 +81,9 @@ export default function PlanoBPage() {
       const uid = session.user.id;
       setUserId(uid);
 
-      const probe = await sb.from('plano_contingencia').select('id', { head: true, count: 'exact' }).limit(1);
+      // Probe SEM head:true — HEAD não traz corpo e o supabase-js não leria o
+      // PGRST205 da tabela ausente (o setup-card nunca apareceria).
+      const probe = await sb.from('plano_contingencia').select('id').limit(1);
       if (probe.error && isMissingTable(probe.error)) { setNeedsSetup(true); setLoading(false); return; }
 
       // Nome da empresa (p/ {empresa} nos comunicados) — defensivo.
@@ -133,6 +135,8 @@ export default function PlanoBPage() {
 
       // Planos do evento.
       const plRes = await sb.from('plano_contingencia').select(SEL_PLANO).eq('usuario_id', uid).eq('evento_id', evId).order('ordem');
+      // Rede de segurança: se a tabela-âncora sumiu, mostra o setup-card.
+      if (plRes.error && isMissingTable(plRes.error)) { setNeedsSetup(true); return; }
       setPlanos(plRes.error ? [] : (plRes.data || []).map(mapPlano));
 
       // Snapshot de previsão (cache).

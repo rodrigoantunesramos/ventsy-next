@@ -82,8 +82,9 @@ export default function ProducaoPage() {
       const uid = session.user.id;
       setUserId(uid);
 
-      // Probe: a tabela-âncora `producao` existe?
-      const probe = await sb.from('producao').select('id', { head: true, count: 'exact' }).limit(1);
+      // Probe: a tabela-âncora `producao` existe? SEM head:true — HEAD não traz
+      // corpo e o supabase-js não leria o PGRST205 (o setup-card nunca apareceria).
+      const probe = await sb.from('producao').select('id').limit(1);
       if (probe.error && isMissingTable(probe.error)) { setNeedsSetup(true); setLoading(false); return; }
 
       const evRes = await sb.from('clientes_eventos').select(SEL_EVENTO).eq('usuario_id', uid)

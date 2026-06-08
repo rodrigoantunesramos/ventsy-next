@@ -73,7 +73,9 @@ export default function CateringPage() {
       const uid = session.user.id;
       setUserId(uid);
 
-      const probe = await sb.from('cardapios').select('id', { head: true, count: 'exact' }).limit(1);
+      // Probe SEM head:true — uma requisição HEAD não traz corpo, então o supabase-js
+      // não lê o PGRST205 da tabela ausente e o setup-card nunca apareceria.
+      const probe = await sb.from('cardapios').select('id').limit(1);
       if (probe.error && isMissingTable(probe.error)) { setNeedsSetup(true); setLoading(false); return; }
 
       const [cRes, pRes, eRes] = await Promise.all([
@@ -81,6 +83,8 @@ export default function CateringPage() {
         sb.from('produtos').select(SEL_PRODUTO).eq('usuario_id', uid).order('nome'),
         sb.from('clientes_eventos').select(SEL_EVENTO).eq('usuario_id', uid).order('data_inicio', { ascending: false, nullsFirst: false }),
       ]);
+      // Rede de segurança: se a tabela-âncora sumiu, mostra o setup-card.
+      if (cRes.error && isMissingTable(cRes.error)) { setNeedsSetup(true); setLoading(false); return; }
       setCardapios(cRes.error ? [] : (cRes.data || []).map(mapCardapioRow));
       setProdutos(pRes.error ? [] : (pRes.data || []).map(mapProduto));
       setEventos(eRes.error ? [] : (eRes.data || []) as EventoLite[]);
