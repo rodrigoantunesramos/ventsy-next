@@ -105,16 +105,16 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 | Campanhas (envio em massa) | `/painel/campanhas` | `01-relacionamento.md` | ✅ |
 | Marketing (cockpit) | `/painel/marketing` | `01-relacionamento.md` | ✅ |
 | Listas Oficiais (comunidade) | `/painel/listas` | `01-relacionamento.md` | ✅ |
-| Portal do Cliente (área do contratante) | `/painel/portal` (+ rota pública) | `01-relacionamento.md` | ⬜ |
+| Portal do Cliente (área do contratante) | `/painel/portal` (+ rota pública) | `01-relacionamento.md` | ✅ |
 | Pesquisas & NPS pós-evento | `/painel/pesquisas` | `01-relacionamento.md` | ✅ |
 
 ### Fase 7 — Conformidade & Risco
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Licenças, Alvarás & Compliance | `/painel/licencas` | `07-compliance.md` | ⬜ |
-| Seguros | `/painel/seguros` | `07-compliance.md` | ⬜ |
-| Saúde, Segurança & Emergência (SST) | `/painel/sst` | `07-compliance.md` | ⬜ |
-| Jurídico & LGPD | `/painel/juridico` | `07-compliance.md` | ⬜ |
+| Licenças, Alvarás & Compliance | `/painel/licencas` | `07-compliance.md` | ✅ |
+| Seguros | `/painel/seguros` | `07-compliance.md` | ✅ |
+| Saúde, Segurança & Emergência (SST) | `/painel/sst` | `07-compliance.md` | ✅ |
+| Jurídico & LGPD | `/painel/juridico` | `07-compliance.md` | ✅ |
 
 ### Fase 8 — Terceiros, Integrações & Inteligência
 | Página | Rota | Arquivo | Status |

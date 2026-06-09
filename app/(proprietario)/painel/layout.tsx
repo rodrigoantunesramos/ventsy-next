@@ -106,6 +106,15 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: 'Conformidade',
+    items: [
+      { href: '/painel/licencas', label: 'Licenças & Alvarás', icon: 'compliance', enabled: true },
+      { href: '/painel/seguros', label: 'Seguros', icon: 'umbrella', enabled: true },
+      { href: '/painel/sst', label: 'Saúde & Segurança (SST)', icon: 'safety', enabled: true },
+      { href: '/painel/juridico', label: 'Jurídico & LGPD', icon: 'scale', enabled: true },
+    ],
+  },
+  {
     group: 'Conta',
     items: [
       { href: '/painel/indique', label: 'Indique & Ganhe', icon: 'gift', enabled: true },
@@ -378,6 +387,10 @@ const ICONS = {
   poll: 'M5 21V9M12 21V3M19 21v-7M3 21h18',
   growth: 'M3 17l6-6 4 4 7-7M14 8h5v5',
   portal: 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3',
+  scale: 'M12 3v18M7 21h10M12 6l7 2-2.5 5a3 3 0 0 0 5 0L19 8M12 6 5 8l2.5 5a3 3 0 0 1-5 0L5 8',
+  safety: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3ZM12 9v6M9 12h6',
+  compliance: 'M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8.5 12.2 7 21l5-2.6 5 2.6-1.5-8.8M10 8.6l1.3 1.3 2.7-2.7',
+  umbrella: 'M12 2a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9ZM12 11v8a2 2 0 0 0 4 0',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {
