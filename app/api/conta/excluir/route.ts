@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized } from '@/lib/apiAuth'
+import { registrarAuditoria } from '@/lib/auditServer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any
@@ -18,6 +19,13 @@ export async function POST(req: NextRequest) {
     .upsert({ usuario_id: user.id, exclusao_solicitada_em: agora }, { onConflict: 'usuario_id' })
 
   if (error) return Response.json({ error: error.message }, { status: 500 })
+
+  await registrarAuditoria({
+    req, contaId: user.id, atorId: user.id, atorEmail: user.email,
+    acao: 'config', entidade: 'conta', sensivel: true,
+    descricao: 'Solicitou o encerramento da conta (LGPD)',
+    meta: { solicitado_em: agora },
+  })
   return Response.json({ ok: true, solicitado_em: agora })
 }
 
@@ -26,5 +34,11 @@ export async function DELETE(req: NextRequest) {
   const user = await getAuthUser(req)
   if (!user) return unauthorized()
   await admin.from('empresa_config').update({ exclusao_solicitada_em: null }).eq('usuario_id', user.id)
+
+  await registrarAuditoria({
+    req, contaId: user.id, atorId: user.id, atorEmail: user.email,
+    acao: 'config', entidade: 'conta', sensivel: true,
+    descricao: 'Cancelou o pedido de encerramento da conta',
+  })
   return Response.json({ ok: true })
 }

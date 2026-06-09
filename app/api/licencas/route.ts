@@ -5,6 +5,7 @@ import {
   type ExigenciaTemplate, type TipoLicenca,
   gerarLicencasDoEvento, tipoLabel,
 } from '@/lib/licencas'
+import { registrarAuditoria } from '@/lib/auditServer'
 
 // Operações AUTORITATIVAS de Licenças, Alvarás & Compliance (service-role).
 // Despacha por `action` no corpo (espelha /api/expositores):
@@ -54,8 +55,8 @@ export async function POST(req: NextRequest) {
   const action = String(body.action || '')
   switch (action) {
     case 'aplicar_checklist': return aplicarChecklist(user.id, body)
-    case 'lancar_custo':      return lancarCusto(user.id, body)
-    case 'estornar_custo':    return estornarCusto(user.id, body)
+    case 'lancar_custo':      return lancarCusto(user, body, req)
+    case 'estornar_custo':    return estornarCusto(user, body, req)
     default:                  return badRequest('ação inválida')
   }
 }
@@ -161,7 +162,8 @@ async function carregarLicenca(id: string, userId: string): Promise<LicRow | nul
 }
 
 // ── lancar_custo: custo da licença → despesa no caixa (contábil) ─────────────
-async function lancarCusto(userId: string, body: Record<string, unknown>) {
+async function lancarCusto(user: { id: string; email?: string | null }, body: Record<string, unknown>, req: NextRequest) {
+  const userId = user.id
   const id = String(body.licenca_id || body.id || '')
   if (!id) return badRequest('licenca_id é obrigatório')
 
@@ -197,11 +199,19 @@ async function lancarCusto(userId: string, body: Record<string, unknown>) {
   if (error || !lanc) return Response.json({ error: 'falha ao lançar a despesa no caixa' }, { status: 500 })
 
   const { data } = await admin.from('licencas').update({ lancamento_id: lanc.id }).eq('id', id).select(SEL_LIC).single()
+
+  await registrarAuditoria({
+    req, contaId: userId, atorId: userId, atorEmail: user.email,
+    acao: 'pagamento', entidade: 'licenca', entidadeId: id,
+    descricao: `Lançou custo de licença — ${nome}`,
+    meta: { lancamento_id: lanc.id, valor },
+  })
   return Response.json({ data, lancamento_id: lanc.id, valor })
 }
 
 // ── estornar_custo: remove a despesa e desvincula ────────────────────────────
-async function estornarCusto(userId: string, body: Record<string, unknown>) {
+async function estornarCusto(user: { id: string; email?: string | null }, body: Record<string, unknown>, req: NextRequest) {
+  const userId = user.id
   const id = String(body.licenca_id || body.id || '')
   if (!id) return badRequest('licenca_id é obrigatório')
 
@@ -211,5 +221,12 @@ async function estornarCusto(userId: string, body: Record<string, unknown>) {
     await admin.from('lancamentos').delete().eq('id', lic.lancamento_id).eq('usuario_id', userId)
   }
   const { data } = await admin.from('licencas').update({ lancamento_id: null }).eq('id', id).select(SEL_LIC).single()
+
+  await registrarAuditoria({
+    req, contaId: userId, atorId: userId, atorEmail: user.email,
+    acao: 'editar', entidade: 'licenca', entidadeId: id,
+    descricao: 'Estornou o custo da licença',
+    meta: { lancamento_id: lic.lancamento_id },
+  })
   return Response.json({ data, estornado: true })
 }

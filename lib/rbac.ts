@@ -49,6 +49,7 @@ export const MODULOS: { key: string; label: string; grupo: string }[] = [
   { key: 'ponto', label: 'Ponto & Escala', grupo: 'Pessoas' },
   { key: 'fornecedores', label: 'Fornecedores', grupo: 'Suprimentos' },
   { key: 'compras', label: 'Compras', grupo: 'Suprimentos' },
+  { key: 'unidades', label: 'Unidades', grupo: 'Conta' },
   { key: 'configuracoes', label: 'Configurações', grupo: 'Conta' },
   { key: 'planos', label: 'Planos', grupo: 'Conta' },
 ]

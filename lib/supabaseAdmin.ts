@@ -26,3 +26,9 @@ export const supabaseAdmin: TypedClient = new Proxy({} as TypedClient, {
     return (adminClient() as unknown as Record<string | symbol, unknown>)[prop]
   },
 })
+
+// Cliente admin SEM tipos — para tabelas ainda fora do schema gerado (migrations
+// pendentes). Espelha `supabaseAny` de lib/supabase.ts. Troque por consultas
+// tipadas após regenerar types/supabase.ts.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const supabaseAdminAny = supabaseAdmin as any

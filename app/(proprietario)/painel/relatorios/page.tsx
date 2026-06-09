@@ -1,766 +1,291 @@
-'use client';
+'use client'
 
-// Relatórios — /painel/relatorios.
-// Dashboard de analytics premium do anúncio. Usa apenas sinais REAIS de
-// analytics_eventos (view / whatsapp / formulario) + reservas (funil de fundo).
-// Tudo client-side, sem libs de chart (SVG/CSS). PDF via jsPDF (dynamic import).
+// Relatórios & BI — /painel/relatorios.
+// Central de inteligência que cruza TODOS os módulos (comercial, financeiro,
+// operações, ocupação, clientes) com indicadores próprios de locação de eventos
+// (ocupação, RevPAS, receita por m²/evento). Três modos: Dashboards prontos,
+// Construtor de relatórios e Exportação agendada. Cálculo na engine pura
+// lib/bi.ts (testada); gráficos em SVG puro; i18n via lib/format (sem "R$"
+// hardcoded). Carga única + filtros globais (período/propriedade/tipo) → números
+// consistentes entre os dashboards e batendo com os módulos-fonte.
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
-import { formatNumber, formatMoney } from '@/lib/format';
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { formatDate } from '@/lib/format'
+import { useToast } from '@/components/Toast'
+import {
+  type Range, type Dimensao, todayYMD, periodoRange, periodoAnterior, periodoLabel,
+  inicioMes, fimMes, addDiasYMD,
+} from '@/lib/bi'
+import {
+  type DadosBI, type RelatorioSalvo, type RelatorioAgendado, type ConstrutorConfig, type RelatorioExport,
+  DADOS_VAZIO, carregarBI, checarSetup, isPremium, filtrarDados, tiposDeEvento,
+  resumoExecutivoKPIs, eventosTabela, exportarCSV, exportarExcel, exportarPDF,
+  nomePropriedade, rotuloMes,
+} from './_lib'
+import { DASHBOARDS, type DashKey } from './_components/dashboards'
+import { Construtor } from './_components/construtor'
+import { Agendados, type NovoAgendado } from './_components/agendados'
+import { SetupNotice, EmptyState, IcoDownload, IcoSpark, IcoChart } from './_components/ui'
 
-type Evento = { evento_tipo: string; created_at: string | null; cidade: string | null };
-type Reserva = { created_at: string | null; status: string | null; valor_estimado: number | null };
+type Tab = 'dashboards' | 'construtor' | 'agendados'
+type Preset = 'mes' | 'trimestre' | 'ano' | '12meses' | 'personalizado'
 
-const PERIODOS = [
-  { v: 7,   label: '7 dias'   },
-  { v: 30,  label: '30 dias'  },
-  { v: 365, label: '12 meses' },
-];
-
-// Métricas reais — só o que realmente é rastreado.
-const METRICAS = [
-  { key: 'view',       label: 'Visualizações', icon: '👁️', color: '#ff385c' },
-  { key: 'whatsapp',   label: 'WhatsApp',      icon: '📱', color: '#22c55e' },
-  { key: 'formulario', label: 'Formulários',   icon: '📋', color: '#f59e0b' },
-];
-
-const DIA = 24 * 60 * 60 * 1000;
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const PRESETS: { v: Preset; label: string }[] = [
+  { v: 'mes', label: 'Mês' }, { v: 'trimestre', label: 'Trimestre' }, { v: 'ano', label: 'Ano' },
+  { v: '12meses', label: '12 meses' }, { v: 'personalizado', label: 'Personalizado' },
+]
 
 export default function RelatoriosPage() {
-  const [loading, setLoading] = useState(true);
-  const [temProp, setTemProp] = useState(true);
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [buscas, setBuscas] = useState<{ nome: string; n: number }[]>([]);
-  const [benchPlat, setBenchPlat] = useState<number | null>(null);
-  const [benchCat, setBenchCat] = useState<number | null>(null);
-  const [categoria, setCategoria] = useState<string>('');
-  const [dias, setDias] = useState(30);
-  const [exporting, setExporting] = useState(false);
+  const toast = useToast()
+  const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [premium, setPremium] = useState(false)
+  const [needsSetup, setNeedsSetup] = useState(false)
+  const [dados, setDados] = useState<DadosBI>(DADOS_VAZIO)
+  const [salvos, setSalvos] = useState<RelatorioSalvo[]>([])
+  const [agendados, setAgendados] = useState<RelatorioAgendado[]>([])
 
-  const carregar = useCallback(async (uid: string) => {
-    const { data: props } = await sb
-      .from('propriedades')
-      .select('id,nome,categoria')
-      .eq('usuario_id', uid)
-      .order('id')
-      .limit(1);
-    const pid = props?.[0]?.id;
-    const cat = (props?.[0]?.categoria || '').trim();
-    if (!pid) { setTemProp(false); return; }
-    setCategoria(cat);
+  const [tab, setTab] = useState<Tab>('dashboards')
+  const [dashKey, setDashKey] = useState<DashKey>('comercial')
+  const [preset, setPreset] = useState<Preset>('12meses')
+  const [custom, setCustom] = useState<{ ini: string; fim: string }>({ ini: '', fim: '' })
+  const [propFiltro, setPropFiltro] = useState<number | null>(null)
+  const [tipoFiltro, setTipoFiltro] = useState<string | null>(null)
 
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 365 * 2);
-    const cutoffISO = cutoff.toISOString();
+  const [aiOpen, setAiOpen] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiTexto, setAiTexto] = useState('')
 
-    // Eventos da propriedade (2 anos para suportar comparação)
+  const hoje = todayYMD()
+  const range: Range = useMemo(() => periodoRange(preset, hoje, custom), [preset, hoje, custom])
+  const rangePrev = useMemo(() => periodoAnterior(range), [range])
+  const range12: Range = useMemo(() => ({ ini: inicioMes(addDiasYMD(fimMes(range.fim), -334)), fim: fimMes(range.fim) }), [range.fim])
+
+  // ── Carga ──────────────────────────────────────────────────────────────────
+  const recarregarListas = useCallback(async () => {
     try {
-      const { data } = await sb
-        .from('analytics_eventos')
-        .select('evento_tipo,created_at,cidade')
-        .eq('propriedade_id', String(pid))
-        .gte('created_at', cutoffISO)
-        .order('created_at', { ascending: false })
-        .limit(10000);
-      setEventos((data || []) as Evento[]);
-    } catch { setEventos([]); }
-
-    // Reservas (fundo do funil + pipeline de receita)
-    try {
-      const { data } = await sb
-        .from('reservas')
-        .select('created_at,status,valor_estimado')
-        .eq('propriedade_id', pid)
-        .gte('created_at', cutoffISO)
-        .limit(5000);
-      setReservas((data || []) as Reserva[]);
-    } catch { setReservas([]); }
-
-    // Buscas populares (plataforma)
-    try {
-      const { data } = await sb
-        .from('buscas')
-        .select('tipo_evento')
-        .not('tipo_evento', 'is', null)
-        .limit(5000);
-      const cont: Record<string, number> = {};
-      (data || []).forEach((b: { tipo_evento: string | null }) => {
-        const t = (b.tipo_evento || '').trim();
-        if (t) cont[t] = (cont[t] || 0) + 1;
-      });
-      setBuscas(
-        Object.entries(cont).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([nome, n]) => ({ nome, n })),
-      );
-    } catch { setBuscas([]); }
-
-    // Benchmark da plataforma — via API com service-role (enxerga todas as
-    // propriedades, ignora RLS). Devolve média geral + média da categoria.
-    try {
-      const headers = await authHeaders();
-      const r = await fetch(`/api/relatorios/benchmark?categoria=${encodeURIComponent(cat)}`, { headers });
-      if (r.ok) {
-        const j = await r.json();
-        setBenchPlat(typeof j.plataforma === 'number' ? j.plataforma : null);
-        setBenchCat(typeof j.categoria === 'number' ? j.categoria : null);
-      }
-    } catch { /* benchmark é opcional */ }
-  }, []);
+      const r = await fetch('/api/relatorios', { headers: { ...(await authHeaders()) } })
+      if (r.ok) { const j = await r.json(); setSalvos(j.salvos || []); setAgendados(j.agendados || []) }
+    } catch { /* listas opcionais */ }
+  }, [])
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) { setLoading(false); return; }
-      await carregar(session.user.id);
-      setLoading(false);
-    })();
-  }, [carregar]);
+      const { data: { session } } = await sb.auth.getSession()
+      if (!session) { setLoading(false); return }
+      setUserId(session.user.id)
+      setEmail(session.user.email || '')
+      try {
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo,plano').eq('usuario_id', session.user.id).maybeSingle()
+        setPremium(isPremium(a?.plano_ativo || a?.plano))
+      } catch { /* plano opcional */ }
+      const [d, setup] = await Promise.all([carregarBI(session.user.id), checarSetup()])
+      setDados(d); setNeedsSetup(setup)
+      if (!setup) await recarregarListas()
+      setLoading(false)
+    })()
+  }, [recarregarListas])
 
-  // ── Janelas de tempo ────────────────────────────────────────────────────────
-  const { evAtual, evPrev, resAtual } = useMemo(() => {
-    const now = Date.now();
-    const cAtual = now - dias * DIA;
-    const cPrev = now - dias * 2 * DIA;
-    const inWindow = (ts: string | null, lo: number, hi: number) => {
-      if (!ts) return false;
-      const t = new Date(ts).getTime();
-      return t >= lo && t < hi;
-    };
-    return {
-      evAtual: eventos.filter((e) => e.created_at && new Date(e.created_at).getTime() >= cAtual),
-      evPrev: eventos.filter((e) => inWindow(e.created_at, cPrev, cAtual)),
-      resAtual: reservas.filter((r) => r.created_at && new Date(r.created_at).getTime() >= cAtual),
-    };
-  }, [eventos, reservas, dias]);
+  // ── Derivados ──────────────────────────────────────────────────────────────
+  const scoped = useMemo(() => filtrarDados(dados, propFiltro, tipoFiltro), [dados, propFiltro, tipoFiltro])
+  const tipos = useMemo(() => tiposDeEvento(dados), [dados])
+  const eventosPeriodo = useMemo(
+    () => scoped.eventos.filter((e) => { const d = (e.data_inicio || e.criado_em || '').slice(0, 10); return d >= range.ini && d <= range.fim }),
+    [scoped.eventos, range],
+  )
 
-  const totais = useMemo(() => contar(evAtual), [evAtual]);
-  const totaisPrev = useMemo(() => contar(evPrev), [evPrev]);
+  const rotuloChave = useCallback((dim: Dimensao, chave: string): string => {
+    if (dim === 'mes') return rotuloMes(chave)
+    if (dim === 'propriedade') return chave.startsWith('sem') ? 'Sem propriedade' : nomePropriedade(dados, Number(chave))
+    return chave
+  }, [dados])
 
-  const views = totais['view'] || 0;
-  const viewsPrev = totaisPrev['view'] || 0;
-  const contatos = (totais['whatsapp'] || 0) + (totais['formulario'] || 0);
-  const contatosPrev = (totaisPrev['whatsapp'] || 0) + (totaisPrev['formulario'] || 0);
-  const nReservas = resAtual.length;
-  const pipeline = useMemo(
-    () => resAtual.reduce((s, r) => s + (Number(r.valor_estimado) || 0), 0),
-    [resAtual],
-  );
+  const dashLabel = DASHBOARDS.find((d) => d.key === dashKey)!.label
+  const subtitulo = `${periodoLabel(preset)} · ${formatDate(range.ini, { style: 'short' })}–${formatDate(range.fim, { style: 'short' })}${propFiltro != null ? ` · ${nomePropriedade(dados, propFiltro)}` : ''}${tipoFiltro ? ` · ${tipoFiltro}` : ''}`
 
-  const taxaConversao = views > 0 ? (contatos / views) * 100 : null;
-  const taxaReserva = contatos > 0 ? (nReservas / contatos) * 100 : null;
+  function montarExport(): RelatorioExport {
+    const tabela = eventosTabela(scoped, range)
+    return { titulo: `Relatório ${dashLabel}`, subtitulo, kpis: resumoExecutivoKPIs(scoped, range, hoje), colunas: tabela.colunas, linhas: tabela.linhas }
+  }
 
-  // ── Série temporal ──────────────────────────────────────────────────────────
-  const serie = useMemo(() => construirSerie(evAtual, resAtual, dias), [evAtual, resAtual, dias]);
+  // ── Handlers de relatórios salvos / agendados ──────────────────────────────
+  async function api(op: string, payload: Record<string, unknown>) {
+    const r = await fetch('/api/relatorios', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(await authHeaders()) }, body: JSON.stringify({ op, ...payload }) })
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Falha na operação') }
+    return r.json()
+  }
+  const salvarRelatorio = async (nome: string, config: ConstrutorConfig) => {
+    try { await api('salvar_relatorio', { nome, config: { ...config, periodo: preset, prop: propFiltro, tipo: tipoFiltro } }); toast.success('Relatório salvo!'); await recarregarListas() }
+    catch (e) { toast.error((e as Error).message) }
+  }
+  const excluirRelatorio = async (id: string) => { try { await api('excluir_relatorio', { id }); await recarregarListas() } catch (e) { toast.error((e as Error).message) } }
+  const criarAgendado = async (a: NovoAgendado) => { try { await api('criar_agendado', a); toast.success('Envio agendado!'); await recarregarListas() } catch (e) { toast.error((e as Error).message) } }
+  const toggleAgendado = async (id: string, ativo: boolean) => { try { await api('toggle_agendado', { id, ativo }); await recarregarListas() } catch (e) { toast.error((e as Error).message) } }
+  const excluirAgendado = async (id: string) => { try { await api('excluir_agendado', { id }); await recarregarListas() } catch (e) { toast.error((e as Error).message) } }
 
-  // ── Distribuições derivadas ─────────────────────────────────────────────────
-  const porDiaSemana = useMemo(() => {
-    const c = new Array(7).fill(0);
-    evAtual.forEach((e) => { if (e.evento_tipo === 'view' && e.created_at) c[new Date(e.created_at).getDay()]++; });
-    return c;
-  }, [evAtual]);
-
-  const porHora = useMemo(() => {
-    const c = new Array(24).fill(0);
-    evAtual.forEach((e) => { if (e.evento_tipo === 'view' && e.created_at) c[new Date(e.created_at).getHours()]++; });
-    return c;
-  }, [evAtual]);
-
-  const porCidade = useMemo(() => {
-    const c: Record<string, number> = {};
-    evAtual.forEach((e) => { const cid = (e.cidade || '').trim(); if (cid) c[cid] = (c[cid] || 0) + 1; });
-    return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([nome, n]) => ({ nome, n }));
-  }, [evAtual]);
-
-  const melhorDiaIdx = porDiaSemana.some((n) => n > 0) ? porDiaSemana.indexOf(Math.max(...porDiaSemana)) : -1;
-  const picoHora = porHora.some((n) => n > 0) ? porHora.indexOf(Math.max(...porHora)) : -1;
-  const benchRef = benchCat ?? benchPlat;
-
-  // ── Insights automáticos ────────────────────────────────────────────────────
-  const insights = useMemo(() => {
-    const out: { icon: string; texto: string; tom: 'up' | 'down' | 'neutro' }[] = [];
-    const totA = views + contatos;
-    const totP = viewsPrev + contatosPrev;
-    if (totP > 0) {
-      const d = Math.round(((totA - totP) / totP) * 100);
-      if (d !== 0) out.push({
-        icon: d > 0 ? '📈' : '📉',
-        texto: `Suas interações ${d > 0 ? 'cresceram' : 'caíram'} ${Math.abs(d)}% vs o período anterior.`,
-        tom: d > 0 ? 'up' : 'down',
-      });
-    }
-    if (melhorDiaIdx >= 0) out.push({
-      icon: '🗓️', tom: 'neutro',
-      texto: `${diaSemanaExtenso(melhorDiaIdx)} é o dia que seu anúncio mais recebe visitas.`,
-    });
-    const benchRef = benchCat ?? benchPlat;
-    if (taxaConversao != null) out.push({
-      icon: '🎯', tom: benchRef != null && taxaConversao >= benchRef ? 'up' : 'neutro',
-      texto: `Você converte ${taxaConversao.toFixed(1)}% das visitas em contato${
-        benchRef != null ? ` (média ${benchCat != null ? 'da categoria' : 'da plataforma'}: ${benchRef.toFixed(1)}%)` : ''
-      }.`,
-    });
-    if (nReservas > 0) out.push({
-      icon: '🤝', tom: 'up',
-      texto: `${nReservas} ${nReservas === 1 ? 'reserva solicitada' : 'reservas solicitadas'}${
-        pipeline > 0 ? ` — ${formatMoney(pipeline)} em pipeline.` : '.'
-      }`,
-    });
-    return out.slice(0, 4);
-  }, [views, contatos, viewsPrev, contatosPrev, melhorDiaIdx, taxaConversao, benchCat, benchPlat, nReservas, pipeline]);
-
-  // ── Deltas ──────────────────────────────────────────────────────────────────
-  const viewsDelta = pctDelta(views, viewsPrev);
-  const contatosDelta = pctDelta(contatos, contatosPrev);
-
-  const rotuloPeriodo = dias === 365 ? '12 meses' : `${dias} dias`;
-
-  // ── Exports ─────────────────────────────────────────────────────────────────
-  const linhasExport = () => ([
-    ['Métrica', 'Total', 'Média/dia'],
-    ['Visualizações', String(views), (views / dias).toFixed(1)],
-    ['Contatos', String(contatos), (contatos / dias).toFixed(1)],
-    ['  WhatsApp', String(totais['whatsapp'] || 0), ((totais['whatsapp'] || 0) / dias).toFixed(1)],
-    ['  Formulários', String(totais['formulario'] || 0), ((totais['formulario'] || 0) / dias).toFixed(1)],
-    ['Reservas solicitadas', String(nReservas), (nReservas / dias).toFixed(1)],
-    ['Pipeline (R$)', String(pipeline), ''],
-    ['Taxa de conversão (%)', taxaConversao != null ? taxaConversao.toFixed(1) : '0', ''],
-  ]);
-
-  const exportCSV = () => {
-    const csv = linhasExport().map((r) => r.join(',')).join('\n');
-    baixar(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `relatorio-ventsy-${dias}dias.csv`);
-  };
-
-  const exportPDF = async () => {
-    setExporting(true);
+  // ── IA: explicar o resultado ───────────────────────────────────────────────
+  async function explicarIA() {
+    setAiOpen(true); setAiLoading(true); setAiTexto('')
     try {
-      const { jsPDF } = await import('jspdf');
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const M = 48;
-      let y = 56;
-      doc.setFontSize(20); doc.setTextColor('#ff385c');
-      doc.text('VENTSY', M, y);
-      doc.setFontSize(13); doc.setTextColor('#222');
-      doc.text('Relatório de desempenho', M, y + 22);
-      doc.setFontSize(10); doc.setTextColor('#888');
-      doc.text(`Período: últimos ${rotuloPeriodo}  ·  Gerado em ${new Date().toLocaleDateString('pt-BR')}`, M, y + 40);
-      y += 76;
+      const r = await fetch('/api/relatorios/ai', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body: JSON.stringify({ dashboard: dashLabel, periodo: subtitulo, kpis: resumoExecutivoKPIs(scoped, range, hoje) }),
+      })
+      const j = await r.json()
+      if (j.code === 'NO_KEY') setAiTexto('A IA ainda não está configurada neste ambiente (defina AI_GATEWAY_API_KEY). Mesmo assim, os números acima já resumem o período.')
+      else if (j.code === 'NEED_PRO') setAiTexto('A explicação por IA faz parte dos planos Pro e Ultra.')
+      else if (j.text) setAiTexto(j.text)
+      else setAiTexto(j.error || 'Não foi possível gerar a explicação agora.')
+    } catch { setAiTexto('Falha ao consultar a IA. Tente novamente.') }
+    finally { setAiLoading(false) }
+  }
 
-      // Cards de resumo
-      const resumo: [string, string][] = [
-        ['Visualizações', formatNumber(views)],
-        ['Contatos', formatNumber(contatos)],
-        ['Reservas', formatNumber(nReservas)],
-        ['Pipeline', pipeline > 0 ? formatMoney(pipeline) : '—'],
-        ['Taxa de conversão', taxaConversao != null ? `${taxaConversao.toFixed(1)}%` : '—'],
-      ];
-      doc.setDrawColor('#eee');
-      resumo.forEach(([k, v]) => {
-        doc.setFontSize(10); doc.setTextColor('#888'); doc.text(k, M, y);
-        doc.setFontSize(13); doc.setTextColor('#111'); doc.text(v, 320, y);
-        doc.line(M, y + 8, 547, y + 8);
-        y += 30;
-      });
+  if (loading) return <Skeleton />
 
-      doc.setFontSize(8); doc.setTextColor('#aaa');
-      doc.text('Gerado automaticamente pela Ventsy · ventsy.com.br', M, 800);
-      doc.save(`relatorio-ventsy-${dias}dias.pdf`);
-    } catch { /* jsPDF indisponível */ }
-    finally { setExporting(false); }
-  };
-
-  // ── Render ──────────────────────────────────────────────────────────────────
-  if (loading) return <RelSkeleton />;
-
-  if (!temProp) return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="text-xl font-bold text-ink sm:text-2xl">Relatórios</h1>
-      <div className="mt-6 rounded-2xl border border-dashed border-brand/30 bg-white p-8 text-center text-sm text-ink-muted shadow-card">
-        Cadastre sua propriedade para acompanhar o desempenho do anúncio.
-      </div>
-    </div>
-  );
-
-  const semDados = evAtual.length === 0 && resAtual.length === 0;
+  const semNada = dados.eventos.length === 0 && dados.lancamentos.length === 0 && dados.reservas.length === 0 && dados.propriedades.length === 0
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
-
-      {/* Cabeçalho ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Cabeçalho */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-ink sm:text-2xl">Relatórios</h1>
-          <p className="mt-1 text-sm text-ink-muted">Desempenho do seu anúncio nos últimos {rotuloPeriodo}.</p>
+          <h1 className="text-xl font-bold text-ink sm:text-2xl">Relatórios & BI</h1>
+          <p className="mt-1 text-sm text-ink-muted">Inteligência do negócio de eventos — ocupação, RevPAS, receita por m²/evento, funil, margem e satisfação, cruzando todos os módulos.</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1 rounded-full border border-black/10 bg-white p-1 text-sm">
-            {PERIODOS.map((p) => (
-              <button
-                key={p.v}
-                onClick={() => setDias(p.v)}
-                className={`rounded-full px-3 py-1.5 font-semibold transition ${
-                  dias === p.v ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
-                }`}
-              >
-                {p.label}
-              </button>
+          {tab === 'dashboards' && (
+            <>
+              <button onClick={explicarIA} className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-ink-soft transition hover:border-brand hover:text-brand" title="Explicar este resultado com IA"><IcoSpark /> Explicar</button>
+              <ExportMenu onCSV={() => exportarCSV(montarExport())} onExcel={() => exportarExcel(montarExport())} onPDF={() => exportarPDF(montarExport())} />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-1 rounded-full border border-black/10 bg-white p-1 text-sm">
+        {([['dashboards', 'Dashboards'], ['construtor', 'Construtor'], ['agendados', 'Exportação agendada']] as [Tab, string][]).map(([t, label]) => (
+          <button key={t} onClick={() => setTab(t)} className={`rounded-full px-4 py-1.5 font-semibold transition ${tab === t ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'}`}>{label}</button>
+        ))}
+      </div>
+
+      {/* Filtros globais */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-white p-3 shadow-card">
+        <div className="flex flex-wrap gap-1 rounded-full bg-black/[0.04] p-0.5">
+          {PRESETS.map((p) => <button key={p.v} onClick={() => setPreset(p.v)} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${preset === p.v ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'}`}>{p.label}</button>)}
+        </div>
+        {preset === 'personalizado' && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <input type="date" value={custom.ini} onChange={(e) => setCustom((c) => ({ ...c, ini: e.target.value }))} className="rounded-lg border border-black/10 px-2 py-1.5 focus:border-brand focus:outline-none" />
+            <span className="text-ink-muted">até</span>
+            <input type="date" value={custom.fim} onChange={(e) => setCustom((c) => ({ ...c, fim: e.target.value }))} className="rounded-lg border border-black/10 px-2 py-1.5 focus:border-brand focus:outline-none" />
+          </div>
+        )}
+        {dados.propriedades.length > 1 && (
+          <select value={propFiltro ?? ''} onChange={(e) => setPropFiltro(e.target.value ? Number(e.target.value) : null)} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-xs focus:border-brand focus:outline-none">
+            <option value="">Todas as propriedades</option>
+            {dados.propriedades.map((p) => <option key={p.id} value={p.id}>{p.nome || `Espaço #${p.id}`}</option>)}
+          </select>
+        )}
+        {tipos.length > 0 && (
+          <select value={tipoFiltro ?? ''} onChange={(e) => setTipoFiltro(e.target.value || null)} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-xs focus:border-brand focus:outline-none">
+            <option value="">Todos os tipos</option>
+            {tipos.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        )}
+        <span className="ml-auto text-xs text-ink-muted">{subtitulo}</span>
+      </div>
+
+      {needsSetup && <SetupNotice />}
+
+      {semNada ? (
+        <EmptyState
+          icon={<IcoChart />}
+          titulo="Sem dados para analisar ainda"
+          texto="Cadastre propriedades, eventos (CRM), lançamentos financeiros e reservas. Conforme os módulos são usados, os indicadores de BI aparecem aqui."
+        />
+      ) : tab === 'dashboards' ? (
+        <>
+          {/* Seletor de dashboard */}
+          <div className="flex flex-wrap gap-1.5">
+            {DASHBOARDS.map((d) => (
+              <button key={d.key} onClick={() => setDashKey(d.key)} className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition ${dashKey === d.key ? 'bg-brand text-white' : 'border border-black/10 bg-white text-ink-soft hover:border-brand/40 hover:text-brand'}`}>{d.label}</button>
             ))}
           </div>
-          <button onClick={exportCSV} className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-ink-soft transition hover:border-brand hover:text-brand">
-            CSV
-          </button>
-          <button onClick={exportPDF} disabled={exporting} className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-ink-soft transition hover:border-brand hover:text-brand disabled:opacity-50">
-            {exporting ? '…' : 'PDF'}
-          </button>
-        </div>
-      </div>
-
-      {semDados ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-white p-12 text-center shadow-card">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-2xl">📊</div>
-          <h3 className="text-base font-bold text-ink">Ainda sem dados neste período</h3>
-          <p className="mx-auto mt-1 max-w-md text-sm text-ink-muted">
-            Assim que as pessoas visitarem e interagirem com seu anúncio, seus números de desempenho aparecem aqui.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Insights ──────────────────────────────────────────────────────────── */}
-          {insights.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {insights.map((ins, i) => (
-                <div
-                  key={i}
-                  className={`flex items-start gap-2.5 rounded-xl border p-3 text-sm ${
-                    ins.tom === 'up' ? 'border-emerald-100 bg-emerald-50/60 text-emerald-900'
-                      : ins.tom === 'down' ? 'border-amber-100 bg-amber-50/60 text-amber-900'
-                      : 'border-black/[0.06] bg-white text-ink-soft'
-                  }`}
-                >
-                  <span className="text-base leading-none">{ins.icon}</span>
-                  <span className="leading-snug">{ins.texto}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Cards resumo ──────────────────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <SummaryCard label="Visualizações" value={formatNumber(views)} delta={viewsDelta} sub="visitas ao anúncio" />
-            <SummaryCard label="Contatos" value={formatNumber(contatos)} delta={contatosDelta} sub="WhatsApp + formulário" />
-            <SummaryCard label="Reservas" value={formatNumber(nReservas)} sub="solicitações recebidas" />
-            <SummaryCard label="Pipeline" value={pipeline > 0 ? formatMoney(pipeline) : '—'} sub="valor estimado" />
-          </div>
-
-          {/* Gráfico de série temporal ─────────────────────────────────────────── */}
-          <div className="rounded-2xl bg-white p-5 shadow-card">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-base font-bold text-ink">Evolução no período</h3>
-              <div className="flex items-center gap-4 text-xs">
-                <Legenda cor="#ff385c" label="Visualizações" />
-                <Legenda cor="#22c55e" label="Contatos" />
-              </div>
-            </div>
-            <AreaChart serie={serie} />
-          </div>
-
-          {/* Funil + Canais ────────────────────────────────────────────────────── */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl bg-white p-5 shadow-card">
-              <h3 className="mb-4 text-base font-bold text-ink">Funil de conversão</h3>
-              <Funil
-                etapas={[
-                  { label: 'Visualizações', n: views, cor: '#ff385c' },
-                  { label: 'Contatos', n: contatos, cor: '#f59e0b', taxa: taxaConversao },
-                  { label: 'Reservas', n: nReservas, cor: '#22c55e', taxa: taxaReserva },
-                ]}
-              />
-            </div>
-
-            <div className="rounded-2xl bg-white p-5 shadow-card">
-              <h3 className="mb-4 text-base font-bold text-ink">Canais de contato</h3>
-              <CanaisContato wpp={totais['whatsapp'] || 0} form={totais['formulario'] || 0} />
-              <div className="mt-5 border-t border-black/[0.05] pt-4">
-                <h4 className="text-sm font-bold text-ink">Horário de pico</h4>
-                <HoraStrip horas={porHora} pico={picoHora} />
-              </div>
-            </div>
-          </div>
-
-          {/* Melhor dia + Métricas reais ───────────────────────────────────────── */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl bg-white p-5 shadow-card">
-              <h3 className="mb-4 text-base font-bold text-ink">Visitas por dia da semana</h3>
-              <DiaSemanaBars dados={porDiaSemana} melhor={melhorDiaIdx} />
-            </div>
-
-            <div className="rounded-2xl bg-white p-5 shadow-card">
-              <h3 className="mb-4 text-base font-bold text-ink">Métricas do período</h3>
-              <div className="space-y-4">
-                {METRICAS.map((m) => {
-                  const total = totais[m.key] || 0;
-                  const prev = totaisPrev[m.key] || 0;
-                  const delta = prev > 0 ? Math.round(((total - prev) / prev) * 100) : null;
-                  const max = Math.max(1, ...METRICAS.map((x) => totais[x.key] || 0));
-                  return (
-                    <div key={m.key} className="flex items-center gap-3">
-                      <div className="flex w-32 shrink-0 items-center gap-2 text-sm">
-                        <span>{m.icon}</span><span className="truncate text-ink-soft">{m.label}</span>
-                      </div>
-                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-black/[0.06]">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.round((total / max) * 100)}%`, background: m.color }} />
-                      </div>
-                      <div className="w-12 shrink-0 text-right text-sm font-bold text-ink">{formatNumber(total)}</div>
-                      {delta != null && delta !== 0 ? (
-                        <span className={`w-12 shrink-0 text-right text-[0.65rem] font-bold ${delta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                          {delta > 0 ? '↑' : '↓'}{Math.abs(delta)}%
-                        </span>
-                      ) : <span className="w-12 shrink-0" />}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Visitantes por cidade + Benchmark ─────────────────────────────────── */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
-            <div className="rounded-2xl bg-white p-5 shadow-card">
-              <div className="flex items-baseline justify-between">
-                <h3 className="text-base font-bold text-ink">Visitantes por cidade</h3>
-                <span className="text-xs text-ink-muted">por geolocalização</span>
-              </div>
-              {porCidade.length === 0 ? (
-                <p className="mt-6 text-sm text-ink-muted">
-                  Os dados de localização dos visitantes aparecem aqui conforme novas visitas chegam.
-                </p>
-              ) : (
-                <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-                  {porCidade.map((c, i) => {
-                    const max = Math.max(1, ...porCidade.map((x) => x.n));
-                    return (
-                      <div key={c.nome}>
-                        <div className="mb-1.5 flex items-center justify-between text-xs">
-                          <span className="flex items-center gap-1.5 font-semibold text-ink-soft">
-                            <span className="w-4 text-right font-normal tabular-nums text-ink-muted/50">{i + 1}.</span>📍 {c.nome}
-                          </span>
-                          <span className="tabular-nums text-ink-muted">{c.n}</span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-black/[0.06]">
-                          <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${Math.round((c.n / max) * 100)}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-2xl bg-gradient-to-br from-ink to-ink-soft p-5 text-white shadow-card">
-              <h3 className="text-base font-bold">Benchmark</h3>
-              {benchRef != null && taxaConversao != null ? (
-                <>
-                  <p className="mt-1 text-xs text-white/60">Sua conversão vs a média {benchCat != null ? `de ${categoria}` : 'da plataforma'}.</p>
-                  <div className="mt-4 flex items-end gap-2">
-                    <span className="text-3xl font-bold leading-none">{taxaConversao.toFixed(1)}%</span>
-                    <span className={`mb-1 rounded-full px-2 py-0.5 text-[0.65rem] font-bold ${
-                      taxaConversao >= benchRef ? 'bg-emerald-400/20 text-emerald-300' : 'bg-amber-400/20 text-amber-300'
-                    }`}>
-                      {taxaConversao >= benchRef ? 'acima' : 'abaixo'} da média
-                    </span>
-                  </div>
-                  <div className="mt-3 text-xs text-white/60">Média {benchCat != null ? `de ${categoria}` : 'da plataforma'}: <strong className="text-white/90">{benchRef.toFixed(1)}%</strong></div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15">
-                    <div className="h-full rounded-full bg-white" style={{ width: `${Math.min(100, Math.round((taxaConversao / Math.max(benchRef * 2, 0.1)) * 100))}%` }} />
-                  </div>
-                </>
-              ) : (
-                <p className="mt-2 text-sm text-white/70">
-                  O comparativo com a média da plataforma aparece quando há volume suficiente de dados.
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Buscas populares ──────────────────────────────────────────────────── */}
-          <div className="rounded-2xl bg-white p-5 shadow-card">
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-base font-bold text-ink">Buscas populares</h3>
-              <span className="text-xs text-ink-muted">plataforma Ventsy</span>
-            </div>
-            {buscas.length === 0 ? (
-              <p className="mt-6 text-sm text-ink-muted">Sem dados de buscas.</p>
-            ) : (
-              <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-                {buscas.map((b, i) => {
-                  const max = Math.max(1, ...buscas.map((x) => x.n));
-                  return (
-                    <div key={b.nome}>
-                      <div className="mb-1.5 flex items-center justify-between text-xs">
-                        <span className="flex items-center gap-1.5 font-semibold text-ink-soft">
-                          <span className="w-4 text-right font-normal tabular-nums text-ink-muted/50">{i + 1}.</span>{b.nome}
-                        </span>
-                        <span className="tabular-nums text-ink-muted">{b.n}</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-black/[0.06]">
-                        <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${Math.round((b.n / max) * 100)}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {(() => { const Comp = DASHBOARDS.find((d) => d.key === dashKey)!.Comp; return <Comp dados={scoped} range={range} rangePrev={rangePrev} range12={range12} hojeYMD={hoje} /> })()}
         </>
+      ) : tab === 'construtor' ? (
+        <Construtor
+          eventos={eventosPeriodo}
+          rotuloChave={rotuloChave}
+          salvos={salvos}
+          premium={premium}
+          subtitulo={subtitulo}
+          onSalvar={salvarRelatorio}
+          onExcluir={excluirRelatorio}
+          onAplicar={() => toast.success('Relatório aberto.')}
+        />
+      ) : (
+        <div className="relative">
+          <Agendados
+            agendados={agendados}
+            salvos={salvos}
+            premium={premium}
+            emailPadrao={email}
+            onCriar={criarAgendado}
+            onToggle={toggleAgendado}
+            onExcluir={excluirAgendado}
+          />
+        </div>
       )}
-    </div>
-  );
-}
 
-// ── Helpers de dados ──────────────────────────────────────────────────────────
-
-function contar(evs: Evento[]): Record<string, number> {
-  const m: Record<string, number> = {};
-  evs.forEach((e) => { m[e.evento_tipo] = (m[e.evento_tipo] || 0) + 1; });
-  return m;
-}
-
-function pctDelta(atual: number, prev: number): number | null {
-  return prev > 0 ? Math.round(((atual - prev) / prev) * 100) : null;
-}
-
-function diaSemanaExtenso(i: number): string {
-  return ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][i] || '—';
-}
-
-type Ponto = { label: string; views: number; contatos: number; reservas: number };
-
-function construirSerie(evs: Evento[], res: Reserva[], dias: number): Ponto[] {
-  const now = new Date();
-  const pontos: Ponto[] = [];
-
-  if (dias <= 30) {
-    // Buckets diários
-    for (let i = dias - 1; i >= 0; i--) {
-      const d = new Date(now); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
-      const ini = d.getTime(); const fim = ini + DIA;
-      pontos.push({
-        label: `${d.getDate()}/${d.getMonth() + 1}`,
-        views: contaJanela(evs, 'view', ini, fim),
-        contatos: contaJanela(evs, 'whatsapp', ini, fim) + contaJanela(evs, 'formulario', ini, fim),
-        reservas: res.filter((r) => emJanela(r.created_at, ini, fim)).length,
-      });
-    }
-  } else {
-    // Buckets mensais (12 meses)
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const ini = d.getTime();
-      const fim = new Date(now.getFullYear(), now.getMonth() - i + 1, 1).getTime();
-      pontos.push({
-        label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
-        views: contaJanela(evs, 'view', ini, fim),
-        contatos: contaJanela(evs, 'whatsapp', ini, fim) + contaJanela(evs, 'formulario', ini, fim),
-        reservas: res.filter((r) => emJanela(r.created_at, ini, fim)).length,
-      });
-    }
-  }
-  return pontos;
-}
-
-function emJanela(ts: string | null, ini: number, fim: number): boolean {
-  if (!ts) return false;
-  const t = new Date(ts).getTime();
-  return t >= ini && t < fim;
-}
-
-function contaJanela(evs: Evento[], tipo: string, ini: number, fim: number): number {
-  return evs.filter((e) => e.evento_tipo === tipo && emJanela(e.created_at, ini, fim)).length;
-}
-
-function baixar(blob: Blob, nome: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = nome; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ── Componentes visuais ───────────────────────────────────────────────────────
-
-function SummaryCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
-  return (
-    <div className="rounded-2xl bg-white p-4 shadow-card">
-      <div className="text-[0.68rem] font-bold uppercase tracking-wider text-ink-muted/80">{label}</div>
-      <div className="mt-2 flex items-end justify-between gap-2">
-        <div className="text-2xl font-bold leading-none text-ink">{value}</div>
-        {delta != null && delta !== 0 && (
-          <span className={`mb-0.5 shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-bold ${
-            delta > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
-          }`}>
-            {delta > 0 ? '↑' : '↓'} {Math.abs(delta)}%
-          </span>
-        )}
-      </div>
-      {sub && <div className="mt-1 text-xs text-ink-muted">{sub}</div>}
-    </div>
-  );
-}
-
-function Legenda({ cor, label }: { cor: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5 text-ink-muted">
-      <span className="h-2 w-2 rounded-full" style={{ background: cor }} />{label}
-    </span>
-  );
-}
-
-function AreaChart({ serie }: { serie: Ponto[] }) {
-  const W = 760, H = 180, P = 8;
-  const max = Math.max(1, ...serie.map((p) => Math.max(p.views, p.contatos)));
-  const n = serie.length;
-  const x = (i: number) => P + (i * (W - 2 * P)) / Math.max(1, n - 1);
-  const y = (v: number) => H - P - (v / max) * (H - 2 * P - 14);
-
-  const linha = (sel: (p: Ponto) => number) =>
-    serie.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(sel(p)).toFixed(1)}`).join(' ');
-  const area = (sel: (p: Ponto) => number) =>
-    `${linha(sel)} L ${x(n - 1).toFixed(1)} ${H - P} L ${x(0).toFixed(1)} ${H - P} Z`;
-
-  // Rótulos do eixo X — no máx. ~7 para não poluir
-  const step = Math.ceil(n / 7);
-
-  return (
-    <div className="w-full overflow-hidden">
-      <svg viewBox={`0 0 ${W} ${H + 18}`} className="w-full" preserveAspectRatio="none" style={{ height: 'auto' }}>
-        <defs>
-          <linearGradient id="gradViews" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ff385c" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="#ff385c" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={area((p) => p.views)} fill="url(#gradViews)" />
-        <path d={linha((p) => p.views)} fill="none" stroke="#ff385c" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-        <path d={linha((p) => p.contatos)} fill="none" stroke="#22c55e" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-        {serie.map((p, i) => (
-          <circle key={i} cx={x(i)} cy={y(p.views)} r="2.5" fill="#ff385c" />
-        ))}
-        {serie.map((p, i) => (i % step === 0 || i === n - 1) ? (
-          <text key={`t${i}`} x={x(i)} y={H + 12} fontSize="9" fill="#9ca3af" textAnchor="middle">{p.label}</text>
-        ) : null)}
-      </svg>
-    </div>
-  );
-}
-
-function Funil({ etapas }: { etapas: { label: string; n: number; cor: string; taxa?: number | null }[] }) {
-  const max = Math.max(1, etapas[0]?.n || 1);
-  return (
-    <div className="space-y-3">
-      {etapas.map((e, i) => (
-        <div key={e.label}>
-          <div className="mb-1 flex items-center justify-between text-sm">
-            <span className="font-semibold text-ink-soft">{e.label}</span>
-            <span className="flex items-center gap-2">
-              <span className="font-bold text-ink">{formatNumber(e.n)}</span>
-              {i > 0 && e.taxa != null && (
-                <span className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[0.65rem] font-bold text-ink-muted">
-                  {e.taxa.toFixed(1)}%
-                </span>
-              )}
-            </span>
-          </div>
-          <div className="h-7 overflow-hidden rounded-lg bg-black/[0.04]">
-            <div
-              className="flex h-full items-center rounded-lg transition-all duration-700"
-              style={{ width: `${Math.max(4, Math.round((e.n / max) * 100))}%`, background: e.cor }}
-            />
+      {/* Modal IA */}
+      {aiOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-start justify-center overflow-y-auto bg-black/50 p-4" onClick={() => setAiOpen(false)}>
+          <div className="relative my-12 w-full max-w-lg rounded-2xl bg-white p-6 shadow-pop" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setAiOpen(false)} className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-ink-muted hover:bg-black/[0.03]">✕</button>
+            <div className="mb-4 flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-brand text-white"><IcoSpark /></span><h3 className="font-display text-lg font-bold text-ink">Explicação do resultado</h3></div>
+            <p className="mb-3 text-xs text-ink-muted">{dashLabel} · {subtitulo}</p>
+            {aiLoading ? (
+              <div className="flex items-center gap-2 py-8 text-sm text-ink-muted"><span className="h-4 w-4 animate-spin rounded-full border-2 border-brand border-t-transparent" /> Analisando os números…</div>
+            ) : (
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-ink-soft">{aiTexto}</div>
+            )}
+            {!premium && !aiLoading && <p className="mt-4 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">A explicação por IA é um recurso Pro+.</p>}
           </div>
         </div>
-      ))}
-    </div>
-  );
-}
-
-function CanaisContato({ wpp, form }: { wpp: number; form: number }) {
-  const total = wpp + form;
-  if (total === 0) return <p className="text-sm text-ink-muted">Nenhum contato no período.</p>;
-  const pWpp = Math.round((wpp / total) * 100);
-  return (
-    <div>
-      <div className="flex h-3 overflow-hidden rounded-full">
-        <div className="bg-[#22c55e]" style={{ width: `${pWpp}%` }} />
-        <div className="bg-[#f59e0b]" style={{ width: `${100 - pWpp}%` }} />
-      </div>
-      <div className="mt-3 flex items-center justify-between text-sm">
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#22c55e]" />WhatsApp</span>
-        <span className="font-bold text-ink">{formatNumber(wpp)} <span className="text-xs font-normal text-ink-muted">({pWpp}%)</span></span>
-      </div>
-      <div className="mt-1.5 flex items-center justify-between text-sm">
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#f59e0b]" />Formulário</span>
-        <span className="font-bold text-ink">{formatNumber(form)} <span className="text-xs font-normal text-ink-muted">({100 - pWpp}%)</span></span>
-      </div>
-    </div>
-  );
-}
-
-function DiaSemanaBars({ dados, melhor }: { dados: number[]; melhor: number }) {
-  const max = Math.max(1, ...dados);
-  return (
-    <div className="flex items-end justify-between gap-2" style={{ height: 140 }}>
-      {dados.map((n, i) => (
-        <div key={i} className="flex flex-1 flex-col items-center justify-end gap-2">
-          <span className="text-[0.65rem] font-bold text-ink-muted">{n > 0 ? n : ''}</span>
-          <div
-            className={`w-full rounded-md transition-all duration-500 ${i === melhor ? 'bg-brand' : 'bg-black/[0.1]'}`}
-            style={{ height: `${Math.max(3, (n / max) * 100)}%` }}
-          />
-          <span className={`text-[0.65rem] ${i === melhor ? 'font-bold text-brand' : 'text-ink-muted'}`}>{WEEKDAYS[i]}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function HoraStrip({ horas, pico }: { horas: number[]; pico: number }) {
-  const max = Math.max(1, ...horas);
-  return (
-    <div>
-      <div className="mt-2 flex items-end gap-[2px]" style={{ height: 44 }}>
-        {horas.map((n, h) => (
-          <div
-            key={h}
-            title={`${h}h — ${n} visita${n === 1 ? '' : 's'}`}
-            className={`flex-1 rounded-sm transition-all ${h === pico ? 'bg-brand' : 'bg-black/[0.08]'}`}
-            style={{ height: `${Math.max(6, (n / max) * 100)}%` }}
-          />
-        ))}
-      </div>
-      <div className="mt-1.5 flex justify-between text-[0.6rem] text-ink-muted/70">
-        <span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span>
-      </div>
-      {pico >= 0 && (
-        <p className="mt-2 text-xs text-ink-muted">
-          Pico de visitas por volta das <strong className="text-ink-soft">{pico}h</strong>.
-        </p>
       )}
     </div>
-  );
+  )
 }
 
-function RelSkeleton() {
+// ── Sub-componentes ──────────────────────────────────────────────────────────
+function ExportMenu({ onCSV, onExcel, onPDF }: { onCSV: () => void; onExcel: () => void; onPDF: () => void }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen((v) => !v)} onBlur={() => setTimeout(() => setOpen(false), 150)} className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-3.5 py-2 text-xs font-semibold text-white hover:bg-brand-600"><IcoDownload /> Exportar</button>
+      {open && (
+        <div className="absolute right-0 top-[42px] z-50 w-36 overflow-hidden rounded-xl border border-black/[0.06] bg-white py-1 shadow-pop">
+          {([['PDF', onPDF], ['Excel', onExcel], ['CSV', onCSV]] as [string, () => void][]).map(([l, fn]) => (
+            <button key={l} onMouseDown={fn} className="block w-full px-4 py-2 text-left text-sm hover:bg-black/[0.03]">{l}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Skeleton() {
   return (
     <div className="mx-auto max-w-6xl animate-pulse space-y-5">
       <div className="h-12 rounded-2xl bg-black/[0.05]" />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => <div key={i} className="h-24 rounded-2xl bg-black/[0.05]" />)}
-      </div>
-      <div className="h-52 rounded-2xl bg-black/[0.05]" />
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <div className="h-56 rounded-2xl bg-black/[0.05]" />
-        <div className="h-56 rounded-2xl bg-black/[0.05]" />
-      </div>
+      <div className="h-10 rounded-full bg-black/[0.05]" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="h-24 rounded-2xl bg-black/[0.05]" />)}</div>
+      <div className="h-56 rounded-2xl bg-black/[0.05]" />
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2"><div className="h-56 rounded-2xl bg-black/[0.05]" /><div className="h-56 rounded-2xl bg-black/[0.05]" /></div>
     </div>
-  );
+  )
 }

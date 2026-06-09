@@ -11,6 +11,7 @@ import { supabaseAny as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
 import { applyPrefs } from '@/lib/prefs';
 import { ToastProvider } from '@/components/Toast';
+import NotificationBell from '@/components/NotificationBell';
 
 type Profile = {
   nome: string;
@@ -115,10 +116,21 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: 'Inteligência',
+    items: [
+      { href: '/painel/terceiros', label: 'Terceiros (custo × retorno)', icon: 'exchange', enabled: true },
+    ],
+  },
+  {
     group: 'Conta',
     items: [
+      { href: '/painel/metas', label: 'Metas & OKR', icon: 'goal', enabled: true },
+      { href: '/painel/automacoes', label: 'Automações', icon: 'bolt', enabled: true },
+      { href: '/painel/unidades', label: 'Unidades', icon: 'network', enabled: true },
       { href: '/painel/indique', label: 'Indique & Ganhe', icon: 'gift', enabled: true },
+      { href: '/painel/integracoes', label: 'Integrações', icon: 'plug', enabled: true },
       { href: '/painel/configuracoes', label: 'Configurações', icon: 'cog', enabled: true },
+      { href: '/painel/auditoria', label: 'Auditoria & Logs', icon: 'audit', enabled: true },
       { href: '/painel/planos', label: 'Planos', icon: 'card', enabled: true },
     ],
   },
@@ -230,7 +242,9 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
           </Link>
         </div>
 
-        <div ref={avatarRef} className="relative">
+        <div className="flex items-center gap-1.5">
+          <NotificationBell />
+          <div ref={avatarRef} className="relative">
           <button
             onClick={() => setAvatarOpen((v) => !v)}
             className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-brand text-base font-bold text-white"
@@ -257,6 +271,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
               </button>
             </div>
           )}
+          </div>
         </div>
       </header>
 
@@ -351,6 +366,7 @@ const ICONS = {
   users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11',
   book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5Z',
   gift: 'M20 12v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9M2 7h20v5H2zM12 22V7M12 7S8 7 8 4.5 12 7 12 7Zm0 0s4 0 4-2.5S12 7 12 7Z',
+  bolt: 'M13 2 3 14h7l-1 8 10-12h-7l1-8Z',
   cog: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8-3a8 8 0 0 0-.13-1.4l2-1.55-2-3.46-2.36.95a8 8 0 0 0-2.42-1.4L14.7 2h-4l-.39 2.74a8 8 0 0 0-2.42 1.4L5.53 5.2l-2 3.46 2 1.55A8 8 0 0 0 5.4 12a8 8 0 0 0 .13 1.4l-2 1.55 2 3.46 2.36-.95a8 8 0 0 0 2.42 1.4L10.7 22h4l.39-2.74a8 8 0 0 0 2.42-1.4l2.36.95 2-3.46-2-1.55A8 8 0 0 0 20 12Z',
   card: 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm0 4h18',
   spaces: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
@@ -391,6 +407,11 @@ const ICONS = {
   safety: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3ZM12 9v6M9 12h6',
   compliance: 'M12 13a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8.5 12.2 7 21l5-2.6 5 2.6-1.5-8.8M10 8.6l1.3 1.3 2.7-2.7',
   umbrella: 'M12 2a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9ZM12 11v8a2 2 0 0 0 4 0',
+  audit: 'M3 3v5h5M3.05 13A9 9 0 1 0 6 5.3L3 8M12 7v5l3 2',
+  network: 'M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM12 7v4M12 11l-6 4M12 11l6 4',
+  goal: 'M6 21V4M6 4.5h11l-2.5 3.5L17 11.5H6',
+  plug: 'M9 2v6M15 2v6M7 8h10v4a5 5 0 0 1-10 0V8ZM12 17v5',
+  exchange: 'M4 9h13m0 0-3-3m3 3-3 3M20 15H7m0 0 3-3m-3 3 3 3',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

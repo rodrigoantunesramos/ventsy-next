@@ -31,10 +31,12 @@ export function emailConfigurado(): boolean {
   return !!(process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-export async function sendEmail(opts: { to: string; subject: string; html: string }) {
+export type EmailAttachment = { filename: string; content: string | Buffer; contentType?: string };
+
+export async function sendEmail(opts: { to: string; subject: string; html: string; attachments?: EmailAttachment[] }) {
   const t = transporter();
   if (!t) return { ok: false, skipped: true };
   const from = process.env.SMTP_FROM || `Ventsy <${process.env.SMTP_USER}>`;
-  await t.sendMail({ from, to: opts.to, subject: opts.subject, html: opts.html });
+  await t.sendMail({ from, to: opts.to, subject: opts.subject, html: opts.html, attachments: opts.attachments });
   return { ok: true, skipped: false };
 }

@@ -33,7 +33,7 @@ export default function LoginPage() {
     setLoading(true)
     setErro('')
 
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha })
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha })
 
     if (error) {
       let msg = 'Erro ao fazer login. Tente novamente.'
@@ -41,7 +41,9 @@ export default function LoginPage() {
       if (error.message.includes('Email not confirmed'))  msg = 'Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.'
       setErro(msg)
       setLoading(false)
+      void auditLogin(undefined, email.trim()) // trilha: tentativa malsucedida
     } else {
+      void auditLogin(data.session?.access_token) // trilha: login bem-sucedido
       router.replace('/painel')
     }
   }
@@ -60,6 +62,20 @@ export default function LoginPage() {
     setModalAberto(false)
     setEmailRecuperar('')
     setRecuperacaoEnviada(false)
+  }
+
+  // Registra o login na trilha de auditoria (best-effort, não bloqueia o fluxo).
+  // Sucesso → com Bearer (identidade do servidor). Falha → sem token, só o
+  // e-mail tentado (a rota resolve a conta e ignora e-mails inexistentes).
+  async function auditLogin(token?: string, emailTentado?: string) {
+    try {
+      await fetch('/api/auditoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(token ? { action: 'registrar', acao: 'login' } : { action: 'registrar', acao: 'login_falha', email: emailTentado }),
+        keepalive: true,
+      })
+    } catch { /* auditoria nunca atrapalha o login */ }
   }
 
   return (

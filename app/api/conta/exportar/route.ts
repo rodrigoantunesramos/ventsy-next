@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized } from '@/lib/apiAuth'
+import { registrarAuditoria } from '@/lib/auditServer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any
@@ -37,6 +38,14 @@ export async function GET(req: NextRequest) {
     aviso: 'Exportação de dados pessoais (LGPD). Não inclui credenciais ou chaves de integração.',
     dados,
   }
+
+  // Trilha de auditoria: exportar dados é uma ação sensível (LGPD).
+  await registrarAuditoria({
+    req, contaId: user.id, atorId: user.id, atorEmail: user.email,
+    acao: 'exportar', entidade: 'dados_pessoais',
+    descricao: 'Exportou todos os dados da conta (LGPD)',
+    meta: { tabelas: Object.keys(dados).length },
+  })
 
   return new Response(JSON.stringify(bundle, null, 2), {
     headers: {

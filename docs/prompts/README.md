@@ -119,13 +119,13 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 ### Fase 8 — Terceiros, Integrações & Inteligência
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Terceiros (custo × retorno) | `/painel/terceiros` | `08-terceiros-integracoes.md` | ⬜ |
-| Integrações (apps, APIs, webhooks) | `/painel/integracoes` | `08-terceiros-integracoes.md` | 🟡 API existe |
-| Relatórios & BI | `/painel/relatorios` | `09-inteligencia-config.md` | 🟡 existe |
-| Metas & OKR | `/painel/metas` | `09-inteligencia-config.md` | ⬜ |
-| Automações & Notificações | `/painel/automacoes` | `09-inteligencia-config.md` | ⬜ |
-| Multi-unidades / Franquias | `/painel/unidades` | `09-inteligencia-config.md` | ⬜ |
-| Auditoria & Logs | `/painel/auditoria` | `09-inteligencia-config.md` | ⬜ |
+| Terceiros (custo × retorno) | `/painel/terceiros` | `08-terceiros-integracoes.md` | ✅ |
+| Integrações (apps, APIs, webhooks) | `/painel/integracoes` | `08-terceiros-integracoes.md` | ✅ |
+| Relatórios & BI | `/painel/relatorios` | `09-inteligencia-config.md` | ✅ |
+| Metas & OKR | `/painel/metas` | `09-inteligencia-config.md` | ✅ |
+| Automações & Notificações | `/painel/automacoes` | `09-inteligencia-config.md` | ✅ |
+| Multi-unidades / Franquias | `/painel/unidades` | `09-inteligencia-config.md` | ✅ |
+| Auditoria & Logs | `/painel/auditoria` | `09-inteligencia-config.md` | ✅ |
 
 ---
 
