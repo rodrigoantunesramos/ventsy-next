@@ -101,7 +101,7 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
 | Avaliações públicas (dono responde) | `/painel/avaliacoes` | `01-relacionamento.md` | ✅ |
-| Feedbacks privados (cliente↔dono) | `/painel/feedbacks` | `01-relacionamento.md` | ⬜ |
+| Feedbacks privados (cliente↔dono) | `/painel/feedbacks` | `01-relacionamento.md` | ✅ |
 | Campanhas (envio em massa) | `/painel/campanhas` | `01-relacionamento.md` | ⬜ |
 | Marketing (cockpit) | `/painel/marketing` | `01-relacionamento.md` | ⬜ |
 | Listas Oficiais (comunidade) | `/painel/listas` | `01-relacionamento.md` | ⬜ |
