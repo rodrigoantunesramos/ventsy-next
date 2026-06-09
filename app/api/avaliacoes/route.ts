@@ -1,12 +1,28 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { getAuthUser, unauthorized } from '@/lib/apiAuth'
+import { getAuthUser, unauthorized, forbidden } from '@/lib/apiAuth'
 
 // Rota server-side: usa service-role (ignora RLS) para inserir avaliação e
 // atualizar a média em propriedades (UPDATE bloqueado para anon sob RLS).
 const supabase = supabaseAdmin
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const supabaseAny = supabaseAdmin as any
+
+// Recalcula a média pública da propriedade considerando só avaliações
+// verificadas e NÃO ocultas (a moderação do dono reflete no número público).
+async function recomputarMedia(propriedadeId: number | string) {
+  const { data: todas } = await supabaseAny
+    .from('avaliacoes')
+    .select('nota')
+    .eq('propriedade_id', propriedadeId)
+    .eq('verificada', true)
+    .eq('oculta', false)
+  const lista = (todas || []) as { nota: number }[]
+  const media = lista.length
+    ? parseFloat((lista.reduce((s, a) => s + a.nota, 0) / lista.length).toFixed(1))
+    : 0
+  await supabase.from('propriedades').update({ avaliacao: media }).eq('id', Number(propriedadeId))
+}
 
 // GET /api/avaliacoes?propriedade_id=xxx — avaliações de uma propriedade (público)
 // GET /api/avaliacoes?user_id=xxx — avaliações do próprio usuário (requer auth)
@@ -97,20 +113,61 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (!error) {
-    // Recalcular média da propriedade
-    const { data: todas } = await supabaseAny
-      .from('avaliacoes')
-      .select('nota')
-      .eq('propriedade_id', propriedade_id)
-      .eq('verificada', true)
+    await recomputarMedia(propriedade_id)
+  }
 
-    if (todas && todas.length > 0) {
-      const media = todas.reduce((s: number, a: any) => s + a.nota, 0) / todas.length
-      await supabase
-        .from('propriedades')
-        .update({ avaliacao: parseFloat(media.toFixed(1)) })
-        .eq('id', Number(propriedade_id))
-    }
+  return Response.json({ data, error })
+}
+
+// PATCH /api/avaliacoes — o DONO do espaço modera/responde uma avaliação.
+// Ações (parciais): { id, resposta?, oculta?, destaque? }. A identidade é o JWT;
+// a posse é verificada via propriedades.usuario_id (nunca confie no corpo).
+export async function PATCH(req: NextRequest) {
+  const user = await getAuthUser(req)
+  if (!user) return unauthorized()
+
+  const body = await req.json()
+  const id = Number(body.id)
+  if (!id) return Response.json({ error: 'id obrigatório' }, { status: 400 })
+
+  // Carrega a avaliação e confirma que o espaço pertence ao usuário autenticado.
+  const { data: aval } = await supabaseAny
+    .from('avaliacoes')
+    .select('id, propriedade_id')
+    .eq('id', id)
+    .maybeSingle()
+  if (!aval) return Response.json({ error: 'Avaliação não encontrada.' }, { status: 404 })
+
+  const { data: prop } = await supabaseAny
+    .from('propriedades')
+    .select('usuario_id')
+    .eq('id', aval.propriedade_id)
+    .maybeSingle()
+  if (!prop || prop.usuario_id !== user.id) return forbidden()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const patch: any = {}
+  if ('resposta' in body) {
+    const r = (body.resposta ?? '').toString().trim()
+    patch.resposta = r || null
+    patch.respondido_em = r ? new Date().toISOString() : null
+  }
+  if ('oculta' in body) patch.oculta = !!body.oculta
+  if ('destaque' in body) patch.destaque = !!body.destaque
+  if (Object.keys(patch).length === 0) {
+    return Response.json({ error: 'Nada para atualizar.' }, { status: 400 })
+  }
+
+  const { data, error } = await supabaseAny
+    .from('avaliacoes')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+
+  // Ocultar/reexibir altera o número público — recalcular a média do espaço.
+  if (!error && 'oculta' in body) {
+    await recomputarMedia(aval.propriedade_id)
   }
 
   return Response.json({ data, error })

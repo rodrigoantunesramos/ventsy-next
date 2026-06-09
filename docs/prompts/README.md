@@ -92,15 +92,15 @@ Legenda: ⬜ a fazer · 🟡 existe (estender) · ✅ pronto
 | Segurança, Controle de acesso & Credenciamento | `/painel/acesso` | `06-operacoes-eventos.md` | ✅ |
 | Estacionamento & Mobilidade | `/painel/estacionamento` | `06-operacoes-eventos.md` | ✅ |
 | Ingressos & Bilheteria | `/painel/bilheteria` | `06-operacoes-eventos.md` | ✅ |
-| Expositores & Patrocínios | `/painel/expositores` | `06-operacoes-eventos.md` | ⬜ |
-| Catering, Buffet & Bar | `/painel/catering` | `06-operacoes-eventos.md` | ⬜ |
-| Layouts, Plantas & Capacidade | `/painel/layouts` | `06-operacoes-eventos.md` | ⬜ |
-| Clima & Plano B (outdoor) | `/painel/plano-b` | `06-operacoes-eventos.md` | ⬜ |
+| Expositores & Patrocínios | `/painel/expositores` | `06-operacoes-eventos.md` | ✅ |
+| Catering, Buffet & Bar | `/painel/catering` | `06-operacoes-eventos.md` | ✅ |
+| Layouts, Plantas & Capacidade | `/painel/layouts` | `06-operacoes-eventos.md` | ✅ |
+| Clima & Plano B (outdoor) | `/painel/plano-b` | `06-operacoes-eventos.md` | ✅ |
 
 ### Fase 6 — Relacionamento, Comunidade & Marketing
 | Página | Rota | Arquivo | Status |
 |---|---|---|---|
-| Avaliações públicas (dono responde) | `/painel/avaliacoes` | `01-relacionamento.md` | ⬜ |
+| Avaliações públicas (dono responde) | `/painel/avaliacoes` | `01-relacionamento.md` | ✅ |
 | Feedbacks privados (cliente↔dono) | `/painel/feedbacks` | `01-relacionamento.md` | ⬜ |
 | Campanhas (envio em massa) | `/painel/campanhas` | `01-relacionamento.md` | ⬜ |
 | Marketing (cockpit) | `/painel/marketing` | `01-relacionamento.md` | ⬜ |

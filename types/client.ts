@@ -39,6 +39,12 @@ export interface ClientReview {
   verificada: boolean
   evento_tipo?: string
   criado_em: string
+  /** Resposta pública do dono (preenchida em /painel/avaliacoes). */
+  resposta?: string | null
+  respondido_em?: string | null
+  /** Moderação do dono: ocultas não aparecem no público; destaque sobe no anúncio. */
+  oculta?: boolean
+  destaque?: boolean
   propriedade?: PropertySummary
 }
 

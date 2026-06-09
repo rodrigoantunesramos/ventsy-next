@@ -13,7 +13,7 @@ import './propriedade.css'
 
 /* ── tipos ── */
 interface Foto { url: string; titulo: string; ordem: number; tipo?: string | null; focal_x?: number | null; focal_y?: number | null; alt?: string | null }
-interface Avaliacao { id: string; autor: string; avatar: string; data: string; nota: number; texto: string; verificada: boolean; evento_tipo?: string }
+interface Avaliacao { id: string; autor: string; avatar: string; data: string; nota: number; texto: string; verificada: boolean; evento_tipo?: string; resposta?: string | null; respondido_em?: string | null }
 interface UsuarioPerfil { nome?: string; foto_perfil?: string; criado_em?: string }
 interface Video { url: string; titulo: string }
 
@@ -176,6 +176,7 @@ function PropriedadeContent() {
           .select('*')
           .eq('propriedade_id', propIdNum)
           .eq('verificada', true)
+          .eq('oculta', false)
           .order('criado_em', { ascending: false }),
 
         supabaseAny
@@ -508,6 +509,12 @@ function PropriedadeContent() {
                     </div>
                     <div className="text-[var(--ouro)] text-[.88rem] mb-[6px]">{'★'.repeat(a.nota)}{'☆'.repeat(5-a.nota)}</div>
                     <p className="pp-aval-texto">{a.texto}</p>
+                    {a.resposta&&(
+                      <div className="mt-2.5 rounded-[10px] border-l-2 border-[#ff385c] bg-[#fafafa] px-3 py-2">
+                        <div className="text-[.74rem] font-semibold text-[#ff385c] mb-0.5">↳ Resposta do anfitrião</div>
+                        <p className="text-[.84rem] text-[#555] leading-[1.5] m-0">{a.resposta}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {!avalFil.length&&(
