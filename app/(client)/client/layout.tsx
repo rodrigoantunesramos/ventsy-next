@@ -13,6 +13,7 @@ interface UserProfile {
 
 const MENU_ITEMS = [
   { href: '/client',           label: '🏠 Início',            rota: '/client'           },
+  { href: '/client/eventos',   label: '🎫 Meus Eventos',       rota: '/client/eventos'   },
   { href: '/client/favoritos', label: '❤️ Favoritos',          rota: '/client/favoritos' },
   { href: '/client/conversas', label: '💬 Conversas',          rota: '/client/conversas' },
   { href: '/client/avaliacoes',label: '⭐ Minhas Avaliações',  rota: '/client/avaliacoes'},

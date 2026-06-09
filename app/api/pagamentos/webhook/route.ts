@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { ativarAssinatura } from '@/lib/assinatura'
+import { baixarParcela, resolverTokenMpDono } from '@/lib/portalServer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     // localiza nosso registro p/ achar a reserva e o anfitrião (define o token)
     const { data: pag } = await admin
       .from('pagamentos')
-      .select('reserva_id, plano_id, usuario_id, meses, valor')
+      .select('reserva_id, plano_id, usuario_id, meses, valor, parcela_id')
       .eq('mp_payment_id', paymentId)
       .maybeSingle()
 
@@ -42,6 +43,10 @@ export async function POST(req: NextRequest) {
         const { data: hm } = await admin.from('host_mp').select('mp_access_token, conectado').eq('usuario_id', reserva.host_id).maybeSingle()
         if (hm?.conectado && hm?.mp_access_token) token = hm.mp_access_token
       }
+    } else if (pag?.parcela_id && pag?.usuario_id) {
+      // Pagamento de parcela via Portal do Cliente — usa o MP do dono se conectado.
+      const r = await resolverTokenMpDono(pag.usuario_id)
+      if (r.token) token = r.token
     }
     if (!token) return Response.json({ ok: true })
 
@@ -58,12 +63,12 @@ export async function POST(req: NextRequest) {
       .update({ status, mp_status: status, mp_status_detail: pay?.status_detail, atualizado_em: new Date().toISOString() })
       .eq('mp_payment_id', paymentId)
 
-    // confirma quando aprovado: reserva → paga; assinatura → ativa
+    // confirma quando aprovado: parcela (portal) → baixa; assinatura → ativa; reserva → paga
     if (status === 'approved') {
-      const ext = pay?.external_reference
-      const reservaId = pag?.reserva_id || (ext && !String(ext).startsWith('plano:') ? ext : null)
-      if (reservaId) {
-        await admin.from('reservas').update({ status: 'paga' }).eq('id', reservaId)
+      const ext = pay?.external_reference ? String(pay.external_reference) : ''
+      if (pag?.parcela_id || ext.startsWith('parcela:')) {
+        const parcelaId = pag?.parcela_id ?? ext.slice('parcela:'.length)
+        if (parcelaId) await baixarParcela(parcelaId, { metodo: 'Pix (Portal)' })
       } else if (pag?.plano_id && pag?.usuario_id) {
         await ativarAssinatura({
           usuario_id: pag.usuario_id,
@@ -72,6 +77,9 @@ export async function POST(req: NextRequest) {
           valor: Number(pag.valor) || 0,
           mp_payment_id: paymentId,
         })
+      } else {
+        const reservaId = pag?.reserva_id || (ext && !ext.startsWith('plano:') ? ext : null)
+        if (reservaId) await admin.from('reservas').update({ status: 'paga' }).eq('id', reservaId)
       }
     }
   } catch {

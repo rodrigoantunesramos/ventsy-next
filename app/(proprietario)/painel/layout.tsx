@@ -55,7 +55,11 @@ const NAV: NavGroup[] = [
   {
     group: 'Marketing',
     items: [
+      { href: '/painel/marketing', label: 'Marketing', icon: 'growth', enabled: true },
       { href: '/painel/campanhas', label: 'Campanhas', icon: 'megaphone', enabled: true },
+      { href: '/painel/listas', label: 'Listas Oficiais', icon: 'list', enabled: true },
+      { href: '/painel/pesquisas', label: 'Pesquisas & NPS', icon: 'poll', enabled: true },
+      { href: '/painel/portal', label: 'Portal do Cliente', icon: 'portal', enabled: true },
     ],
   },
   {
@@ -370,6 +374,10 @@ const ICONS = {
   cloud: 'M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.5A4 4 0 0 0 6 19h11.5ZM9 21l-1 1.5M13 21l-1 1.5M16 21l-1 1.5',
   expo: 'M3 9l1.6-4.2A1 1 0 0 1 5.5 4h13a1 1 0 0 1 .9.8L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18M9 20v-6h6v6',
   megaphone: 'M3 11v2a1 1 0 0 0 1 1h2l3.5 3.5a1 1 0 0 0 1.7-.7V7.2a1 1 0 0 0-1.7-.7L6 10H4a1 1 0 0 0-1 1ZM15 8a4 4 0 0 1 0 8M18 5a8 8 0 0 1 0 14',
+  list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  poll: 'M5 21V9M12 21V3M19 21v-7M3 21h18',
+  growth: 'M3 17l6-6 4 4 7-7M14 8h5v5',
+  portal: 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {

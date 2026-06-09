@@ -37,6 +37,7 @@ export const MODULOS: { key: string; label: string; grupo: string }[] = [
   { key: 'relatorios', label: 'Relatórios', grupo: 'Gestão' },
   { key: 'documentos', label: 'Documentos', grupo: 'Gestão' },
   { key: 'diario', label: 'Diário', grupo: 'Gestão' },
+  { key: 'marketing', label: 'Marketing', grupo: 'Marketing' },
   { key: 'logistica', label: 'Logística', grupo: 'Operações' },
   { key: 'expositores', label: 'Expositores & Patrocínios', grupo: 'Operações' },
   { key: 'estacionamento', label: 'Estacionamento', grupo: 'Operações' },
