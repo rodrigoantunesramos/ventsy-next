@@ -53,6 +53,12 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: 'Marketing',
+    items: [
+      { href: '/painel/campanhas', label: 'Campanhas', icon: 'megaphone', enabled: true },
+    ],
+  },
+  {
     group: 'Operações',
     items: [
       { href: '/painel/producao', label: 'Produção', icon: 'clapper', enabled: true },
@@ -363,6 +369,7 @@ const ICONS = {
   utensils: 'M4 3v7a2 2 0 0 0 2 2v9M8 3v7a2 2 0 0 1-2 2M6 3v7M16 3c-1.3 0-2.5 1.7-2.5 4.5S14.7 12 16 12v9',
   cloud: 'M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.5A4 4 0 0 0 6 19h11.5ZM9 21l-1 1.5M13 21l-1 1.5M16 21l-1 1.5',
   expo: 'M3 9l1.6-4.2A1 1 0 0 1 5.5 4h13a1 1 0 0 1 .9.8L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18M9 20v-6h6v6',
+  megaphone: 'M3 11v2a1 1 0 0 0 1 1h2l3.5 3.5a1 1 0 0 0 1.7-.7V7.2a1 1 0 0 0-1.7-.7L6 10H4a1 1 0 0 0-1 1ZM15 8a4 4 0 0 1 0 8M18 5a8 8 0 0 1 0 14',
 } as const;
 
 function Icon({ name }: { name: keyof typeof ICONS }) {
