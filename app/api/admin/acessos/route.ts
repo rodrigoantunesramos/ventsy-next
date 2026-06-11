@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
 import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Gestão da equipe de admin (tabela admin_membros). O módulo 'acessos' só é
 // permitido ao super_admin (adminPode nega staff), então requireAdmin já barra
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
         { onConflict: 'usuario_id' },
       )
     if (error) return Response.json({ error: error.message }, { status: 500 })
+    await registrarAcaoAdmin(ctx, 'acessos', 'conceder', email, { papel })
     return Response.json({ ok: true })
   }
 
@@ -102,6 +104,7 @@ export async function POST(req: NextRequest) {
     if (ehVoceMesmo) return Response.json({ error: 'Você não pode remover a si mesmo.' }, { status: 400 })
     const { error } = await admin.from('admin_membros').delete().eq('usuario_id', id)
     if (error) return Response.json({ error: error.message }, { status: 500 })
+    await registrarAcaoAdmin(ctx, 'acessos', 'remover', id)
     return Response.json({ ok: true })
   }
 

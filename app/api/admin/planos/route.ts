@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
 import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Edição de planos (preço/benefícios/status) na fonte única `planos_config`,
 // consumida pelas páginas pública e do painel. Via service-role após requireAdmin.
@@ -59,5 +60,6 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabaseAdminAny.from('planos_config').upsert(registros, { onConflict: 'id' })
   if (error) return Response.json({ error: error.message }, { status: 500 })
+  await registrarAcaoAdmin(ctx, 'planos', 'salvar', null, { planos: registros.length })
   return Response.json({ ok: true })
 }

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
 import { supabaseAdmin, supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Gestão de usuários pelo admin. Tudo via service-role (após requireAdmin), por
 // isso enxerga/edita o que a RLS bloqueava no admin legado. Bloqueio/reativação
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest) {
   const action = body.action as string | undefined
   const id = body.id as string | undefined
   if (!action || !id) return Response.json({ error: 'Parâmetros ausentes.' }, { status: 400 })
+  await registrarAcaoAdmin(ctx, 'usuarios', action, id)
 
   if (action === 'editar') {
     const patch: Record<string, unknown> = {}

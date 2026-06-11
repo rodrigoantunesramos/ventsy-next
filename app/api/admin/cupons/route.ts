@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
 import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // CRUD de cupons pelo admin (a tabela `cupons` tem policy is_admin, mas
 // centralizamos na API service-role para manter o padrão e habilitar auditoria).
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
   const acaoRbac = action === 'excluir' ? 'excluir' : action === 'criar' ? 'criar' : 'editar'
   const ctx = await requireAdmin(req, 'cupons', acaoRbac)
   if (!ctx) return forbidden()
+  await registrarAcaoAdmin(ctx, 'cupons', action ?? 'acao', (body.id as string) ?? (body.codigo as string) ?? null)
 
   const admin = supabaseAdminAny
 

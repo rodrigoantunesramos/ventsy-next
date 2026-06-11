@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
 import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { registrarAcaoAdmin } from '@/lib/adminAudit'
 import { PLATAFORMA_CONFIG } from '@/lib/plataformaConfig'
 import { lerPlataformaConfig } from '@/lib/plataformaConfigServer'
 
@@ -37,5 +38,6 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabaseAdminAny.from('plataforma_config').upsert(registros, { onConflict: 'chave' })
   if (error) return Response.json({ error: error.message }, { status: 500 })
+  await registrarAcaoAdmin(ctx, 'config', 'salvar', null, { chaves: registros.map((r) => r.chave) })
   return Response.json({ ok: true })
 }
