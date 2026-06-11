@@ -1,88 +1,80 @@
 'use client'
-// ─────────────────────────────────────────────────────────────────
-// VENTSY Admin — Painel de Administração Central
-// Rota: /admin
-//
-// Acesso restrito ao proprietário (verificação por e-mail em
-// ADMIN_EMAILS dentro de /public/admin/admin.js).
-//
-// TODO: adicionar verificação server-side no middleware quando pronto.
-// ─────────────────────────────────────────────────────────────────
 
-import Script from 'next/script'
+import { useEffect, useState } from 'react'
 
-import AdminLoadingScreen from '@/components/admin/AdminLoadingScreen'
-import AdminLoginScreen   from '@/components/admin/AdminLoginScreen'
-import AdminSidebar       from '@/components/admin/AdminSidebar'
-import AdminTopbar        from '@/components/admin/AdminTopbar'
-import AdminModals        from '@/components/admin/AdminModals'
+type Overview = {
+  usuarios: number
+  propriedades: { total: number; publicadas: number; pendentes: number }
+  assinaturas: {
+    total: number
+    porStatus: Record<string, number>
+    ativasPorPlano: Record<string, number>
+  }
+  cupons: number
+}
 
-import PageDashboard    from '@/components/admin/pages/PageDashboard'
-import PageAnalytics    from '@/components/admin/pages/PageAnalytics'
-import PagePropriedades from '@/components/admin/pages/PagePropriedades'
-import PageUsuarios     from '@/components/admin/pages/PageUsuarios'
-import PageIncompletos  from '@/components/admin/pages/PageIncompletos'
-import PageAssinaturas  from '@/components/admin/pages/PageAssinaturas'
-import PagePlanos       from '@/components/admin/pages/PagePlanos'
-import PageConfig       from '@/components/admin/pages/PageConfig'
-import PageFinanceiro   from '@/components/admin/pages/PageFinanceiro'
-import PageQualidade    from '@/components/admin/pages/PageQualidade'
-import PageComunicacao  from '@/components/admin/pages/PageComunicacao'
-import PageCupons       from '@/components/admin/pages/PageCupons'
-import PageLogs         from '@/components/admin/pages/PageLogs'
+export default function AdminDashboard() {
+  const [data, setData] = useState<Overview | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
-export default function AdminPage() {
+  useEffect(() => {
+    fetch('/api/admin/overview')
+      .then(async (r) => {
+        if (!r.ok) throw new Error(r.status === 403 ? 'Acesso negado.' : `Erro ${r.status}`)
+        return r.json()
+      })
+      .then(setData)
+      .catch((e) => setErro(e.message))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
-    <div className="admin-root">
-      {/* ── Scripts CDN ────────────────────────────────────────── */}
-      <Script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-        strategy="beforeInteractive"
-      />
-      <Script
-        src="https://cdn.jsdelivr.net/npm/chart.js"
-        strategy="beforeInteractive"
-      />
+    <div className="max-w-6xl p-8">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <p className="mb-6 mt-1 text-sm text-[#a0a0b8]">
+        Visão geral da plataforma — dados reais via service-role (inclui o que a RLS escondia do
+        admin antigo, como assinaturas).
+      </p>
 
-      {/* ── Lógica do painel (extraída do admin.html original) ── */}
-      <Script
-        src="/admin/admin.js"
-        strategy="afterInteractive"
-      />
+      {loading && <div className="text-[#a0a0b8]">Carregando…</div>}
 
-      {/* ── Loading & Login ─────────────────────────────────────── */}
-      <AdminLoadingScreen />
-      <AdminLoginScreen />
-
-      {/* ── Sidebar ─────────────────────────────────────────────── */}
-      <AdminSidebar />
-
-      {/* ── Área principal ──────────────────────────────────────── */}
-      <div className="admin-main" id="main-content">
-        <AdminTopbar />
-
-        <div className="admin-content">
-          <PageDashboard />
-          <PageAnalytics />
-          <PagePropriedades />
-          <PageUsuarios />
-          <PageIncompletos />
-          <PageAssinaturas />
-          <PagePlanos />
-          <PageConfig />
-          <PageFinanceiro />
-          <PageQualidade />
-          <PageComunicacao />
-          <PageCupons />
-          <PageLogs />
+      {erro && (
+        <div className="rounded-lg border border-[#ff385c]/30 bg-[#ff385c]/10 px-4 py-3 text-[#ff385c]">
+          {erro}
         </div>
-      </div>
+      )}
 
-      {/* ── Modais ──────────────────────────────────────────────── */}
-      <AdminModals />
+      {data && (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <Card label="Usuários" value={data.usuarios} />
+          <Card
+            label="Propriedades"
+            value={data.propriedades.total}
+            sub={`${data.propriedades.publicadas} no ar · ${data.propriedades.pendentes} pendentes`}
+          />
+          <Card
+            label="Assinaturas"
+            value={data.assinaturas.total}
+            sub={
+              Object.entries(data.assinaturas.porStatus)
+                .map(([k, v]) => `${v} ${k}`)
+                .join(' · ') || '—'
+            }
+          />
+          <Card label="Cupons" value={data.cupons} />
+        </div>
+      )}
+    </div>
+  )
+}
 
-      {/* ── Toasts ──────────────────────────────────────────────── */}
-      <div id="toast-container"></div>
+function Card({ label, value, sub }: { label: string; value: number; sub?: string }) {
+  return (
+    <div className="rounded-2xl border border-white/[0.07] bg-[#111118] p-5">
+      <div className="mb-1 text-[0.72rem] uppercase tracking-wide text-[#5c5c78]">{label}</div>
+      <div className="text-3xl font-bold">{value}</div>
+      {sub && <div className="mt-1 text-[0.72rem] text-[#a0a0b8]">{sub}</div>}
     </div>
   )
 }

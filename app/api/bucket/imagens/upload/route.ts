@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabaseRest as supabase } from '@/lib/supabaseServer'
 
 export async function POST(req: Request) {
   const formData = await req.formData()
