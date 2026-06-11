@@ -27,7 +27,7 @@ export const ADMIN_MODULOS: { key: string; label: string; pronto?: boolean }[] =
   { key: 'planos', label: 'Planos, Preços & Comissões', pronto: true },
   { key: 'cupons', label: 'Cupons & Créditos', pronto: true },
   { key: 'comunicacao', label: 'Comunicação', pronto: true },
-  { key: 'moderacao', label: 'Conteúdo & Moderação' },
+  { key: 'moderacao', label: 'Conteúdo & Moderação', pronto: true },
   { key: 'auditoria', label: 'Auditoria & Logs', pronto: true },
   { key: 'config', label: 'Configurações & Flags', pronto: true },
   { key: 'saude', label: 'Saúde do Sistema', pronto: true },
