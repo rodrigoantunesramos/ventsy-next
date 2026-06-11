@@ -30,7 +30,7 @@ export const ADMIN_MODULOS: { key: string; label: string; pronto?: boolean }[] =
   { key: 'moderacao', label: 'Conteúdo & Moderação' },
   { key: 'auditoria', label: 'Auditoria & Logs' },
   { key: 'config', label: 'Configurações & Flags', pronto: true },
-  { key: 'saude', label: 'Saúde do Sistema' },
+  { key: 'saude', label: 'Saúde do Sistema', pronto: true },
   { key: 'acessos', label: 'Acessos da Equipe', pronto: true },
 ]
 
