@@ -21,7 +21,7 @@ export type AdminMembro = {
 // `acessos` é exclusivo do super_admin (gestão da equipe).
 export const ADMIN_MODULOS: { key: string; label: string; pronto?: boolean }[] = [
   { key: 'dashboard', label: 'Dashboard', pronto: true },
-  { key: 'usuarios', label: 'Usuários & Contas' },
+  { key: 'usuarios', label: 'Usuários & Contas', pronto: true },
   { key: 'propriedades', label: 'Propriedades & Aprovação' },
   { key: 'financeiro', label: 'Assinaturas & Financeiro' },
   { key: 'planos', label: 'Planos, Preços & Comissões' },
