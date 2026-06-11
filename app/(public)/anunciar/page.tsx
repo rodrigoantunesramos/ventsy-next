@@ -111,7 +111,7 @@ export default function AnunciarPage() {
         comodidades: comodidades.length ? `{${comodidades.join(',')}}` : null,
         latitude: coords?.lat ?? null,
         longitude: coords?.lng ?? null,
-        publicada: true,
+        publicada: false, // fila de aprovação: vai ao ar após o admin aprovar em /admin/propriedades
         avaliacao: null,
       }
 

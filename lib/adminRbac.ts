@@ -22,8 +22,8 @@ export type AdminMembro = {
 export const ADMIN_MODULOS: { key: string; label: string; pronto?: boolean }[] = [
   { key: 'dashboard', label: 'Dashboard', pronto: true },
   { key: 'usuarios', label: 'Usuários & Contas', pronto: true },
-  { key: 'propriedades', label: 'Propriedades & Aprovação' },
-  { key: 'financeiro', label: 'Assinaturas & Financeiro' },
+  { key: 'propriedades', label: 'Propriedades & Aprovação', pronto: true },
+  { key: 'financeiro', label: 'Assinaturas & Financeiro', pronto: true },
   { key: 'planos', label: 'Planos, Preços & Comissões' },
   { key: 'cupons', label: 'Cupons & Créditos' },
   { key: 'comunicacao', label: 'Comunicação' },
