@@ -25,13 +25,13 @@ export const ADMIN_MODULOS: { key: string; label: string; pronto?: boolean }[] =
   { key: 'propriedades', label: 'Propriedades & Aprovação', pronto: true },
   { key: 'financeiro', label: 'Assinaturas & Financeiro', pronto: true },
   { key: 'planos', label: 'Planos, Preços & Comissões' },
-  { key: 'cupons', label: 'Cupons & Créditos' },
+  { key: 'cupons', label: 'Cupons & Créditos', pronto: true },
   { key: 'comunicacao', label: 'Comunicação' },
   { key: 'moderacao', label: 'Conteúdo & Moderação' },
   { key: 'auditoria', label: 'Auditoria & Logs' },
   { key: 'config', label: 'Configurações & Flags' },
   { key: 'saude', label: 'Saúde do Sistema' },
-  { key: 'acessos', label: 'Acessos da Equipe' },
+  { key: 'acessos', label: 'Acessos da Equipe', pronto: true },
 ]
 
 const NIVEL_ORDEM: Record<AdminNivel, number> = { nenhum: 0, leitura: 1, edicao: 2, total: 3 }
