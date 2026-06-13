@@ -1,12 +1,13 @@
 'use client';
 
-// Aba Dados & LGPD — exportar meus dados (JSON), política de retenção e pedido de
-// encerramento de conta. Exclusão definitiva é processada no servidor.
+// Aba Dados & LGPD — exportar meus dados (JSON), política de retenção e exclusão
+// definitiva da conta (anonimização da PII + bloqueio de login, imediata e
+// irreversível; exige reautenticação por senha).
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { authHeaders } from '@/lib/supabase';
-import { formatDateTime } from '@/lib/format';
+import { useRouter } from 'next/navigation';
+import { supabase, authHeaders } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { Section, Campo, SaveBar, inp } from './ui';
 import type { EmpresaConfig } from '../_lib';
@@ -22,9 +23,10 @@ const RETENCOES = [6, 12, 24, 36, 60];
 
 export default function TabDados({ empresa: e, set, saving, onSave }: Props) {
   const toast = useToast();
+  const router = useRouter();
   const [exporting, setExporting] = useState(false);
   const [excluirTxt, setExcluirTxt] = useState('');
-  const [solicitadoEm, setSolicitadoEm] = useState<string | null>(e.exclusao_solicitada_em);
+  const [senha, setSenha] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function exportar() {
@@ -41,24 +43,21 @@ export default function TabDados({ empresa: e, set, saving, onSave }: Props) {
     } catch { toast.error('Não foi possível exportar agora.'); } finally { setExporting(false); }
   }
 
-  async function solicitarExclusao() {
-    if (excluirTxt.trim().toUpperCase() !== 'EXCLUIR') return;
+  async function encerrarConta() {
+    if (excluirTxt.trim().toUpperCase() !== 'EXCLUIR' || !senha) return;
     setBusy(true);
     try {
-      const r = await fetch('/api/conta/excluir', { method: 'POST', headers: await authHeaders() });
-      const j = await r.json();
-      if (!r.ok) throw new Error();
-      setSolicitadoEm(j.solicitado_em); setExcluirTxt('');
-      toast.success('Pedido de encerramento registrado.');
-    } catch { toast.error('Erro ao registrar o pedido.'); } finally { setBusy(false); }
-  }
-
-  async function cancelarExclusao() {
-    setBusy(true);
-    try {
-      await fetch('/api/conta/excluir', { method: 'DELETE', headers: await authHeaders() });
-      setSolicitadoEm(null); toast.success('Pedido de encerramento cancelado.');
-    } catch { toast.error('Erro ao cancelar.'); } finally { setBusy(false); }
+      const r = await fetch('/api/conta/excluir', {
+        method: 'POST',
+        headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmacao: 'EXCLUIR', senha }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { toast.error(j.error || 'Não foi possível encerrar a conta.'); return; }
+      toast.success('Conta encerrada. Você será desconectado.');
+      await supabase.auth.signOut();
+      router.replace('/');
+    } catch { toast.error('Erro ao encerrar a conta.'); } finally { setBusy(false); }
   }
 
   return (
@@ -87,19 +86,28 @@ export default function TabDados({ empresa: e, set, saving, onSave }: Props) {
       <section className="rounded-2xl border border-red-200 bg-red-50/40 p-6">
         <h2 className="text-base font-bold text-red-700">Encerrar conta</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          O encerramento é permanente e remove seus dados da Ventsy. Digite <strong>EXCLUIR</strong> para registrar o pedido — nossa equipe conclui em até 48h úteis.
+          Ação <strong>imediata e irreversível</strong>: seus dados pessoais são anonimizados e o acesso é
+          bloqueado. Registros exigidos por lei (notas fiscais e lançamentos contábeis) são mantidos de forma
+          anonimizada. Confirme com sua senha e digite <strong>EXCLUIR</strong>.
         </p>
-        {solicitadoEm ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm">
-            <span className="font-medium text-red-700">Pedido registrado em {formatDateTime(solicitadoEm)}.</span>
-            <button onClick={cancelarExclusao} disabled={busy} className="font-semibold text-ink-soft hover:text-ink underline disabled:opacity-60">Cancelar pedido</button>
-          </div>
-        ) : (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <input value={excluirTxt} onChange={(ev) => setExcluirTxt(ev.target.value)} placeholder="EXCLUIR" className="rounded-xl border border-red-300 bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-200" />
-            <button onClick={solicitarExclusao} disabled={busy || excluirTxt.trim().toUpperCase() !== 'EXCLUIR'} className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-40">Encerrar minha conta</button>
-          </div>
-        )}
+        <div className="mt-4 grid max-w-sm gap-3">
+          <input
+            type="password" value={senha} onChange={(ev) => setSenha(ev.target.value)}
+            placeholder="Sua senha" autoComplete="current-password"
+            className="rounded-xl border border-red-300 bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+          />
+          <input
+            value={excluirTxt} onChange={(ev) => setExcluirTxt(ev.target.value)} placeholder="EXCLUIR"
+            className="rounded-xl border border-red-300 bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+          />
+          <button
+            onClick={encerrarConta}
+            disabled={busy || excluirTxt.trim().toUpperCase() !== 'EXCLUIR' || !senha}
+            className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-40"
+          >
+            {busy ? 'Encerrando…' : 'Encerrar minha conta'}
+          </button>
+        </div>
       </section>
     </div>
   );
