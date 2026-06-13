@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { ativarAssinatura } from '@/lib/assinatura'
 import { baixarParcela, resolverTokenMpDono } from '@/lib/portalServer'
+import { registrarAuditoria } from '@/lib/auditServer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any
@@ -82,6 +83,17 @@ export async function POST(req: NextRequest) {
         if (reservaId) await admin.from('reservas').update({ status: 'paga' }).eq('id', reservaId)
       }
     }
+
+    // Trilha de auditoria do pagamento (entidade sensível) — registra qualquer status.
+    await registrarAuditoria({
+      req, contaId: pag?.usuario_id ?? null,
+      acao: 'pagamento', entidade: 'pagamento', entidadeId: paymentId, sensivel: true,
+      descricao: `Pagamento Mercado Pago: ${status}`,
+      meta: {
+        external_reference: pay?.external_reference ?? null,
+        reserva_id: pag?.reserva_id ?? null, parcela_id: pag?.parcela_id ?? null, plano_id: pag?.plano_id ?? null,
+      },
+    })
   } catch {
     /* responde ok mesmo assim — o MP reenvia se precisar */
   }

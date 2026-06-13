@@ -350,6 +350,34 @@ export const EVENTOS_WEBHOOK: WebhookEventoDef[] = [
 export const EVENTOS_WEBHOOK_SET = new Set(EVENTOS_WEBHOOK.map((e) => e.v))
 export const eventoWebhookLabel = (v: string): string => EVENTOS_WEBHOOK.find((e) => e.v === v)?.label || v
 
+/**
+ * Anti-SSRF para webhooks de saída: a URL deve ser https (http://localhost só em
+ * dev) e NÃO pode apontar para hosts internos/privados — loopback, RFC1918
+ * (10/172.16-31/192.168), link-local/metadata (169.254), 0.0.0.0, domínios
+ * .local/.internal ou hostnames sem ponto. Checagem por literal (defesa em
+ * profundidade; não resolve DNS).
+ */
+export function urlWebhookSegura(u: unknown, permitirLocalhost = false): boolean {
+  let url: URL
+  try { url = new URL(String(u ?? '')) } catch { return false }
+  const proto = url.protocol.toLowerCase()
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, '')
+  const loopback = host === 'localhost' || /^127\./.test(host) || host === '::1'
+  if (proto !== 'https:' && !(permitirLocalhost && proto === 'http:' && loopback)) return false
+  if (loopback) return permitirLocalhost
+  if (
+    host === '0.0.0.0' ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+    /^169\.254\./.test(host) ||
+    host.endsWith('.local') ||
+    host.endsWith('.internal') ||
+    !host.includes('.')
+  ) return false
+  return true
+}
+
 /** Corpo canônico de um webhook — o MESMO objeto que é assinado e entregue. */
 export type CorpoWebhook = { id: string; evento: string; criado_em: string; dados: unknown }
 export function corpoWebhook(id: string, evento: string, criadoEmIso: string, dados: unknown): CorpoWebhook {

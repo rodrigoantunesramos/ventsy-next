@@ -12,7 +12,7 @@ import { createHmac, randomBytes, randomUUID } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import {
   corpoWebhook, formatarAssinatura, deveRetentar, entregaOk,
-  proximaTentativaSegundos, HEADER_ASSINATURA,
+  proximaTentativaSegundos, HEADER_ASSINATURA, urlWebhookSegura,
 } from '@/lib/integracoes'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +38,17 @@ async function entregarWebhook(sub: Subscricao, evento: string, dados: unknown, 
   const corpo = corpoWebhook(deliveryId, evento, new Date().toISOString(), dados)
   const raw = JSON.stringify(corpo)
   const assinatura = formatarAssinatura(assinarCorpo(sub.segredo, raw))
+
+  // Anti-SSRF: nunca entrega para host interno/privado (defesa em profundidade,
+  // mesmo que a URL tenha sido cadastrada antes da validação de entrada).
+  if (!urlWebhookSegura(sub.url)) {
+    await admin.from('integracoes_webhooks_log').insert({
+      usuario_id: sub.usuario_id, webhook_id: sub.id, evento, tentativa,
+      http_status: 0, ok: false, erro: 'URL bloqueada (host interno/privado)',
+      payload: corpo, proxima_tentativa_em: null,
+    })
+    return { ok: false, status: 0 }
+  }
 
   let status = 0
   let erro: string | null = null

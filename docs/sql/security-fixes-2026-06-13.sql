@@ -27,3 +27,28 @@ revoke select on public.v_indicacoes_dashboard from anon;               -- mant�
 -- executável por anon. O EXECUTE default vai para PUBLIC; revogar de anon/auth não basta.
 revoke execute on function public.limpar_zumbis_auth() from public, anon, authenticated;
 grant execute on function public.limpar_zumbis_auth() to service_role;
+
+-- V-18 (cont.): fixa search_path = public em TODAS as funções do schema public
+-- (migration sec_fix_function_search_path). Elimina o aviso
+-- function_search_path_mutable. Após aplicar: 56 funções, 0 sem search_path.
+do $$
+declare r record;
+begin
+  for r in
+    select p.proname, pg_get_function_identity_arguments(p.oid) as args
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.prokind = 'f'
+  loop
+    begin
+      execute format('alter function public.%I(%s) set search_path = public', r.proname, r.args);
+    exception when others then raise notice 'skip %(%): %', r.proname, r.args, sqlerrm;
+    end;
+  end loop;
+end $$;
+
+-- ── Hardening que NÃO é SQL / ficou deferido (ação manual — ver relatório) ──────
+-- • HIBP (proteção de senha vazada): ligar em Supabase > Authentication > Policies.
+-- • pg_net em public: mover de schema requer teste (risco de quebrar os crons que
+--   usam pg_net via private.disparar_cron).
+-- • Bucket público fotos-dashboard permite listagem: avaliar policy de Storage
+--   (validar exibição por URL pública depois de restringir o SELECT anônimo).
