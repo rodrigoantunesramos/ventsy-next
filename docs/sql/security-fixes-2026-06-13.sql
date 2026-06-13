@@ -46,9 +46,21 @@ begin
   end loop;
 end $$;
 
--- ── Hardening que NÃO é SQL / ficou deferido (ação manual — ver relatório) ──────
--- • HIBP (proteção de senha vazada): ligar em Supabase > Authentication > Policies.
--- • pg_net em public: mover de schema requer teste (risco de quebrar os crons que
---   usam pg_net via private.disparar_cron).
--- • Bucket público fotos-dashboard permite listagem: avaliar policy de Storage
---   (validar exibição por URL pública depois de restringir o SELECT anônimo).
+-- ── Rodada 2 (pós-LGPD) ─────────────────────────────────────────────────────────
+-- V-17 follow-up: a view só lê de `indicacoes` (policy SELECT indicador_id=auth.uid());
+-- security_invoker faz a view respeitar a RLS do chamador (fecha cross-tenant
+-- autenticado + o ERROR security_definer_view) sem quebrar o painel/indique.
+alter view public.v_indicacoes_dashboard set (security_invoker = on);
+
+-- V-19: bucket público fotos-dashboard expunha LISTAGEM (paths com user-ids) a anon.
+-- O app usa URLs /object/public/ + a tabela fotos_imovel (não lista o bucket).
+-- Verificado: após remover, /object/public/ segue 200 e a listagem anônima dá [].
+drop policy if exists "Leitura pública fotos-dashboard 1fxml9y_0" on storage.objects;
+
+-- ── Aceito / ação manual (ver relatório) ────────────────────────────────────────
+-- • HIBP (senha vazada): ligar em Supabase > Authentication > Policies (não é SQL).
+-- • pg_net: extensão registrada em public, mas os objetos http_* vivem no schema
+--   `net` e disparar_cron usa net.http_get (qualificado). Mover quebraria o cron
+--   sem ganho real → MANTIDO (falso-positivo de baixo risco).
+-- • perfis_publicos permanece SECURITY DEFINER: é a forma correta de expor um
+--   subconjunto de colunas de usuarios numa página pública (RLS não filtra coluna).
