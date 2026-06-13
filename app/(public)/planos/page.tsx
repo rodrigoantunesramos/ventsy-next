@@ -264,7 +264,7 @@ function PlanosContent() {
           valor={checkout.valor}
           email={userEmail}
           onClose={() => setCheckout(null)}
-          onPaid={() => { setCheckout(null); setAlerta({ msg: '✅ Pagamento aprovado! Seu plano foi ativado.', cor: 'green' }); setTimeout(() => router.push('/dashboard'), 2500) }}
+          onPaid={() => { setCheckout(null); setAlerta({ msg: '✅ Pagamento aprovado! Seu plano foi ativado.', cor: 'green' }); setTimeout(() => router.push('/painel'), 2500) }}
         />
       )}
     </>

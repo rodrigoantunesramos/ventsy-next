@@ -30,12 +30,20 @@ export type Breakdown = {
 
 const r2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100
 
-export function calcularTaxas(valorBase: number, modelo: ModeloTaxa = FEE_CONFIG.modelo): Breakdown {
+// `cfg` permite injetar taxas dinâmicas (ex.: editadas pelo admin via
+// plataforma_config — ver lib/feesServer). Sem ele, usa o FEE_CONFIG padrão.
+type TaxasCfg = { taxaAnfitriaoUnica: number; taxaAnfitriaoSplit: number; taxaHospedeSplit: number }
+
+export function calcularTaxas(
+  valorBase: number,
+  modelo: ModeloTaxa = FEE_CONFIG.modelo,
+  cfg: TaxasCfg = FEE_CONFIG,
+): Breakdown {
   const base = r2(Math.max(0, valorBase || 0))
 
   if (modelo === 'dividido') {
-    const taxaHospede = r2(base * FEE_CONFIG.taxaHospedeSplit)
-    const taxaAnfitriao = r2(base * FEE_CONFIG.taxaAnfitriaoSplit)
+    const taxaHospede = r2(base * cfg.taxaHospedeSplit)
+    const taxaAnfitriao = r2(base * cfg.taxaAnfitriaoSplit)
     return {
       modelo,
       valorBase: base,
@@ -48,7 +56,7 @@ export function calcularTaxas(valorBase: number, modelo: ModeloTaxa = FEE_CONFIG
   }
 
   // modo 'anfitriao' — taxa única, maior
-  const taxaAnfitriao = r2(base * FEE_CONFIG.taxaAnfitriaoUnica)
+  const taxaAnfitriao = r2(base * cfg.taxaAnfitriaoUnica)
   return {
     modelo,
     valorBase: base,

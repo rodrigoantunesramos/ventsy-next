@@ -7,6 +7,13 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
 
+// Destino pós-login: respeita ?redirect (apenas caminhos internos), senão /painel.
+function destinoPosLogin(): string {
+  if (typeof window === 'undefined') return '/painel'
+  const r = new URLSearchParams(window.location.search).get('redirect')
+  return r && r.startsWith('/') && !r.startsWith('//') ? r : '/painel'
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail]           = useState('')
@@ -24,7 +31,7 @@ export default function LoginPage() {
   // Redireciona se já logado
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace('/painel')
+      if (data.session) router.replace(destinoPosLogin())
     })
   }, [router])
 
@@ -44,7 +51,7 @@ export default function LoginPage() {
       void auditLogin(undefined, email.trim()) // trilha: tentativa malsucedida
     } else {
       void auditLogin(data.session?.access_token) // trilha: login bem-sucedido
-      router.replace('/painel')
+      router.replace(destinoPosLogin())
     }
   }
 

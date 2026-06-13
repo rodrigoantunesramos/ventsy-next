@@ -100,8 +100,11 @@ export default function AdminConfig() {
                         </button>
                       ) : (
                         <input
-                          value={typeof valores[c.chave] === 'string' ? (valores[c.chave] as string) : String(valores[c.chave] ?? '')}
-                          onChange={(e) => set(c.chave, e.target.value)}
+                          type={c.tipo === 'numero' ? 'number' : 'text'}
+                          value={String(valores[c.chave] ?? '')}
+                          onChange={(e) =>
+                            set(c.chave, c.tipo === 'numero' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value)
+                          }
                           className="w-64 rounded-lg border border-white/[0.08] bg-[#1a1a24] px-3 py-1.5 text-sm outline-none focus:border-[#ff385c]"
                         />
                       )}

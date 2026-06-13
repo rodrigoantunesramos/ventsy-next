@@ -67,6 +67,7 @@ export default function FaleConoscoPage() {
   const [mensagem, setMensagem] = useState('')
   const [erros, setErros]       = useState<Record<string, boolean>>({})
   const [enviado, setEnviado]   = useState(false)
+  const [enviando, setEnviando] = useState(false)
 
   // Scroll reveal
   useEffect(() => {
@@ -78,14 +79,32 @@ export default function FaleConoscoPage() {
     return () => obs.disconnect()
   }, [])
 
-  function enviar() {
+  async function enviar() {
     const novosErros: Record<string, boolean> = {}
     if (!nome.trim())     novosErros.nome = true
     if (!email.trim())    novosErros.email = true
     if (!mensagem.trim()) novosErros.mensagem = true
     setErros(novosErros)
     if (Object.keys(novosErros).length > 0) return
-    setEnviado(true)
+
+    setEnviando(true)
+    try {
+      const r = await fetch('/api/contato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email, telefone, assunto: chip, perfil, mensagem }),
+      })
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}))
+        alert(j.error || 'Não foi possível enviar. Tente novamente.')
+        return
+      }
+      setEnviado(true)
+    } catch {
+      alert('Falha de conexão. Tente novamente.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (

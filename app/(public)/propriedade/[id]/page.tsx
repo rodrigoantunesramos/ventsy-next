@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, Suspense } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, notFound } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
@@ -69,6 +69,7 @@ function PropriedadeContent() {
   const [avaliacoes,setAval]   = useState<Avaliacao[]>([])
   const [plano,setPlano]       = useState<'basico'|'pro'|'ultra'>('basico')
   const [loading,setLoading]   = useState(true)
+  const [naoEncontrado,setNaoEncontrado] = useState(false)
   const [anfNome,setAnfNome]   = useState('—')
   const [anfTempo,setAnfTempo] = useState('—')
   const [anfAv,setAnfAv]       = useState('')
@@ -154,7 +155,8 @@ function PropriedadeContent() {
       )
 
       if (!p) {
-        loadDemo()
+        setNaoEncontrado(true)
+        setLoading(false)
         return
       }
 
@@ -330,6 +332,8 @@ function PropriedadeContent() {
   const hostNome = prop?.nome_responsavel || anfNome
   const hostBio  = prop?.bio_responsavel || ''
   const custosExtras:any[] = Array.isArray(prop?.custos_extras) ? prop.custos_extras.filter((c:any)=>c?.nome) : []
+
+  if (naoEncontrado) notFound()
 
   if(loading) return(
     <div className="pp-loading">

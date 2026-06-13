@@ -70,4 +70,30 @@ export const PLATAFORMA_CONFIG: ConfigDef[] = [
     padrao: '',
     grupo: 'Institucional',
   },
+  // Comissão da Ventsy — incide SÓ em eventos fechados pela plataforma (checkout
+  // de reserva paga via Ventsy). Contato direto/WhatsApp não passa por aqui.
+  {
+    chave: 'comissao_anfitriao_unica_pct',
+    label: 'Taxa do anfitrião — modelo único (%)',
+    desc: 'Descontada do anfitrião quando o hóspede paga só o aluguel. Padrão 15.',
+    tipo: 'numero',
+    padrao: 15,
+    grupo: 'Comissão (eventos via Ventsy)',
+  },
+  {
+    chave: 'comissao_anfitriao_split_pct',
+    label: 'Taxa do anfitrião — modelo dividido (%)',
+    desc: 'Percentual do anfitrião no modelo dividido. Padrão 3.',
+    tipo: 'numero',
+    padrao: 3,
+    grupo: 'Comissão (eventos via Ventsy)',
+  },
+  {
+    chave: 'comissao_hospede_split_pct',
+    label: 'Taxa do hóspede — modelo dividido (%)',
+    desc: 'Percentual somado ao hóspede no modelo dividido. Padrão 12.',
+    tipo: 'numero',
+    padrao: 12,
+    grupo: 'Comissão (eventos via Ventsy)',
+  },
 ]

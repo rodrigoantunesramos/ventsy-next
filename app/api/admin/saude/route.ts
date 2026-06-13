@@ -18,11 +18,11 @@ const CRONS = [
   { rota: 'rh-alertas', agenda: '0 7 * * *', orfao: false },
   { rota: 'clima-eventos', agenda: '0 8 * * *', orfao: false },
   { rota: 'weekly-report', agenda: '0 12 * * 1', orfao: false },
-  { rota: 'campanhas', agenda: '(não agendado)', orfao: true },
-  { rota: 'pesquisas-pos-evento', agenda: '(não agendado)', orfao: true },
-  { rota: 'automacoes', agenda: '(não agendado)', orfao: true },
-  { rota: 'webhooks-retry', agenda: '(não agendado)', orfao: true },
-  { rota: 'relatorios-agendados', agenda: '(não agendado)', orfao: true },
+  { rota: 'campanhas', agenda: '*/15 * * * *', orfao: false },
+  { rota: 'webhooks-retry', agenda: '*/15 * * * *', orfao: false },
+  { rota: 'automacoes', agenda: '30 8 * * *', orfao: false },
+  { rota: 'pesquisas-pos-evento', agenda: '0 9 * * *', orfao: false },
+  { rota: 'relatorios-agendados', agenda: '0 10 * * *', orfao: false },
 ]
 
 export async function GET(req: NextRequest) {

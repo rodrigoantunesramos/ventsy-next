@@ -109,8 +109,8 @@ export default function AdminPlanos() {
 
           <div className="mt-8 rounded-xl border border-white/[0.07] bg-[#0d0d13] p-4 text-sm text-[#a0a0b8]">
             <strong className="text-[#f0f0f5]">Comissão da plataforma</strong> — a taxa cobrada apenas nos eventos
-            fechados dentro da Ventsy ainda está fixa no código (lib/fees.ts). Torná-la editável aqui toca o fluxo de
-            pagamento (checkout), então será feito numa etapa dedicada, com cuidado.
+            fechados dentro da Ventsy agora é editável em <strong>Configurações → Comissão (eventos via Ventsy)</strong>.
+            O checkout lê esses percentuais (com fallback ao padrão), sem alterar a lógica de pagamento.
           </div>
         </>
       )}

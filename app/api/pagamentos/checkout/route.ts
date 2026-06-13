@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized, forbidden } from '@/lib/apiAuth'
-import { calcularTaxas } from '@/lib/fees'
+import { calcularTaxasServer } from '@/lib/feesServer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'A reserva precisa estar aprovada pelo anfitrião antes do pagamento.' }, { status: 409 })
   }
 
-  const fees = calcularTaxas(Number(reserva.valor_estimado) || 0)
+  const fees = await calcularTaxasServer(Number(reserva.valor_estimado) || 0)
   if (fees.totalHospede <= 0) return Response.json({ error: 'Valor inválido para cobrança.' }, { status: 400 })
 
   // Split: se o anfitrião conectou o Mercado Pago, o pagamento cai na conta DELE
