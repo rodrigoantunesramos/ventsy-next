@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase, authHeaders } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Suspense } from 'react'
@@ -319,6 +319,15 @@ function CadastroContent() {
       }
 
       try { await supabase.rpc('marcar_cadastro_convertido', { p_email: email.trim() }) } catch (_) {}
+
+      // LGPD — registra a prova do aceite dos Termos/Privacidade (server-side: versão/IP/UA).
+      try {
+        await fetch('/api/conta/consentimento', {
+          method: 'POST',
+          headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: nome.trim() }),
+        })
+      } catch (_) {}
 
       setSucesso(true)
 
