@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
 import { supabaseAdmin, supabaseAdminAny } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
+import { sendEmail } from '@/lib/email'
 
 // Gestão de usuários pelo admin. Tudo via service-role (após requireAdmin), por
 // isso enxerga/edita o que a RLS bloqueava no admin legado. Bloqueio/reativação
@@ -100,6 +101,49 @@ export async function POST(req: NextRequest) {
     )
     if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
+  }
+
+  if (action === 'reset_senha') {
+    const { data: u } = await admin.from('usuarios').select('email').eq('id', id).maybeSingle()
+    const emailAlvo = u?.email as string | undefined
+    if (!emailAlvo) return Response.json({ error: 'Usuário sem e-mail cadastrado.' }, { status: 400 })
+    const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ventsy.com.br'
+    const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'recovery',
+      email: emailAlvo,
+      options: { redirectTo: `${site}/redefinir-senha` },
+    })
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+    const link = (linkData as { properties?: { action_link?: string } })?.properties?.action_link ?? null
+    let enviado = false
+    try {
+      const r = await sendEmail({
+        to: emailAlvo,
+        subject: 'Redefinição de senha — Ventsy',
+        html: `<p>Foi solicitada a redefinição da sua senha na Ventsy.</p><p><a href="${link}">Clique aqui para criar uma nova senha</a>. Se você não pediu, ignore este e-mail.</p>`,
+      })
+      enviado = !r.skipped
+    } catch {
+      /* sem SMTP → devolve o link para o admin enviar manualmente */
+    }
+    return Response.json({ ok: true, enviado, link: enviado ? null : link })
+  }
+
+  if (action === 'impersonar') {
+    // Sensível: só super_admin. Toda impersonação fica registrada na auditoria.
+    if (ctx.membro.papel !== 'super_admin') return forbidden()
+    const { data: u } = await admin.from('usuarios').select('email').eq('id', id).maybeSingle()
+    const emailAlvo = u?.email as string | undefined
+    if (!emailAlvo) return Response.json({ error: 'Usuário sem e-mail cadastrado.' }, { status: 400 })
+    const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ventsy.com.br'
+    const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: emailAlvo,
+      options: { redirectTo: `${site}/painel` },
+    })
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+    const link = (linkData as { properties?: { action_link?: string } })?.properties?.action_link ?? null
+    return Response.json({ ok: true, link })
   }
 
   return Response.json({ error: 'Ação inválida.' }, { status: 400 })

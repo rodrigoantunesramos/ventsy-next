@@ -62,6 +62,39 @@ export default function AdminUsuarios() {
     if (await acao({ action: verbo, id: u.id })) carregar(q)
   }
 
+  async function resetSenha(u: Usuario) {
+    if (!confirm(`Enviar redefinição de senha para ${u.email || u.nome || 'este usuário'}?`)) return
+    const r = await fetch('/api/admin/usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reset_senha', id: u.id }),
+    })
+    const j = await r.json().catch(() => ({}))
+    if (!r.ok) {
+      alert(j.error || 'Erro ao gerar a redefinição.')
+      return
+    }
+    if (j.enviado) alert('E-mail de redefinição enviado ao usuário.')
+    else if (j.link) prompt('SMTP não configurado — copie e envie este link de redefinição ao usuário:', j.link)
+    else alert('Link gerado, mas não foi possível enviar nem exibir.')
+  }
+
+  async function impersonar(u: Usuario) {
+    if (!confirm(`Entrar como ${u.nome || u.email}? Abra em uma aba anônima para não encerrar sua sessão de admin.`)) return
+    const r = await fetch('/api/admin/usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'impersonar', id: u.id }),
+    })
+    const j = await r.json().catch(() => ({}))
+    if (!r.ok) {
+      alert(j.error || (r.status === 403 ? 'Apenas o super-admin pode impersonar.' : 'Erro ao gerar o acesso.'))
+      return
+    }
+    if (j.link) window.open(j.link, '_blank')
+    else alert('Não foi possível gerar o link de acesso.')
+  }
+
   async function salvarEdicao(e: FormEvent) {
     e.preventDefault()
     if (!editando) return
@@ -173,6 +206,18 @@ export default function AdminUsuarios() {
                         className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[0.78rem] hover:bg-white/[0.04]"
                       >
                         Editar
+                      </button>
+                      <button
+                        onClick={() => resetSenha(u)}
+                        className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[0.78rem] hover:bg-white/[0.04]"
+                      >
+                        Senha
+                      </button>
+                      <button
+                        onClick={() => impersonar(u)}
+                        className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[0.78rem] hover:bg-white/[0.04]"
+                      >
+                        Entrar como
                       </button>
                       <button
                         onClick={() => toggleBloqueio(u)}
