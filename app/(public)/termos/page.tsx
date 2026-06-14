@@ -2,6 +2,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import '../legal.css'
 
 export const metadata: Metadata = {
   title: 'Termos de Uso — VENTSY',
