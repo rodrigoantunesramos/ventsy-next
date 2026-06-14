@@ -38,6 +38,23 @@ function avaliarForca(senha: string): { forca: number; label: string; cor: strin
   return { forca: f, label: labels[f] || '', cor: cores[f] || '' }
 }
 
+// Checagem de disponibilidade via rota com rate-limit (antes era RPC anônima direta).
+// true = já cadastrado · false = disponível · null = não deu p/ verificar (erro/limite).
+async function checarDisponibilidade(tipo: 'documento' | 'email' | 'usuario', valor: string): Promise<boolean | null> {
+  try {
+    const r = await fetch('/api/cadastro/verificar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipo, valor }),
+    })
+    if (!r.ok) return null
+    const j = await r.json()
+    return j?.existe === true
+  } catch {
+    return null
+  }
+}
+
 // ── Tipo para status de campo ──
 type FieldStatus = { ok: boolean | null; hint: string }
 
@@ -125,10 +142,10 @@ function CadastroContent() {
 
   async function verificarDocBanco(limpo: string) {
     setStDoc({ ok: null, hint: `Verificando ${tipoDoc.toUpperCase()}...` })
-    const { data, error } = await supabase.rpc('verificar_documento', { p_documento: limpo })
-    if (error) { setStDoc({ ok: null, hint: '' }); return }
-    if (data === true) setStDoc({ ok: false, hint: `Este ${tipoDoc.toUpperCase()} já está cadastrado. Tente fazer login.` })
-    else               setStDoc({ ok: true,  hint: `${tipoDoc.toUpperCase()} disponível.` })
+    const existe = await checarDisponibilidade('documento', limpo)
+    if (existe === null) { setStDoc({ ok: null, hint: '' }); return }
+    if (existe) setStDoc({ ok: false, hint: `Este ${tipoDoc.toUpperCase()} já está cadastrado. Tente fazer login.` })
+    else        setStDoc({ ok: true,  hint: `${tipoDoc.toUpperCase()} disponível.` })
   }
 
   function validarNome() {
@@ -168,10 +185,10 @@ function CadastroContent() {
 
   async function verificarEmailBanco(em: string) {
     setStEmail({ ok: null, hint: 'Verificando e-mail...' })
-    const { data, error } = await supabase.rpc('verificar_email', { p_email: em })
-    if (error) { setStEmail({ ok: null, hint: '' }); return }
-    if (data === true) setStEmail({ ok: false, hint: 'Este e-mail já está cadastrado. Tente fazer login.' })
-    else               setStEmail({ ok: true,  hint: 'E-mail disponível.' })
+    const existe = await checarDisponibilidade('email', em)
+    if (existe === null) { setStEmail({ ok: null, hint: '' }); return }
+    if (existe) setStEmail({ ok: false, hint: 'Este e-mail já está cadastrado. Tente fazer login.' })
+    else        setStEmail({ ok: true,  hint: 'E-mail disponível.' })
   }
 
   function formatarUsuario(val: string) {
@@ -194,10 +211,10 @@ function CadastroContent() {
 
   async function verificarUsuarioBanco(u: string) {
     setStUsuario({ ok: null, hint: 'Verificando disponibilidade...' })
-    const { data, error } = await supabase.rpc('verificar_usuario', { p_usuario: u })
-    if (error) { setStUsuario({ ok: null, hint: '' }); return }
-    if (data === true) setStUsuario({ ok: false, hint: 'Este nome de usuário já está em uso. Escolha outro.' })
-    else               setStUsuario({ ok: true,  hint: 'Nome de usuário disponível!' })
+    const existe = await checarDisponibilidade('usuario', u)
+    if (existe === null) { setStUsuario({ ok: null, hint: '' }); return }
+    if (existe) setStUsuario({ ok: false, hint: 'Este nome de usuário já está em uso. Escolha outro.' })
+    else        setStUsuario({ ok: true,  hint: 'Nome de usuário disponível!' })
   }
 
   function validarSenha2() {
