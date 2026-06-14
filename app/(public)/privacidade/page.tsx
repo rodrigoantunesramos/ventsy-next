@@ -5,8 +5,9 @@ import type { Metadata } from 'next'
 import '../legal.css'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidade — VENTSY',
+  title: 'Política de Privacidade',
   description: 'Como coletamos, usamos e protegemos suas informações na plataforma VENTSY.',
+  alternates: { canonical: '/privacidade' },
 }
 
 const sections = [

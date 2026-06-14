@@ -5,8 +5,9 @@ import type { Metadata } from 'next'
 import '../legal.css'
 
 export const metadata: Metadata = {
-  title: 'Termos de Uso — VENTSY',
+  title: 'Termos de Uso',
   description: 'Regras e condições para utilização da plataforma VENTSY.',
+  alternates: { canonical: '/termos' },
 }
 
 const sections = [
