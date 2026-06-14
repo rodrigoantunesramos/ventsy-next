@@ -1,8 +1,7 @@
-'use client'
-import { useRouter } from 'next/navigation'
+// Server Component: seção/carrossel de uma categoria na home. "Ver todos" é um
+// <Link> rastreável (era router.push em client). Os cards são ilhas cliente.
+import Link from 'next/link'
 import PropertyCard from './PropertyCard'
-import { supabase } from '@/lib/supabase'
-
 import type { PropertySummary } from '@/types/client'
 
 interface Props {
@@ -11,30 +10,23 @@ interface Props {
 }
 
 export default function CategorySection({ cat, props }: Props) {
-  const router = useRouter()
-
-  const buscarCat = async (nome: string) => {
-    try { await supabase.from('buscas').insert({ tipo_evento: nome }) } catch (_) {}
-    router.push(`/busca?tipo=${encodeURIComponent(nome)}`)
-  }
-
   return (
     <section className="max-w-[1440px] mx-auto px-[5%] pt-1 pb-0">
       {/* Cabeçalho da seção */}
       <div className="flex items-center gap-3 mb-3">
-        <span className="text-lg leading-none">{cat.emoji}</span>
+        <span className="text-lg leading-none" aria-hidden="true">{cat.emoji}</span>
         <h2 className="font-['Playfair_Display'] text-[1.1rem] font-black text-[#0d0d0d] tracking-tight">
           {cat.nome}
         </h2>
-        <button
-          className="ml-auto bg-[#0d0d0d] hover:bg-[#ff385c] text-white border-none rounded-full px-5 py-2 text-[.8rem] font-bold cursor-pointer whitespace-nowrap flex items-center gap-1.5 transition-all duration-200 hover:scale-[1.03] font-[inherit]"
-          onClick={() => buscarCat(cat.nome)}
+        <Link
+          href={`/busca?tipo=${encodeURIComponent(cat.nome)}`}
+          className="ml-auto bg-[#0d0d0d] hover:bg-[#ff385c] text-white no-underline rounded-full px-5 py-2 text-[.8rem] font-bold cursor-pointer whitespace-nowrap flex items-center gap-1.5 transition-all duration-200 hover:scale-[1.03]"
         >
           Ver todos
-          <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.5}>
+          <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
-        </button>
+        </Link>
       </div>
 
       {/* Carrossel */}
