@@ -1,14 +1,14 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams, useRouter, type ReadonlyURLSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
 import SearchMap from '@/components/SearchMap'
 import { supabase } from '@/lib/supabase'
-import { DEMO_PROPS } from '@/lib/data'
+import { filtrosFromParams, paramsFromFiltros, contarFiltros, aplicarFiltrosNaQuery } from './_filtros'
 import type { PropertySummary } from '@/types/client'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
@@ -20,96 +20,21 @@ const SIGLA_PARA_NOME: Record<string, string> = {
   SC:'Santa Catarina', SP:'São Paulo', SE:'Sergipe', TO:'Tocantins',
 }
 
-const DEMO_BUSCA = DEMO_PROPS.map((d) => {
-  const [cidade, estado] = d.cidade.split(',').map((s) => s.trim())
-  return {
-    id: d.id, nome: d.nome, cidade, estado,
-    valor_base: d.preco, valor_hora: 0,
-    avaliacao: d.nota_media, _nota: String(d.nota_media),
-    _plano: d._plano, categoria: d.categoria, imagem_url: d.imagem_url,
-    latitude: d.latitude, longitude: d.longitude,
-  }
-})
-
 const fmtDataCurta = (isoStr: string) => {
   const [y, m, d] = isoStr.split('-').map(Number)
   if (!y || !m || !d) return isoStr
   return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
-// ── Filtros ↔ URL (a URL é a fonte da verdade: busca compartilhável e persistente) ──
-type SP = URLSearchParams | ReadonlyURLSearchParams
-
-function filtrosFromParams(p: SP): Filtros {
-  const num = (k: string, d: number) => { const v = p.get(k); const n = Number(v); return v !== null && Number.isFinite(n) ? n : d }
-  const bool = (k: string) => p.get(k) === '1'
-  const list = (k: string) => { const v = p.get(k); return v ? v.split(',').filter(Boolean) : [] }
-  return {
-    precoMin: num('preco_min', 0),
-    precoMax: num('preco_max', 10000),
-    capacidade: num('convidados', 0),
-    estado: (p.get('estado') || '').toUpperCase(),
-    cidade: p.get('cidade') || '',
-    climatizado: bool('climatizado'),
-    estacionamento: bool('estacionamento'),
-    seguranca: bool('seguranca'),
-    espacoAberto: bool('espaco_aberto'),
-    ultra: bool('ultra'),
-    acessibilidade: bool('acessibilidade'),
-    somAlto: bool('som_alto'),
-    somTarde: bool('som_tarde'),
-    tiposEvento: list('eventos'),
-    categorias: list('categorias'),
-  }
-}
-
-function paramsFromFiltros(f: Filtros, base: SP): URLSearchParams {
-  const p = new URLSearchParams()
-  // preserva contexto da busca que não vem do modal
-  for (const k of ['bairro', 'data_inicio', 'data_fim', 'tipo']) {
-    const v = base.get(k); if (v) p.set(k, v)
-  }
-  if (f.estado) p.set('estado', f.estado)
-  if (f.cidade) p.set('cidade', f.cidade)
-  if (f.precoMin > 0) p.set('preco_min', String(f.precoMin))
-  if (f.precoMax < 10000) p.set('preco_max', String(f.precoMax))
-  if (f.capacidade > 0) p.set('convidados', String(f.capacidade))
-  if (f.climatizado) p.set('climatizado', '1')
-  if (f.estacionamento) p.set('estacionamento', '1')
-  if (f.seguranca) p.set('seguranca', '1')
-  if (f.espacoAberto) p.set('espaco_aberto', '1')
-  if (f.ultra) p.set('ultra', '1')
-  if (f.acessibilidade) p.set('acessibilidade', '1')
-  if (f.somAlto) p.set('som_alto', '1')
-  if (f.somTarde) p.set('som_tarde', '1')
-  if (f.tiposEvento.length) p.set('eventos', f.tiposEvento.join(','))
-  if (f.categorias.length) p.set('categorias', f.categorias.join(','))
-  return p
-}
-
-function contarFiltros(f: Filtros): number {
-  let c = 0
-  if (f.precoMin > 0 || f.precoMax < 10000) c++
-  if (f.capacidade > 0) c++
-  if (f.climatizado || f.estacionamento || f.seguranca || f.espacoAberto) c++
-  if (f.somAlto || f.somTarde) c++
-  if (f.acessibilidade) c++
-  if (f.ultra) c++
-  if (f.tiposEvento.length) c++
-  if (f.categorias.length) c++
-  return c
-}
-
 type RawProperty = PropertySummary & { usuario_id?: string; latitude?: number | null; longitude?: number | null }
 
-function BuscaContent() {
+function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProperty[]; initialPlanos: Record<string, string> }) {
   const params = useSearchParams()
   const router = useRouter()
   const qs = params.toString()
 
   const estadoParam = params.get('estado')?.toUpperCase() || ''
   const cidadeParam = params.get('cidade') || ''
-  const bairroParam = params.get('bairro') || ''
   const tipoParam   = params.get('tipo') || params.get('evento') || ''
   const dataInicioParam = params.get('data_inicio') || ''
   const dataFimParam    = params.get('data_fim') || ''
@@ -122,45 +47,25 @@ function BuscaContent() {
   const filtros = filtrosFromParams(params)
   const contFiltros = contarFiltros(filtros)
 
-  const [props, setProps]           = useState<RawProperty[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [planosMap, setPlanosMap]   = useState<Record<string, string>>({})
+  const [props, setProps]           = useState<RawProperty[]>(initialProps)
+  const [loading, setLoading]       = useState(false)
+  const [planosMap]                 = useState<Record<string, string>>(initialPlanos)
   const [filtroOpen, setFiltroOpen] = useState(false)
+  const primeira = useRef(true)
 
+  // A listagem inicial vem do servidor (initialProps). A ilha só re-busca quando
+  // os params mudam (navegação/filtros), pulando o primeiro render.
   useEffect(() => {
-    fetch('/api/planos').then(r => r.json()).then(json => setPlanosMap(json.planos || {})).catch(() => {})
-  }, [])
-
-  // A busca reage a QUALQUER mudança de params (localização, datas e filtros do modal).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { buscar() }, [qs])
+    if (primeira.current) { primeira.current = false; return }
+    buscar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qs])
 
   async function buscar() {
     setLoading(true)
     const f = filtrosFromParams(params)
     let query = supabase.from('propriedades').select('*').eq('publicada', true)
-
-    if (f.estado) query = query.eq('estado', f.estado)
-    if (f.cidade) query = query.ilike('cidade', `%${f.cidade}%`)
-    if (bairroParam) query = query.ilike('bairro', `%${bairroParam}%`)
-    if (f.capacidade > 0) query = query.gte('capacidade', f.capacidade)
-    if (f.precoMin > 0)     query = query.gte('valor_hora', f.precoMin)
-    if (f.precoMax < 10000) query = query.lte('valor_hora', f.precoMax)
-    if (f.acessibilidade)   query = query.eq('acessibilidade', true)
-    if (f.somAlto)          query = query.eq('som_alto', true)
-    if (f.somTarde)         query = query.eq('som_tarde', true)
-    // comodidades é text (JSON serializado), não array — filtra por substring do slug.
-    if (f.climatizado)      query = query.ilike('comodidades', '%"climatizado"%')
-    if (f.estacionamento)   query = query.ilike('comodidades', '%"estacionamento"%')
-    if (f.seguranca)        query = query.ilike('comodidades', '%"seguranca"%')
-    if (f.espacoAberto)     query = query.ilike('comodidades', '%"espaco-aberto"%')
-    if (f.tiposEvento.length > 0) query = query.or(f.tiposEvento.map(t => `tipo_evento.ilike.%${t}%`).join(','))
-
-    if (f.categorias.length > 0) {
-      query = query.or(f.categorias.flatMap(v => [`tipo_propriedade.eq.${v}`, `categoria.eq.${v}`]).join(','))
-    } else if (tipoParam) {
-      query = query.eq('categoria', tipoParam)
-    }
+    query = aplicarFiltrosNaQuery(query, params)
 
     if (f.ultra) {
       const { planos } = await fetch('/api/planos').then(r => r.json()).catch(() => ({ planos: {} }))
@@ -169,14 +74,11 @@ function BuscaContent() {
       else { setProps([]); setLoading(false); return }
     }
 
-    const { data, error } = await query.limit(60)
-    const rows = (data || []) as unknown as RawProperty[]
-    const usarDemo = process.env.NODE_ENV !== 'production' && !error
-    setProps(rows.length ? rows : usarDemo ? (DEMO_BUSCA as unknown as RawProperty[]) : [])
+    const { data } = await query.limit(60)
+    setProps((data || []) as unknown as RawProperty[])
     setLoading(false)
   }
 
-  // Aplicar filtros = navegar com os filtros na URL (compartilhável, com histórico).
   const aplicarFiltros = (f: Filtros) => {
     setFiltroOpen(false)
     router.push(`/busca?${paramsFromFiltros(f, params).toString()}`)
@@ -286,14 +188,18 @@ function BuscaContent() {
   )
 }
 
-export default function BuscaClient() {
+export default function BuscaClient({ initialProps, initialPlanos }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialProps: any[]
+  initialPlanos: Record<string, string>
+}) {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-screen text-gray-400">
         Carregando...
       </div>
     }>
-      <BuscaContent />
+      <BuscaContent initialProps={initialProps as RawProperty[]} initialPlanos={initialPlanos} />
     </Suspense>
   )
 }

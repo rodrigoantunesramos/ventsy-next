@@ -4,6 +4,7 @@
 import type { Metadata } from 'next'
 import { SITE_NAME, abs } from '@/lib/site'
 import BuscaClient from './_BuscaClient'
+import { fetchBuscaInicial } from './_data'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
   AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará',
@@ -51,6 +52,14 @@ export async function generateMetadata({ searchParams }: { searchParams: SP }): 
   }
 }
 
-export default function BuscaPage() {
-  return <BuscaClient />
+export default async function BuscaPage({ searchParams }: { searchParams: SP }) {
+  // Converte os searchParams (objeto) num URLSearchParams e faz a query inicial
+  // no servidor → a listagem já vem no HTML (SEO/LCP); a ilha re-busca em mudanças.
+  const sp = new URLSearchParams()
+  for (const [k, v] of Object.entries(searchParams)) {
+    const val = Array.isArray(v) ? v[0] : v
+    if (val) sp.set(k, val)
+  }
+  const { props, planos } = await fetchBuscaInicial(sp)
+  return <BuscaClient initialProps={props} initialPlanos={planos} />
 }
