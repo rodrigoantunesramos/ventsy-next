@@ -28,8 +28,10 @@ export default function HomeFeed() {
       type RawProp = PropertySummary & { usuario_id?: string }
       const raw: RawProp[] = (props || []) as unknown as RawProp[]
 
+      // DEMO só em desenvolvimento — produção nunca exibe espaços fictícios.
+      const usarDemo = process.env.NODE_ENV !== 'production' && (!raw.length || !!error)
       let lista: PropertySummary[]
-      if (!raw.length || error) {
+      if (usarDemo) {
         lista = DEMO_PROPS.map(p => ({ ...p, _nota: p.nota_media })) as unknown as PropertySummary[]
       } else {
         lista = raw.map(p => ({

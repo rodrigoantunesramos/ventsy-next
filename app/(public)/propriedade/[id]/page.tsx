@@ -231,7 +231,9 @@ function PropriedadeContent() {
       }).catch(() => {})
 
     } catch(e) {
-      loadDemo()
+      // Em produção um erro não pode virar a propriedade de demonstração: mostra "não encontrado".
+      if (process.env.NODE_ENV !== 'production') loadDemo()
+      else setNaoEncontrado(true)
     } finally {
       setLoading(false)
     }

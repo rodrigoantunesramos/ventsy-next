@@ -33,6 +33,12 @@ const DEMO_BUSCA = DEMO_PROPS.map((d) => {
   }
 })
 
+const fmtDataCurta = (isoStr: string) => {
+  const [y, m, d] = isoStr.split('-').map(Number)
+  if (!y || !m || !d) return isoStr
+  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+}
+
 function BuscaContent() {
   const params = useSearchParams()
   const router = useRouter()
@@ -41,7 +47,15 @@ function BuscaContent() {
   const cidadeParam = params.get('cidade') || ''
   const bairroParam = params.get('bairro') || ''
   const tipoParam   = params.get('tipo') || params.get('evento') || ''
-  const dataParam   = params.get('data') || ''
+  const dataInicioParam = params.get('data_inicio') || ''
+  const dataFimParam    = params.get('data_fim') || ''
+  const convidadosParam = Number(params.get('convidados')) || 0
+  // Compat: aceita o ?data= antigo (texto) e o novo par data_inicio/data_fim (ISO).
+  const dataParam   = dataInicioParam
+    ? (dataFimParam && dataFimParam !== dataInicioParam
+        ? `${fmtDataCurta(dataInicioParam)} → ${fmtDataCurta(dataFimParam)}`
+        : fmtDataCurta(dataInicioParam))
+    : (params.get('data') || '')
 
   type RawProperty = PropertySummary & { usuario_id?: string }
   const [props, setProps]             = useState<RawProperty[]>([])
@@ -55,7 +69,7 @@ function BuscaContent() {
     fetch('/api/planos').then(r => r.json()).then(json => setPlanosMap(json.planos || {}))
   }, [])
 
-  useEffect(() => { buscar(null) }, [estadoParam, cidadeParam, bairroParam, tipoParam])
+  useEffect(() => { buscar(null) }, [estadoParam, cidadeParam, bairroParam, tipoParam, convidadosParam])
 
   async function buscar(f: Filtros | null) {
     setLoading(true)
@@ -69,10 +83,13 @@ function BuscaContent() {
     if (cidade) query = query.ilike('cidade', `%${cidade}%`)
     if (bairro) query = query.ilike('bairro', `%${bairro}%`)
 
+    // Capacidade: convidados da SearchBar (URL) ou o filtro do modal têm o mesmo efeito.
+    const capacidadeMin = f?.capacidade || convidadosParam
+    if (capacidadeMin > 0) query = query.gte('capacidade', capacidadeMin)
+
     if (f) {
       if (f.precoMin > 0)     query = query.gte('valor_hora', f.precoMin)
       if (f.precoMax < 10000) query = query.lte('valor_hora', f.precoMax)
-      if (f.capacidade > 0)   query = query.gte('capacidade', f.capacidade)
       if (f.acessibilidade)   query = query.eq('acessibilidade', true)
       if (f.somAlto)          query = query.eq('som_alto', true)
       if (f.somTarde)         query = query.eq('som_tarde', true)
@@ -108,9 +125,11 @@ function BuscaContent() {
       query = query.eq('categoria', tipoParam)
     }
 
-    const { data } = await query
+    const { data, error } = await query.limit(60)
     const rows = (data || []) as unknown as RawProperty[]
-    setProps(rows.length ? rows : (DEMO_BUSCA as unknown as RawProperty[]))
+    // DEMO só em desenvolvimento e quando não houve erro — produção mostra o estado vazio real.
+    const usarDemo = process.env.NODE_ENV !== 'production' && !error
+    setProps(rows.length ? rows : usarDemo ? (DEMO_BUSCA as unknown as RawProperty[]) : [])
     setLoading(false)
   }
 

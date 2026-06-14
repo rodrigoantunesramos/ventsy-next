@@ -7,6 +7,9 @@ import EventoDropdown from './EventoDropdown'
 
 const MM = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 const fd = (d: Date) => `${d.getDate()} ${MM[d.getMonth()]}`
+// Data em ISO local (YYYY-MM-DD) — vai para a URL e é usada pela busca/disponibilidade.
+const iso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 export default function SearchBar() {
   const router = useRouter()
@@ -14,6 +17,7 @@ export default function SearchBar() {
   const [dataDisplay, setDataDisplay]   = useState('Adicionar datas')
   const [guests, setGuests]             = useState(1)
   const [eventoValue, setEventoValue]   = useState('')
+  const [datas, setDatas]               = useState<{ ini?: string; fim?: string }>({})
   const pickerRef = useRef<any>(null)
   const inputRef  = useRef<HTMLInputElement>(null)
 
@@ -31,11 +35,12 @@ export default function SearchBar() {
         showMonths: 2,
         disableMobile: true,
         onChange(ds: Date[]) {
-          if (!ds.length)       setDataDisplay('Adicionar datas')
-          else if (ds.length === 1) setDataDisplay(`${fd(ds[0])} → ...`)
+          if (!ds.length)            { setDataDisplay('Adicionar datas'); setDatas({}) }
+          else if (ds.length === 1)  { setDataDisplay(`${fd(ds[0])} → ...`); setDatas({ ini: iso(ds[0]) }) }
           else {
             const a = fd(ds[0]), b = fd(ds[1])
             setDataDisplay(a === b ? a : `${a} → ${b}`)
+            setDatas({ ini: iso(ds[0]), fim: iso(ds[1]) })
           }
         },
       })
@@ -60,7 +65,9 @@ export default function SearchBar() {
     if (ondeSelected.cidade) params.set('cidade', ondeSelected.cidade)
     if (ondeSelected.bairro) params.set('bairro', ondeSelected.bairro)
     if (eventoValue)         params.set('evento', eventoValue)
-    if (dataDisplay && dataDisplay !== 'Adicionar datas') params.set('data', dataDisplay)
+    if (datas.ini)           params.set('data_inicio', datas.ini)
+    if (datas.fim)           params.set('data_fim', datas.fim)
+    if (guests > 1)          params.set('convidados', String(guests))
 
     if (eventoValue) {
       eventoValue.split(',').forEach(async t => {
@@ -113,13 +120,17 @@ export default function SearchBar() {
           </label>
           <div className="flex items-center gap-2 mt-0.5">
             <button
+              type="button"
+              aria-label="Diminuir número de convidados"
               className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500 text-sm leading-none bg-white cursor-pointer"
               onClick={() => setGuests(g => Math.max(1, g - 1))}
             >
               −
             </button>
-            <span className="text-sm font-semibold w-5 text-center">{guests}</span>
+            <span className="text-sm font-semibold w-5 text-center" aria-live="polite">{guests}</span>
             <button
+              type="button"
+              aria-label="Aumentar número de convidados"
               className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500 text-sm leading-none bg-white cursor-pointer"
               onClick={() => setGuests(g => g + 1)}
             >
@@ -130,12 +141,14 @@ export default function SearchBar() {
 
         {/* BOTÃO BUSCAR */}
         <button
+          type="button"
+          aria-label="Buscar espaços"
           className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-base flex-shrink-0 ml-1 transition-all border-none
             ${canSearch ? 'bg-[#ff385c] hover:bg-[#e0304f] hover:scale-[1.07] cursor-pointer' : 'bg-[#ff385c] opacity-30 cursor-not-allowed'}`}
           disabled={!canSearch}
           onClick={handleSearch}
         >
-          🔍
+          <span aria-hidden="true">🔍</span>
         </button>
       </div>
     </div>
