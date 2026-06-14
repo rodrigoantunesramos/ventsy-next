@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase, authHeaders } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { CATS, ESTADOS } from '@/lib/data'
@@ -51,7 +51,8 @@ export default function AnunciarPage() {
   const [valorHora, setValorHora] = useState('')
   const [valorBase, setValorBase] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
-  const [imagemUrl, setImagemUrl] = useState('')
+  const [fotoFile, setFotoFile] = useState<File | null>(null)
+  const [fotoPreview, setFotoPreview] = useState('')
   const [comodidades, setComodidades] = useState<string[]>([])
 
   const [erro, setErro] = useState('')
@@ -66,6 +67,17 @@ export default function AnunciarPage() {
 
   function toggleComodidade(c: string) {
     setComodidades((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
+  }
+
+  function onSelecionarFoto(e: ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (!f) return
+    if (!f.type.startsWith('image/')) { setErro('Selecione um arquivo de imagem (JPG, PNG ou WebP).'); return }
+    if (f.size > 8 * 1024 * 1024) { setErro('A imagem deve ter no máximo 8 MB.'); return }
+    setErro('')
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview)
+    setFotoFile(f)
+    setFotoPreview(URL.createObjectURL(f))
   }
 
   function validar(): string | null {
@@ -107,7 +119,7 @@ export default function AnunciarPage() {
         valor_hora: valorHora ? Number(valorHora) : null,
         valor_base: valorBase ? Number(valorBase) : null,
         whatsapp: whatsapp.replace(/\D/g, '') || null,
-        imagem_url: imagemUrl.trim() || null,
+        imagem_url: null, // definida pelo upload (/api/fotos) logo após criar a propriedade
         comodidades: comodidades.length ? `{${comodidades.join(',')}}` : null,
         latitude: coords?.lat ?? null,
         longitude: coords?.lng ?? null,
@@ -125,6 +137,17 @@ export default function AnunciarPage() {
         setErro(`Não foi possível publicar: ${error.message}`)
         setEnviando(false)
         return
+      }
+
+      // Upload da foto de capa, se houver — reusa /api/fotos (entra na galeria e vira a capa).
+      if (fotoFile) {
+        try {
+          const fd = new FormData()
+          fd.append('propriedadeId', String(data.id))
+          fd.append('files', fotoFile)
+          fd.append('tipo', 'espaco')
+          await fetch('/api/fotos', { method: 'POST', headers: { ...(await authHeaders()) }, body: fd })
+        } catch { /* publica mesmo sem a foto; o dono pode adicionar depois no painel */ }
       }
 
       router.push(`/propriedade/${data.id}`)
@@ -272,8 +295,19 @@ export default function AnunciarPage() {
               <input className={inputCls} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(21) 99999-9999" />
             </div>
             <div>
-              <label className={labelCls}>URL da foto de capa</label>
-              <input className={inputCls} value={imagemUrl} onChange={(e) => setImagemUrl(e.target.value)} placeholder="https://..." />
+              <label className={labelCls} htmlFor="anuncio-foto">Foto de capa</label>
+              <input
+                id="anuncio-foto"
+                type="file"
+                accept="image/*"
+                onChange={onSelecionarFoto}
+                className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:text-white file:px-4 file:py-2 file:font-semibold file:cursor-pointer hover:file:bg-brand-600 cursor-pointer"
+              />
+              {fotoPreview ? (
+                <img src={fotoPreview} alt="Pré-visualização da foto de capa" className="mt-3 h-32 w-full max-w-xs object-cover rounded-xl border border-gray-200" />
+              ) : (
+                <p className="text-xs text-ink-muted mt-2">JPG, PNG ou WebP, até 8 MB. Você poderá adicionar mais fotos depois, no painel.</p>
+              )}
             </div>
           </div>
         </section>
