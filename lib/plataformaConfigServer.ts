@@ -1,4 +1,4 @@
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { PLATAFORMA_CONFIG } from '@/lib/plataformaConfig'
 
 // Leitura das configurações globais — SERVER-ONLY (usa service-role). Faz merge
@@ -8,8 +8,8 @@ export async function lerPlataformaConfig(): Promise<Record<string, unknown>> {
   const out: Record<string, unknown> = {}
   for (const def of PLATAFORMA_CONFIG) out[def.chave] = def.padrao
   try {
-    const { data } = await supabaseAdminAny.from('plataforma_config').select('chave, valor')
-    for (const row of (data ?? []) as Array<{ chave: string; valor: unknown }>) {
+    const { data } = await supabaseAdmin.from('plataforma_config').select('chave, valor')
+    for (const row of data ?? []) {
       out[row.chave] = row.valor
     }
   } catch {

@@ -1,7 +1,13 @@
 import type { NextRequest } from 'next/server'
 import { getAuthUser } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
-import { adminPode, type AdminAcao, type AdminMembro } from '@/lib/adminRbac'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import {
+  adminPode,
+  type AdminAcao,
+  type AdminMembro,
+  type AdminPapel,
+  type AdminPermissoes,
+} from '@/lib/adminRbac'
 
 // Re-exporta a lógica pura de RBAC (tipos, ADMIN_MODULOS, adminPode) para quem
 // importa daqui. SERVER-ONLY (usa supabaseAdmin): não importar em client.
@@ -9,7 +15,7 @@ export * from '@/lib/adminRbac'
 
 // Lê o membro de admin (ativo) por id via service-role. null se não for admin.
 export async function getAdminMembro(userId: string): Promise<AdminMembro | null> {
-  const { data, error } = await supabaseAdminAny
+  const { data, error } = await supabaseAdmin
     .from('admin_membros')
     .select('usuario_id, papel, permissoes, ativo')
     .eq('usuario_id', userId)
@@ -17,8 +23,8 @@ export async function getAdminMembro(userId: string): Promise<AdminMembro | null
   if (error || !data || data.ativo !== true) return null
   return {
     usuario_id: data.usuario_id,
-    papel: data.papel,
-    permissoes: data.permissoes ?? {},
+    papel: data.papel as AdminPapel,
+    permissoes: (data.permissoes ?? {}) as AdminPermissoes,
     ativo: data.ativo,
   }
 }
