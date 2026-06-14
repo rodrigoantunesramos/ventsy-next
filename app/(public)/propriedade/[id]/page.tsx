@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useParams, notFound } from 'next/navigation'
+import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
@@ -56,6 +57,26 @@ function FaqItem({pergunta,resposta}:{pergunta:string;resposta:string}) {
       <div className="pp-faq-resposta"><p>{resposta}</p></div>
     </div>
   )
+}
+
+// next/image só para fotos do nosso bucket (Supabase) ou picsum (demo). URLs
+// legadas hotlinkadas (Google/Facebook de propriedades de teste) seguem em <img>
+// normal para não quebrar a página com erro de hostname do next/image.
+function fotoOtimizavel(url?: string | null) {
+  if (!url) return false
+  try { const h = new URL(url).hostname; return h.endsWith('.supabase.co') || h.endsWith('picsum.photos') }
+  catch { return false }
+}
+
+function FotoEspaco({ url, alt, focal_x, focal_y, sizes, priority = false, className = '' }: {
+  url: string; alt: string; focal_x?: number | null; focal_y?: number | null; sizes: string; priority?: boolean; className?: string
+}) {
+  const objectPosition = `${focal_x ?? 50}% ${focal_y ?? 50}%`
+  if (fotoOtimizavel(url)) {
+    return <Image src={url} alt={alt} fill sizes={sizes} priority={priority} className={`object-cover ${className}`.trim()} style={{ objectPosition }} />
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt={alt} loading={priority ? undefined : 'lazy'} className={`w-full h-full object-cover ${className}`.trim()} style={{ objectPosition }} />
 }
 
 function PropriedadeContent() {
@@ -389,7 +410,7 @@ function PropriedadeContent() {
           <div className="pp-galeria-grid">
             {fotosEspaco.slice(0,5).map((f,i)=>(
               <div key={i} className={`pp-foto-slot${i===0?' pp-foto-main':''} cursor-pointer relative`} onClick={()=>setModalGal(true)}>
-                <img src={f.url} alt={f.alt||f.titulo||`Foto ${i+1}`} loading="lazy" style={{objectPosition:`${f.focal_x??50}% ${f.focal_y??50}%`}} onError={e=>{(e.target as HTMLImageElement).src=`https://picsum.photos/seed/fb${i}/800/600`}}/>
+                <FotoEspaco url={f.url} alt={f.alt||f.titulo||`Foto ${i+1}`} focal_x={f.focal_x} focal_y={f.focal_y} priority={i===0} sizes={i===0?'(min-width:1024px) 50vw, 100vw':'(min-width:1024px) 25vw, 50vw'} />
                 {i===4&&fotosEspaco.length>5&&<div className="pp-foto-overlay">+{fotosEspaco.length-4}</div>}
               </div>
             ))}
@@ -460,7 +481,7 @@ function PropriedadeContent() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {fotosEvento.slice(0,6).map((f,i)=>(
                     <div key={i} className="relative rounded-xl overflow-hidden cursor-pointer aspect-[4/3] group" onClick={()=>abrirLb(fotosEvento.map(x=>x.url),i)}>
-                      <img src={f.url} alt={f.alt||f.titulo||''} loading="lazy" style={{objectPosition:`${f.focal_x??50}% ${f.focal_y??50}%`}} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                      <FotoEspaco url={f.url} alt={f.alt||f.titulo||'Foto do evento'} focal_x={f.focal_x} focal_y={f.focal_y} sizes="(min-width:640px) 33vw, 50vw" className="transition-transform duration-300 group-hover:scale-105" />
                       {f.titulo&&<div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-white text-[.78rem] font-semibold">{f.titulo}</div>}
                     </div>
                   ))}
