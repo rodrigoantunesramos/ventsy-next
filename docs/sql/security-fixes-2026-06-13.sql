@@ -57,6 +57,18 @@ alter view public.v_indicacoes_dashboard set (security_invoker = on);
 -- Verificado: após remover, /object/public/ segue 200 e a listagem anônima dá [].
 drop policy if exists "Leitura pública fotos-dashboard 1fxml9y_0" on storage.objects;
 
+-- ── V-07 (hardening / defesa em profundidade): anon com DML em tabelas de PII ────
+-- Confirmado AO VIVO (2026-06-13): equipe/freelancers/fornecedores/parceiros têm RLS ON
+-- + policies estritamente (usuario_id = auth.uid()) → anon já enxerga 0 linhas. Mas anon
+-- mantinha GRANT de DML completo (default Supabase) = zero defesa em profundidade — mesmo
+-- pré-requisito que tornou o V-16 explorável. anon não tem caminho legítimo a essas
+-- tabelas → revogado. authenticated mantém (a RLS filtra por usuario_id = auth.uid()).
+-- Aplicado via migration sec_revoke_anon_grants_pii_tables.
+revoke all on public.equipe       from anon;
+revoke all on public.freelancers  from anon;
+revoke all on public.fornecedores from anon;
+revoke all on public.parceiros    from anon;
+
 -- ── Aceito / ação manual (ver relatório) ────────────────────────────────────────
 -- • HIBP (senha vazada): ligar em Supabase > Authentication > Policies (não é SQL).
 -- • pg_net: extensão registrada em public, mas os objetos http_* vivem no schema

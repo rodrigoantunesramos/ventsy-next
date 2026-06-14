@@ -32,8 +32,11 @@ export async function POST(req: NextRequest) {
   if (!fornecedorId) return Response.json({ error: 'fornecedor_id obrigatório.' }, { status: 400 });
 
   // ── Carrega o fornecedor + histórico (sempre escopado ao dono) ──────────────
+  // Colunas explícitas (sem chave_pix/banco): dados bancários/PIX nem carregam nesta rota de IA.
   const { data: forn } = await sb
-    .from('fornecedores').select('*').eq('id', fornecedorId).eq('usuario_id', user.id).maybeSingle();
+    .from('fornecedores')
+    .select('id,nome,fantasia,tipo,categoria,cidade,estado,homologacao,condicoes_pagamento,prazo_entrega_dias,obs')
+    .eq('id', fornecedorId).eq('usuario_id', user.id).maybeSingle();
   if (!forn) return Response.json({ error: 'Fornecedor não encontrado.' }, { status: 404 });
 
   const [{ data: desp }, { data: avals }, { data: docs }] = await Promise.all([

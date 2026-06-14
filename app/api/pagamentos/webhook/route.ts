@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { ativarAssinatura } from '@/lib/assinatura'
 import { baixarParcela, resolverTokenMpDono } from '@/lib/portalServer'
 import { registrarAuditoria } from '@/lib/auditServer'
+import { verificarWebhookMP } from '@/lib/mpWebhook'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any
@@ -12,6 +13,12 @@ const admin = supabaseAdmin as any
 // reservas + pagamentos. Cobre split (token do anfitrião) e plataforma.
 // Configure a URL no painel MP: https://www.ventsy.com.br/api/pagamentos/webhook
 export async function POST(req: NextRequest) {
+  // V-05: rejeita notificações forjadas via HMAC do MP (x-signature). Degrada se
+  // MP_WEBHOOK_SECRET ausente — a reconsulta à API do MP segue como validação efetiva.
+  const assinatura = verificarWebhookMP(req)
+  if (assinatura === 'invalida') return Response.json({ error: 'assinatura inválida' }, { status: 401 })
+  if (assinatura === 'sem_chave') console.warn('[MP webhook pagamentos] MP_WEBHOOK_SECRET ausente — assinatura não verificada')
+
   let paymentId: string | null = null
   try {
     const body = await req.json()
