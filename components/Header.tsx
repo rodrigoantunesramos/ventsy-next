@@ -61,10 +61,14 @@ export default function Header() {
         {/* Menu hambúrguer */}
         <div className="relative" ref={menuRef}>
           <button
+            type="button"
+            aria-haspopup="true"
+            aria-expanded={menuOpen}
+            aria-label="Abrir menu"
             className="bg-white border border-gray-200 rounded-full px-3.5 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:shadow-md transition-shadow font-[inherit]"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            ☰ Menu
+            <span aria-hidden="true">☰</span> Menu
           </button>
 
           {menuOpen && (

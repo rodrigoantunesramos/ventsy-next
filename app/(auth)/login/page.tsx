@@ -35,6 +35,14 @@ export default function LoginPage() {
     })
   }, [router])
 
+  // Fecha o modal de recuperação com Esc
+  useEffect(() => {
+    if (!modalAberto) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') fecharModal() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [modalAberto])
+
   async function fazerLogin() {
     if (!email || !senha) { setErro('Preencha e-mail e senha para continuar.'); return }
     setLoading(true)
@@ -104,19 +112,22 @@ export default function LoginPage() {
 
             {/* Alerta de erro */}
             {erro && (
-              <div className="ln-alerta">
-                <span className="material-icons">error_outline</span>
+              <div className="ln-alerta" role="alert">
+                <span className="material-icons" aria-hidden="true">error_outline</span>
                 <span>{erro}</span>
               </div>
             )}
 
             {/* E-mail */}
             <div className="ln-form-group">
-              <label>E-mail</label>
+              <label htmlFor="login-email">E-mail</label>
               <div className="ln-input-wrap">
-                <span className="material-icons ln-icon-left">email</span>
+                <span className="material-icons ln-icon-left" aria-hidden="true">email</span>
                 <input
+                  id="login-email"
                   type="email"
+                  autoComplete="email"
+                  inputMode="email"
                   value={email}
                   placeholder="seu@email.com"
                   onChange={e => setEmail(e.target.value)}
@@ -127,11 +138,13 @@ export default function LoginPage() {
 
             {/* Senha */}
             <div className="ln-form-group">
-              <label>Senha</label>
+              <label htmlFor="login-senha">Senha</label>
               <div className="ln-input-wrap">
-                <span className="material-icons ln-icon-left">lock_outline</span>
+                <span className="material-icons ln-icon-left" aria-hidden="true">lock_outline</span>
                 <input
+                  id="login-senha"
                   type={mostraSenha ? 'text' : 'password'}
+                  autoComplete="current-password"
                   value={senha}
                   placeholder="Sua senha"
                   onChange={e => setSenha(e.target.value)}
@@ -141,9 +154,10 @@ export default function LoginPage() {
                   type="button"
                   className="ln-toggle-senha"
                   onClick={() => setMostraSenha(!mostraSenha)}
-                  tabIndex={-1}
+                  aria-label={mostraSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-pressed={mostraSenha}
                 >
-                  <span className="material-icons">
+                  <span className="material-icons" aria-hidden="true">
                     {mostraSenha ? 'visibility' : 'visibility_off'}
                   </span>
                 </button>
@@ -161,7 +175,7 @@ export default function LoginPage() {
               onClick={fazerLogin}
               disabled={loading}
             >
-              <span className="material-icons" style={loading ? { animation: 'spin 1s linear infinite' } : {}}>
+              <span className="material-icons" aria-hidden="true" style={loading ? { animation: 'spin 1s linear infinite' } : {}}>
                 {loading ? 'sync' : 'login'}
               </span>
               {loading ? 'Entrando...' : 'Entrar'}
@@ -180,10 +194,10 @@ export default function LoginPage() {
           className="ln-modal-overlay"
           onClick={e => { if (e.target === e.currentTarget) fecharModal() }}
         >
-          <div className="ln-modal-box">
+          <div className="ln-modal-box" role="dialog" aria-modal="true" aria-label="Recuperar senha">
             {recuperacaoEnviada ? (
               <div className="ln-modal-sucesso">
-                <span className="material-icons text-[2.5rem] text-[var(--verde)] mb-[10px] block">
+                <span className="material-icons text-[2.5rem] text-[var(--verde)] mb-[10px] block" aria-hidden="true">
                   mark_email_read
                 </span>
                 <h3>E-mail enviado!</h3>
@@ -197,12 +211,16 @@ export default function LoginPage() {
                 <h3>Recuperar senha</h3>
                 <p>Informe seu e-mail cadastrado e enviaremos um link para redefinir sua senha.</p>
                 <input
+                  id="recuperar-email"
                   type="email"
+                  autoComplete="email"
+                  aria-label="E-mail para recuperação de senha"
                   value={emailRecuperar}
                   placeholder="seu@email.com"
                   onChange={e => setEmailRecuperar(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && recuperarSenha()}
                   className="ln-modal-input"
+                  autoFocus
                 />
                 <div className="ln-modal-acoes">
                   <button className="ln-btn-modal-cancelar" onClick={fecharModal}>Cancelar</button>
