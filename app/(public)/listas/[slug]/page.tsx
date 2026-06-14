@@ -13,6 +13,7 @@ import {
   fetchListaPorSlug, fetchRelacionadas, categoriaLabel, TIPO_LABEL, type PublicItem,
 } from '../_data';
 import Interacoes from './_Interacoes';
+import { SITE_URL, abs } from '@/lib/site';
 
 export const revalidate = 120;
 
@@ -41,8 +42,34 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
   const { lista, itens } = res;
   const relacionadas = await fetchRelacionadas(lista, 6);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: 'Listas Oficiais', item: abs('/listas') },
+          { '@type': 'ListItem', position: 3, name: lista.titulo, item: abs(`/listas/${lista.slug}`) },
+        ],
+      },
+      {
+        '@type': 'ItemList',
+        name: lista.titulo,
+        numberOfItems: itens.length,
+        itemListElement: itens.map((it, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: it.ref_nome || it.nome_externo || 'Item',
+          ...(it.propriedade_id != null ? { url: abs(`/propriedade/${it.propriedade_id}`) } : {}),
+        })),
+      },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Header />
       <main className="min-h-screen bg-[#f7f7f8]">
         {/* Capa / cabeçalho */}
