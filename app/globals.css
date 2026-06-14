@@ -10,6 +10,11 @@
   --vermelho: #ff385c;
   --preto:    #0d0d0d;
   --ouro:     #f59e0b;
+  /* Variáveis usadas pelo CSS das páginas públicas (styles/publico.css) */
+  --cinza:    #f5f5f5;
+  --borda:    #e8e8e8;
+  --texto:    #3a3a3a;
+  --suave:    #888;
 }
 
 body {
