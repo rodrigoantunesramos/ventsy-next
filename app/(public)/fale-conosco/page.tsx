@@ -68,6 +68,7 @@ export default function FaleConoscoPage() {
   const [erros, setErros]       = useState<Record<string, boolean>>({})
   const [enviado, setEnviado]   = useState(false)
   const [enviando, setEnviando] = useState(false)
+  const [erroEnvio, setErroEnvio] = useState('')
 
   // Scroll reveal
   useEffect(() => {
@@ -80,12 +81,17 @@ export default function FaleConoscoPage() {
   }, [])
 
   async function enviar() {
+    if (enviando) return
+    setErroEnvio('')
     const novosErros: Record<string, boolean> = {}
     if (!nome.trim())     novosErros.nome = true
     if (!email.trim())    novosErros.email = true
     if (!mensagem.trim()) novosErros.mensagem = true
     setErros(novosErros)
-    if (Object.keys(novosErros).length > 0) return
+    if (Object.keys(novosErros).length > 0) {
+      setErroEnvio('Preencha os campos destacados para enviar.')
+      return
+    }
 
     setEnviando(true)
     try {
@@ -96,12 +102,12 @@ export default function FaleConoscoPage() {
       })
       if (!r.ok) {
         const j = await r.json().catch(() => ({}))
-        alert(j.error || 'Não foi possível enviar. Tente novamente.')
+        setErroEnvio(j.error || 'Não foi possível enviar. Tente novamente.')
         return
       }
       setEnviado(true)
     } catch {
-      alert('Falha de conexão. Tente novamente.')
+      setErroEnvio('Falha de conexão. Verifique sua internet e tente novamente.')
     } finally {
       setEnviando(false)
     }
@@ -137,11 +143,13 @@ export default function FaleConoscoPage() {
               <p className="fc-form-sub">Preencha o formulário abaixo e responderemos em até 48 horas úteis.</p>
 
               {/* Chips de assunto */}
-              <span className="fc-label-chips">Qual é o assunto?</span>
-              <div className="fc-chips-wrap">
+              <span className="fc-label-chips" id="fc-assunto-label">Qual é o assunto?</span>
+              <div className="fc-chips-wrap" role="group" aria-labelledby="fc-assunto-label">
                 {CHIPS.map(c => (
                   <button
                     key={c}
+                    type="button"
+                    aria-pressed={chip === c}
                     className={`fc-chip${chip === c ? ' fc-chip-ativo' : ''}`}
                     onClick={() => setChip(c)}
                   >{c}</button>
@@ -151,17 +159,18 @@ export default function FaleConoscoPage() {
               {/* Nome + Telefone */}
               <div className="fc-form-row">
                 <div className="fc-form-group">
-                  <label>Nome</label>
+                  <label htmlFor="fc-nome">Nome</label>
                   <input
-                    type="text" value={nome} placeholder="Seu nome completo"
+                    id="fc-nome" type="text" autoComplete="name" value={nome} placeholder="Seu nome completo"
                     onChange={e => setNome(e.target.value)}
+                    aria-invalid={!!erros.nome}
                     className={erros.nome ? 'fc-campo-erro' : ''}
                   />
                 </div>
                 <div className="fc-form-group">
-                  <label>Telefone / WhatsApp</label>
+                  <label htmlFor="fc-tel">Telefone / WhatsApp</label>
                   <input
-                    type="tel" value={telefone} placeholder="(11) 99999-9999"
+                    id="fc-tel" type="tel" inputMode="tel" autoComplete="tel" value={telefone} placeholder="(11) 99999-9999"
                     onChange={e => setTelefone(mascaraTelefone(e.target.value))}
                   />
                 </div>
@@ -169,18 +178,19 @@ export default function FaleConoscoPage() {
 
               {/* E-mail */}
               <div className="fc-form-group">
-                <label>E-mail</label>
+                <label htmlFor="fc-email">E-mail</label>
                 <input
-                  type="email" value={email} placeholder="seu@email.com"
+                  id="fc-email" type="email" autoComplete="email" value={email} placeholder="seu@email.com"
                   onChange={e => setEmail(e.target.value)}
+                  aria-invalid={!!erros.email}
                   className={erros.email ? 'fc-campo-erro' : ''}
                 />
               </div>
 
               {/* Perfil */}
               <div className="fc-form-group">
-                <label>Você é...</label>
-                <select value={perfil} onChange={e => setPerfil(e.target.value)}>
+                <label htmlFor="fc-perfil">Você é...</label>
+                <select id="fc-perfil" value={perfil} onChange={e => setPerfil(e.target.value)}>
                   <option value="" disabled>Selecione seu perfil</option>
                   <option>Dono de espaço</option>
                   <option>Quero alugar um espaço</option>
@@ -192,17 +202,21 @@ export default function FaleConoscoPage() {
 
               {/* Mensagem */}
               <div className="fc-form-group">
-                <label>Mensagem</label>
+                <label htmlFor="fc-msg">Mensagem</label>
                 <textarea
-                  value={mensagem} placeholder="Descreva sua dúvida ou mensagem com o máximo de detalhes possível..."
+                  id="fc-msg" value={mensagem} placeholder="Descreva sua dúvida ou mensagem com o máximo de detalhes possível..."
                   onChange={e => setMensagem(e.target.value)}
+                  aria-invalid={!!erros.mensagem}
                   className={erros.mensagem ? 'fc-campo-erro' : ''}
                 />
               </div>
 
-              <button className="fc-btn-enviar" onClick={enviar}>
-                <span className="material-icons">send</span>
-                Enviar mensagem
+              {erroEnvio && (
+                <p role="alert" className="text-[#c81e40] text-sm font-medium mb-3">{erroEnvio}</p>
+              )}
+              <button className="fc-btn-enviar" onClick={enviar} disabled={enviando}>
+                <span className="material-icons" aria-hidden="true">{enviando ? 'sync' : 'send'}</span>
+                {enviando ? 'Enviando...' : 'Enviar mensagem'}
               </button>
             </>
           )}

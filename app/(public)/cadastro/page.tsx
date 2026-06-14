@@ -411,29 +411,31 @@ function CadastroContent() {
 
                 {/* Alerta */}
                 {alerta && (
-                  <div className={`cadastro-alerta cadastro-alerta-${alerta.tipo}`}>
-                    <span className="material-icons">{alerta.tipo === 'erro' ? 'error_outline' : 'check_circle'}</span>
+                  <div className={`cadastro-alerta cadastro-alerta-${alerta.tipo}`} role="alert">
+                    <span className="material-icons" aria-hidden="true">{alerta.tipo === 'erro' ? 'error_outline' : 'check_circle'}</span>
                     <span>{alerta.msg}</span>
                   </div>
                 )}
 
                 {/* Tipo de documento */}
-                <div className="tipo-doc">
-                  <button className={`tipo-btn${tipoDoc === 'cpf' ? ' ativo' : ''}`} onClick={() => trocarTipoDoc('cpf')}>
-                    <span className="material-icons">person</span> CPF (Pessoa Física)
+                <div className="tipo-doc" role="group" aria-label="Tipo de documento">
+                  <button type="button" aria-pressed={tipoDoc === 'cpf'} className={`tipo-btn${tipoDoc === 'cpf' ? ' ativo' : ''}`} onClick={() => trocarTipoDoc('cpf')}>
+                    <span className="material-icons" aria-hidden="true">person</span> CPF (Pessoa Física)
                   </button>
-                  <button className={`tipo-btn${tipoDoc === 'cnpj' ? ' ativo' : ''}`} onClick={() => trocarTipoDoc('cnpj')}>
-                    <span className="material-icons">business</span> CNPJ (Empresa)
+                  <button type="button" aria-pressed={tipoDoc === 'cnpj'} className={`tipo-btn${tipoDoc === 'cnpj' ? ' ativo' : ''}`} onClick={() => trocarTipoDoc('cnpj')}>
+                    <span className="material-icons" aria-hidden="true">business</span> CNPJ (Empresa)
                   </button>
                 </div>
 
                 {/* Documento */}
                 <div className="form-group">
-                  <label>{tipoDoc === 'cpf' ? 'CPF' : 'CNPJ'}</label>
+                  <label htmlFor="cad-doc">{tipoDoc === 'cpf' ? 'CPF' : 'CNPJ'}</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">badge</span>
+                    <span className="material-icons icon-left" aria-hidden="true">badge</span>
                     <input
+                      id="cad-doc"
                       type="text"
+                      inputMode="numeric"
                       value={documento}
                       placeholder={tipoDoc === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
                       maxLength={tipoDoc === 'cpf' ? 14 : 18}
@@ -449,10 +451,10 @@ function CadastroContent() {
 
                 {/* Nome */}
                 <div className="form-group">
-                  <label>Nome completo</label>
+                  <label htmlFor="cad-nome">Nome completo</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">person_outline</span>
-                    <input type="text" value={nome} placeholder="Seu nome completo"
+                    <span className="material-icons icon-left" aria-hidden="true">person_outline</span>
+                    <input id="cad-nome" type="text" autoComplete="name" value={nome} placeholder="Seu nome completo"
                       onChange={e => setNome(e.target.value)} onBlur={validarNome} />
                     <StatusIcon st={stNome} />
                   </div>
@@ -461,10 +463,10 @@ function CadastroContent() {
 
                 {/* Nascimento */}
                 <div className="form-group">
-                  <label>Data de nascimento</label>
+                  <label htmlFor="cad-nasc">Data de nascimento</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">cake</span>
-                    <input type="date" value={nascimento} max={maxNasc}
+                    <span className="material-icons icon-left" aria-hidden="true">cake</span>
+                    <input id="cad-nasc" type="date" autoComplete="bday" value={nascimento} max={maxNasc}
                       onChange={e => { setNascimento(e.target.value); validarIdade() }}
                       onBlur={validarIdade} />
                     <StatusIcon st={stNasc} />
@@ -476,10 +478,10 @@ function CadastroContent() {
 
                 {/* E-mail */}
                 <div className="form-group">
-                  <label>E-mail</label>
+                  <label htmlFor="cad-email">E-mail</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">email</span>
-                    <input type="email" value={email} placeholder="seu@email.com"
+                    <span className="material-icons icon-left" aria-hidden="true">email</span>
+                    <input id="cad-email" type="email" autoComplete="email" inputMode="email" value={email} placeholder="seu@email.com"
                       onChange={e => setEmail(e.target.value)} onBlur={validarEmail} />
                     <StatusIcon st={stEmail} />
                   </div>
@@ -488,10 +490,10 @@ function CadastroContent() {
 
                 {/* Usuário */}
                 <div className="form-group">
-                  <label>Nome de usuário</label>
+                  <label htmlFor="cad-usuario">Nome de usuário</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">alternate_email</span>
-                    <input type="text" value={usuario} placeholder="seu_usuario"
+                    <span className="material-icons icon-left" aria-hidden="true">alternate_email</span>
+                    <input id="cad-usuario" type="text" autoComplete="username" value={usuario} placeholder="seu_usuario"
                       onChange={e => setUsuario(formatarUsuario(e.target.value))}
                       onBlur={validarUsuario} />
                     <StatusIcon st={stUsuario} />
@@ -501,14 +503,15 @@ function CadastroContent() {
 
                 {/* Senha */}
                 <div className="form-group">
-                  <label>Senha</label>
+                  <label htmlFor="cad-senha">Senha</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">lock_outline</span>
-                    <input type={mostraSenha ? 'text' : 'password'} value={senha}
+                    <span className="material-icons icon-left" aria-hidden="true">lock_outline</span>
+                    <input id="cad-senha" type={mostraSenha ? 'text' : 'password'} autoComplete="new-password" value={senha}
                       className="com-toggle" placeholder="Mínimo 8 caracteres"
                       onChange={e => { setSenha(e.target.value); setForca(avaliarForca(e.target.value)) }} />
-                    <button type="button" className="toggle-senha" onClick={() => setMostraSenha(!mostraSenha)} tabIndex={-1}>
-                      <span className="material-icons">{mostraSenha ? 'visibility' : 'visibility_off'}</span>
+                    <button type="button" className="toggle-senha" onClick={() => setMostraSenha(!mostraSenha)}
+                      aria-label={mostraSenha ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={mostraSenha}>
+                      <span className="material-icons" aria-hidden="true">{mostraSenha ? 'visibility' : 'visibility_off'}</span>
                     </button>
                   </div>
                   {/* Barras de força */}
@@ -523,14 +526,15 @@ function CadastroContent() {
 
                 {/* Confirmar senha */}
                 <div className="form-group">
-                  <label>Confirmar senha</label>
+                  <label htmlFor="cad-senha2">Confirmar senha</label>
                   <div className="input-wrap">
-                    <span className="material-icons icon-left">lock_outline</span>
-                    <input type={mostraSenha2 ? 'text' : 'password'} value={senha2}
+                    <span className="material-icons icon-left" aria-hidden="true">lock_outline</span>
+                    <input id="cad-senha2" type={mostraSenha2 ? 'text' : 'password'} autoComplete="new-password" value={senha2}
                       className="com-toggle" placeholder="Repita a senha"
                       onChange={e => setSenha2(e.target.value)} onBlur={validarSenha2} />
-                    <button type="button" className="toggle-senha" onClick={() => setMostraSenha2(!mostraSenha2)} tabIndex={-1}>
-                      <span className="material-icons">{mostraSenha2 ? 'visibility' : 'visibility_off'}</span>
+                    <button type="button" className="toggle-senha" onClick={() => setMostraSenha2(!mostraSenha2)}
+                      aria-label={mostraSenha2 ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={mostraSenha2}>
+                      <span className="material-icons" aria-hidden="true">{mostraSenha2 ? 'visibility' : 'visibility_off'}</span>
                     </button>
                   </div>
                   <HintText st={stSenha2} />
@@ -555,6 +559,7 @@ function CadastroContent() {
                       <input
                         id="ref-codigo"
                         type="text"
+                        aria-label="Código de indicação"
                         value={refCodigo}
                         placeholder="Ex: A3KX92BZ"
                         maxLength={8}
@@ -579,7 +584,7 @@ function CadastroContent() {
 
                 {/* Termos */}
                 <div className="termos-linha">
-                  <input type="checkbox" id="termos" checked={termos} onChange={e => setTermos(e.target.checked)} />
+                  <input type="checkbox" id="termos" aria-label="Li e concordo com os Termos de Uso e a Política de Privacidade" checked={termos} onChange={e => setTermos(e.target.checked)} />
                   <p>Li e concordo com os{' '}
                     <Link href="/termos">Termos de Uso</Link> e a{' '}
                     <Link href="/privacidade">Política de Privacidade</Link> da VENTSY.
