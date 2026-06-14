@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import FavoriteButton from './client/FavoriteButton'
 import type { PropertySummary } from '@/types/client'
 
@@ -19,6 +20,13 @@ const StarIcon = () => (
   </svg>
 )
 
+// Placeholder local para quando a propriedade não tem foto (sem depender de picsum).
+const FotoPlaceholder = () => (
+  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-300 text-3xl" aria-hidden="true">
+    🏠
+  </div>
+)
+
 export default function PropertyCard({
   property,
   variant = 'default',
@@ -34,7 +42,13 @@ export default function PropertyCard({
 
   const isUltra = property._plano === 'ultra'
   const isPro   = property._plano === 'pro'
-  const img     = property.imagem_url || property.foto_capa || `https://picsum.photos/seed/${property.id}/420/320`
+  const img     = property.imagem_url || property.foto_capa || ''
+  // next/image só para fotos do nosso bucket (ou picsum em dev). URLs legadas
+  // hotlinkadas (Google/Facebook) caem no placeholder em vez de quebrar a página.
+  const temFoto = (() => {
+    try { const h = new URL(img).hostname; return h.endsWith('.supabase.co') || h.endsWith('picsum.photos') }
+    catch { return false }
+  })()
   const nome    = property.nome || 'Sem nome'
   const cidade  = property.cidade || property.estado || ''
   const nota    = property._nota ?? (property.avaliacao > 0 ? String(property.avaliacao) : null)
@@ -63,11 +77,12 @@ export default function PropertyCard({
         )}
 
         <div className={`relative overflow-hidden ${isUltra ? 'h-[132px]' : 'h-[120px]'}`}>
-          <img
-            src={img} alt={nome} loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={e => { (e.target as HTMLImageElement).src = `https://picsum.photos/seed/err${property.id}/420/320` }}
-          />
+          {temFoto ? (
+            <Image
+              src={img} alt={nome} fill sizes="208px"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : <FotoPlaceholder />}
           {isUltra && (
             <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full backdrop-blur-sm">
               ✦ Premium
@@ -125,11 +140,13 @@ export default function PropertyCard({
         )}
 
         <div className="relative h-48 overflow-hidden">
-          <img
-            src={img} alt={nome} loading="lazy"
-            className="w-full h-full object-cover"
-            onError={e => { (e.target as HTMLImageElement).src = `https://picsum.photos/seed/err${property.id}/400/300` }}
-          />
+          {temFoto ? (
+            <Image
+              src={img} alt={nome} fill
+              sizes="(min-width:1280px) 30vw, (min-width:1024px) 45vw, 50vw"
+              className="object-cover"
+            />
+          ) : <FotoPlaceholder />}
           {isUltra ? (
             <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full">
               ✦ Premium
@@ -206,11 +223,11 @@ export default function PropertyCard({
   return (
     <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.09)]">
       <Link href={`/propriedade/${property.id}`} className="no-underline">
-        <img
-          className="w-full h-[180px] object-cover block"
-          src={img} alt={nome}
-          onError={e => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/ventsy/800/500' }}
-        />
+        <div className="relative w-full h-[180px]">
+          {temFoto ? (
+            <Image src={img} alt={nome} fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover" />
+          ) : <FotoPlaceholder />}
+        </div>
         <div className="px-4 py-3.5">
           <div className="text-[.95rem] font-bold text-gray-900 truncate mb-1">{nome}</div>
           <div className="text-[.78rem] text-gray-400 mb-2">
