@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { filtrosFromParams, aplicarFiltrosNaQuery, type SP } from './_filtros'
+import { filtrosFromParams, aplicarFiltrosNaQuery, ordenarPorRelevancia, type SP } from './_filtros'
 
 // Server-only: este módulo importa supabaseAdmin (service-role). NUNCA importar
 // no client — a lógica de filtros pura fica em _filtros.ts.
@@ -35,7 +35,7 @@ export async function fetchBuscaInicial(sp: SP): Promise<BuscaInicial> {
 
   try {
     const { data } = await query.limit(60)
-    return { props: data || [], planos }
+    return { props: ordenarPorRelevancia(data || [], planos), planos }
   } catch {
     return { props: [], planos }
   }

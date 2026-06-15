@@ -95,3 +95,17 @@ export function aplicarFiltrosNaQuery(query: any, sp: SP) {
   }
   return query
 }
+
+// Relevância: plano pago primeiro (ultra > pro > básico), depois nota, depois nome.
+const pesoPlano = (p: string) => (p === 'ultra' ? 0 : p === 'pro' ? 1 : 2)
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ordenarPorRelevancia<T extends Record<string, any>>(props: T[], planos: Record<string, string>): T[] {
+  return [...props].sort((a, b) => {
+    const dp = pesoPlano(planos[a.usuario_id] || 'basico') - pesoPlano(planos[b.usuario_id] || 'basico')
+    if (dp !== 0) return dp
+    const dn = (parseFloat(String(b.avaliacao ?? 0)) || 0) - (parseFloat(String(a.avaliacao ?? 0)) || 0)
+    if (dn !== 0) return dn
+    return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR')
+  })
+}

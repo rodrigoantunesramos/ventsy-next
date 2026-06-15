@@ -8,7 +8,7 @@ import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
 import SearchMap from '@/components/SearchMap'
 import { supabase } from '@/lib/supabase'
-import { filtrosFromParams, paramsFromFiltros, contarFiltros, aplicarFiltrosNaQuery } from './_filtros'
+import { filtrosFromParams, paramsFromFiltros, contarFiltros, aplicarFiltrosNaQuery, ordenarPorRelevancia } from './_filtros'
 import type { PropertySummary } from '@/types/client'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
@@ -51,11 +51,13 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
   const [loading, setLoading]       = useState(false)
   const [planosMap]                 = useState<Record<string, string>>(initialPlanos)
   const [filtroOpen, setFiltroOpen] = useState(false)
+  const [visiveis, setVisiveis]     = useState(24)
   const primeira = useRef(true)
 
   // A listagem inicial vem do servidor (initialProps). A ilha só re-busca quando
   // os params mudam (navegação/filtros), pulando o primeiro render.
   useEffect(() => {
+    setVisiveis(24) // nova busca recomeça a paginação
     if (primeira.current) { primeira.current = false; return }
     buscar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,7 +77,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
     }
 
     const { data } = await query.limit(60)
-    setProps((data || []) as unknown as RawProperty[])
+    setProps(ordenarPorRelevancia((data || []) as unknown as RawProperty[], planosMap))
     setLoading(false)
   }
 
@@ -148,15 +150,28 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
-              {props.map(p => (
-                <PropertyCard
-                  key={p.id}
-                  property={{ ...p, _plano: ((p.usuario_id && planosMap[p.usuario_id]) || 'basico') as 'basico' | 'pro' | 'ultra' }}
-                  variant="grid"
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+                {props.slice(0, visiveis).map(p => (
+                  <PropertyCard
+                    key={p.id}
+                    property={{ ...p, _plano: ((p.usuario_id && planosMap[p.usuario_id]) || 'basico') as 'basico' | 'pro' | 'ultra' }}
+                    variant="grid"
+                  />
+                ))}
+              </div>
+              {props.length > visiveis && (
+                <div className="text-center mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setVisiveis(v => v + 24)}
+                    className="bg-white border border-gray-300 hover:border-gray-500 rounded-full px-7 py-3 text-sm font-bold text-gray-700 cursor-pointer transition-colors font-[inherit]"
+                  >
+                    Carregar mais ({props.length - visiveis} restantes)
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
 
