@@ -1,7 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import type { Json } from '@/types/supabase'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Gestão da equipe de admin (tabela admin_membros). O módulo 'acessos' só é
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'acessos', 'ver')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const { data: membros } = await admin
     .from('admin_membros')
     .select('usuario_id, papel, permissoes, ativo, criado_em')
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   const ctx = await requireAdmin(req, 'acessos', 'editar')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
   const action = body.action as string | undefined
 
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   if (action === 'permissoes') {
     const permissoes = body.permissoes && typeof body.permissoes === 'object' ? body.permissoes : {}
-    const { error } = await admin.from('admin_membros').update({ permissoes }).eq('usuario_id', id)
+    const { error } = await admin.from('admin_membros').update({ permissoes: permissoes as Json }).eq('usuario_id', id)
     if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
   }

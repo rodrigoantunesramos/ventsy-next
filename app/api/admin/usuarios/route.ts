@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdmin, supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 import { sendEmail } from '@/lib/email'
 
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'usuarios', 'ver')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const q = (new URL(req.url).searchParams.get('q') || '').toLowerCase().trim()
 
   const [{ data: perfis }, { data: assinaturas }] = await Promise.all([
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
   const ctx = await requireAdmin(req, 'usuarios', 'editar')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
   const action = body.action as string | undefined
   const id = body.id as string | undefined
