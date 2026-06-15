@@ -262,7 +262,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
         if (u.criado_em){
           const a = Math.floor((Date.now() - new Date(u.criado_em).getTime()) / 31536000000)
-          setAnfTempo(a >= 1 ? `${a} ano${a > 1 ? 's' : ''}` : 'menos de 1 ano')
+          setAnfTempo(a >= 1 ? `${a} ${a > 1 ? t.anfitriao.anoMuitos : t.anfitriao.anoUm}` : t.anfitriao.menosDeUmAno)
         }
       }
 
@@ -466,35 +466,35 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
             {/* Detalhes */}
             <div className="pp-detalhes">
-              {[{label:'Capacidade',valor:prop?.capacidade?`${prop.capacidade} pessoas`:'—'},{label:'Tipo do espaço',valor:prop?.tipo_propriedade||'—'},{label:'Localização',valor:prop?.cidade||'—'}].map(d=>(
+              {[{label:t.detalhes.capacidade,valor:prop?.capacidade?`${prop.capacidade} ${t.detalhes.pessoas}`:'—'},{label:t.detalhes.tipoEspaco,valor:prop?.tipo_propriedade||'—'},{label:t.detalhes.localizacao,valor:prop?.cidade||'—'}].map(d=>(
                 <div key={d.label} className="pp-detalhe-item"><span className="pp-det-label">{d.label}</span><span className="pp-det-valor">{d.valor}</span></div>
               ))}
             </div>
 
             {/* Sobre */}
             <div className="pp-sobre">
-              <h2>Sobre este espaço</h2>
+              <h2>{t.sobre.titulo}</h2>
               {sobrePreview.map((l:string,i:number)=><p key={i}>{l}</p>)}
               {sobreResto.length>0&&sobreExp&&sobreResto.map((l:string,i:number)=><p key={i}>{l}</p>)}
-              {sobreResto.length>0&&!sobreExp&&<button className="pp-expandir" onClick={()=>setSobreExp(true)}>Ler mais →</button>}
+              {sobreResto.length>0&&!sobreExp&&<button className="pp-expandir" onClick={()=>setSobreExp(true)}>{t.sobre.lerMais}</button>}
             </div>
 
             {/* Comodidades */}
-            <div className="pp-comodidades"><h2>O que o lugar oferece</h2>
+            <div className="pp-comodidades"><h2>{t.comodidades.titulo}</h2>
               <div className="pp-como-grid">
-                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{comodidadeLabel(c)}</div>):<p className="text-[#aaa] text-[.88rem]">Não informado.</p>}
+                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{comodidadeLabel(c)}</div>):<p className="text-[#aaa] text-[.88rem]">{t.comodidades.naoInformado}</p>}
               </div>
             </div>
 
             {/* Custos extras */}
             {custosExtras.length>0 && (
               <div className="mb-6">
-                <h2 className="text-[1.15rem] font-bold text-[#222] mb-3">Serviços e custos extras</h2>
+                <h2 className="text-[1.15rem] font-bold text-[#222] mb-3">{t.custosExtras.titulo}</h2>
                 <div className="flex flex-col gap-2">
                   {custosExtras.map((c:any,i:number)=>(
                     <div key={i} className="flex items-center justify-between rounded-xl border border-[#eee] px-4 py-2.5">
                       <span className="text-[.9rem] text-[#333]">{c.nome}</span>
-                      <span className="text-[.9rem] font-semibold text-[#222]">{formatMoney(Number(c.valor)||0)}</span>
+                      <span className="text-[.9rem] font-semibold text-[#222]">{formatMoney(locale,Number(c.valor)||0)}</span>
                     </div>
                   ))}
                 </div>
@@ -504,12 +504,12 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
             {/* Espaço em eventos */}
             {fotosEvento.length>0 && (
               <div className="mb-6">
-                <h2 className="text-[1.15rem] font-bold text-[#222] mb-1">Este espaço em eventos</h2>
-                <p className="text-[.86rem] text-[#888] mb-3">Veja como o espaço fica montado para diferentes ocasiões.</p>
+                <h2 className="text-[1.15rem] font-bold text-[#222] mb-1">{t.emEventos.titulo}</h2>
+                <p className="text-[.86rem] text-[#888] mb-3">{t.emEventos.subtitulo}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {fotosEvento.slice(0,6).map((f,i)=>(
                     <div key={i} className="relative rounded-xl overflow-hidden cursor-pointer aspect-[4/3] group" onClick={()=>abrirLb(fotosEvento.map(x=>x.url),i)}>
-                      <FotoEspaco url={f.url} alt={f.alt||f.titulo||'Foto do evento'} focal_x={f.focal_x} focal_y={f.focal_y} sizes="(min-width:640px) 33vw, 50vw" className="transition-transform duration-300 group-hover:scale-105" />
+                      <FotoEspaco url={f.url} alt={f.alt||f.titulo||t.galeria.fotoEventoAlt} focal_x={f.focal_x} focal_y={f.focal_y} sizes="(min-width:640px) 33vw, 50vw" className="transition-transform duration-300 group-hover:scale-105" />
                       {f.titulo&&<div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-white text-[.78rem] font-semibold">{f.titulo}</div>}
                     </div>
                   ))}
@@ -523,7 +523,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                 <div className="pp-aval-nota">{nota?parseFloat(nota).toFixed(1):'—'}</div>
                 <div>
                   <div className="pp-aval-stars">★★★★★</div>
-                  <div className="pp-aval-total">{avaliacoes.length} avaliações verificadas</div>
+                  <div className="pp-aval-total">{avaliacoes.length} {t.avaliacoes.verificadas}</div>
                 </div>
               </div>
 
@@ -532,26 +532,26 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                 <div className="my-3">
                   {jaAvaliou ? (
                     <div className="text-[.84rem] text-[#27ae60] bg-[#f0faf5] rounded-[10px] px-[14px] py-2 inline-flex items-center gap-[6px]">
-                      ✅ Você já avaliou este espaço
+                      {t.avaliacoes.jaAvaliou}
                     </div>
                   ) : (
                     <button
                       onClick={()=>setReviewModal(true)}
                       className="bg-[#ff385c] text-white border-none rounded-[10px] px-[18px] py-[9px] text-[.86rem] font-bold cursor-pointer transition-opacity duration-150"
                     >
-                      ⭐ Avaliar este espaço
+                      {t.avaliacoes.avaliarEspaco}
                     </button>
                   )}
                 </div>
               )}
               {!clientUserId && propId !== 'demo' && (
                 <div className="text-[.82rem] text-[#888] mt-2 mb-3 bg-[#fafafa] rounded-[10px] px-[14px] py-2">
-                  <a href="/login" className="text-[#ff385c] font-semibold no-underline">Faça login</a> para avaliar este espaço.
+                  <a href={lhref('/login')} className="text-[#ff385c] font-semibold no-underline">{t.avaliacoes.facaLogin}</a> {t.avaliacoes.paraAvaliar}
                 </div>
               )}
 
               <div className="pp-aval-filtros">
-                {[['todas','Todas'],['5','★★★★★'],['4','★★★★'],['3','★★★ ou menos'],['verificados','✓ Verificados']].map(([k,l])=>(
+                {[['todas',t.avaliacoes.filtros.todas],['5','★★★★★'],['4',t.avaliacoes.filtros.quatroOuMais],['3',t.avaliacoes.filtros.tresOuMenos],['verificados',t.avaliacoes.filtros.verificados]].map(([k,l])=>(
                   <button key={k} className={`pp-aval-filtro${avalFiltro===k?' pp-aval-ativo':''}`} onClick={()=>{setAvalFiltro(k);setAvalVis(4)}}>{l}</button>
                 ))}
               </div>
@@ -560,13 +560,13 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                   <div key={a.id} className="pp-aval-card">
                     <div className="pp-aval-autor">
                       <img src={a.avatar||`https://i.pravatar.cc/150?u=${a.id}`} alt={a.autor} loading="lazy"/>
-                      <div><strong>{a.autor}{a.verificada&&<span className="pp-badge-ver">✓ Verificado</span>}</strong><span>{a.data}{a.evento_tipo?` · ${a.evento_tipo}`:''}</span></div>
+                      <div><strong>{a.autor}{a.verificada&&<span className="pp-badge-ver">{t.avaliacoes.badgeVerificado}</span>}</strong><span>{a.data}{a.evento_tipo?` · ${a.evento_tipo}`:''}</span></div>
                     </div>
                     <div className="text-[var(--ouro)] text-[.88rem] mb-[6px]">{'★'.repeat(a.nota)}{'☆'.repeat(5-a.nota)}</div>
                     <p className="pp-aval-texto">{a.texto}</p>
                     {a.resposta&&(
                       <div className="mt-2.5 rounded-[10px] border-l-2 border-[#ff385c] bg-[#fafafa] px-3 py-2">
-                        <div className="text-[.74rem] font-semibold text-[#ff385c] mb-0.5">↳ Resposta do anfitrião</div>
+                        <div className="text-[.74rem] font-semibold text-[#ff385c] mb-0.5">{t.avaliacoes.respostaAnfitriao}</div>
                         <p className="text-[.84rem] text-[#555] leading-[1.5] m-0">{a.resposta}</p>
                       </div>
                     )}
@@ -575,12 +575,12 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                 {!avalFil.length&&(
                   <div className="text-[#bbb] [grid-column:1/-1] text-center py-6">
                     <div className="text-[1.6rem] mb-2">⭐</div>
-                    <div className="font-semibold text-[#aaa] mb-1">Nenhuma avaliação ainda</div>
-                    <div className="text-[.82rem]">Seja o primeiro a avaliar este espaço!</div>
+                    <div className="font-semibold text-[#aaa] mb-1">{t.avaliacoes.vazioTitulo}</div>
+                    <div className="text-[.82rem]">{t.avaliacoes.vazioSub}</div>
                   </div>
                 )}
               </div>
-              {avalFil.length>avalVis&&<button className="pp-btn-ver-mais" onClick={()=>setAvalVis(v=>v+4)}>Mostrar mais avaliações</button>}
+              {avalFil.length>avalVis&&<button className="pp-btn-ver-mais" onClick={()=>setAvalVis(v=>v+4)}>{t.avaliacoes.mostrarMais}</button>}
             </div>
 
             {/* Modal de avaliação */}
@@ -596,7 +596,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                       propriedade_id: propId,
                       nota:        form.nota,
                       texto:       form.texto,
-                      autor:       clientNome || 'Usuário Ventsy',
+                      autor:       clientNome || t.avaliacoes.autorFallback,
                       evento_tipo: form.evento_tipo,
                     }),
                   })
@@ -605,9 +605,9 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                   // Adicionar à lista localmente
                   setAval(prev=>[{
                     id:         json.data.id,
-                    autor:      clientNome || 'Usuário Ventsy',
+                    autor:      clientNome || t.avaliacoes.autorFallback,
                     avatar:     '',
-                    data:       new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}),
+                    data:       new Intl.DateTimeFormat(locale==='pt'?'pt-BR':locale==='es'?'es-ES':'en-US',{month:'long',year:'numeric'}).format(new Date()),
                     nota:       form.nota,
                     texto:      form.texto || '',
                     verificada: true,
@@ -615,7 +615,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                   },...prev])
                   setJaAvaliou(true)
                   setReviewModal(false)
-                  setReviewToast('✅ Avaliação enviada com sucesso!')
+                  setReviewToast(t.avaliacoes.enviadaSucesso)
                   setTimeout(()=>setReviewToast(''),3500)
                 }}
               />
@@ -636,18 +636,18 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
             {/* Mapa */}
             {prop?.cidade&&(
-              <div className="pp-mapa"><h2>Onde fica este espaço</h2>
-                <p className="pp-mapa-end">{[prop?.cidade,prop?.estado,'Brasil'].filter(Boolean).join(', ')}</p>
+              <div className="pp-mapa"><h2>{t.mapa.titulo}</h2>
+                <p className="pp-mapa-end">{[prop?.cidade,prop?.estado,t.mapa.pais].filter(Boolean).join(', ')}</p>
                 <div className="pp-mapa-container">
-                  <iframe title="Localização" width="100%" height="350" className="border-0" loading="lazy"
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent([prop?.cidade,prop?.estado,'Brasil'].filter(Boolean).join(', '))}&output=embed&hl=pt-BR`}/>
+                  <iframe title={t.mapa.iframeTitulo} width="100%" height="350" className="border-0" loading="lazy"
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent([prop?.cidade,prop?.estado,t.mapa.pais].filter(Boolean).join(', '))}&output=embed&hl=${locale==='pt'?'pt-BR':locale}`}/>
                 </div>
               </div>
             )}
 
             {/* FAQ */}
             {faqItems.length>0&&(
-              <div className="pp-faq"><h2>Perguntas frequentes</h2>
+              <div className="pp-faq"><h2>{t.faq.titulo}</h2>
                 {faqItems.map((f,i)=><FaqItem key={i} pergunta={f.pergunta} resposta={f.resposta}/>)}
               </div>
             )}
@@ -658,21 +658,21 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
             <div className="pp-card-lateral">
               {plano==='ultra'&&(
                 <div className="pp-ultra-banner">
-                  <div className="pp-ultra-title">✦ Espaço Premium VENTSY</div>
-                  <div className="pp-ultra-sub">Fotos profissionais, vídeos e tour 360° disponíveis. Resposta prioritária garantida.</div>
+                  <div className="pp-ultra-title">{t.cardLateral.ultraBannerTitulo}</div>
+                  <div className="pp-ultra-sub">{t.cardLateral.ultraBannerSub}</div>
                 </div>
               )}
               <div className="pp-precos">
-                {prop?.valor_hora>0&&<div className="pp-preco-item"><span className="pp-preco-label">Por hora</span><span className="pp-preco-valor">R$ {Number(prop.valor_hora).toLocaleString('pt-BR')}<em>/h</em></span></div>}
-                {(prop?.valor_base||prop?.preco)>0&&<div className="pp-preco-item"><span className="pp-preco-label">Diária</span><span className="pp-preco-valor">R$ {Number(prop?.valor_base||prop?.preco).toLocaleString('pt-BR')}</span></div>}
+                {prop?.valor_hora>0&&<div className="pp-preco-item"><span className="pp-preco-label">{t.cardLateral.porHora}</span><span className="pp-preco-valor">{formatMoney(locale,Number(prop.valor_hora))}<em>{t.cardLateral.porHoraSufixo}</em></span></div>}
+                {(prop?.valor_base||prop?.preco)>0&&<div className="pp-preco-item"><span className="pp-preco-label">{t.cardLateral.diaria}</span><span className="pp-preco-valor">{formatMoney(locale,Number(prop?.valor_base||prop?.preco))}</span></div>}
               </div>
               {plano!=='basico'?(
                 <>
-                  {wppRef.current&&<button className="pp-btn-wpp" onClick={irWppDireto}>{WPP_SVG} WhatsApp direto</button>}
+                  {wppRef.current&&<button className="pp-btn-wpp" onClick={irWppDireto}>{WPP_SVG} {t.cardLateral.whatsappDireto}</button>}
                   <div className="pp-form">
-                    {[{id:'nome',label:'Nome *',type:'text',val:formNome,set:setFormNome,ph:'Seu nome completo',err:formErros.nome,onChange:(v:string)=>setFormNome(v)},
-                      {id:'tel',label:'Telefone *',type:'tel',val:formTel,set:setFormTel,ph:'(11) 99999-9999',err:formErros.tel,onChange:(v:string)=>setFormTel(mascaraTel(v))},
-                      {id:'email',label:'E-mail *',type:'email',val:formEmail,set:setFormEmail,ph:'seu@email.com',err:formErros.email,onChange:(v:string)=>setFormEmail(v)}
+                    {[{id:'nome',label:t.form.nomeLabel,type:'text',val:formNome,set:setFormNome,ph:t.form.nomePlaceholder,err:formErros.nome,onChange:(v:string)=>setFormNome(v)},
+                      {id:'tel',label:t.form.telefoneLabel,type:'tel',val:formTel,set:setFormTel,ph:t.form.telefonePlaceholder,err:formErros.tel,onChange:(v:string)=>setFormTel(mascaraTel(v))},
+                      {id:'email',label:t.form.emailLabel,type:'email',val:formEmail,set:setFormEmail,ph:t.form.emailPlaceholder,err:formErros.email,onChange:(v:string)=>setFormEmail(v)}
                     ].map(f=>(
                       <div key={f.id} className="pp-form-grupo">
                         <label>{f.label}</label>
@@ -680,21 +680,21 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                       </div>
                     ))}
                     <div className="pp-form-grupo">
-                      <label>Tipo de evento *</label>
+                      <label>{t.form.tipoEventoLabel}</label>
                       <select value={formTipo} className={formErros.tipo?'pp-campo-erro':''} onChange={e=>setFormTipo(e.target.value)}>
-                        <option value="">Selecione o tipo</option>
-                        {TIPOS_EVENTO.map(t=><option key={t}>{t}</option>)}
+                        <option value="">{t.form.tipoEventoPlaceholder}</option>
+                        {TIPOS_EVENTO.map(tp=><option key={tp} value={tp}>{tipoEventoLabel(tp)}</option>)}
                       </select>
                     </div>
                     <div className="pp-form-grupo">
-                      <label>Modo de cobrança *</label>
+                      <label>{t.form.modoCobrancaLabel}</label>
                       <div className="pp-modo-wrap">
-                        {prop?.valor_hora>0&&<label className={`pp-modo-btn${formModo==='hora'?' pp-modo-on':''}`}><input type="radio" name="modo" checked={formModo==='hora'} onChange={()=>setFormModo('hora')}/>⏱ Por hora</label>}
-                        {(prop?.valor_base||prop?.preco)>0&&<label className={`pp-modo-btn${formModo==='diaria'?' pp-modo-on':''}`}><input type="radio" name="modo" checked={formModo==='diaria'} onChange={()=>setFormModo('diaria')}/>📅 Diária</label>}
+                        {prop?.valor_hora>0&&<label className={`pp-modo-btn${formModo==='hora'?' pp-modo-on':''}`}><input type="radio" name="modo" checked={formModo==='hora'} onChange={()=>setFormModo('hora')}/>{t.form.modoHora}</label>}
+                        {(prop?.valor_base||prop?.preco)>0&&<label className={`pp-modo-btn${formModo==='diaria'?' pp-modo-on':''}`}><input type="radio" name="modo" checked={formModo==='diaria'} onChange={()=>setFormModo('diaria')}/>{t.form.modoDiaria}</label>}
                       </div>
                     </div>
                     {formModo==='hora'&&(
-                      <div className="pp-form-grupo"><label>Horas</label>
+                      <div className="pp-form-grupo"><label>{t.form.horasLabel}</label>
                         <div className="flex gap-[10px] items-center">
                           <input type="range" min={1} max={24} value={formHoras} onChange={e=>setFormHoras(Number(e.target.value))} className="flex-1 accent-[var(--vermelho)]"/>
                           <input type="number" min={1} max={24} value={formHoras} onChange={e=>setFormHoras(Number(e.target.value))} className="w-16 px-2 py-1 border-[1.5px] border-[#ddd] rounded-lg text-center font-[inherit] text-[.85rem]"/>
@@ -703,20 +703,20 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                     )}
                     {formModo==='diaria'&&(
                       <div className="pp-form-duplo">
-                        <div className="pp-form-grupo"><label>Início</label><input type="date" value={formInicio} min={new Date().toISOString().split('T')[0]} onChange={e=>setFormInicio(e.target.value)}/></div>
-                        <div className="pp-form-grupo"><label>Fim</label><input type="date" value={formFim} min={formInicio||new Date().toISOString().split('T')[0]} onChange={e=>setFormFim(e.target.value)}/></div>
+                        <div className="pp-form-grupo"><label>{t.form.inicioLabel}</label><input type="date" value={formInicio} min={new Date().toISOString().split('T')[0]} onChange={e=>setFormInicio(e.target.value)}/></div>
+                        <div className="pp-form-grupo"><label>{t.form.fimLabel}</label><input type="date" value={formFim} min={formInicio||new Date().toISOString().split('T')[0]} onChange={e=>setFormFim(e.target.value)}/></div>
                       </div>
                     )}
-                    <div className="pp-form-grupo"><label>Convidados (máx. {prop?.capacidade||500})</label>
+                    <div className="pp-form-grupo"><label>{t.form.convidadosLabel.replace('{n}',String(prop?.capacidade||500))}</label>
                       <div className="flex gap-[10px] items-center">
                         <input type="range" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} className="flex-1 accent-[var(--vermelho)]"/>
                         <input type="number" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} className="w-16 px-2 py-1 border-[1.5px] border-[#ddd] rounded-lg text-center font-[inherit] text-[.85rem]"/>
                       </div>
                     </div>
                     <div className="pp-simulador">
-                      <div className="pp-sim-label">Estimativa de orçamento</div>
-                      <div className="pp-sim-total"><span>Total estimado:</span><span>{total>0?total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'A consultar'}</span></div>
-                      <div className="pp-sim-aviso">*Valor estimado, sujeito a confirmação do proprietário.</div>
+                      <div className="pp-sim-label">{t.form.estimativaTitulo}</div>
+                      <div className="pp-sim-total"><span>{t.form.totalEstimado}</span><span>{total>0?formatMoney(locale,total):t.form.aConsultar}</span></div>
+                      <div className="pp-sim-aviso">{t.form.estimativaAviso}</div>
                     </div>
                     <button
                       type="button"
@@ -724,17 +724,17 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                       disabled={enviandoReserva}
                       className="w-full bg-[#ff385c] hover:bg-[#e0304f] disabled:opacity-60 text-white font-bold text-[.92rem] rounded-[12px] py-3 transition-colors inline-flex items-center justify-center gap-2"
                     >
-                      🗓️ {enviandoReserva?'Enviando...':'Solicitar reserva pela Ventsy'}
+                      {enviandoReserva?t.form.enviando:t.form.solicitarReserva}
                     </button>
-                    <div className="text-center text-[.72rem] text-[#aaa] my-1">ou</div>
-                    <button className={`pp-btn-enviar-wpp${formValido?'':' pp-btn-bloqueado'}`} onClick={enviarWpp}>{WPP_SVG} Enviar solicitação pelo WhatsApp</button>
-                    <p className="pp-form-hint">Todas as informações serão enviadas ao proprietário via WhatsApp.</p>
+                    <div className="text-center text-[.72rem] text-[#aaa] my-1">{t.form.ou}</div>
+                    <button className={`pp-btn-enviar-wpp${formValido?'':' pp-btn-bloqueado'}`} onClick={enviarWpp}>{WPP_SVG} {t.form.enviarWhatsapp}</button>
+                    <p className="pp-form-hint">{t.form.hint}</p>
                   </div>
                 </>
               ):(
                 <div className="pp-basico-cta">
-                  <p>Entre em contato com o proprietário para verificar disponibilidade e negociar condições.</p>
-                  {wppRef.current&&<button className="pp-btn-wpp mt-4" onClick={irWppDireto}>💬 Falar pelo WhatsApp</button>}
+                  <p>{t.cardLateral.basicoCta}</p>
+                  {wppRef.current&&<button className="pp-btn-wpp mt-4" onClick={irWppDireto}>{t.cardLateral.falarWhatsapp}</button>}
                 </div>
               )}
             </div>
@@ -745,8 +745,8 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
       {/* Modal galeria */}
       {modalGal&&(
         <div className="pp-modal-galeria">
-          <div className="pp-modal-header"><h3>Todas as fotos ({fotosEspaco.length})</h3><button className="pp-btn-fechar" onClick={()=>setModalGal(false)}>✕</button></div>
-          {Object.entries(fotosEspaco.reduce((acc:Record<string,Foto[]>,f)=>{const k=f.titulo||'Geral';(acc[k]=acc[k]||[]).push(f);return acc},{})).map(([sec,arr])=>(
+          <div className="pp-modal-header"><h3>{t.galeria.todasAsFotos} ({fotosEspaco.length})</h3><button className="pp-btn-fechar" onClick={()=>setModalGal(false)}>✕</button></div>
+          {Object.entries(fotosEspaco.reduce((acc:Record<string,Foto[]>,f)=>{const k=f.titulo||t.galeria.geral;(acc[k]=acc[k]||[]).push(f);return acc},{})).map(([sec,arr])=>(
             <div key={sec} className="mb-5">
               <h4 className="text-[1rem] font-bold text-[#222] mb-2.5 px-1">{sec}</h4>
               <div className="pp-modal-grid">
@@ -764,14 +764,14 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
       {/* Modal vídeos */}
       {modalVid&&(
         <div className="pp-modal-videos">
-          <div className="pp-videos-header"><h3>🎬 Vídeos do Espaço — Tour 360°</h3><button className="pp-btn-fechar" onClick={()=>setModalVid(false)}>✕</button></div>
+          <div className="pp-videos-header"><h3>{t.videos.titulo}</h3><button className="pp-btn-fechar" onClick={()=>setModalVid(false)}>✕</button></div>
           <div className="pp-videos-content">
             {videos.length?videos.map((v,i)=>(
               <div key={i} className="pp-video-item">
-                {v.url?<video controls><source src={v.url}/>Seu navegador não suporta vídeo.</video>:<div className="pp-video-placeholder">Vídeo em breve</div>}
-                <div className="pp-video-titulo">{v.titulo||'Vídeo do espaço'}</div>
+                {v.url?<video controls><source src={v.url}/>{t.videos.semSuporte}</video>:<div className="pp-video-placeholder">{t.videos.emBreve}</div>}
+                <div className="pp-video-titulo">{v.titulo||t.videos.tituloPadrao}</div>
               </div>
-            )):<p className="text-[#888] text-center py-10">Nenhum vídeo cadastrado ainda.</p>}
+            )):<p className="text-[#888] text-center py-10">{t.videos.nenhum}</p>}
           </div>
         </div>
       )}

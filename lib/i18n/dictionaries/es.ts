@@ -6,6 +6,11 @@ import planos from './es/planos'
 import cadastro from './es/cadastro'
 import anunciar from './es/anunciar'
 import comoFunciona from './es/comoFunciona'
+import busca from './es/busca'
+import propriedade from './es/propriedade'
+import legal from './es/legal'
+import listas from './es/listas'
+import vagas from './es/vagas'
 
 const es: Dictionary = {
   common: {
@@ -175,6 +180,11 @@ const es: Dictionary = {
   cadastro,
   anunciar,
   comoFunciona,
+  busca,
+  propriedade,
+  legal,
+  listas,
+  vagas,
 }
 
 export default es

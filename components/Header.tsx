@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import SearchBar from './SearchBar'
 import { useT } from './i18n/I18nProvider'
+import LocaleSwitcher from './i18n/LocaleSwitcher'
 
 export default function Header() {
   const { dict, lhref } = useT()
@@ -44,6 +45,7 @@ export default function Header() {
 
       {/* Ações à direita */}
       <div className="flex-none flex items-center gap-3 ml-4">
+        <LocaleSwitcher />
         {isLoggedIn ? (
           <Link
             href="/painel"

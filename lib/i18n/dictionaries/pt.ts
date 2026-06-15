@@ -9,6 +9,11 @@ import planos from './pt/planos'
 import cadastro from './pt/cadastro'
 import anunciar from './pt/anunciar'
 import comoFunciona from './pt/comoFunciona'
+import busca from './pt/busca'
+import propriedade from './pt/propriedade'
+import legal from './pt/legal'
+import listas from './pt/listas'
+import vagas from './pt/vagas'
 
 const pt = {
   common: {
@@ -178,6 +183,11 @@ const pt = {
   cadastro,
   anunciar,
   comoFunciona,
+  busca,
+  propriedade,
+  legal,
+  listas,
+  vagas,
 }
 
 export type Dictionary = typeof pt
