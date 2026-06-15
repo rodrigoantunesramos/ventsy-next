@@ -56,6 +56,3 @@ export const supabaseRest: SupabaseClient<Database> = new Proxy(
     },
   },
 )
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const supabaseRestAny = supabaseRest as any

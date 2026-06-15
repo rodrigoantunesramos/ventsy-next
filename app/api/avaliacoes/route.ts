@@ -5,8 +5,6 @@ import { getAuthUser, unauthorized, forbidden } from '@/lib/apiAuth'
 // Rota server-side: usa service-role (ignora RLS) para inserir avaliação e
 // atualizar a média em propriedades (UPDATE bloqueado para anon sob RLS).
 const supabase = supabaseAdmin
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const supabase = supabaseAdmin as any
 
 // Recalcula a média pública da propriedade considerando só avaliações
 // verificadas e NÃO ocultas (a moderação do dono reflete no número público).
@@ -14,7 +12,7 @@ async function recomputarMedia(propriedadeId: number | string) {
   const { data: todas } = await supabase
     .from('avaliacoes')
     .select('nota')
-    .eq('propriedade_id', propriedadeId)
+    .eq('propriedade_id', Number(propriedadeId))
     .eq('verificada', true)
     .eq('oculta', false)
   const lista = (todas || []) as { nota: number }[]
@@ -36,7 +34,7 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabase
       .from('avaliacoes')
       .select('*')
-      .eq('propriedade_id', propriedadeId)
+      .eq('propriedade_id', Number(propriedadeId))
       .eq('verificada', true)
       .order('criado_em', { ascending: false })
     return Response.json({ data, error })
@@ -141,7 +139,7 @@ export async function PATCH(req: NextRequest) {
   const { data: prop } = await supabase
     .from('propriedades')
     .select('usuario_id')
-    .eq('id', aval.propriedade_id)
+    .eq('id', aval.propriedade_id as number)
     .maybeSingle()
   if (!prop || prop.usuario_id !== user.id) return forbidden()
 
@@ -167,7 +165,7 @@ export async function PATCH(req: NextRequest) {
 
   // Ocultar/reexibir altera o número público — recalcular a média do espaço.
   if (!error && 'oculta' in body) {
-    await recomputarMedia(aval.propriedade_id)
+    await recomputarMedia(aval.propriedade_id as number)
   }
 
   return Response.json({ data, error })
