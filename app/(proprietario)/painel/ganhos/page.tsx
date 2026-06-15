@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { calcularTaxas, brl } from '@/lib/fees'
+import { calcularTaxas } from '@/lib/fees'
+import { formatMoney } from '@/lib/format'
 
 type Reserva = {
   id: string
@@ -131,10 +132,10 @@ export default function GanhosPage() {
           <div className="space-y-10">
             {/* KPIs */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Kpi label="Seu repasse líquido" valor={brl(repasse)} sub={`de ${confirmadas.length} reserva${confirmadas.length === 1 ? '' : 's'} confirmada${confirmadas.length === 1 ? '' : 's'}`} destaque />
-              <Kpi label="Faturamento confirmado" valor={brl(faturamento)} sub="valor total das reservas pagas" />
-              <Kpi label="Comissão Ventsy" valor={brl(comissao)} sub={`modelo ${calcularTaxas(100).modelo === 'anfitriao' ? '15% anfitrião' : 'dividido'}`} />
-              <Kpi label="A receber" valor={brl(aReceber)} sub={`${aprovadas} aprovada${aprovadas === 1 ? '' : 's'} aguardando pgto.`} />
+              <Kpi label="Seu repasse líquido" valor={formatMoney(repasse)} sub={`de ${confirmadas.length} reserva${confirmadas.length === 1 ? '' : 's'} confirmada${confirmadas.length === 1 ? '' : 's'}`} destaque />
+              <Kpi label="Faturamento confirmado" valor={formatMoney(faturamento)} sub="valor total das reservas pagas" />
+              <Kpi label="Comissão Ventsy" valor={formatMoney(comissao)} sub={`modelo ${calcularTaxas(100).modelo === 'anfitriao' ? '15% anfitrião' : 'dividido'}`} />
+              <Kpi label="A receber" valor={formatMoney(aReceber)} sub={`${aprovadas} aprovada${aprovadas === 1 ? '' : 's'} aguardando pgto.`} />
             </div>
 
             {pendentes > 0 && (
@@ -174,7 +175,7 @@ export default function GanhosPage() {
                         <p className="font-semibold text-ink">{e.nome}</p>
                         <p className="text-xs text-ink-muted">{e.count} reserva{e.count === 1 ? '' : 's'} confirmada{e.count === 1 ? '' : 's'}</p>
                       </div>
-                      <p className="font-display text-xl font-black text-ink">{brl(e.total)}</p>
+                      <p className="font-display text-xl font-black text-ink">{formatMoney(e.total)}</p>
                     </div>
                   ))}
                 </div>
@@ -211,9 +212,9 @@ export default function GanhosPage() {
                             </td>
                             <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{periodo(r)}</td>
                             <td className="px-4 py-3"><span className={`text-xs font-bold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span></td>
-                            <td className="px-4 py-3 text-right text-ink-soft whitespace-nowrap">{val(r) > 0 ? brl(val(r)) : '—'}</td>
-                            <td className={`px-4 py-3 text-right whitespace-nowrap font-semibold ${conf ? 'text-ink' : 'text-ink-muted'}`}>{val(r) > 0 ? brl(t.repasseAnfitriao) : '—'}</td>
-                            <td className="px-4 py-3 text-right text-ink-muted whitespace-nowrap">{val(r) > 0 ? brl(t.comissaoVentsy) : '—'}</td>
+                            <td className="px-4 py-3 text-right text-ink-soft whitespace-nowrap">{val(r) > 0 ? formatMoney(val(r)) : '—'}</td>
+                            <td className={`px-4 py-3 text-right whitespace-nowrap font-semibold ${conf ? 'text-ink' : 'text-ink-muted'}`}>{val(r) > 0 ? formatMoney(t.repasseAnfitriao) : '—'}</td>
+                            <td className="px-4 py-3 text-right text-ink-muted whitespace-nowrap">{val(r) > 0 ? formatMoney(t.comissaoVentsy) : '—'}</td>
                           </tr>
                         )
                       })}

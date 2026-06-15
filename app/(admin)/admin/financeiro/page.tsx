@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { formatMoney } from '@/lib/format'
 
 type Metricas = {
   mrr: number
@@ -19,9 +20,6 @@ type Assinatura = {
   fim: string | null
   valor_pago: number
 }
-
-const brl = (n: number) =>
-  `R$ ${Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 export default function AdminFinanceiro() {
   const [m, setM] = useState<Metricas | null>(null)
@@ -56,10 +54,10 @@ export default function AdminFinanceiro() {
       {m && (
         <>
           <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <Card label="MRR" value={brl(m.mrr)} />
-            <Card label="ARR" value={brl(m.arr)} />
+            <Card label="MRR" value={formatMoney(m.mrr)} />
+            <Card label="ARR" value={formatMoney(m.arr)} />
             <Card label="Assinaturas ativas" value={String(m.ativas)} sub={`${m.trial} em trial`} />
-            <Card label="Receita histórica" value={brl(m.receitaHistorica)} sub={`${m.canceladas} canceladas`} />
+            <Card label="Receita histórica" value={formatMoney(m.receitaHistorica)} sub={`${m.canceladas} canceladas`} />
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-[#111118]">
@@ -90,7 +88,7 @@ export default function AdminFinanceiro() {
                       {a.inicio ? new Date(a.inicio).toLocaleDateString('pt-BR') : '—'}
                       {a.fim ? ` → ${new Date(a.fim).toLocaleDateString('pt-BR')}` : ''}
                     </td>
-                    <td className="px-4 py-3 text-right">{brl(a.valor_pago)}</td>
+                    <td className="px-4 py-3 text-right">{formatMoney(a.valor_pago)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { authHeaders } from '@/lib/supabase'
-import { calcularTaxas, brl } from '@/lib/fees'
+import { calcularTaxas } from '@/lib/fees'
+import { formatMoney } from '@/lib/format'
 
 declare global {
   interface Window {
@@ -89,11 +90,11 @@ export default function CheckoutReserva({
         <p className="text-sm text-ink-muted mb-4">Pix ou cartão, com segurança pelo Mercado Pago.</p>
 
         <div className="rounded-xl bg-gray-50 border border-gray-200 p-3 text-sm mb-4 space-y-1">
-          <div className="flex justify-between"><span className="text-ink-muted">Aluguel</span><span>{brl(fees.valorBase)}</span></div>
+          <div className="flex justify-between"><span className="text-ink-muted">Aluguel</span><span>{formatMoney(fees.valorBase)}</span></div>
           {fees.taxaHospede > 0 && (
-            <div className="flex justify-between"><span className="text-ink-muted">Taxa de serviço</span><span>{brl(fees.taxaHospede)}</span></div>
+            <div className="flex justify-between"><span className="text-ink-muted">Taxa de serviço</span><span>{formatMoney(fees.taxaHospede)}</span></div>
           )}
-          <div className="flex justify-between font-bold text-ink pt-1.5 mt-1 border-t border-gray-200"><span>Total</span><span>{brl(fees.totalHospede)}</span></div>
+          <div className="flex justify-between font-bold text-ink pt-1.5 mt-1 border-t border-gray-200"><span>Total</span><span>{formatMoney(fees.totalHospede)}</span></div>
         </div>
 
         {pix ? (

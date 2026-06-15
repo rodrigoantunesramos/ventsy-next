@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase, authHeaders } from '@/lib/supabase'
 import { CATS, ESTADOS } from '@/lib/data'
+import { formatMoney } from '@/lib/format'
 
 const COMODIDADES = [
   'Wi-Fi', 'Estacionamento', 'Churrasqueira', 'Piscina', 'Ar-condicionado',
@@ -26,10 +27,6 @@ function parseComod(v: unknown): string[] {
     try { const j = JSON.parse(s); return Array.isArray(j) ? j : [] } catch { return [] }
   }
   return []
-}
-
-function brl(v: number | null | undefined) {
-  return v && v > 0 ? Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'Sob consulta'
 }
 
 function EditarModal({ espaco, onClose, onSaved }: { espaco: Espaco; onClose: () => void; onSaved: (e: Espaco) => void }) {
@@ -367,7 +364,7 @@ export default function MeusEspacosPage() {
                   <h3 className="font-display text-lg font-bold text-ink">{e.nome || `Espaço #${e.id}`}</h3>
                   <p className="text-sm text-ink-muted">{[e.cidade, e.estado].filter(Boolean).join(', ')}</p>
                   <p className="text-sm text-ink-soft mt-1">
-                    {e.valor_hora > 0 ? `${brl(e.valor_hora)}/h` : e.valor_base > 0 ? brl(e.valor_base) : 'Sob consulta'}
+                    {e.valor_hora > 0 ? `${formatMoney(e.valor_hora)}/h` : e.valor_base > 0 ? formatMoney(e.valor_base) : 'Sob consulta'}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
                     <button onClick={() => setEditando(e)} className="bg-ink hover:bg-ink-soft text-white text-sm font-semibold rounded-lg px-3.5 py-2 transition-colors">Editar</button>
