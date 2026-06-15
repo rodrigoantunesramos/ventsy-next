@@ -7,7 +7,7 @@ import { supabase, authHeaders } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Suspense } from 'react'
-import type { Metadata } from 'next'
+import { useT } from '@/components/i18n/I18nProvider'
 
 // ── Helpers de máscara ──
 function mascaraCPF(v: string) {
@@ -27,15 +27,14 @@ function mascaraCNPJ(v: string) {
   return v
 }
 
-function avaliarForca(senha: string): { forca: number; label: string; cor: string } {
+function avaliarForca(senha: string): { forca: number; cor: string } {
   let f = 0
   if (senha.length >= 8)          f++
   if (/[A-Z]/.test(senha))        f++
   if (/[0-9]/.test(senha))        f++
   if (/[^A-Za-z0-9]/.test(senha)) f++
   const cores  = ['', '#ff385c', '#ff8c00', '#f0c040', '#22c55e']
-  const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte']
-  return { forca: f, label: labels[f] || '', cor: cores[f] || '' }
+  return { forca: f, cor: cores[f] || '' }
 }
 
 // Checagem de disponibilidade via rota com rate-limit (antes era RPC anônima direta).
@@ -61,6 +60,10 @@ type FieldStatus = { ok: boolean | null; hint: string }
 function CadastroContent() {
   const router = useRouter()
   const params = useSearchParams()
+  const { dict, lhref } = useT()
+  const t = dict.cadastro
+  // Rótulos de força da senha indexados por nível (0 = vazio).
+  const forcaLabels = ['', t.forca.muitoFraca, t.forca.fraca, t.forca.boa, t.forca.forte]
 
   // ── Tipo de doc ──
   const [tipoDoc, setTipoDoc] = useState<'cpf' | 'cnpj'>('cpf')
@@ -83,18 +86,18 @@ function CadastroContent() {
   // ── Indicação ──
   const [refAutoPreenchido, setRefAutoPreenchido] = useState(false)
   const [refStatus, setRefStatus] = useState<'idle' | 'ok' | 'aviso' | 'erro'>('idle')
-  const [refHint, setRefHint]     = useState('Opcional — deixe em branco se não foi indicado por ninguém.')
+  const [refHint, setRefHint]     = useState(t.indicacao.hintOpcional)
 
   // ── Status dos campos ──
   const [stDoc,     setStDoc]     = useState<FieldStatus>({ ok: null, hint: '' })
   const [stNome,    setStNome]    = useState<FieldStatus>({ ok: null, hint: '' })
-  const [stNasc,    setStNasc]    = useState<FieldStatus>({ ok: null, hint: 'Apenas maiores de 18 anos podem se cadastrar.' })
-  const [stEmail,   setStEmail]   = useState<FieldStatus>({ ok: null, hint: 'Usado para fazer login na plataforma.' })
-  const [stUsuario, setStUsuario] = useState<FieldStatus>({ ok: null, hint: 'Letras minúsculas, números e _ (sem espaços).' })
+  const [stNasc,    setStNasc]    = useState<FieldStatus>({ ok: null, hint: t.hints.maiorDe18 })
+  const [stEmail,   setStEmail]   = useState<FieldStatus>({ ok: null, hint: t.hints.emailLogin })
+  const [stUsuario, setStUsuario] = useState<FieldStatus>({ ok: null, hint: t.hints.usuarioRegras })
   const [stSenha2,  setStSenha2]  = useState<FieldStatus>({ ok: null, hint: '' })
 
   // ── Força senha ──
-  const [forca, setForca] = useState({ forca: 0, label: '', cor: '' })
+  const [forca, setForca] = useState({ forca: 0, cor: '' })
 
   // ── UI global ──
   const [alerta, setAlerta]     = useState<{ tipo: 'erro' | 'sucesso'; msg: string } | null>(null)
@@ -115,7 +118,7 @@ function CadastroContent() {
       setRefCodigo(ref)
       setRefAutoPreenchido(true)
       setRefStatus('ok')
-      setRefHint('Código preenchido automaticamente pelo link de convite!')
+      setRefHint(t.indicacao.hintAutoPreenchido)
     }
   }, [params])
 
@@ -135,60 +138,60 @@ function CadastroContent() {
   function validarDoc() {
     const limpo = documento.replace(/\D/g, '')
     const ok = tipoDoc === 'cpf' ? limpo.length === 11 : limpo.length === 14
-    setStDoc({ ok, hint: ok ? '' : `${tipoDoc.toUpperCase()} inválido ou incompleto.` })
+    setStDoc({ ok, hint: ok ? '' : `${tipoDoc.toUpperCase()} ${t.validacao.docInvalido}` })
     if (ok) verificarDocBanco(limpo)
     return ok
   }
 
   async function verificarDocBanco(limpo: string) {
-    setStDoc({ ok: null, hint: `Verificando ${tipoDoc.toUpperCase()}...` })
+    setStDoc({ ok: null, hint: `${t.validacao.docVerificando} ${tipoDoc.toUpperCase()}...` })
     const existe = await checarDisponibilidade('documento', limpo)
     if (existe === null) { setStDoc({ ok: null, hint: '' }); return }
-    if (existe) setStDoc({ ok: false, hint: `Este ${tipoDoc.toUpperCase()} já está cadastrado. Tente fazer login.` })
-    else        setStDoc({ ok: true,  hint: `${tipoDoc.toUpperCase()} disponível.` })
+    if (existe) setStDoc({ ok: false, hint: `${t.validacao.docJaCadastradoA} ${tipoDoc.toUpperCase()} ${t.validacao.docJaCadastradoB}` })
+    else        setStDoc({ ok: true,  hint: `${tipoDoc.toUpperCase()} ${t.validacao.docDisponivelB}` })
   }
 
   function validarNome() {
     const ok = nome.trim().length >= 3 && nome.trim().includes(' ')
-    setStNome({ ok, hint: ok ? '' : 'Informe nome e sobrenome.' })
+    setStNome({ ok, hint: ok ? '' : t.validacao.nomeSobrenome })
     return ok
   }
 
   function validarIdade() {
-    if (!nascimento) { setStNasc({ ok: null, hint: 'Apenas maiores de 18 anos podem se cadastrar.' }); return false }
+    if (!nascimento) { setStNasc({ ok: null, hint: t.hints.maiorDe18 }); return false }
     const nasc = new Date(nascimento + 'T00:00:00')
     const ano  = nasc.getFullYear()
     const hoje = new Date()
     if (isNaN(nasc.getTime()) || ano < 1900 || ano > hoje.getFullYear()) {
-      setStNasc({ ok: false, hint: 'Data inválida.' }); return false
+      setStNasc({ ok: false, hint: t.validacao.dataInvalida }); return false
     }
     let idade = hoje.getFullYear() - nasc.getFullYear()
     const m = hoje.getMonth() - nasc.getMonth()
     if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--
     const ok = idade >= 18
-    setStNasc({ ok, hint: ok ? 'Idade confirmada.' : 'Você precisa ter 18 anos ou mais.' })
+    setStNasc({ ok, hint: ok ? t.validacao.idadeConfirmada : t.validacao.precisa18 })
     return ok
   }
 
   function validarEmailFormato() {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-    if (!ok) setStEmail({ ok: false, hint: 'Informe um e-mail válido.' })
+    if (!ok) setStEmail({ ok: false, hint: t.validacao.emailInvalido })
     return ok
   }
 
   function validarEmail() {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-    setStEmail({ ok, hint: ok ? '' : 'Informe um e-mail válido.' })
+    setStEmail({ ok, hint: ok ? '' : t.validacao.emailInvalido })
     if (ok) verificarEmailBanco(email.trim())
     return ok
   }
 
   async function verificarEmailBanco(em: string) {
-    setStEmail({ ok: null, hint: 'Verificando e-mail...' })
+    setStEmail({ ok: null, hint: t.validacao.emailVerificando })
     const existe = await checarDisponibilidade('email', em)
     if (existe === null) { setStEmail({ ok: null, hint: '' }); return }
-    if (existe) setStEmail({ ok: false, hint: 'Este e-mail já está cadastrado. Tente fazer login.' })
-    else        setStEmail({ ok: true,  hint: 'E-mail disponível.' })
+    if (existe) setStEmail({ ok: false, hint: t.validacao.emailJaCadastrado })
+    else        setStEmail({ ok: true,  hint: t.validacao.emailDisponivel })
   }
 
   function formatarUsuario(val: string) {
@@ -197,39 +200,39 @@ function CadastroContent() {
 
   function validarUsuarioFormato() {
     const ok = /^[a-z0-9_]{3,20}$/.test(usuario)
-    if (!ok) setStUsuario({ ok: false, hint: usuario ? 'Entre 3 e 20 caracteres. Apenas letras, números e _.' : 'Informe um nome de usuário.' })
+    if (!ok) setStUsuario({ ok: false, hint: usuario ? t.validacao.usuarioRegras : t.validacao.usuarioInformar })
     return ok
   }
 
   function validarUsuario() {
-    if (!usuario) { setStUsuario({ ok: null, hint: 'Letras minúsculas, números e _ (sem espaços).' }); return false }
+    if (!usuario) { setStUsuario({ ok: null, hint: t.hints.usuarioRegras }); return false }
     const ok = /^[a-z0-9_]{3,20}$/.test(usuario)
-    setStUsuario({ ok, hint: ok ? '' : 'Entre 3 e 20 caracteres. Apenas letras, números e _.' })
+    setStUsuario({ ok, hint: ok ? '' : t.validacao.usuarioRegras })
     if (ok) verificarUsuarioBanco(usuario)
     return ok
   }
 
   async function verificarUsuarioBanco(u: string) {
-    setStUsuario({ ok: null, hint: 'Verificando disponibilidade...' })
+    setStUsuario({ ok: null, hint: t.validacao.usuarioVerificando })
     const existe = await checarDisponibilidade('usuario', u)
     if (existe === null) { setStUsuario({ ok: null, hint: '' }); return }
-    if (existe) setStUsuario({ ok: false, hint: 'Este nome de usuário já está em uso. Escolha outro.' })
-    else        setStUsuario({ ok: true,  hint: 'Nome de usuário disponível!' })
+    if (existe) setStUsuario({ ok: false, hint: t.validacao.usuarioEmUso })
+    else        setStUsuario({ ok: true,  hint: t.validacao.usuarioDisponivel })
   }
 
   function validarSenha2() {
     if (!senha2) { setStSenha2({ ok: null, hint: '' }); return false }
     const ok = senha === senha2
-    setStSenha2({ ok, hint: ok ? 'Senhas conferem.' : 'As senhas não coincidem.' })
+    setStSenha2({ ok, hint: ok ? t.validacao.senhasConferem : t.validacao.senhasNaoCoincidem })
     return ok
   }
 
   function handleRefInput(val: string) {
     setRefCodigo(val)
     setRefAutoPreenchido(false)
-    if (!val) { setRefStatus('idle'); setRefHint('Opcional — deixe em branco se não foi indicado por ninguém.'); return }
+    if (!val) { setRefStatus('idle'); setRefHint(t.indicacao.hintOpcional); return }
     setRefStatus('aviso')
-    setRefHint('Digite exatamente como te passaram — maiúsculas e minúsculas importam!')
+    setRefHint(t.indicacao.hintDigite)
   }
 
   async function verificarRefNoBanco(handle: string): Promise<boolean> {
@@ -270,10 +273,10 @@ function CadastroContent() {
     let ok = docOk && nomeOk && idadeOk && emailOk && userOk && s2Ok && senhaOk
 
     if (!termos) {
-      setAlerta({ tipo: 'erro', msg: 'Você precisa aceitar os Termos de Uso para continuar.' })
+      setAlerta({ tipo: 'erro', msg: t.alerta.aceitarTermos })
       ok = false
     } else if (!ok) {
-      setAlerta({ tipo: 'erro', msg: 'Corrija os campos em destaque antes de continuar.' })
+      setAlerta({ tipo: 'erro', msg: t.alerta.corrijaCampos })
     }
 
     if (!ok) { setEnviando(false); return }
@@ -283,8 +286,8 @@ function CadastroContent() {
       const refValido = await verificarRefNoBanco(refCodigo.trim())
       if (!refValido) {
         setRefStatus('erro')
-        setRefHint('Usuário não encontrado. Tem certeza que o código está certo? Deixe em branco ou confira com quem te indicou.')
-        setAlerta({ tipo: 'erro', msg: 'Código de indicação inválido.' })
+        setRefHint(t.indicacao.hintNaoEncontrado)
+        setAlerta({ tipo: 'erro', msg: t.alerta.refInvalido })
         setEnviando(false)
         return
       }
@@ -299,19 +302,19 @@ function CadastroContent() {
         options: { data: { nome: nome.trim(), usuario } }
       })
 
-      if (authError) throw new Error('Erro ao criar conta. Tente novamente.')
+      if (authError) throw new Error(t.alerta.erroCriarConta)
 
       let userId = authData.user?.id
 
       if (authData.user?.identities?.length === 0) {
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha })
-        if (signInError || !signInData?.user?.id) throw new Error('Este e-mail já possui uma conta. Tente fazer login.')
+        if (signInError || !signInData?.user?.id) throw new Error(t.alerta.emailJaPossuiConta)
         userId = signInData.user.id
         const { data: perfilExiste } = await supabase.from('usuarios').select('id').eq('id', userId).single()
-        if (perfilExiste) throw new Error('Este e-mail já possui uma conta. Tente fazer login.')
+        if (perfilExiste) throw new Error(t.alerta.emailJaPossuiConta)
       }
 
-      if (!userId) throw new Error('Erro ao obter ID do usuário. Tente novamente.')
+      if (!userId) throw new Error(t.alerta.erroObterId)
 
       const { error: dbError } = await supabase.from('usuarios').insert({
         id: userId,
@@ -325,10 +328,10 @@ function CadastroContent() {
       if (dbError) {
         try { await supabase.rpc('limpar_zumbi_auth', { p_user_id: userId }) } catch (_) {}
         if (dbError.code === '23505') {
-          if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.')
-          if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.')
+          if (dbError.message.includes('documento')) throw new Error(t.alerta.docJaCadastrado)
+          if (dbError.message.includes('usuario'))   throw new Error(t.alerta.usuarioEmUso)
         }
-        throw new Error('Erro ao salvar seus dados. Tente novamente.')
+        throw new Error(t.alerta.erroSalvarDados)
       }
 
       if (refCodigo.trim() && userId) {
@@ -349,7 +352,7 @@ function CadastroContent() {
       setSucesso(true)
 
     } catch (err: unknown) {
-      setAlerta({ tipo: 'erro', msg: (err instanceof Error ? err.message : null) || 'Ocorreu um erro. Tente novamente.' })
+      setAlerta({ tipo: 'erro', msg: (err instanceof Error ? err.message : null) || t.alerta.erroGenerico })
     } finally {
       setEnviando(false)
     }
@@ -386,9 +389,9 @@ function CadastroContent() {
 
           {/* ── TOPO ── */}
           <div className="cadastro-topo">
-            <span className="cadastro-tag">Novo cadastro</span>
-            <h1>Crie sua conta na <em>VENTSY</em></h1>
-            <p>Preencha as informações abaixo para começar.<br />Os demais detalhes serão completados dentro da plataforma.</p>
+            <span className="cadastro-tag">{t.tag}</span>
+            <h1>{t.tituloAntes} <em>VENTSY</em></h1>
+            <p>{t.subtituloA}<br />{t.subtituloB}</p>
           </div>
 
           <div className="cadastro-card">
@@ -399,11 +402,11 @@ function CadastroContent() {
                 <div className="sucesso-icone-grande">
                   <span className="material-icons text-[2.2rem] text-[var(--verde)]">check</span>
                 </div>
-                <h2>Conta criada!</h2>
-                <p>Seu cadastro foi realizado com sucesso.<br />Acesse a plataforma para completar seu perfil<br />e começar a usar a VENTSY.</p>
+                <h2>{t.sucessoTitulo}</h2>
+                <p>{t.sucessoTextoA}<br />{t.sucessoTextoB}<br />{t.sucessoTextoC}</p>
                 <Link href="/painel" className="btn-ir-plataforma">
                   <span className="material-icons">login</span>
-                  Entrar na plataforma
+                  {t.sucessoBotao}
                 </Link>
               </div>
             ) : (
@@ -418,18 +421,18 @@ function CadastroContent() {
                 )}
 
                 {/* Tipo de documento */}
-                <div className="tipo-doc" role="group" aria-label="Tipo de documento">
+                <div className="tipo-doc" role="group" aria-label={t.tipoDocLabel}>
                   <button type="button" aria-pressed={tipoDoc === 'cpf'} className={`tipo-btn${tipoDoc === 'cpf' ? ' ativo' : ''}`} onClick={() => trocarTipoDoc('cpf')}>
-                    <span className="material-icons" aria-hidden="true">person</span> CPF (Pessoa Física)
+                    <span className="material-icons" aria-hidden="true">person</span> {t.cpfPessoaFisica}
                   </button>
                   <button type="button" aria-pressed={tipoDoc === 'cnpj'} className={`tipo-btn${tipoDoc === 'cnpj' ? ' ativo' : ''}`} onClick={() => trocarTipoDoc('cnpj')}>
-                    <span className="material-icons" aria-hidden="true">business</span> CNPJ (Empresa)
+                    <span className="material-icons" aria-hidden="true">business</span> {t.cnpjEmpresa}
                   </button>
                 </div>
 
                 {/* Documento */}
                 <div className="form-group">
-                  <label htmlFor="cad-doc">{tipoDoc === 'cpf' ? 'CPF' : 'CNPJ'}</label>
+                  <label htmlFor="cad-doc">{tipoDoc === 'cpf' ? t.cpf : t.cnpj}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">badge</span>
                     <input
@@ -447,14 +450,14 @@ function CadastroContent() {
                   <HintText st={stDoc} />
                 </div>
 
-                <div className="divider"><span>Dados pessoais</span></div>
+                <div className="divider"><span>{t.divisorDadosPessoais}</span></div>
 
                 {/* Nome */}
                 <div className="form-group">
-                  <label htmlFor="cad-nome">Nome completo</label>
+                  <label htmlFor="cad-nome">{t.nomeLabel}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">person_outline</span>
-                    <input id="cad-nome" type="text" autoComplete="name" value={nome} placeholder="Seu nome completo"
+                    <input id="cad-nome" type="text" autoComplete="name" value={nome} placeholder={t.nomePlaceholder}
                       onChange={e => setNome(e.target.value)} onBlur={validarNome} />
                     <StatusIcon st={stNome} />
                   </div>
@@ -463,7 +466,7 @@ function CadastroContent() {
 
                 {/* Nascimento */}
                 <div className="form-group">
-                  <label htmlFor="cad-nasc">Data de nascimento</label>
+                  <label htmlFor="cad-nasc">{t.nascimentoLabel}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">cake</span>
                     <input id="cad-nasc" type="date" autoComplete="bday" value={nascimento} max={maxNasc}
@@ -474,14 +477,14 @@ function CadastroContent() {
                   <HintText st={stNasc} />
                 </div>
 
-                <div className="divider"><span>Acesso à plataforma</span></div>
+                <div className="divider"><span>{t.divisorAcesso}</span></div>
 
                 {/* E-mail */}
                 <div className="form-group">
-                  <label htmlFor="cad-email">E-mail</label>
+                  <label htmlFor="cad-email">{t.emailLabel}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">email</span>
-                    <input id="cad-email" type="email" autoComplete="email" inputMode="email" value={email} placeholder="seu@email.com"
+                    <input id="cad-email" type="email" autoComplete="email" inputMode="email" value={email} placeholder={t.emailPlaceholder}
                       onChange={e => setEmail(e.target.value)} onBlur={validarEmail} />
                     <StatusIcon st={stEmail} />
                   </div>
@@ -490,10 +493,10 @@ function CadastroContent() {
 
                 {/* Usuário */}
                 <div className="form-group">
-                  <label htmlFor="cad-usuario">Nome de usuário</label>
+                  <label htmlFor="cad-usuario">{t.usuarioLabel}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">alternate_email</span>
-                    <input id="cad-usuario" type="text" autoComplete="username" value={usuario} placeholder="seu_usuario"
+                    <input id="cad-usuario" type="text" autoComplete="username" value={usuario} placeholder={t.usuarioPlaceholder}
                       onChange={e => setUsuario(formatarUsuario(e.target.value))}
                       onBlur={validarUsuario} />
                     <StatusIcon st={stUsuario} />
@@ -503,14 +506,14 @@ function CadastroContent() {
 
                 {/* Senha */}
                 <div className="form-group">
-                  <label htmlFor="cad-senha">Senha</label>
+                  <label htmlFor="cad-senha">{t.senhaLabel}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">lock_outline</span>
                     <input id="cad-senha" type={mostraSenha ? 'text' : 'password'} autoComplete="new-password" value={senha}
-                      className="com-toggle" placeholder="Mínimo 8 caracteres"
+                      className="com-toggle" placeholder={t.senhaPlaceholder}
                       onChange={e => { setSenha(e.target.value); setForca(avaliarForca(e.target.value)) }} />
                     <button type="button" className="toggle-senha" onClick={() => setMostraSenha(!mostraSenha)}
-                      aria-label={mostraSenha ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={mostraSenha}>
+                      aria-label={mostraSenha ? t.ocultarSenha : t.mostrarSenha} aria-pressed={mostraSenha}>
                       <span className="material-icons" aria-hidden="true">{mostraSenha ? 'visibility' : 'visibility_off'}</span>
                     </button>
                   </div>
@@ -521,19 +524,19 @@ function CadastroContent() {
                         style={{ background: i <= forca.forca ? forca.cor : 'var(--cinza-borda)' }} />
                     ))}
                   </div>
-                  {forca.label && <p className="forca-label" style={{ color: forca.cor }}>{forca.label}</p>}
+                  {forca.forca > 0 && <p className="forca-label" style={{ color: forca.cor }}>{forcaLabels[forca.forca]}</p>}
                 </div>
 
                 {/* Confirmar senha */}
                 <div className="form-group">
-                  <label htmlFor="cad-senha2">Confirmar senha</label>
+                  <label htmlFor="cad-senha2">{t.senha2Label}</label>
                   <div className="input-wrap">
                     <span className="material-icons icon-left" aria-hidden="true">lock_outline</span>
                     <input id="cad-senha2" type={mostraSenha2 ? 'text' : 'password'} autoComplete="new-password" value={senha2}
-                      className="com-toggle" placeholder="Repita a senha"
+                      className="com-toggle" placeholder={t.senha2Placeholder}
                       onChange={e => setSenha2(e.target.value)} onBlur={validarSenha2} />
                     <button type="button" className="toggle-senha" onClick={() => setMostraSenha2(!mostraSenha2)}
-                      aria-label={mostraSenha2 ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={mostraSenha2}>
+                      aria-label={mostraSenha2 ? t.ocultarSenha : t.mostrarSenha} aria-pressed={mostraSenha2}>
                       <span className="material-icons" aria-hidden="true">{mostraSenha2 ? 'visibility' : 'visibility_off'}</span>
                     </button>
                   </div>
@@ -545,23 +548,22 @@ function CadastroContent() {
                   <div className="indicacao-cabecalho">
                     <div className="indicacao-emoji">🤝</div>
                     <div className="indicacao-cabecalho-texto">
-                      <strong>Você veio por indicação?</strong>
-                      <span>A gente ama a transparência e o boca a boca. Bem-vindo à equipe VENTSY!</span>
+                      <strong>{t.indicacao.tituloPergunta}</strong>
+                      <span>{t.indicacao.subtitulo}</span>
                     </div>
                   </div>
                   <div className="indicacao-corpo">
-                    <p>Cole abaixo o código de quem te indicou. Se você veio pelo link, ele <strong>preenche sozinho</strong>.
-                      Se estiver em branco, consegue digitar exatamente como a pessoa te passou?{' '}
-                      <strong>Não troque maiúsculo por minúsculo</strong> — cole igualzinho. A VENTSY agradece! 💙
+                    <p>{t.indicacao.instrucaoA} <strong>{t.indicacao.instrucaoNegritoA}</strong>{t.indicacao.instrucaoB}{' '}
+                      <strong>{t.indicacao.instrucaoNegritoB}</strong> {t.indicacao.instrucaoC}
                     </p>
                     <div className="indicacao-input-wrap">
                       <span className="material-icons icon-left text-[#ff385c]">card_giftcard</span>
                       <input
                         id="ref-codigo"
                         type="text"
-                        aria-label="Código de indicação"
+                        aria-label={t.indicacao.aria}
                         value={refCodigo}
-                        placeholder="Ex: A3KX92BZ"
+                        placeholder={t.indicacao.placeholder}
                         maxLength={8}
                         autoComplete="off"
                         className={refAutoPreenchido ? 'preenchido-auto' : refStatus === 'erro' ? 'erro' : ''}
@@ -584,10 +586,10 @@ function CadastroContent() {
 
                 {/* Termos */}
                 <div className="termos-linha">
-                  <input type="checkbox" id="termos" aria-label="Li e concordo com os Termos de Uso e a Política de Privacidade" checked={termos} onChange={e => setTermos(e.target.checked)} />
-                  <p>Li e concordo com os{' '}
-                    <Link href="/termos">Termos de Uso</Link> e a{' '}
-                    <Link href="/privacidade">Política de Privacidade</Link> da VENTSY.
+                  <input type="checkbox" id="termos" aria-label={t.termosAria} checked={termos} onChange={e => setTermos(e.target.checked)} />
+                  <p>{t.termosTextoA}{' '}
+                    <Link href={lhref('/termos')}>{t.termosLinkTermos}</Link> {t.termosTextoE}{' '}
+                    <Link href={lhref('/privacidade')}>{t.termosLinkPrivacidade}</Link> {t.termosTextoFim}
                   </p>
                 </div>
 
@@ -596,14 +598,14 @@ function CadastroContent() {
                   <span className="material-icons">
                     {enviando ? 'sync' : 'arrow_forward'}
                   </span>
-                  {enviando ? 'Criando conta...' : 'Criar minha conta'}
+                  {enviando ? t.btnCriando : t.btnCriar}
                 </button>
 
               </div>
             )}
           </div>
 
-          <p className="link-login">Já tem uma conta? <Link href="/login">Entrar</Link></p>
+          <p className="link-login">{t.jaTemConta} <Link href={lhref('/login')}>{t.entrar}</Link></p>
         </div>
       </main>
 

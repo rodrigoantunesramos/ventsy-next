@@ -26,6 +26,15 @@ const nextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },
+  async redirects() {
+    // Rotas públicas aposentadas, consolidadas no painel do proprietário.
+    // (O ?mp= do callback do Mercado Pago em /reservas é preservado pelo Next.)
+    return [
+      { source: '/meus-espacos', destination: '/painel/meus-espacos', permanent: true },
+      { source: '/ganhos', destination: '/painel/ganhos', permanent: true },
+      { source: '/reservas', destination: '/painel/reservas', permanent: true },
+    ]
+  },
 }
 
 module.exports = nextConfig

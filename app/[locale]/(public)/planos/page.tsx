@@ -8,6 +8,8 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
 import CheckoutPlano from '@/components/CheckoutPlano'
+import { useT } from '@/components/i18n/I18nProvider'
+import { formatMoney } from '@/lib/i18n/format'
 
 /* ── preços padrão ── */
 const PRECOS_DEFAULT = {
@@ -15,31 +17,11 @@ const PRECOS_DEFAULT = {
   ultra: { mensal: 149, anual: 119 },
 }
 
-/* ── features padrão ── */
-const FEATURES = {
-  basico: [
-    { ok: true,  txt: 'Cadastro de 1 propriedade' },
-    { ok: true,  txt: 'Até 5 fotos na galeria' },
-    { ok: false, txt: 'Botão de WhatsApp direto' },
-    { ok: false, txt: 'Relatório de desempenho' },
-    { ok: false, txt: 'Selo de verificação' },
-  ],
-  pro: [
-    { ok: true, txt: 'Tudo do plano Básico' },
-    { ok: true, txt: 'Fotos ilimitadas' },
-    { ok: true, txt: 'Botão de WhatsApp direto' },
-    { ok: true, txt: 'Relatórios detalhados' },
-    { ok: true, txt: 'Calendário de disponibilidade' },
-    { ok: true, txt: 'Suporte prioritário' },
-  ],
-  ultra: [
-    { ok: true, txt: 'Tudo do plano Pro' },
-    { ok: true, txt: 'Upload de vídeos' },
-    { ok: true, txt: 'Aparecer no topo das buscas' },
-    { ok: true, txt: 'Selo de Verificação Premium' },
-    { ok: true, txt: 'Destaque na Home do site' },
-    { ok: true, txt: 'Gerador de Contratos PDF' },
-  ],
+/* ── flags padrão das features (textos vêm do dicionário) ── */
+const FEATURE_FLAGS = {
+  basico: [true, true, false, false, false],
+  pro:    [true, true, true, true, true, true],
+  ultra:  [true, true, true, true, true, true],
 }
 
 /* ── Alerta flutuante ── */
@@ -65,10 +47,19 @@ function AlertaFlutuante({ msg, cor, onClose }: { msg: string; cor: string; onCl
 function PlanosContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { dict, lhref, locale } = useT()
+  const t = dict.planos
+
+  // Features padrão construídas a partir do dicionário (texto) + flags (ok).
+  const featuresDefault = {
+    basico: FEATURE_FLAGS.basico.map((ok, i) => ({ ok, txt: t.basico.features[`f${i + 1}` as keyof typeof t.basico.features] })),
+    pro:    FEATURE_FLAGS.pro.map((ok, i) => ({ ok, txt: t.pro.features[`f${i + 1}` as keyof typeof t.pro.features] })),
+    ultra:  FEATURE_FLAGS.ultra.map((ok, i) => ({ ok, txt: t.ultra.features[`f${i + 1}` as keyof typeof t.ultra.features] })),
+  }
 
   const [isAnual, setIsAnual]   = useState(false)
   const [precos, setPrecos]     = useState(PRECOS_DEFAULT)
-  const [features, setFeatures] = useState(FEATURES)
+  const [features, setFeatures] = useState(featuresDefault)
   const [loadingPlano, setLoadingPlano] = useState<string | null>(null)
   const [alerta, setAlerta]     = useState<{ msg: string; cor: string } | null>(null)
   const [checkout, setCheckout] = useState<{ plano: string; valor: number; periodo: string } | null>(null)
@@ -78,14 +69,14 @@ function PlanosContent() {
   useEffect(() => {
     const status = searchParams.get('pagamento')
     if (status === 'sucesso') {
-      setAlerta({ msg: '✅ Pagamento aprovado! Seu plano foi ativado. Redirecionando...', cor: 'green' })
+      setAlerta({ msg: t.alertas.pagamentoAprovadoRedir, cor: 'green' })
       setTimeout(() => router.push('/painel'), 3000)
     } else if (status === 'erro') {
-      setAlerta({ msg: '❌ Houve um problema com o pagamento. Tente novamente.', cor: 'red' })
+      setAlerta({ msg: t.alertas.pagamentoErro, cor: 'red' })
     } else if (status === 'pendente') {
-      setAlerta({ msg: '⏳ Pagamento pendente. Você receberá um e-mail de confirmação.', cor: 'orange' })
+      setAlerta({ msg: t.alertas.pagamentoPendente, cor: 'orange' })
     }
-  }, [searchParams, router])
+  }, [searchParams, router, t])
 
   // Carrega config dinâmica do Supabase
   useEffect(() => {
@@ -103,13 +94,15 @@ function PlanosContent() {
         if (cfg.ultra) { novosPrecos.ultra = { mensal: cfg.ultra.preco, anual: Math.round(cfg.ultra.preco * 0.8) } }
         setPrecos(novosPrecos)
 
-        const novasFeatures = { ...FEATURES }
-        ;(['basico', 'pro', 'ultra'] as const).forEach(nome => {
-          if (cfg[nome]?.items?.length) {
-            novasFeatures[nome] = cfg[nome].items.map((txt: string) => ({ ok: true, txt }))
-          }
+        setFeatures(prev => {
+          const novasFeatures = { ...prev }
+          ;(['basico', 'pro', 'ultra'] as const).forEach(nome => {
+            if (cfg[nome]?.items?.length) {
+              novasFeatures[nome] = cfg[nome].items.map((txt: string) => ({ ok: true, txt }))
+            }
+          })
+          return novasFeatures
         })
-        setFeatures(novasFeatures)
       } catch (_) {}
     }
     load()
@@ -141,15 +134,15 @@ function PlanosContent() {
 
       {/* ── HERO ── */}
       <section className="pl-hero">
-        <h1>Escolha o plano <span>certo para você</span></h1>
-        <p>Anuncie seu espaço para milhares de pessoas que buscam o local perfeito para seus eventos.</p>
+        <h1>{t.hero.tituloA} <span>{t.hero.tituloB}</span></h1>
+        <p>{t.hero.subtitulo}</p>
 
         {/* Toggle mensal / anual */}
         <div className="pl-toggle-periodo">
-          <span className={!isAnual ? 'pl-periodo-ativo' : ''}>Mensal</span>
+          <span className={!isAnual ? 'pl-periodo-ativo' : ''}>{t.hero.mensal}</span>
           <div className={`pl-toggle-switch${isAnual ? ' pl-toggle-anual' : ''}`} onClick={() => setIsAnual(!isAnual)} />
-          <span className={isAnual ? 'pl-periodo-ativo' : ''}>Anual</span>
-          {isAnual && <span className="pl-badge-desconto">−20%</span>}
+          <span className={isAnual ? 'pl-periodo-ativo' : ''}>{t.hero.anual}</span>
+          {isAnual && <span className="pl-badge-desconto">{t.hero.badgeDesconto}</span>}
         </div>
       </section>
 
@@ -158,11 +151,11 @@ function PlanosContent() {
 
         {/* BÁSICO */}
         <div className="pl-card">
-          <p className="pl-nome">Básico</p>
-          <h2 className="pl-titulo">Para começar</h2>
-          <p className="pl-desc">Para quem está começando a divulgar seu espaço.</p>
+          <p className="pl-nome">{t.basico.nome}</p>
+          <h2 className="pl-titulo">{t.basico.titulo}</h2>
+          <p className="pl-desc">{t.basico.desc}</p>
           <div className="pl-preco pl-preco-gratis">
-            <span className="pl-valor">Grátis</span>
+            <span className="pl-valor">{t.precoGratis}</span>
           </div>
           <div className="pl-divider" />
           <ul className="pl-features">
@@ -172,23 +165,23 @@ function PlanosContent() {
               </li>
             ))}
           </ul>
-          <Link href="/cadastro" className="pl-btn pl-btn-outline block text-center no-underline mt-5">
-            Começar grátis
+          <Link href={lhref('/cadastro')} className="pl-btn pl-btn-outline block text-center no-underline mt-5">
+            {t.basico.cta}
           </Link>
         </div>
 
         {/* PRO — DESTAQUE */}
         <div className="pl-card pl-destaque">
-          <span className="pl-badge-popular">Mais popular</span>
-          <p className="pl-nome">Pro</p>
-          <h2 className="pl-titulo">Profissional</h2>
-          <p className="pl-desc">Ideal para chácaras e salões profissionais.</p>
+          <span className="pl-badge-popular">{t.pro.badgePopular}</span>
+          <p className="pl-nome">{t.pro.nome}</p>
+          <h2 className="pl-titulo">{t.pro.titulo}</h2>
+          <p className="pl-desc">{t.pro.desc}</p>
           <div className="pl-preco">
-            <span className="pl-cifrao">R$</span>
+            <span className="pl-cifrao">{t.cifrao}</span>
             <span className="pl-valor">{pPro}</span>
-            <span className="pl-periodo">/mês</span>
+            <span className="pl-periodo">{t.porMes}</span>
           </div>
-          {isAnual && <p className="pl-economia">Equivale a R$ {precos.pro.mensal}/mês no mensal</p>}
+          {isAnual && <p className="pl-economia">{t.equivaleMensal.replace('{valor}', formatMoney(locale, precos.pro.mensal))}</p>}
           <div className="pl-divider" />
           <ul className="pl-features">
             {features.pro.map((f, i) => (
@@ -202,21 +195,21 @@ function PlanosContent() {
             onClick={() => assinarPlano('pro')}
             disabled={loadingPlano === 'pro'}
           >
-            {loadingPlano === 'pro' ? '⏳ Aguarde...' : '⭐ Assinar Pro'}
+            {loadingPlano === 'pro' ? t.pro.ctaAguarde : t.pro.ctaAssinar}
           </button>
         </div>
 
         {/* ULTRA */}
         <div className="pl-card">
-          <p className="pl-nome">Ultra</p>
-          <h2 className="pl-titulo">Máximo alcance</h2>
-          <p className="pl-desc">O máximo de leads para o seu negócio.</p>
+          <p className="pl-nome">{t.ultra.nome}</p>
+          <h2 className="pl-titulo">{t.ultra.titulo}</h2>
+          <p className="pl-desc">{t.ultra.desc}</p>
           <div className="pl-preco">
-            <span className="pl-cifrao">R$</span>
+            <span className="pl-cifrao">{t.cifrao}</span>
             <span className="pl-valor">{pUltra}</span>
-            <span className="pl-periodo">/mês</span>
+            <span className="pl-periodo">{t.porMes}</span>
           </div>
-          {isAnual && <p className="pl-economia">Equivale a R$ {precos.ultra.mensal}/mês no mensal</p>}
+          {isAnual && <p className="pl-economia">{t.equivaleMensal.replace('{valor}', formatMoney(locale, precos.ultra.mensal))}</p>}
           <div className="pl-divider" />
           <ul className="pl-features">
             {features.ultra.map((f, i) => (
@@ -230,7 +223,7 @@ function PlanosContent() {
             onClick={() => assinarPlano('ultra')}
             disabled={loadingPlano === 'ultra'}
           >
-            {loadingPlano === 'ultra' ? '⏳ Aguarde...' : '🚀 Assinar Ultra'}
+            {loadingPlano === 'ultra' ? t.ultra.ctaAguarde : t.ultra.ctaAssinar}
           </button>
         </div>
 
@@ -238,8 +231,8 @@ function PlanosContent() {
 
       {/* ── NOTA ── */}
       <p className="pl-nota">
-        Dúvidas sobre os planos? <Link href="/como-funciona#cobranca">Veja como funciona a cobrança</Link> ou{' '}
-        <Link href="/fale-conosco">fale com a gente</Link>.
+        {t.nota.duvidas} <Link href={lhref('/como-funciona') + '#cobranca'}>{t.nota.verCobranca}</Link> {t.nota.ou}{' '}
+        <Link href={lhref('/fale-conosco')}>{t.nota.faleConosco}</Link>.
       </p>
 
       {/* ── CTA TRIAL ── */}
@@ -247,12 +240,12 @@ function PlanosContent() {
         <div className="pl-trial-banner">
           <span className="pl-trial-icon">🎁</span>
           <div>
-            <strong>1 mês grátis no Ultra</strong>
-            <p>Cadastre sua propriedade agora e experimente todos os recursos premium sem pagar nada. Após o período, você continua no plano Básico gratuitamente.</p>
+            <strong>{t.cta.trialTitulo}</strong>
+            <p>{t.cta.trialDesc}</p>
           </div>
         </div>
-        <Link href="/cadastro" className="pl-btn-cta">Cadastre sua propriedade</Link>
-        <p className="pl-cta-nota">Seu anúncio ficará em revisão até ser aprovado pela equipe VENTSY antes de ir ao público.</p>
+        <Link href={lhref('/cadastro')} className="pl-btn-cta">{t.cta.botao}</Link>
+        <p className="pl-cta-nota">{t.cta.nota}</p>
       </div>
 
       <Footer />
@@ -264,7 +257,7 @@ function PlanosContent() {
           valor={checkout.valor}
           email={userEmail}
           onClose={() => setCheckout(null)}
-          onPaid={() => { setCheckout(null); setAlerta({ msg: '✅ Pagamento aprovado! Seu plano foi ativado.', cor: 'green' }); setTimeout(() => router.push('/painel'), 2500) }}
+          onPaid={() => { setCheckout(null); setAlerta({ msg: t.alertas.pagamentoAprovado, cor: 'green' }); setTimeout(() => router.push('/painel'), 2500) }}
         />
       )}
     </>

@@ -10,6 +10,8 @@
 // determinísticas e testáveis. A formatação i18n (datas/percentuais) fica em
 // lib/format, injetada pelas páginas. Compartilhado por painel + rota pública + API.
 
+export { isMissingTable } from '@/lib/dbErrors';
+
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 export type CanalFeedback = 'formulario' | 'whatsapp' | 'presencial' | 'email';
 export type StatusFeedback = 'novo' | 'em_tratativa' | 'resolvido';
@@ -266,11 +268,6 @@ export function notaPorChave(
 /** Pode virar avaliação pública? (cliente autorizou, nota alta e ainda não promovido). */
 export function podePromover(f: Feedback): boolean {
   return !!f.permite_publicar && Number(f.nota_geral) >= NOTA_MIN_PROMOVER && !f.promovida_avaliacao_id;
-}
-
-/** Detecta "tabela ausente" no Supabase (REST PGRST205 ou Postgres 42P01). */
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
 }
 
 // ── Export CSV (puro: retorna string; o download/DOM fica na página) ───────────

@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import type { Metadata } from 'next'
-
-const CHIPS = ['Dúvida geral', 'Anunciar meu espaço', 'Problema técnico', 'Planos e cobrança', 'Parceria', 'Outro']
+import { useT } from '@/components/i18n/I18nProvider'
 
 function mascaraTelefone(v: string) {
   v = v.replace(/\D/g, '').substring(0, 11)
@@ -59,7 +57,17 @@ const IconLI = () => (
 )
 
 export default function FaleConoscoPage() {
-  const [chip, setChip]         = useState('Dúvida geral')
+  const { dict } = useT()
+  const t = dict.faleConosco
+  const chips: { key: string; label: string }[] = [
+    { key: 'duvidaGeral', label: t.chips.duvidaGeral },
+    { key: 'anunciar', label: t.chips.anunciar },
+    { key: 'problemaTecnico', label: t.chips.problemaTecnico },
+    { key: 'planosCobranca', label: t.chips.planosCobranca },
+    { key: 'parceria', label: t.chips.parceria },
+    { key: 'outro', label: t.chips.outro },
+  ]
+  const [chip, setChip]         = useState('duvidaGeral')
   const [nome, setNome]         = useState('')
   const [telefone, setTelefone] = useState('')
   const [email, setEmail]       = useState('')
@@ -89,25 +97,26 @@ export default function FaleConoscoPage() {
     if (!mensagem.trim()) novosErros.mensagem = true
     setErros(novosErros)
     if (Object.keys(novosErros).length > 0) {
-      setErroEnvio('Preencha os campos destacados para enviar.')
+      setErroEnvio(t.erroCampos)
       return
     }
 
     setEnviando(true)
     try {
+      const assunto = chips.find(c => c.key === chip)?.label ?? chip
       const r = await fetch('/api/contato', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, telefone, assunto: chip, perfil, mensagem }),
+        body: JSON.stringify({ nome, email, telefone, assunto, perfil, mensagem }),
       })
       if (!r.ok) {
         const j = await r.json().catch(() => ({}))
-        setErroEnvio(j.error || 'Não foi possível enviar. Tente novamente.')
+        setErroEnvio(j.error || t.erroEnvioGenerico)
         return
       }
       setEnviado(true)
     } catch {
-      setErroEnvio('Falha de conexão. Verifique sua internet e tente novamente.')
+      setErroEnvio(t.erroConexao)
     } finally {
       setEnviando(false)
     }
@@ -120,9 +129,9 @@ export default function FaleConoscoPage() {
       {/* ── HERO ── */}
       <div className="fc-hero">
         <div className="fc-hero-inner">
-          <span className="fc-hero-tag">Fale Conosco</span>
-          <h1>Estamos aqui para<br /><em>te ajudar</em></h1>
-          <p>Dúvidas, sugestões ou problemas? Nossa equipe responde com agilidade para você ter a melhor experiência na VENTSY.</p>
+          <span className="fc-hero-tag">{t.heroTag}</span>
+          <h1>{t.heroTituloA}<br /><em>{t.heroTituloEm}</em></h1>
+          <p>{t.heroSub}</p>
         </div>
       </div>
 
@@ -134,41 +143,41 @@ export default function FaleConoscoPage() {
           {enviado ? (
             <div className="fc-form-sucesso">
               <span className="fc-sucesso-icone">✅</span>
-              <h3>Mensagem enviada!</h3>
-              <p>Recebemos seu contato e nossa equipe responderá<br />em até <strong>48 horas úteis</strong> pelo e-mail informado.</p>
+              <h3>{t.sucessoTitulo}</h3>
+              <p>{t.sucessoTextoA}<br />{t.sucessoTextoB} <strong>{t.sucessoHoras}</strong> {t.sucessoTextoC}</p>
             </div>
           ) : (
             <>
-              <h2 className="fc-form-titulo">Envie sua mensagem</h2>
-              <p className="fc-form-sub">Preencha o formulário abaixo e responderemos em até 48 horas úteis.</p>
+              <h2 className="fc-form-titulo">{t.formTitulo}</h2>
+              <p className="fc-form-sub">{t.formSub}</p>
 
               {/* Chips de assunto */}
-              <span className="fc-label-chips" id="fc-assunto-label">Qual é o assunto?</span>
+              <span className="fc-label-chips" id="fc-assunto-label">{t.assuntoLabel}</span>
               <div className="fc-chips-wrap" role="group" aria-labelledby="fc-assunto-label">
-                {CHIPS.map(c => (
+                {chips.map(c => (
                   <button
-                    key={c}
+                    key={c.key}
                     type="button"
-                    aria-pressed={chip === c}
-                    className={`fc-chip${chip === c ? ' fc-chip-ativo' : ''}`}
-                    onClick={() => setChip(c)}
-                  >{c}</button>
+                    aria-pressed={chip === c.key}
+                    className={`fc-chip${chip === c.key ? ' fc-chip-ativo' : ''}`}
+                    onClick={() => setChip(c.key)}
+                  >{c.label}</button>
                 ))}
               </div>
 
               {/* Nome + Telefone */}
               <div className="fc-form-row">
                 <div className="fc-form-group">
-                  <label htmlFor="fc-nome">Nome</label>
+                  <label htmlFor="fc-nome">{t.nomeLabel}</label>
                   <input
-                    id="fc-nome" type="text" autoComplete="name" value={nome} placeholder="Seu nome completo"
+                    id="fc-nome" type="text" autoComplete="name" value={nome} placeholder={t.nomePlaceholder}
                     onChange={e => setNome(e.target.value)}
                     aria-invalid={!!erros.nome}
                     className={erros.nome ? 'fc-campo-erro' : ''}
                   />
                 </div>
                 <div className="fc-form-group">
-                  <label htmlFor="fc-tel">Telefone / WhatsApp</label>
+                  <label htmlFor="fc-tel">{t.telefoneLabel}</label>
                   <input
                     id="fc-tel" type="tel" inputMode="tel" autoComplete="tel" value={telefone} placeholder="(11) 99999-9999"
                     onChange={e => setTelefone(mascaraTelefone(e.target.value))}
@@ -178,9 +187,9 @@ export default function FaleConoscoPage() {
 
               {/* E-mail */}
               <div className="fc-form-group">
-                <label htmlFor="fc-email">E-mail</label>
+                <label htmlFor="fc-email">{t.emailLabel}</label>
                 <input
-                  id="fc-email" type="email" autoComplete="email" value={email} placeholder="seu@email.com"
+                  id="fc-email" type="email" autoComplete="email" value={email} placeholder={t.emailPlaceholder}
                   onChange={e => setEmail(e.target.value)}
                   aria-invalid={!!erros.email}
                   className={erros.email ? 'fc-campo-erro' : ''}
@@ -189,22 +198,22 @@ export default function FaleConoscoPage() {
 
               {/* Perfil */}
               <div className="fc-form-group">
-                <label htmlFor="fc-perfil">Você é...</label>
+                <label htmlFor="fc-perfil">{t.perfilLabel}</label>
                 <select id="fc-perfil" value={perfil} onChange={e => setPerfil(e.target.value)}>
-                  <option value="" disabled>Selecione seu perfil</option>
-                  <option>Dono de espaço</option>
-                  <option>Quero alugar um espaço</option>
-                  <option>Parceiro / Fornecedor</option>
-                  <option>Imprensa</option>
-                  <option>Outro</option>
+                  <option value="" disabled>{t.perfil.selecione}</option>
+                  <option>{t.perfil.donoEspaco}</option>
+                  <option>{t.perfil.queroAlugar}</option>
+                  <option>{t.perfil.parceiroFornecedor}</option>
+                  <option>{t.perfil.imprensa}</option>
+                  <option>{t.perfil.outro}</option>
                 </select>
               </div>
 
               {/* Mensagem */}
               <div className="fc-form-group">
-                <label htmlFor="fc-msg">Mensagem</label>
+                <label htmlFor="fc-msg">{t.mensagemLabel}</label>
                 <textarea
-                  id="fc-msg" value={mensagem} placeholder="Descreva sua dúvida ou mensagem com o máximo de detalhes possível..."
+                  id="fc-msg" value={mensagem} placeholder={t.mensagemPlaceholder}
                   onChange={e => setMensagem(e.target.value)}
                   aria-invalid={!!erros.mensagem}
                   className={erros.mensagem ? 'fc-campo-erro' : ''}
@@ -216,7 +225,7 @@ export default function FaleConoscoPage() {
               )}
               <button className="fc-btn-enviar" onClick={enviar} disabled={enviando}>
                 <span className="material-icons" aria-hidden="true">{enviando ? 'sync' : 'send'}</span>
-                {enviando ? 'Enviando...' : 'Enviar mensagem'}
+                {enviando ? t.enviando : t.btnEnviar}
               </button>
             </>
           )}
@@ -229,9 +238,9 @@ export default function FaleConoscoPage() {
           <a href="https://wa.me/5521999992120" target="_blank" rel="noopener noreferrer" className="fc-canal-card fc-reveal">
             <div className="fc-canal-icone verde"><IconWhatsApp /></div>
             <div className="fc-canal-info">
-              <p className="fc-canal-label">WhatsApp</p>
+              <p className="fc-canal-label">{t.whatsappLabel}</p>
               <p className="fc-canal-valor">(21) 99999-2120</p>
-              <p className="fc-canal-desc">Resposta rápida em horário comercial</p>
+              <p className="fc-canal-desc">{t.whatsappDesc}</p>
             </div>
             <span className="material-icons fc-canal-seta">arrow_forward_ios</span>
           </a>
@@ -240,9 +249,9 @@ export default function FaleConoscoPage() {
           <a href="mailto:contato@ventsy.com.br" className="fc-canal-card fc-reveal delay-100">
             <div className="fc-canal-icone azul"><IconEmail /></div>
             <div className="fc-canal-info">
-              <p className="fc-canal-label">E-mail</p>
+              <p className="fc-canal-label">{t.emailCanalLabel}</p>
               <p className="fc-canal-valor">contato@ventsy.com.br</p>
-              <p className="fc-canal-desc">Resposta em até 48 horas úteis</p>
+              <p className="fc-canal-desc">{t.emailCanalDesc}</p>
             </div>
             <span className="material-icons fc-canal-seta">arrow_forward_ios</span>
           </a>
@@ -251,17 +260,17 @@ export default function FaleConoscoPage() {
           <a href="mailto:suporte@ventsy.com.br" className="fc-canal-card fc-reveal delay-150">
             <div className="fc-canal-icone verm"><IconSuporte /></div>
             <div className="fc-canal-info">
-              <p className="fc-canal-label">Suporte Técnico</p>
+              <p className="fc-canal-label">{t.suporteLabel}</p>
               <p className="fc-canal-valor">suporte@ventsy.com.br</p>
-              <p className="fc-canal-desc">Problemas na plataforma ou conta</p>
+              <p className="fc-canal-desc">{t.suporteDesc}</p>
             </div>
             <span className="material-icons fc-canal-seta">arrow_forward_ios</span>
           </a>
 
           {/* Redes sociais */}
           <div className="fc-redes-card fc-reveal delay-200">
-            <p className="fc-redes-titulo">Redes Sociais</p>
-            <p className="fc-redes-sub">Siga a VENTSY e fique por dentro de novidades, dicas e espaços incríveis.</p>
+            <p className="fc-redes-titulo">{t.redesTitulo}</p>
+            <p className="fc-redes-sub">{t.redesSub}</p>
             <div className="fc-redes-grid">
               <a href="#" target="_blank" rel="noopener noreferrer" className="fc-rede-btn fc-instagram"><IconInsta />Instagram</a>
               <a href="#" target="_blank" rel="noopener noreferrer" className="fc-rede-btn fc-facebook"><IconFB />Facebook</a>
@@ -272,18 +281,18 @@ export default function FaleConoscoPage() {
 
           {/* Horário */}
           <div className="fc-horario-card fc-reveal delay-[250ms]">
-            <p className="fc-horario-titulo">🕐 Horário de atendimento</p>
+            <p className="fc-horario-titulo">{t.horarioTitulo}</p>
             <div className="fc-horario-linha">
-              <span className="fc-horario-dia">Segunda a Sexta</span>
-              <span className="fc-horario-tempo">9h às 18h</span>
+              <span className="fc-horario-dia">{t.horarioSegSex}</span>
+              <span className="fc-horario-tempo">{t.horarioSegSexValor}</span>
             </div>
             <div className="fc-horario-linha">
-              <span className="fc-horario-dia">Sábado</span>
-              <span className="fc-horario-tempo">9h às 13h</span>
+              <span className="fc-horario-dia">{t.horarioSabado}</span>
+              <span className="fc-horario-tempo">{t.horarioSabadoValor}</span>
             </div>
             <div className="fc-horario-linha">
-              <span className="fc-horario-dia">Domingo</span>
-              <span className="fc-horario-fechado">Fechado</span>
+              <span className="fc-horario-dia">{t.horarioDomingo}</span>
+              <span className="fc-horario-fechado">{t.horarioFechado}</span>
             </div>
           </div>
 

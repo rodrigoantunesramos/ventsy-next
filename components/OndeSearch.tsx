@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ESTADOS, norm } from '@/lib/data'
+import { useT } from './i18n/I18nProvider'
 
 export interface OndeSelection {
   tipo: 'prop' | 'cidade' | 'bairro' | 'estado'
@@ -55,6 +56,7 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function OndeSearch({ onSelect }: Props) {
+  const { dict } = useT()
   const [value, setValue]   = useState('')
   const [results, setResults] = useState<React.ReactNode>(null)
   const [open, setOpen]     = useState(false)
@@ -85,14 +87,14 @@ export default function OndeSearch({ onSelect }: Props) {
     const populares = ESTADOS.filter(e => POPULARES.includes(e.s))
     return (
       <>
-        <GroupLabel>🔥 Destinos populares</GroupLabel>
+        <GroupLabel>🔥 {dict.componentes.onde.destinosPopulares}</GroupLabel>
         {populares.map(e => (
           <ResultRow
             key={e.s}
             icon="📍"
             title={e.n}
-            sub={`${e.s} · Brasil`}
-            badge="Estado"
+            sub={`${e.s} · ${dict.componentes.onde.brasil}`}
+            badge={dict.componentes.onde.badgeEstado}
             badgeColor="bg-gray-100 text-gray-500"
             onClick={() => select({ tipo: 'estado', estado: e.s, label: `${e.n}, BR` })}
           />
@@ -105,7 +107,7 @@ export default function OndeSearch({ onSelect }: Props) {
     setResults(
       <div className="flex items-center gap-2 px-4 py-3 text-gray-400 text-sm">
         <div className="w-4 h-4 border-2 border-gray-200 border-t-[#ff385c] rounded-full animate-spin" />
-        Buscando...
+        {dict.componentes.onde.buscando}
       </div>
     )
 
@@ -146,7 +148,7 @@ export default function OndeSearch({ onSelect }: Props) {
     const nodes: React.ReactNode[] = []
 
     if (propsByName.length) {
-      nodes.push(<GroupLabel key="prop-label">🏠 Espaços</GroupLabel>)
+      nodes.push(<GroupLabel key="prop-label">🏠 {dict.componentes.onde.espacos}</GroupLabel>)
       propsByName.slice(0, 5).forEach(p => {
         nodes.push(
           <ResultRow
@@ -158,7 +160,7 @@ export default function OndeSearch({ onSelect }: Props) {
             }
             title={p.nome}
             sub={`${p.cidade} · ${p.estado}`}
-            badge="Espaço"
+            badge={dict.componentes.onde.badgeEspaco}
             badgeColor="bg-[#fff0f3] text-[#ff385c]"
             onClick={() => select({ tipo: 'prop', id: p.id, estado: p.estado || '', cidade: p.cidade || '', label: p.nome })}
           />
@@ -167,7 +169,7 @@ export default function OndeSearch({ onSelect }: Props) {
     }
 
     if (bairroMap.size > 0) {
-      nodes.push(<GroupLabel key="bairro-label">🏘️ Bairros</GroupLabel>)
+      nodes.push(<GroupLabel key="bairro-label">🏘️ {dict.componentes.onde.bairros}</GroupLabel>)
       Array.from(bairroMap.values()).slice(0, 4).forEach(b => {
         nodes.push(
           <ResultRow
@@ -175,7 +177,7 @@ export default function OndeSearch({ onSelect }: Props) {
             icon="🏘️"
             title={b.bairro}
             sub={`${b.cidade} · ${b.estado}`}
-            badge="Bairro"
+            badge={dict.componentes.onde.badgeBairro}
             badgeColor="bg-gray-100 text-gray-500"
             onClick={() => select({ tipo: 'bairro', estado: b.estado, cidade: b.cidade, bairro: b.bairro, label: `${b.bairro}, ${b.cidade}` })}
           />
@@ -184,15 +186,15 @@ export default function OndeSearch({ onSelect }: Props) {
     }
 
     if (cidadeMap.size > 0) {
-      nodes.push(<GroupLabel key="cidade-label">🏙️ Cidades</GroupLabel>)
+      nodes.push(<GroupLabel key="cidade-label">🏙️ {dict.componentes.onde.cidades}</GroupLabel>)
       Array.from(cidadeMap.values()).slice(0, 4).forEach(c => {
         nodes.push(
           <ResultRow
             key={`cidade-${c.cidade}-${c.estado}`}
             icon="🏙️"
             title={c.cidade}
-            sub={`${c.estado} · Brasil`}
-            badge="Cidade"
+            sub={`${c.estado} · ${dict.componentes.onde.brasil}`}
+            badge={dict.componentes.onde.badgeCidade}
             badgeColor="bg-gray-100 text-gray-500"
             onClick={() => select({ tipo: 'cidade', estado: c.estado, cidade: c.cidade, label: `${c.cidade}, ${c.estado}` })}
           />
@@ -201,15 +203,15 @@ export default function OndeSearch({ onSelect }: Props) {
     }
 
     if (estadosMatch.length) {
-      nodes.push(<GroupLabel key="est-label">📍 Estados</GroupLabel>)
+      nodes.push(<GroupLabel key="est-label">📍 {dict.componentes.onde.estados}</GroupLabel>)
       estadosMatch.slice(0, 3).forEach(e => {
         nodes.push(
           <ResultRow
             key={e.s}
             icon="📍"
             title={e.n}
-            sub={`${e.s} · Brasil`}
-            badge="Estado"
+            sub={`${e.s} · ${dict.componentes.onde.brasil}`}
+            badge={dict.componentes.onde.badgeEstado}
             badgeColor="bg-gray-100 text-gray-500"
             onClick={() => select({ tipo: 'estado', estado: e.s, label: `${e.n}, BR` })}
           />
@@ -220,7 +222,7 @@ export default function OndeSearch({ onSelect }: Props) {
     if (!nodes.length) {
       setResults(
         <div className="px-4 py-6 text-center text-gray-400 text-sm">
-          Nenhum resultado para &ldquo;<strong className="text-gray-600">{q}</strong>&rdquo;
+          {dict.componentes.onde.semResultado} &ldquo;<strong className="text-gray-600">{q}</strong>&rdquo;
         </div>
       )
     } else {
@@ -244,12 +246,12 @@ export default function OndeSearch({ onSelect }: Props) {
   return (
     <div ref={ref} className="relative">
       <label className="text-[.68rem] font-extrabold uppercase tracking-[.05em] text-gray-800 block">
-        Onde?
+        {dict.componentes.onde.label}
       </label>
       <div className="flex items-center relative">
         <input
           className="text-[.83rem] text-gray-600 bg-transparent border-none outline-none w-[180px] placeholder:text-gray-400"
-          placeholder="Cidade, bairro, estado ou espaço..."
+          placeholder={dict.componentes.onde.placeholder}
           value={value}
           onChange={e => handleInput(e.target.value)}
           onFocus={handleFocus}

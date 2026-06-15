@@ -23,6 +23,7 @@
 //   • i18n: os rótulos PT são o default do catálogo; a UI pode reescrevê-los.
 
 import { PROVEDORES } from '@/lib/fiscal'
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Vocabulário ──────────────────────────────────────────────────────────────
 export type Categoria =
@@ -415,9 +416,3 @@ export const ESCOPOS_API: { v: string; label: string; descricao: string }[] = [
   { v: 'webhooks', label: 'Webhooks', descricao: 'Gerenciar assinaturas de webhooks de saída.' },
 ]
 export const ESCOPOS_API_SET = new Set(ESCOPOS_API.map((e) => e.v))
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-// PGRST205 = REST não achou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01'
-}

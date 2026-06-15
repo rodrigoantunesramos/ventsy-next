@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
+import { getDictionary } from '@/lib/i18n/getDictionary'
+import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
 
-export const metadata: Metadata = {
-  title: 'Planos e preços',
-  description:
-    'Escolha o plano ideal para anunciar seu espaço de eventos na VENTSY: Básico grátis, Pro e Ultra. Mais visibilidade, fotos e recursos premium.',
-  alternates: { canonical: '/planos' },
-  openGraph: {
-    title: 'Planos e preços · VENTSY',
-    description: 'Básico grátis, Pro e Ultra: escolha o plano ideal para anunciar seu espaço de eventos.',
-    url: '/planos',
-  },
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
+  const dict = getDictionary(locale)
+  const url = localizar(locale, '/planos')
+  return {
+    title: dict.planos.meta.title,
+    description: dict.planos.meta.description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: dict.planos.meta.ogTitle,
+      description: dict.planos.meta.ogDescription,
+      url,
+    },
+  }
 }
 
 export default function PlanosLayout({ children }: { children: React.ReactNode }) {

@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase as sb } from '@/lib/supabase';
+import { useT } from '@/components/i18n/I18nProvider';
 
 type Tipo = 'curtir' | 'salvar' | 'seguir';
 
@@ -29,6 +30,8 @@ export default function Interacoes({
   const [nSalvos, setNSalvos] = useState(salvos);
   const [busy, setBusy] = useState<Tipo | ''>('');
   const [flash, setFlash] = useState('');
+  const { dict, lhref } = useT();
+  const t = dict.listas.interacoes;
 
   useEffect(() => {
     (async () => {
@@ -51,7 +54,7 @@ export default function Interacoes({
   function dica(msg: string) { setFlash(msg); setTimeout(() => setFlash(''), 2200); }
 
   async function toggle(tipo: Tipo) {
-    if (!uid) { window.location.href = `/login?redirect=${encodeURIComponent('/listas/' + slug)}`; return; }
+    if (!uid) { window.location.href = lhref(`/login?redirect=${encodeURIComponent(lhref('/listas/' + slug))}`); return; }
     if (busy) return;
     setBusy(tipo);
     try {
@@ -66,7 +69,7 @@ export default function Interacoes({
           const { error } = await sb.from('listas_interacoes').insert({ lista_id: listaId, user_id: uid, tipo });
           if (error) throw error;
           setOn(true); setN((n) => n + 1);
-          dica(tipo === 'curtir' ? 'Curtida!' : 'Lista salva no seu perfil.');
+          dica(tipo === 'curtir' ? t.curtida : t.listaSalva);
         }
       } else {
         if (following) {
@@ -75,22 +78,22 @@ export default function Interacoes({
         } else {
           const { error } = await sb.from('listas_interacoes').insert({ autor_id: autorId, user_id: uid, tipo: 'seguir' });
           if (error) throw error;
-          setFollowing(true); dica('Você está seguindo este autor.');
+          setFollowing(true); dica(t.seguindoAutor);
         }
       }
     } catch {
-      dica('Não foi possível registrar. Tente de novo.');
+      dica(t.erro);
     } finally {
       setBusy('');
     }
   }
 
   async function compartilhar() {
-    const url = `${window.location.origin}/listas/${slug}`;
+    const url = `${window.location.origin}${lhref('/listas/' + slug)}`;
     // Web Share quando disponível (mobile), senão copia para a área de transferência.
     const nav = navigator as Navigator & { share?: (d: { title: string; url: string }) => Promise<void> };
     if (nav.share) { try { await nav.share({ title: titulo, url }); return; } catch { /* cancelado */ } }
-    try { await navigator.clipboard.writeText(url); dica('Link copiado!'); }
+    try { await navigator.clipboard.writeText(url); dica(t.linkCopiado); }
     catch { dica(url); }
   }
 
@@ -98,13 +101,13 @@ export default function Interacoes({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Btn onClick={() => toggle('curtir')} active={liked} busy={busy === 'curtir'} icon={<IcoHeart filled={liked} />} label={`${nCurtidas}`} title="Curtir" />
-      <Btn onClick={() => toggle('salvar')} active={saved} busy={busy === 'salvar'} icon={<IcoBookmark filled={saved} />} label={saved ? 'Salva' : 'Salvar'} title="Salvar" />
+      <Btn onClick={() => toggle('curtir')} active={liked} busy={busy === 'curtir'} icon={<IcoHeart filled={liked} />} label={`${nCurtidas}`} title={t.curtir} />
+      <Btn onClick={() => toggle('salvar')} active={saved} busy={busy === 'salvar'} icon={<IcoBookmark filled={saved} />} label={saved ? t.salva : t.salvar} title={t.salvar} />
       {!ehAutor && (
-        <Btn onClick={() => toggle('seguir')} active={following} busy={busy === 'seguir'} icon={<IcoUserPlus />} label={following ? 'Seguindo' : 'Seguir autor'} title="Seguir autor" />
+        <Btn onClick={() => toggle('seguir')} active={following} busy={busy === 'seguir'} icon={<IcoUserPlus />} label={following ? t.seguindo : t.seguirAutor} title={t.seguirAutor} />
       )}
       <button onClick={compartilhar} className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3.5 py-2 text-sm font-medium text-ink-soft hover:border-brand/40 hover:text-brand">
-        <IcoShare /> Compartilhar
+        <IcoShare /> {t.compartilhar}
       </button>
       {flash && <span className="text-xs font-semibold text-emerald-600" role="status">{flash}</span>}
     </div>

@@ -17,6 +17,9 @@
 //     (moeda/percentual/data i18n) fica em lib/format, chamada por quem consome.
 //   • Determinístico e testável: nada de relógio/aleatoriedade escondidos.
 
+// Detecção de tabela ausente (degrade → setup-card).
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Vocabulário do domínio ───────────────────────────────────────────────────
 /** Estado comercial de um estande no mapa. */
 export type EstandeStatus = 'disponivel' | 'reservado' | 'vendido' | 'bloqueado'
@@ -509,11 +512,4 @@ export function progressoMeta(realizado: number, meta: number | null | undefined
   const alvo = num(meta)
   if (alvo <= 0) return 0
   return Math.min(1, Math.max(0, num(realizado) / alvo))
-}
-
-// ── Detecção de tabela ausente (degrade → setup-card) ────────────────────────
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
 }

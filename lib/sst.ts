@@ -21,6 +21,8 @@
 //    substituem a exigência do Corpo de Bombeiros / vigilância / ANVISA do
 //    município, que varia por porte e tipo de evento. Servem para PLANEJAR.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas (puro, agnóstico de fuso) ───────────────────────────────────────────
 /** Só a parte 'YYYY-MM-DD' de uma data/timestamp (null se inválida). */
 export function diaDe(v: string | null | undefined): string | null {
@@ -558,11 +560,4 @@ export function normalizarConteudo(raw: any): PlanoConteudo {
 export function completudePlano(c: PlanoConteudo): number {
   const checks = [c.rotas.length > 0, c.pontos_encontro.length > 0, c.recursos.length > 0, c.procedimentos.length > 0, c.contatos.length > 0]
   return checks.filter(Boolean).length / checks.length
-}
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
 }

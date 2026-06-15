@@ -5,31 +5,48 @@
 
 import type { Metadata } from 'next'
 import { SITE_NAME, abs } from '@/lib/site'
+import { isLocale, defaultLocale, localizar, htmlLang, type Locale } from '@/lib/i18n/config'
+import propriedadePt from '@/lib/i18n/dictionaries/pt/propriedade'
+import propriedadeEn from '@/lib/i18n/dictionaries/en/propriedade'
+import propriedadeEs from '@/lib/i18n/dictionaries/es/propriedade'
 import { fetchPropriedadeMeta, fetchPropriedadeFotos, type PropMeta } from './_data'
 import PropriedadeClient from './_PropriedadeClient'
 
 export const revalidate = 300
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+// Namespace `propriedade` por locale. Acessado direto (e não via getDictionary)
+// porque o índice central ainda não registra esta chave — o orquestrador o fará.
+const dicts = { pt: propriedadePt, en: propriedadeEn, es: propriedadeEs }
+function getPropDict(locale: Locale) {
+  return dicts[locale] ?? propriedadePt
+}
+
+export async function generateMetadata({ params }: { params: { locale: string; id: string } }): Promise<Metadata> {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
+  const t = getPropDict(locale)
   const prop = await fetchPropriedadeMeta(Number(params.id))
-  if (!prop) return { title: 'Espaço para eventos' }
+  if (!prop) return { title: t.meta.tituloFallback }
 
   const local = [prop.cidade, prop.estado].filter(Boolean).join(', ')
-  const titulo = `${prop.nome || 'Espaço para eventos'}${local ? ` — ${local}` : ''}`
-  const desc = (prop.descricao || `Conheça ${prop.nome || 'este espaço'} para o seu evento${local ? ` em ${local}` : ''} na ${SITE_NAME}.`)
+  const titulo = `${prop.nome || t.meta.tituloFallback}${local ? ` — ${local}` : ''}`
+  const desc = (
+    prop.descricao ||
+    `${t.meta.descConhecaA} ${prop.nome || t.meta.descConhecaEsteEspaco} ${t.meta.descParaEvento}${local ? ` ${t.meta.descEm} ${local}` : ''} ${t.meta.descNa} ${SITE_NAME}.`
+  )
     .replace(/\s+/g, ' ')
     .slice(0, 160)
   const img = prop.imagem_url || undefined
+  const url = localizar(locale, `/propriedade/${prop.id}`)
 
   return {
     title: titulo,
     description: desc,
-    alternates: { canonical: `/propriedade/${prop.id}` },
+    alternates: { canonical: url },
     openGraph: {
       title: prop.nome || titulo,
       description: desc,
       type: 'website',
-      url: abs(`/propriedade/${prop.id}`),
+      url: abs(url),
       ...(img ? { images: [{ url: img }] } : {}),
     },
     twitter: { card: img ? 'summary_large_image' : 'summary', title: prop.nome || titulo, description: desc },
@@ -38,7 +55,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-function eventVenueLd(prop: PropMeta) {
+function eventVenueLd(prop: PropMeta, locale: Locale) {
+  const t = getPropDict(locale)
   const img = prop.imagem_url
   const capacidade = prop.capacidade ? Number(String(prop.capacidade).replace(/\D/g, '')) : 0
   const nota = prop.avaliacao ? Number(prop.avaliacao) : 0
@@ -46,10 +64,11 @@ function eventVenueLd(prop: PropMeta) {
   return {
     '@context': 'https://schema.org',
     '@type': 'EventVenue',
-    name: prop.nome || 'Espaço para eventos',
+    name: prop.nome || t.meta.tituloFallback,
+    inLanguage: htmlLang[locale],
     ...(prop.descricao ? { description: prop.descricao.replace(/\s+/g, ' ').slice(0, 400) } : {}),
     ...(img ? { image: img } : {}),
-    url: abs(`/propriedade/${prop.id}`),
+    url: abs(localizar(locale, `/propriedade/${prop.id}`)),
     ...(prop.cidade || prop.estado
       ? {
           address: {
@@ -75,7 +94,8 @@ function eventVenueLd(prop: PropMeta) {
   }
 }
 
-export default async function PropriedadePage({ params }: { params: { id: string } }) {
+export default async function PropriedadePage({ params }: { params: { locale: string; id: string } }) {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
   // Busca a propriedade e suas fotos no servidor para semear a ilha cliente:
   // o herói entra no HTML inicial (LCP) em vez de aparecer só após o fetch.
   const [prop, fotos] = await Promise.all([
@@ -86,7 +106,7 @@ export default async function PropriedadePage({ params }: { params: { id: string
   return (
     <>
       {prop && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventVenueLd(prop)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventVenueLd(prop, locale)) }} />
       )}
       <PropriedadeClient initialProp={prop} initialFotos={fotos} />
     </>

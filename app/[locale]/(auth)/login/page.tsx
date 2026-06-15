@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
+import { useT } from '@/components/i18n/I18nProvider'
 
 // Destino pós-login: respeita ?redirect (apenas caminhos internos), senão /painel.
 function destinoPosLogin(): string {
@@ -16,6 +17,7 @@ function destinoPosLogin(): string {
 
 export default function LoginPage() {
   const router = useRouter()
+  const { dict, lhref } = useT()
   const [email, setEmail]           = useState('')
   const [senha, setSenha]           = useState('')
   const [mostraSenha, setMostraSenha] = useState(false)
@@ -44,16 +46,16 @@ export default function LoginPage() {
   }, [modalAberto])
 
   async function fazerLogin() {
-    if (!email || !senha) { setErro('Preencha e-mail e senha para continuar.'); return }
+    if (!email || !senha) { setErro(dict.auth.login.erroCamposObrigatorios); return }
     setLoading(true)
     setErro('')
 
     const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha })
 
     if (error) {
-      let msg = 'Erro ao fazer login. Tente novamente.'
-      if (error.message.includes('Invalid login'))        msg = 'E-mail ou senha incorretos.'
-      if (error.message.includes('Email not confirmed'))  msg = 'Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.'
+      let msg = dict.auth.login.erroGenerico
+      if (error.message.includes('Invalid login'))        msg = dict.auth.login.erroCredenciais
+      if (error.message.includes('Email not confirmed'))  msg = dict.auth.login.erroEmailNaoConfirmado
       setErro(msg)
       setLoading(false)
       void auditLogin(undefined, email.trim()) // trilha: tentativa malsucedida
@@ -67,7 +69,7 @@ export default function LoginPage() {
     if (!emailRecuperar.trim()) return
     setLoadingRecuperar(true)
     await supabase.auth.resetPasswordForEmail(emailRecuperar.trim(), {
-      redirectTo: `${window.location.origin}/redefinir-senha`,
+      redirectTo: `${window.location.origin}${lhref('/redefinir-senha')}`,
     })
     setLoadingRecuperar(false)
     setRecuperacaoEnviada(true)
@@ -102,9 +104,9 @@ export default function LoginPage() {
 
           {/* Topo */}
           <div className="ln-topo">
-            <span className="ln-tag">Acesso</span>
-            <h1>Bem-vindo de volta à <em>VENTSY</em></h1>
-            <p>Entre com seu e-mail e senha para acessar sua conta.</p>
+            <span className="ln-tag">{dict.auth.login.tag}</span>
+            <h1>{dict.auth.login.bemVindo} <em>VENTSY</em></h1>
+            <p>{dict.auth.login.subtitulo}</p>
           </div>
 
           {/* Card */}
@@ -120,7 +122,7 @@ export default function LoginPage() {
 
             {/* E-mail */}
             <div className="ln-form-group">
-              <label htmlFor="login-email">E-mail</label>
+              <label htmlFor="login-email">{dict.auth.login.emailLabel}</label>
               <div className="ln-input-wrap">
                 <span className="material-icons ln-icon-left" aria-hidden="true">email</span>
                 <input
@@ -129,7 +131,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   inputMode="email"
                   value={email}
-                  placeholder="seu@email.com"
+                  placeholder={dict.auth.login.emailPlaceholder}
                   onChange={e => setEmail(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && fazerLogin()}
                 />
@@ -138,7 +140,7 @@ export default function LoginPage() {
 
             {/* Senha */}
             <div className="ln-form-group">
-              <label htmlFor="login-senha">Senha</label>
+              <label htmlFor="login-senha">{dict.auth.login.senhaLabel}</label>
               <div className="ln-input-wrap">
                 <span className="material-icons ln-icon-left" aria-hidden="true">lock_outline</span>
                 <input
@@ -146,7 +148,7 @@ export default function LoginPage() {
                   type={mostraSenha ? 'text' : 'password'}
                   autoComplete="current-password"
                   value={senha}
-                  placeholder="Sua senha"
+                  placeholder={dict.auth.login.senhaPlaceholder}
                   onChange={e => setSenha(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && fazerLogin()}
                 />
@@ -154,7 +156,7 @@ export default function LoginPage() {
                   type="button"
                   className="ln-toggle-senha"
                   onClick={() => setMostraSenha(!mostraSenha)}
-                  aria-label={mostraSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-label={mostraSenha ? dict.auth.login.ocultarSenha : dict.auth.login.mostrarSenha}
                   aria-pressed={mostraSenha}
                 >
                   <span className="material-icons" aria-hidden="true">
@@ -164,7 +166,7 @@ export default function LoginPage() {
               </div>
               <div className="ln-esqueceu">
                 <button className="ln-link-btn" onClick={() => setModalAberto(true)}>
-                  Esqueceu a senha?
+                  {dict.auth.login.esqueceuSenha}
                 </button>
               </div>
             </div>
@@ -178,12 +180,12 @@ export default function LoginPage() {
               <span className="material-icons" aria-hidden="true" style={loading ? { animation: 'spin 1s linear infinite' } : {}}>
                 {loading ? 'sync' : 'login'}
               </span>
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? dict.auth.login.entrando : dict.auth.login.entrar}
             </button>
           </div>
 
           <p className="ln-link-cadastro">
-            Não tem conta? <Link href="/cadastro">Criar conta grátis</Link>
+            {dict.auth.login.semConta} <Link href={lhref('/cadastro')}>{dict.auth.login.criarConta}</Link>
           </p>
         </div>
       </main>
@@ -194,42 +196,42 @@ export default function LoginPage() {
           className="ln-modal-overlay"
           onClick={e => { if (e.target === e.currentTarget) fecharModal() }}
         >
-          <div className="ln-modal-box" role="dialog" aria-modal="true" aria-label="Recuperar senha">
+          <div className="ln-modal-box" role="dialog" aria-modal="true" aria-label={dict.auth.recuperar.dialogAriaLabel}>
             {recuperacaoEnviada ? (
               <div className="ln-modal-sucesso">
                 <span className="material-icons text-[2.5rem] text-[var(--verde)] mb-[10px] block" aria-hidden="true">
                   mark_email_read
                 </span>
-                <h3>E-mail enviado!</h3>
-                <p>Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+                <h3>{dict.auth.recuperar.sucessoTitulo}</h3>
+                <p>{dict.auth.recuperar.sucessoDescricao}</p>
                 <button className="ln-btn-modal-cancelar mt-4 w-full" onClick={fecharModal}>
-                  Fechar
+                  {dict.auth.recuperar.fechar}
                 </button>
               </div>
             ) : (
               <>
-                <h3>Recuperar senha</h3>
-                <p>Informe seu e-mail cadastrado e enviaremos um link para redefinir sua senha.</p>
+                <h3>{dict.auth.recuperar.titulo}</h3>
+                <p>{dict.auth.recuperar.descricao}</p>
                 <input
                   id="recuperar-email"
                   type="email"
                   autoComplete="email"
-                  aria-label="E-mail para recuperação de senha"
+                  aria-label={dict.auth.recuperar.emailAriaLabel}
                   value={emailRecuperar}
-                  placeholder="seu@email.com"
+                  placeholder={dict.auth.recuperar.emailPlaceholder}
                   onChange={e => setEmailRecuperar(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && recuperarSenha()}
                   className="ln-modal-input"
                   autoFocus
                 />
                 <div className="ln-modal-acoes">
-                  <button className="ln-btn-modal-cancelar" onClick={fecharModal}>Cancelar</button>
+                  <button className="ln-btn-modal-cancelar" onClick={fecharModal}>{dict.auth.recuperar.cancelar}</button>
                   <button
                     className="ln-btn-modal-enviar"
                     onClick={recuperarSenha}
                     disabled={loadingRecuperar}
                   >
-                    {loadingRecuperar ? 'Enviando...' : 'Enviar link'}
+                    {loadingRecuperar ? dict.auth.recuperar.enviando : dict.auth.recuperar.enviarLink}
                   </button>
                 </div>
               </>

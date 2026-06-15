@@ -8,8 +8,10 @@ import PropertyCard from '@/components/PropertyCard'
 import FilterModal, { type Filtros } from '@/components/FilterModal'
 import SearchMap from '@/components/SearchMap'
 import { supabase } from '@/lib/supabase'
+import { useT } from '@/components/i18n/I18nProvider'
 import { filtrosFromParams, paramsFromFiltros, contarFiltros, aplicarFiltrosNaQuery, ordenarPorRelevancia } from './_filtros'
 import type { PropertySummary } from '@/types/client'
+import type { Locale } from '@/lib/i18n/config'
 
 const SIGLA_PARA_NOME: Record<string, string> = {
   AC:'Acre', AL:'Alagoas', AP:'Amapá', AM:'Amazonas', BA:'Bahia', CE:'Ceará',
@@ -20,10 +22,11 @@ const SIGLA_PARA_NOME: Record<string, string> = {
   SC:'Santa Catarina', SP:'São Paulo', SE:'Sergipe', TO:'Tocantins',
 }
 
-const fmtDataCurta = (isoStr: string) => {
+const intlLocale: Record<Locale, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' }
+const fmtDataCurta = (isoStr: string, locale: Locale) => {
   const [y, m, d] = isoStr.split('-').map(Number)
   if (!y || !m || !d) return isoStr
-  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+  return new Date(y, m - 1, d).toLocaleDateString(intlLocale[locale], { day: '2-digit', month: 'short' })
 }
 
 type RawProperty = PropertySummary & { usuario_id?: string; latitude?: number | null; longitude?: number | null }
@@ -31,6 +34,8 @@ type RawProperty = PropertySummary & { usuario_id?: string; latitude?: number | 
 function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProperty[]; initialPlanos: Record<string, string> }) {
   const params = useSearchParams()
   const router = useRouter()
+  const { dict, lhref, locale } = useT()
+  const t = dict.busca
   const qs = params.toString()
 
   const estadoParam = params.get('estado')?.toUpperCase() || ''
@@ -40,8 +45,8 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
   const dataFimParam    = params.get('data_fim') || ''
   const dataParam   = dataInicioParam
     ? (dataFimParam && dataFimParam !== dataInicioParam
-        ? `${fmtDataCurta(dataInicioParam)} → ${fmtDataCurta(dataFimParam)}`
-        : fmtDataCurta(dataInicioParam))
+        ? `${fmtDataCurta(dataInicioParam, locale)} → ${fmtDataCurta(dataFimParam, locale)}`
+        : fmtDataCurta(dataInicioParam, locale))
     : (params.get('data') || '')
 
   const filtros = filtrosFromParams(params)
@@ -83,18 +88,20 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
 
   const aplicarFiltros = (f: Filtros) => {
     setFiltroOpen(false)
-    router.push(`/busca?${paramsFromFiltros(f, params).toString()}`)
-    f.tiposEvento.forEach(async t => {
-      try { await supabase.from('buscas').insert({ tipo_evento: t }) } catch (_) {}
+    router.push(lhref(`/busca?${paramsFromFiltros(f, params).toString()}`))
+    f.tiposEvento.forEach(async tipoEv => {
+      try { await supabase.from('buscas').insert({ tipo_evento: tipoEv }) } catch (_) {}
     })
   }
 
   const nomeEstado = SIGLA_PARA_NOME[estadoParam] || estadoParam
   const titulo = cidadeParam
-    ? `Espaços em ${cidadeParam}${estadoParam ? `, ${estadoParam}` : ''}`
-    : estadoParam ? `Espaços em ${nomeEstado}`
+    ? (estadoParam
+        ? t.tituloCidadeEstado.replace('{cidade}', cidadeParam).replace('{estado}', estadoParam)
+        : t.tituloCidade.replace('{cidade}', cidadeParam))
+    : estadoParam ? t.tituloEstado.replace('{estado}', nomeEstado)
     : tipoParam   ? tipoParam
-    : 'Todos os espaços'
+    : t.tituloTodos
 
   return (
     <>
@@ -110,7 +117,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
               className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 cursor-pointer transition-colors font-[inherit]"
               onClick={() => setFiltroOpen(true)}
             >
-              ⚙ Filtros
+              ⚙ {t.filtrosBtn}
               {contFiltros > 0 && (
                 <span className="bg-[#ff385c] text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[.7rem] font-extrabold">
                   {contFiltros}
@@ -120,33 +127,33 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
             {contFiltros > 0 && (
               <button
                 type="button"
-                onClick={() => router.push('/busca')}
+                onClick={() => router.push(lhref('/busca'))}
                 className="text-sm text-gray-500 hover:text-gray-800 underline cursor-pointer bg-transparent border-none font-[inherit]"
               >
-                Limpar filtros
+                {t.limparFiltros}
               </button>
             )}
           </div>
 
           {!loading && (
             <p className="text-gray-400 text-[.88rem] mb-4" aria-live="polite">
-              {props.length} espaço{props.length !== 1 ? 's' : ''} encontrado{props.length !== 1 ? 's' : ''}
+              {(props.length === 1 ? t.resultadoUm : t.resultadoVarios).replace('{n}', String(props.length))}
               {dataParam ? ` · ${dataParam}` : ''}
             </p>
           )}
 
           {loading ? (
-            <div className="text-gray-400 py-10 text-center">Carregando...</div>
+            <div className="text-gray-400 py-10 text-center">{t.carregando}</div>
           ) : props.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-[1.1rem] mb-3">😕 Nenhum espaço encontrado</p>
-              <p className="text-gray-400 mb-6 text-[.9rem]">Tente ajustar os filtros ou buscar em outra região.</p>
+              <p className="text-[1.1rem] mb-3">{t.vazioTitulo}</p>
+              <p className="text-gray-400 mb-6 text-[.9rem]">{t.vazioTexto}</p>
               <button
                 type="button"
-                onClick={() => router.push('/')}
+                onClick={() => router.push(lhref('/'))}
                 className="bg-[#ff385c] hover:bg-[#e0304f] text-white border-none rounded-xl px-7 py-3 cursor-pointer font-[inherit] font-bold text-[.9rem] transition-colors"
               >
-                Ver todos os espaços
+                {t.vazioBotao}
               </button>
             </div>
           ) : (
@@ -167,7 +174,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
                     onClick={() => setVisiveis(v => v + 24)}
                     className="bg-white border border-gray-300 hover:border-gray-500 rounded-full px-7 py-3 text-sm font-bold text-gray-700 cursor-pointer transition-colors font-[inherit]"
                   >
-                    Carregar mais ({props.length - visiveis} restantes)
+                    {t.carregarMais.replace('{n}', String(props.length - visiveis))}
                   </button>
                 </div>
               )}
@@ -208,10 +215,11 @@ export default function BuscaClient({ initialProps, initialPlanos }: {
   initialProps: any[]
   initialPlanos: Record<string, string>
 }) {
+  const { dict } = useT()
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-screen text-gray-400">
-        Carregando...
+        {dict.busca.carregando}
       </div>
     }>
       <BuscaContent initialProps={initialProps as RawProperty[]} initialPlanos={initialPlanos} />

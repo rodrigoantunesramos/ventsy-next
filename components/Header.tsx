@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import SearchBar from './SearchBar'
+import { useT } from './i18n/I18nProvider'
 
 export default function Header() {
+  const { dict, lhref } = useT()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -28,7 +30,7 @@ export default function Header() {
       {/* Logo */}
       <div className="flex-none flex items-center mr-4">
         <Link
-          href="/"
+          href={lhref('/')}
           className="font-display text-[1.6rem] font-black tracking-tight text-brand no-underline flex items-center"
         >
           VENTSY
@@ -47,14 +49,14 @@ export default function Header() {
             href="/painel"
             className="bg-ink hover:bg-ink-soft text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
           >
-            Painel
+            {dict.common.painel}
           </Link>
         ) : (
           <Link
-            href="/login"
+            href={lhref('/login')}
             className="bg-brand hover:bg-brand-600 text-white py-2 px-5 rounded-lg no-underline font-semibold text-sm transition-colors whitespace-nowrap inline-flex items-center"
           >
-            Entrar
+            {dict.common.entrar}
           </Link>
         )}
 
@@ -64,26 +66,26 @@ export default function Header() {
             type="button"
             aria-haspopup="true"
             aria-expanded={menuOpen}
-            aria-label="Abrir menu"
+            aria-label={dict.common.abrirMenu}
             className="bg-white border border-gray-200 rounded-full px-3.5 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:shadow-md transition-shadow font-[inherit]"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            <span aria-hidden="true">☰</span> Menu
+            <span aria-hidden="true">☰</span> {dict.common.menu}
           </button>
 
           {menuOpen && (
             <div className="absolute top-12 right-0 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col py-2 z-[2000]">
-              <Link href="/anunciar" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                ✏️ Anuncie seu espaço
+              <Link href={lhref('/anunciar')} onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+                ✏️ {dict.header.anuncieSeuEspaco}
               </Link>
-              <Link href="/planos" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                💳 Planos
+              <Link href={lhref('/planos')} onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+                💳 {dict.header.planos}
               </Link>
-              <Link href="/como-funciona" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                💡 Como Funciona
+              <Link href={lhref('/como-funciona')} onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+                💡 {dict.header.comoFunciona}
               </Link>
-              <Link href="/fale-conosco" onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
-                💬 Fale Conosco
+              <Link href={lhref('/fale-conosco')} onClick={() => setMenuOpen(false)} className="px-5 py-3 no-underline text-gray-600 text-sm block hover:bg-gray-50 transition-colors">
+                💬 {dict.header.faleConosco}
               </Link>
             </div>
           )}

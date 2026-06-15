@@ -9,6 +9,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getDictionary } from '@/lib/i18n/getDictionary';
+import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config';
 import {
   fetchListaPorSlug, fetchRelacionadas, categoriaLabel, TIPO_LABEL, type PublicItem,
 } from '../_data';
@@ -17,18 +19,23 @@ import { SITE_URL, abs } from '@/lib/site';
 
 export const revalidate = 120;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { locale: string; slug: string } }): Promise<Metadata> {
+  const locale = isLocale(params.locale) ? params.locale : defaultLocale;
+  const tm = getDictionary(locale).listas.meta;
   const res = await fetchListaPorSlug(params.slug);
-  if (!res) return { title: 'Lista não encontrada — VENTSY' };
+  if (!res) return { title: tm.notFound };
   const { lista } = res;
-  const desc = (lista.descricao || `Uma seleção de ${lista.n_itens} recomendações para o seu evento, pela comunidade VENTSY.`).slice(0, 160);
-  const titulo = `${lista.titulo} — Listas Oficiais | VENTSY`;
+  const desc = (lista.descricao || tm.detailFallbackDescription.replace('{n}', String(lista.n_itens))).slice(0, 160);
+  const titulo = tm.detailTitle.replace('{titulo}', lista.titulo);
+  const canonical = localizar(locale, `/listas/${params.slug}`);
   return {
     title: titulo,
     description: desc,
+    alternates: { canonical },
     openGraph: {
       title: lista.titulo,
       description: desc,
+      url: canonical,
       type: 'article',
       ...(lista.capa_url ? { images: [{ url: lista.capa_url }] } : {}),
     },
@@ -36,7 +43,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ListaPublicaPage({ params }: { params: { slug: string } }) {
+export default async function ListaPublicaPage({ params }: { params: { locale: string; slug: string } }) {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale;
+  const dict = getDictionary(locale);
+  const t = dict.listas.detail;
+  const tc = dict.listas.card;
+
   const res = await fetchListaPorSlug(params.slug);
   if (!res) notFound();
   const { lista, itens } = res;
@@ -48,8 +60,8 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
-          { '@type': 'ListItem', position: 2, name: 'Listas Oficiais', item: abs('/listas') },
+          { '@type': 'ListItem', position: 1, name: t.inicio, item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: t.breadcrumb, item: abs('/listas') },
           { '@type': 'ListItem', position: 3, name: lista.titulo, item: abs(`/listas/${lista.slug}`) },
         ],
       },
@@ -60,7 +72,7 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
         itemListElement: itens.map((it, idx) => ({
           '@type': 'ListItem',
           position: idx + 1,
-          name: it.ref_nome || it.nome_externo || 'Item',
+          name: it.ref_nome || it.nome_externo || t.fallbackItem,
           ...(it.propriedade_id != null ? { url: abs(`/propriedade/${it.propriedade_id}`) } : {}),
         })),
       },
@@ -84,14 +96,14 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
           <div className="mx-auto max-w-4xl px-4">
             <div className="-mt-24 rounded-2xl bg-white p-6 shadow-card sm:p-8">
               <nav className="mb-2 text-xs text-ink-muted">
-                <Link href="/listas" className="font-semibold text-brand hover:underline">Listas Oficiais</Link>
-                {lista.categoria && <> · <Link href={`/listas?categoria=${encodeURIComponent(lista.categoria)}`} className="hover:underline">{categoriaLabel(lista.categoria)}</Link></>}
+                <Link href={localizar(locale, '/listas')} className="font-semibold text-brand hover:underline">{t.breadcrumb}</Link>
+                {lista.categoria && <> · <Link href={localizar(locale, `/listas?categoria=${encodeURIComponent(lista.categoria)}`)} className="hover:underline">{categoriaLabel(lista.categoria)}</Link></>}
               </nav>
               <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">{lista.titulo}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
-                {lista.autor_nome && <span>por <strong className="text-ink-soft">{lista.autor_nome}</strong></span>}
+                {lista.autor_nome && <span>{t.porAutor} <strong className="text-ink-soft">{lista.autor_nome}</strong></span>}
                 {lista.cidade && <span>· {lista.cidade}</span>}
-                <span>· {lista.n_itens} {lista.n_itens === 1 ? 'item' : 'itens'}</span>
+                <span>· {lista.n_itens} {lista.n_itens === 1 ? t.itemSingular : t.itemPlural}</span>
               </div>
               {lista.descricao && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">{lista.descricao}</p>}
               <div className="mt-5 border-t border-black/[0.06] pt-4">
@@ -104,10 +116,10 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
         {/* Itens */}
         <section className="mx-auto max-w-4xl px-4 py-8">
           {itens.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-black/10 bg-white py-12 text-center text-sm text-ink-muted">Esta lista ainda não tem itens.</p>
+            <p className="rounded-2xl border border-dashed border-black/10 bg-white py-12 text-center text-sm text-ink-muted">{t.semItens}</p>
           ) : (
             <ol className="space-y-3">
-              {itens.map((it, idx) => <ItemCard key={it.id} item={it} pos={idx + 1} />)}
+              {itens.map((it, idx) => <ItemCard key={it.id} item={it} pos={idx + 1} locale={locale} t={t} />)}
             </ol>
           )}
         </section>
@@ -115,10 +127,10 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
         {/* Relacionadas */}
         {relacionadas.length > 0 && (
           <section className="mx-auto max-w-4xl px-4 pb-12">
-            <h2 className="mb-3 text-lg font-bold text-ink">Listas relacionadas</h2>
+            <h2 className="mb-3 text-lg font-bold text-ink">{t.relacionadas}</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {relacionadas.map((r) => (
-                <Link key={r.id} href={`/listas/${r.slug}`} className="group overflow-hidden rounded-2xl bg-white shadow-card transition hover:shadow-pop">
+                <Link key={r.id} href={localizar(locale, `/listas/${r.slug}`)} className="group overflow-hidden rounded-2xl bg-white shadow-card transition hover:shadow-pop">
                   <div className="h-24 w-full overflow-hidden bg-gradient-to-br from-brand-50 to-amber-50">
                     {r.capa_url
                       // eslint-disable-next-line @next/next/no-img-element
@@ -127,7 +139,7 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
                   </div>
                   <div className="p-3">
                     <h3 className="line-clamp-2 text-sm font-bold leading-snug text-ink group-hover:text-brand">{r.titulo}</h3>
-                    <p className="mt-1 text-xs text-ink-muted">{r.n_itens} itens · ♥ {r.curtidas}</p>
+                    <p className="mt-1 text-xs text-ink-muted">{r.n_itens} {tc.itens} · ♥ {r.curtidas}</p>
                   </div>
                 </Link>
               ))}
@@ -140,9 +152,13 @@ export default async function ListaPublicaPage({ params }: { params: { slug: str
   );
 }
 
+type DetailT = {
+  naVentsy: string; verAnuncio: string; notaAria: string; fallbackItem: string;
+};
+
 // ── Card de item (linka ao anúncio quando é propriedade da plataforma) ──
-function ItemCard({ item, pos }: { item: PublicItem; pos: number }) {
-  const nome = item.ref_nome || item.nome_externo || 'Item';
+function ItemCard({ item, pos, locale, t }: { item: PublicItem; pos: number; locale: Locale; t: DetailT }) {
+  const nome = item.ref_nome || item.nome_externo || t.fallbackItem;
   const naPlataforma = item.propriedade_id != null;
 
   const inner = (
@@ -156,25 +172,25 @@ function ItemCard({ item, pos }: { item: PublicItem; pos: number }) {
         <div className="flex flex-wrap items-center gap-2">
           <h3 className={`truncate font-bold text-ink ${naPlataforma ? 'group-hover:text-brand' : ''}`}>{nome}</h3>
           <span className="flex-shrink-0 rounded-full bg-black/[0.05] px-2 py-0.5 text-[0.65rem] font-semibold text-ink-soft">{TIPO_LABEL[item.tipo] ?? item.tipo}</span>
-          {naPlataforma && <span className="flex-shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[0.65rem] font-semibold text-brand">na VENTSY</span>}
+          {naPlataforma && <span className="flex-shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[0.65rem] font-semibold text-brand">{t.naVentsy}</span>}
         </div>
         {item.ref_cidade && <p className="mt-0.5 truncate text-xs text-ink-muted">{item.ref_cidade}</p>}
-        {item.nota != null && <Stars value={item.nota} />}
+        {item.nota != null && <Stars value={item.nota} t={t} />}
         {item.comentario && <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{item.comentario}</p>}
-        {naPlataforma && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand">Ver anúncio <IcoArrow /></span>}
+        {naPlataforma && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand">{t.verAnuncio} <IcoArrow /></span>}
       </div>
     </div>
   );
 
   return naPlataforma
-    ? <li><Link href={`/propriedade/${item.propriedade_id}`} className="group block">{inner}</Link></li>
+    ? <li><Link href={localizar(locale, `/propriedade/${item.propriedade_id}`)} className="group block">{inner}</Link></li>
     : <li className="group">{inner}</li>;
 }
 
-function Stars({ value }: { value: number }) {
+function Stars({ value, t }: { value: number; t: DetailT }) {
   const v = Math.round(value);
   return (
-    <div className="mt-1 flex items-center gap-0.5" aria-label={`Nota ${v} de 5`}>
+    <div className="mt-1 flex items-center gap-0.5" aria-label={t.notaAria.replace('{v}', String(v))}>
       {[1, 2, 3, 4, 5].map((n) => <span key={n} className={n <= v ? 'text-amber-400' : 'text-black/15'}>★</span>)}
     </div>
   );

@@ -9,9 +9,18 @@ import { supabase, authHeaders } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
 import { comodidadeLabel } from '@/lib/data'
-import { formatMoney } from '@/lib/format'
+import { useT } from '@/components/i18n/I18nProvider'
+import { formatMoney } from '@/lib/i18n/format'
+import propriedadePt from '@/lib/i18n/dictionaries/pt/propriedade'
+import propriedadeEn from '@/lib/i18n/dictionaries/en/propriedade'
+import propriedadeEs from '@/lib/i18n/dictionaries/es/propriedade'
+import type { Locale } from '@/lib/i18n/config'
 import type { PropMeta, FotoMeta } from './_data'
 import './propriedade.css'
+
+// Namespace `propriedade` por locale. Acessado direto (e não via dict.propriedade)
+// porque o índice central ainda não registra esta chave — o orquestrador o fará.
+const propDicts: Record<Locale, typeof propriedadePt> = { pt: propriedadePt, en: propriedadeEn, es: propriedadeEs }
 
 /* ── tipos ── */
 interface Foto { url: string; titulo: string; ordem: number; tipo?: string | null; focal_x?: number | null; focal_y?: number | null; alt?: string | null }
@@ -84,6 +93,10 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   const params = useParams()
   const propId    = params.id as string
   const propIdNum = Number(propId)
+  const { lhref, locale } = useT()
+  const t = propDicts[locale] ?? propriedadePt
+  // Rótulo traduzido de um tipo de evento (valor salvo em PT). Fallback: o próprio valor.
+  const tipoEventoLabel = (v: string) => (t.tiposEvento as Record<string, string>)[v] || v
 
   // Semeia o estado com o que veio do servidor (initialProp/initialFotos) para o
   // herói/galeria renderizarem já no HTML — o useEffect re-busca e enriquece.
@@ -319,28 +332,31 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   const total=calcTotal()
   const formValido=formNome.trim().length>=3&&/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail)&&formTel.replace(/\D/g,'').length===11&&!!formTipo&&!!formModo
 
-  const irWppDireto=async()=>{const msg=`Olá! Vi seu espaço "${prop?.nome||'no portal VENTSY'}" e gostaria de mais informações.`;fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propriedade_id:prop?.id,evento_tipo:'whatsapp'})}).catch(()=>{});window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(msg)}`,'_blank')}
+  const irWppDireto=async()=>{const msg=t.whatsapp.msgDireto.replace('{nome}',prop?.nome||t.whatsapp.nomePadrao);fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propriedade_id:prop?.id,evento_tipo:'whatsapp'})}).catch(()=>{});window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(msg)}`,'_blank')}
 
   const enviarWpp=async()=>{
     if(!formValido){const e:Record<string,boolean>={};if(formNome.trim().length<3)e.nome=true;if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail))e.email=true;if(formTel.replace(/\D/g,'').length!==11)e.tel=true;if(!formTipo)e.tipo=true;if(!formModo)e.modo=true;setFormErros(e);return}
     setFormErros({})
-    const fmt=(d:string)=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'A combinar'
-    let db='';if(formModo==='hora')db=`⏱ *Tipo de locação:* Por hora (${formHoras}h)`;if(formModo==='diaria')db=`📅 *Período:* ${fmt(formInicio)} até ${fmt(formFim)}`
-    const txt=`Olá, tudo bem? Preenchi o formulário na Ventsy e gostaria de mais informações. Seguem os dados do meu evento:\n\n📍 *Espaço:* ${prop?.nome||'—'}\n👤 *Nome:* ${formNome}\n📞 *Telefone:* ${formTel}\n📧 *E-mail:* ${formEmail}\n🎉 *Tipo de evento:* ${formTipo}\n${db}\n👥 *Convidados:* ${formPessoas} pessoas\n💰 *Estimativa de orçamento:* ${total>0?total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'A consultar'}\n\n_Enviado pelo portal VENTSY_`
+    const fmt=(d:string)=>d?formatMoneyDate(d):t.whatsapp.aCombinar
+    let db='';if(formModo==='hora')db=`⏱ *${t.whatsapp.tipoLocacao}* ${t.whatsapp.porHora} (${formHoras}h)`;if(formModo==='diaria')db=`📅 *${t.whatsapp.periodo}* ${fmt(formInicio)} ${t.whatsapp.ate} ${fmt(formFim)}`
+    const txt=`${t.whatsapp.saudacao}\n\n📍 *${t.whatsapp.espaco}* ${prop?.nome||t.whatsapp.semDado}\n👤 *${t.whatsapp.nome}* ${formNome}\n📞 *${t.whatsapp.telefone}* ${formTel}\n📧 *${t.whatsapp.email}* ${formEmail}\n🎉 *${t.whatsapp.tipoEvento}* ${tipoEventoLabel(formTipo)}\n${db}\n👥 *${t.whatsapp.convidados}* ${formPessoas} ${t.whatsapp.pessoas}\n💰 *${t.whatsapp.estimativaOrcamento}* ${total>0?formatMoney(locale,total):t.whatsapp.aConsultar}\n\n_${t.whatsapp.enviadoPelo}_`
     fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propriedade_id:prop?.id,evento_tipo:'formulario'})}).catch(()=>{})
     window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(txt)}`,'_blank')
   }
 
+  // Data por extenso sensível ao locale (ex.: "5 de junho de 2025" / "June 5, 2025").
+  const formatMoneyDate=(d:string)=>new Intl.DateTimeFormat(locale==='pt'?'pt-BR':locale==='es'?'es-ES':'en-US',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00'))
+
   const solicitarReserva=async()=>{
     if(enviandoReserva)return
-    if(!clientUserId){setReservaToast('Faça login para solicitar uma reserva pela Ventsy.');setTimeout(()=>setReservaToast(''),4000);return}
-    if(!formValido){setReservaToast('Preencha nome, telefone, e-mail, tipo de evento e modo de cobrança.');setTimeout(()=>setReservaToast(''),4000);return}
+    if(!clientUserId){setReservaToast(t.reserva.loginNecessario);setTimeout(()=>setReservaToast(''),4000);return}
+    if(!formValido){setReservaToast(t.reserva.preenchaCampos);setTimeout(()=>setReservaToast(''),4000);return}
     setEnviandoReserva(true)
     try{
       const dataRef=formInicio||new Date().toISOString().split('T')[0]
       if(dataRef){
         const{data:bloq}=await supabase.from('disponibilidade').select('bloqueado').eq('prop_id',prop?.id).eq('data',dataRef).maybeSingle()
-        if(bloq?.bloqueado){setReservaToast('Essa data está indisponível neste espaço. Escolha outra.');setEnviandoReserva(false);setTimeout(()=>setReservaToast(''),4000);return}
+        if(bloq?.bloqueado){setReservaToast(t.reserva.dataIndisponivel);setEnviandoReserva(false);setTimeout(()=>setReservaToast(''),4000);return}
       }
       const{error}=await supabase.from('reservas').insert({
         propriedade_id:prop?.id, usuario_id:clientUserId,
@@ -350,11 +366,11 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
         horas:formModo==='hora'?formHoras:null, pessoas:formPessoas,
         valor_estimado:total||null, status:'solicitada',
       })
-      if(error){setReservaToast('Não foi possível solicitar a reserva: '+error.message)}
-      else{setReservaToast('✅ Reserva solicitada! Acompanhe em "Minhas reservas" — o anfitrião vai aprovar.')}
+      if(error){setReservaToast(t.reserva.naoFoiPossivel+error.message)}
+      else{setReservaToast(t.reserva.solicitada)}
       setTimeout(()=>setReservaToast(''),5000)
     }catch(_){
-      setReservaToast('Erro ao solicitar a reserva. Tente novamente.');setTimeout(()=>setReservaToast(''),4000)
+      setReservaToast(t.reserva.erroGenerico);setTimeout(()=>setReservaToast(''),4000)
     }finally{setEnviandoReserva(false)}
   }
 
@@ -372,7 +388,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
   if(loading) return(
     <div className="pp-loading">
-      <div className="pp-loading-logo"><em>VENTSY</em></div>
+      <div className="pp-loading-logo"><em>{t.loading.marca}</em></div>
       <div className="pp-loading-dots"><span/><span/><span/></div>
     </div>
   )
@@ -391,28 +407,28 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
             <div className="pp-meta">
               {nota&&<span className="pp-nota"><span>★</span> {parseFloat(nota).toFixed(1)}</span>}
               {nota&&<span>•</span>}
-              <span>{avaliacoes.length} avaliações</span>
+              <span>{avaliacoes.length} {t.cabecalho.avaliacoes}</span>
               <span>•</span>
               <span>{[prop?.cidade,prop?.estado].filter(Boolean).join(', ')}</span>
-              {plano==='ultra'&&<span className="pp-selo-ultra">✦ ESPAÇO PREMIUM</span>}
-              {plano==='pro'&&<span className="pp-selo-pro">★ PRO</span>}
+              {plano==='ultra'&&<span className="pp-selo-ultra">{t.cabecalho.seloPremium}</span>}
+              {plano==='pro'&&<span className="pp-selo-pro">{t.cabecalho.seloPro}</span>}
             </div>
           </div>
           <div className="pp-acoes relative">
             <button className="pp-btn-acao" onClick={()=>setShareOpen(!shareOpen)}>
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-              Compartilhar
+              {t.cabecalho.compartilhar}
             </button>
             {shareOpen&&(
               <div className="pp-share-drop">
-                <button onClick={copiarLink}>{linkCopiado?'✅ Link copiado!':'🔗 Copiar link'}</button>
-                <a href={`https://wa.me/?text=${encodeURIComponent((prop?.nome||'Espaço')+' — '+window.location.href)}`} target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
-                <a href={`mailto:?subject=${encodeURIComponent(prop?.nome||'')}&body=${encodeURIComponent('Confira este espaço: '+window.location.href)}`}>📧 E-mail</a>
+                <button onClick={copiarLink}>{linkCopiado?t.cabecalho.linkCopiado:t.cabecalho.copiarLink}</button>
+                <a href={`https://wa.me/?text=${encodeURIComponent((prop?.nome||t.cabecalho.espacoFallback)+' — '+window.location.href)}`} target="_blank" rel="noopener noreferrer">{t.cabecalho.compartilharWhatsapp}</a>
+                <a href={`mailto:?subject=${encodeURIComponent(prop?.nome||'')}&body=${encodeURIComponent(t.cabecalho.confiraEsteEspaco+' '+window.location.href)}`}>{t.cabecalho.compartilharEmail}</a>
               </div>
             )}
             <button className={`pp-btn-acao${fav?' pp-favoritado':''}`} onClick={toggleFav}>
               <svg width="16" height="16" fill={fav?'currentColor':'none'} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-              {fav?'Salvo':'Salvar'}
+              {fav?t.cabecalho.salvo:t.cabecalho.salvar}
             </button>
           </div>
         </div>
@@ -422,15 +438,15 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
           <div className="pp-galeria-grid">
             {fotosEspaco.slice(0,5).map((f,i)=>(
               <div key={i} className={`pp-foto-slot${i===0?' pp-foto-main':''} cursor-pointer relative`} onClick={()=>setModalGal(true)}>
-                <FotoEspaco url={f.url} alt={f.alt||f.titulo||`Foto ${i+1}`} focal_x={f.focal_x} focal_y={f.focal_y} priority={i===0} sizes={i===0?'(min-width:1024px) 50vw, 100vw':'(min-width:1024px) 25vw, 50vw'} />
+                <FotoEspaco url={f.url} alt={f.alt||f.titulo||`${t.galeria.fotoAlt} ${i+1}`} focal_x={f.focal_x} focal_y={f.focal_y} priority={i===0} sizes={i===0?'(min-width:1024px) 50vw, 100vw':'(min-width:1024px) 25vw, 50vw'} />
                 {i===4&&fotosEspaco.length>5&&<div className="pp-foto-overlay">+{fotosEspaco.length-4}</div>}
               </div>
             ))}
           </div>
           <div className="pp-galeria-acoes">
-            {prop?.fotos_verificadas&&<span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[.8rem] font-semibold text-emerald-700">✓ Fotos verificadas</span>}
-            {plano==='ultra'&&videos.length>0&&<button className="pp-btn-galeria" onClick={()=>setModalVid(true)}>🎬 Ver vídeos / Tour 360°</button>}
-            {plano!=='basico'&&<button className="pp-btn-galeria" onClick={()=>setModalGal(true)}>⊞ {fotosEspaco.length>5?`Ver todas as ${fotosEspaco.length} fotos`:'Mostrar todas as fotos'}</button>}
+            {prop?.fotos_verificadas&&<span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[.8rem] font-semibold text-emerald-700">{t.galeria.fotosVerificadas}</span>}
+            {plano==='ultra'&&videos.length>0&&<button className="pp-btn-galeria" onClick={()=>setModalVid(true)}>{t.galeria.verVideos}</button>}
+            {plano!=='basico'&&<button className="pp-btn-galeria" onClick={()=>setModalGal(true)}>⊞ {fotosEspaco.length>5?t.galeria.verTodasN.replace('{n}',String(fotosEspaco.length)):t.galeria.mostrarTodas}</button>}
           </div>
         </div>
 

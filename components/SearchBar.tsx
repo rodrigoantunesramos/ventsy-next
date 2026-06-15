@@ -4,17 +4,21 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import OndeSearch from './OndeSearch'
 import EventoDropdown from './EventoDropdown'
+import { useT } from './i18n/I18nProvider'
+import { formatDate } from '@/lib/i18n/format'
 
-const MM = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
-const fd = (d: Date) => `${d.getDate()} ${MM[d.getMonth()]}`
 // Data em ISO local (YYYY-MM-DD) — vai para a URL e é usada pela busca/disponibilidade.
 const iso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 export default function SearchBar() {
+  const { dict, locale, lhref } = useT()
   const router = useRouter()
+  // Exibição curta da data, localizada (ex.: "12 de jun" / "Jun 12").
+  const fd = (d: Date) => formatDate(locale, d, { day: 'numeric', month: 'short' })
+
   const [ondeSelected, setOndeSelected] = useState<any>(null)
-  const [dataDisplay, setDataDisplay]   = useState('Adicionar datas')
+  const [dataDisplay, setDataDisplay]   = useState(dict.searchBar.adicionarDatas)
   const [guests, setGuests]             = useState(1)
   const [eventoValue, setEventoValue]   = useState('')
   const [datas, setDatas]               = useState<{ ini?: string; fim?: string }>({})
@@ -25,17 +29,19 @@ export default function SearchBar() {
     let fp: any
     const load = async () => {
       const flatpickr = (await import('flatpickr')).default
-      await import('flatpickr/dist/l10n/pt.js')
+      let fpLocale: string = 'default' // en é o padrão do flatpickr
+      if (locale === 'pt') { await import('flatpickr/dist/l10n/pt.js'); fpLocale = 'pt' }
+      else if (locale === 'es') { await import('flatpickr/dist/l10n/es.js'); fpLocale = 'es' }
       if (!inputRef.current) return
       fp = flatpickr(inputRef.current, {
         mode: 'range',
         minDate: 'today',
         dateFormat: 'Y-m-d',
-        locale: 'pt' as any,
+        locale: fpLocale as any,
         showMonths: 2,
         disableMobile: true,
         onChange(ds: Date[]) {
-          if (!ds.length)            { setDataDisplay('Adicionar datas'); setDatas({}) }
+          if (!ds.length)            { setDataDisplay(dict.searchBar.adicionarDatas); setDatas({}) }
           else if (ds.length === 1)  { setDataDisplay(`${fd(ds[0])} → ...`); setDatas({ ini: iso(ds[0]) }) }
           else {
             const a = fd(ds[0]), b = fd(ds[1])
@@ -48,7 +54,8 @@ export default function SearchBar() {
     }
     load()
     return () => { fp?.destroy() }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale])
 
   const canSearch = !!ondeSelected
 
@@ -56,7 +63,7 @@ export default function SearchBar() {
     if (!ondeSelected) return
 
     if (ondeSelected.tipo === 'prop' && ondeSelected.id) {
-      router.push(`/propriedade/${ondeSelected.id}`)
+      router.push(lhref(`/propriedade/${ondeSelected.id}`))
       return
     }
 
@@ -75,7 +82,7 @@ export default function SearchBar() {
       })
     }
 
-    router.push(`/busca?${params.toString()}`)
+    router.push(`${lhref('/busca')}?${params.toString()}`)
   }
 
   return (
@@ -95,7 +102,7 @@ export default function SearchBar() {
           onClick={() => pickerRef.current?.open()}
         >
           <label className="text-[.68rem] font-extrabold uppercase tracking-[.05em] text-gray-800 cursor-pointer pointer-events-none">
-            Quando?
+            {dict.searchBar.quando}
           </label>
           <span className="text-[.83rem] text-gray-500 truncate">{dataDisplay}</span>
           <input ref={inputRef} className="hidden" readOnly />
@@ -106,7 +113,7 @@ export default function SearchBar() {
         {/* TIPO DE EVENTO */}
         <div className="relative flex flex-col px-3 py-1 min-w-[140px] flex-shrink-0">
           <label className="text-[.68rem] font-extrabold uppercase tracking-[.05em] text-gray-800 pointer-events-none">
-            Tipo de Evento
+            {dict.searchBar.tipoEvento}
           </label>
           <EventoDropdown onChange={setEventoValue} />
         </div>
@@ -116,12 +123,12 @@ export default function SearchBar() {
         {/* CONVIDADOS */}
         <div className="flex flex-col px-3 py-1 min-w-[110px] flex-shrink-0">
           <label className="text-[.68rem] font-extrabold uppercase tracking-[.05em] text-gray-800">
-            Convidados
+            {dict.searchBar.convidados}
           </label>
           <div className="flex items-center gap-2 mt-0.5">
             <button
               type="button"
-              aria-label="Diminuir número de convidados"
+              aria-label={dict.searchBar.diminuirConvidados}
               className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500 text-sm leading-none bg-white cursor-pointer"
               onClick={() => setGuests(g => Math.max(1, g - 1))}
             >
@@ -130,7 +137,7 @@ export default function SearchBar() {
             <span className="text-sm font-semibold w-5 text-center" aria-live="polite">{guests}</span>
             <button
               type="button"
-              aria-label="Aumentar número de convidados"
+              aria-label={dict.searchBar.aumentarConvidados}
               className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500 text-sm leading-none bg-white cursor-pointer"
               onClick={() => setGuests(g => g + 1)}
             >
@@ -142,7 +149,7 @@ export default function SearchBar() {
         {/* BOTÃO BUSCAR */}
         <button
           type="button"
-          aria-label="Buscar espaços"
+          aria-label={dict.searchBar.buscarEspacos}
           className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-base flex-shrink-0 ml-1 transition-all border-none
             ${canSearch ? 'bg-[#ff385c] hover:bg-[#e0304f] hover:scale-[1.07] cursor-pointer' : 'bg-[#ff385c] opacity-30 cursor-not-allowed'}`}
           disabled={!canSearch}

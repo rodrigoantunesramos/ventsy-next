@@ -20,6 +20,8 @@
 //     SEMPRE por parâmetro ('YYYY-MM-DD'), nunca `new Date()` dentro da lógica.
 //   • i18n: os rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas (puro, agnóstico de fuso) ───────────────────────────────────────────
 /** Só a parte 'YYYY-MM-DD' de uma data/timestamp (null se inválida). */
 export function diaDe(v: string | null | undefined): string | null {
@@ -614,15 +616,4 @@ export function prazosProximos(
   }
 
   return itens.sort((x, y) => x.dias - y.dias || x.data.localeCompare(y.data))
-}
-
-// ── needsSetup (tabela ainda não criada) ──────────────────────────────────────
-/** Detecta "tabela ausente" no PostgREST/Supabase (PGRST205) ou no Postgres (42P01).
- *  NÃO use head:true no probe — HEAD não traz corpo e o erro fica ilegível. */
-export function isMissingTable(error: unknown): boolean {
-  if (!error) return false
-  const e = error as { code?: string; message?: string }
-  if (e.code === 'PGRST205' || e.code === '42P01') return true
-  const msg = (e.message || '').toLowerCase()
-  return msg.includes('does not exist') || (msg.includes('could not find the table') && msg.includes('schema cache'))
 }

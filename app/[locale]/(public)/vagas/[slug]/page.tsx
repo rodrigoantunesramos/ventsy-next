@@ -6,41 +6,46 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { formatMoneyShort } from '@/lib/format'
-import { SITE_NAME, SITE_URL, abs } from '@/lib/site'
+import { SITE_NAME, SITE_URL } from '@/lib/site'
+import { getDictionary } from '@/lib/i18n/getDictionary'
+import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
 import { fetchVagaPorSlug, type Vaga } from './_data'
 import Candidatura from './_Candidatura'
 
 export const revalidate = 300
 
-const CONTRATO_LABEL: Record<string, string> = { clt: 'CLT', horista: 'Horista', mei: 'MEI/PJ', estagio: 'Estágio', freelancer: 'Freelancer' }
 // Mapeia o tipo de contrato para o employmentType do schema.org JobPosting.
 const EMPLOYMENT_TYPE: Record<string, string> = { clt: 'FULL_TIME', horista: 'PART_TIME', mei: 'CONTRACTOR', estagio: 'INTERN', freelancer: 'CONTRACTOR' }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { locale: string; slug: string } }): Promise<Metadata> {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
+  const dict = getDictionary(locale)
+  const t = dict.vagas
   const vaga = await fetchVagaPorSlug(params.slug)
-  if (!vaga) return { title: 'Vaga não encontrada', robots: { index: false } }
-  const desc = (vaga.descricao || `Vaga de ${vaga.titulo} na ${SITE_NAME}. Candidate-se online.`).replace(/\s+/g, ' ').slice(0, 160)
+  if (!vaga) return { title: t.meta.naoEncontrada, robots: { index: false } }
+  const desc = (vaga.descricao || `${t.meta.descFallbackA} ${vaga.titulo} ${SITE_NAME}. ${t.meta.descFallbackB}`).replace(/\s+/g, ' ').slice(0, 160)
+  const url = localizar(locale, `/vagas/${vaga.slug}`)
   return {
     title: `${vaga.titulo}${vaga.local ? ` — ${vaga.local}` : ''}`,
     description: desc,
-    alternates: { canonical: `/vagas/${vaga.slug}` },
-    openGraph: { title: vaga.titulo, description: desc, type: 'article', url: abs(`/vagas/${vaga.slug}`) },
+    alternates: { canonical: url },
+    openGraph: { title: vaga.titulo, description: desc, type: 'article', url },
   }
 }
 
-function jobPostingLd(vaga: Vaga) {
+function jobPostingLd(vaga: Vaga, locale: Locale, t: ReturnType<typeof getDictionary>['vagas']) {
   return {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
     title: vaga.titulo,
-    description: [vaga.descricao, vaga.requisitos && `Requisitos:\n${vaga.requisitos}`, vaga.beneficios && `Benefícios:\n${vaga.beneficios}`]
+    description: [vaga.descricao, vaga.requisitos && `${t.secaoRequisitos}:\n${vaga.requisitos}`, vaga.beneficios && `${t.secaoBeneficios}:\n${vaga.beneficios}`]
       .filter(Boolean)
       .join('\n\n'),
     ...(vaga.criado_em ? { datePosted: vaga.criado_em } : {}),
     ...(EMPLOYMENT_TYPE[vaga.tipo_contrato] ? { employmentType: EMPLOYMENT_TYPE[vaga.tipo_contrato] } : {}),
     hiringOrganization: { '@type': 'Organization', name: SITE_NAME, sameAs: SITE_URL },
     directApply: true,
-    url: abs(`/vagas/${vaga.slug}`),
+    url: `${SITE_URL}${localizar(locale, `/vagas/${vaga.slug}`)}`,
     ...(vaga.local
       ? { jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: vaga.local, addressCountry: 'BR' } } }
       : { jobLocationType: 'TELECOMMUTE' }),
@@ -61,13 +66,17 @@ function jobPostingLd(vaga: Vaga) {
   }
 }
 
-export default async function VagaPublicaPage({ params }: { params: { slug: string } }) {
+export default async function VagaPublicaPage({ params }: { params: { locale: string; slug: string } }) {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
+  const t = getDictionary(locale).vagas
   const vaga = await fetchVagaPorSlug(params.slug)
   if (!vaga) notFound()
 
+  const CONTRATO_LABEL: Record<string, string> = t.contrato
+
   return (
     <div className="min-h-screen bg-[#f7f7f8]">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(vaga)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(vaga, locale, t)) }} />
 
       <header className="border-b border-black/[0.06] bg-white">
         <div className="mx-auto flex h-[60px] max-w-3xl items-center px-4">
@@ -89,13 +98,13 @@ export default async function VagaPublicaPage({ params }: { params: { slug: stri
                 </span>
               )}
             </div>
-            {vaga.descricao && <Secao titulo="Descrição">{vaga.descricao}</Secao>}
-            {vaga.requisitos && <Secao titulo="Requisitos">{vaga.requisitos}</Secao>}
-            {vaga.beneficios && <Secao titulo="Benefícios">{vaga.beneficios}</Secao>}
+            {vaga.descricao && <Secao titulo={t.secaoDescricao}>{vaga.descricao}</Secao>}
+            {vaga.requisitos && <Secao titulo={t.secaoRequisitos}>{vaga.requisitos}</Secao>}
+            {vaga.beneficios && <Secao titulo={t.secaoBeneficios}>{vaga.beneficios}</Secao>}
           </article>
 
           <div className="rounded-2xl bg-white p-6 shadow-card sm:p-8">
-            <h2 className="font-display text-lg font-bold text-ink">Candidate-se</h2>
+            <h2 className="font-display text-lg font-bold text-ink">{t.candidateSe}</h2>
             <Candidatura slug={vaga.slug} />
           </div>
         </div>

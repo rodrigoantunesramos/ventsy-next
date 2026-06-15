@@ -1,12 +1,14 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { EVENTOS_CATS } from '@/lib/data'
+import { useT } from './i18n/I18nProvider'
 
 interface Props {
   onChange: (value: string) => void
 }
 
 export default function EventoDropdown({ onChange }: Props) {
+  const { dict } = useT()
   const [open, setOpen]         = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const ref = useRef<HTMLDivElement>(null)
@@ -32,14 +34,14 @@ export default function EventoDropdown({ onChange }: Props) {
   }
 
   const count = selected.size
-  let displayText = 'Todos os eventos'
+  let displayText = dict.componentes.evento.todos
   if (count === 1) {
     const v = [...selected][0]
     const flat = EVENTOS_CATS.flatMap(c => c.items)
     const item = flat.find(i => i.v === v)
     displayText = item ? `${item.emoji} ${item.v}` : v
   } else if (count > 1) {
-    displayText = 'Eventos'
+    displayText = dict.componentes.evento.varios
   }
 
   return (
@@ -71,7 +73,7 @@ export default function EventoDropdown({ onChange }: Props) {
               className="w-full text-left text-xs text-gray-400 hover:text-gray-600 mb-3 transition-colors bg-transparent border-none cursor-pointer font-[inherit]"
               onClick={clear}
             >
-              ✕ Limpar seleção
+              ✕ {dict.componentes.evento.limpar}
             </button>
 
             {EVENTOS_CATS.map(cat => (

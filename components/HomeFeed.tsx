@@ -4,6 +4,8 @@
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { CATS, DEMO_PROPS, ordenar } from '@/lib/data'
+import { localizar, type Locale } from '@/lib/i18n/config'
+import { getDictionary } from '@/lib/i18n/getDictionary'
 import CategorySection from './CategorySection'
 import type { PropertySummary } from '@/types/client'
 
@@ -49,7 +51,8 @@ async function fetchHomeFeed(): Promise<Record<string, PropertySummary[]>> {
   return grupos
 }
 
-export default async function HomeFeed() {
+export default async function HomeFeed({ locale }: { locale: Locale }) {
+  const dict = getDictionary(locale)
   const grupos = await fetchHomeFeed()
   const secoesVisiveis = CATS.filter((c) => (grupos[c.nome] || []).length > 0)
 
@@ -59,23 +62,23 @@ export default async function HomeFeed() {
         const grupo = ordenar(grupos[cat.nome] || []).slice(0, 7)
         return (
           <div key={cat.nome}>
-            <CategorySection cat={cat} props={grupo} />
+            <CategorySection cat={cat} props={grupo} locale={locale} />
 
             {/* Banner para anunciantes após a 3ª categoria */}
             {idx === 2 && (
               <div className="mx-[5%] my-6 bg-[#0d0d0d] rounded-2xl px-8 py-10 flex items-center justify-between gap-6 flex-wrap">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Para proprietários</p>
-                  <h3 className="text-white text-2xl font-bold mb-2">Anuncie seu espaço na VENTSY</h3>
+                  <p className="text-gray-400 text-sm mb-1">{dict.componentes.homeBanner.paraProprietarios}</p>
+                  <h3 className="text-white text-2xl font-bold mb-2">{dict.componentes.homeBanner.titulo}</h3>
                   <span className="text-gray-400 text-sm">
-                    Alcance milhares de pessoas que buscam o espaço ideal para seu evento.
+                    {dict.componentes.homeBanner.desc}
                   </span>
                 </div>
                 <Link
-                  href="/cadastro"
+                  href={localizar(locale, '/cadastro')}
                   className="bg-[#ff385c] hover:bg-[#e0304f] text-white font-bold py-3 px-7 rounded-xl no-underline transition-colors whitespace-nowrap text-sm"
                 >
-                  Começar agora →
+                  {dict.componentes.homeBanner.cta}
                 </Link>
               </div>
             )}

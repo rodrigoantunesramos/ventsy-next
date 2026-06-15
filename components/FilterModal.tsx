@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ESTADOS } from '@/lib/data'
+import { useT } from '@/components/i18n/I18nProvider'
 
 const CATEGORIAS = [
   { v: 'Casas de Festas',                  label: '🏠 Casas de Festas' },
@@ -127,6 +128,8 @@ function Chip({ label, checked, onClick }: { label: string; checked: boolean; on
 }
 
 export default function FilterModal({ open, onClose, onApply, initialEstado = '', initialEvento = '' }: Props) {
+  const { dict } = useT()
+  const t = dict.busca.filtros
   const [precoMin,       setPrecoMin]       = useState(0)
   const [precoMax,       setPrecoMax]       = useState(10000)
   const [capacidade,     setCapacidade]     = useState(0)
@@ -194,10 +197,11 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           <button
             className="text-gray-400 hover:text-gray-700 text-lg transition-colors bg-transparent border-none cursor-pointer"
             onClick={onClose}
+            aria-label={t.fechar}
           >
             ✕
           </button>
-          <h2 className="font-bold text-base text-gray-800">Filtros</h2>
+          <h2 className="font-bold text-base text-gray-800">{t.titulo}</h2>
           <div className="w-6" />
         </div>
 
@@ -205,14 +209,14 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
 
           {/* Localização */}
-          <FiltroSecao titulo="Localização">
+          <FiltroSecao titulo={t.localizacao}>
             <div className="space-y-2">
               <select
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white outline-none focus:border-[#ff385c] transition-colors"
                 value={estado}
                 onChange={e => { setEstado(e.target.value); setCidade('') }}
               >
-                <option value="">Todos os estados</option>
+                <option value="">{t.todosEstados}</option>
                 {ESTADOS.map(e => <option key={e.s} value={e.s}>{e.n}</option>)}
               </select>
               <select
@@ -222,7 +226,7 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
                 disabled={!estado || loadCidades}
               >
                 <option value="">
-                  {loadCidades ? 'Carregando...' : estado ? 'Todas as cidades' : 'Selecione um estado primeiro'}
+                  {loadCidades ? t.carregandoCidades : estado ? t.todasCidades : t.selecioneEstado}
                 </option>
                 {cidades.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -230,7 +234,7 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           </FiltroSecao>
 
           {/* Faixa de preço */}
-          <FiltroSecao titulo="Faixa de preço — por hora">
+          <FiltroSecao titulo={t.faixaPreco}>
             <div className="space-y-3">
               <div className="relative h-1 bg-gray-200 rounded-full mx-1">
                 <div
@@ -246,8 +250,8 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
               </div>
               <div className="flex gap-3">
                 {[
-                  { label: 'Mínimo', value: precoMin, set: setPrecoMin },
-                  { label: 'Máximo', value: precoMax, set: setPrecoMax },
+                  { label: t.minimo, value: precoMin, set: setPrecoMin },
+                  { label: t.maximo, value: precoMax, set: setPrecoMax },
                 ].map(f => (
                   <div key={f.label} className="flex-1 border border-gray-200 rounded-xl px-3 py-2">
                     <label className="text-[10px] text-gray-400 block">{f.label}</label>
@@ -266,9 +270,9 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           </FiltroSecao>
 
           {/* Capacidade */}
-          <FiltroSecao titulo="Capacidade mínima">
+          <FiltroSecao titulo={t.capacidade}>
             <p className="text-xs text-gray-400 mb-3">
-              {capacidade === 0 ? 'Qualquer tamanho' : `Mínimo ${capacidade} convidados`}
+              {capacidade === 0 ? t.qualquerTamanho : t.capacidadeMin.replace('{n}', String(capacidade))}
             </p>
             <input
               type="range" min={0} max={500} step={10} value={capacidade}
@@ -278,13 +282,13 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           </FiltroSecao>
 
           {/* Serviços */}
-          <FiltroSecao titulo="Serviços oferecidos">
+          <FiltroSecao titulo={t.servicos}>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: '❄️ Climatizado',            val: climatizado,    set: setClimatizado    },
-                { label: '🅿️ Estacionamento gratuito', val: estacionamento, set: setEstacionamento },
-                { label: '🛡️ Segurança',               val: seguranca,      set: setSeguranca      },
-                { label: '🌳 Espaço aberto',           val: espacoAberto,   set: setEspacoAberto   },
+                { label: t.servClimatizado,     val: climatizado,    set: setClimatizado    },
+                { label: t.servEstacionamento,  val: estacionamento, set: setEstacionamento },
+                { label: t.servSeguranca,       val: seguranca,      set: setSeguranca      },
+                { label: t.servEspacoAberto,    val: espacoAberto,   set: setEspacoAberto   },
               ].map(f => (
                 <label
                   key={f.label}
@@ -299,7 +303,7 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           </FiltroSecao>
 
           {/* Tipo de propriedade */}
-          <FiltroSecao titulo="Tipo de Propriedade">
+          <FiltroSecao titulo={t.tipoPropriedade}>
             <div className="flex flex-wrap gap-2">
               {CATEGORIAS.map(c => (
                 <Chip
@@ -313,41 +317,41 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           </FiltroSecao>
 
           {/* Tipo de evento */}
-          <FiltroSecao titulo="Tipo de Evento">
+          <FiltroSecao titulo={t.tipoEvento}>
             <div className="flex flex-wrap gap-2">
-              {TIPOS_EVENTO.map(t => (
+              {TIPOS_EVENTO.map(ev => (
                 <Chip
-                  key={t.v}
-                  label={t.label}
-                  checked={tiposEvento.has(t.v)}
-                  onClick={() => toggleEvento(t.v)}
+                  key={ev.v}
+                  label={ev.label}
+                  checked={tiposEvento.has(ev.v)}
+                  onClick={() => toggleEvento(ev.v)}
                 />
               ))}
             </div>
           </FiltroSecao>
 
           {/* Destaques */}
-          <FiltroSecao titulo="Destaques">
+          <FiltroSecao titulo={t.destaques}>
             <label
               className={`flex items-center gap-2 text-sm px-3 py-2.5 rounded-xl cursor-pointer transition-all select-none
                 ${ultra ? 'bg-[#fff0f3] text-[#ff385c] font-semibold' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
             >
               <input type="checkbox" checked={ultra} onChange={e => setUltra(e.target.checked)} className="sr-only" />
-              ✦ Apenas propriedades premium
+              {t.apenasPremium}
             </label>
           </FiltroSecao>
 
           {/* Som */}
-          <FiltroSecao titulo="Som">
+          <FiltroSecao titulo={t.som}>
             <div className="space-y-3">
-              <Toggle checked={somAlto}  onChange={setSomAlto}  label="Permite som alto"     />
-              <Toggle checked={somTarde} onChange={setSomTarde} label="Permite som até tarde" />
+              <Toggle checked={somAlto}  onChange={setSomAlto}  label={t.somAlto}  />
+              <Toggle checked={somTarde} onChange={setSomTarde} label={t.somTarde} />
             </div>
           </FiltroSecao>
 
           {/* Acessibilidade */}
-          <FiltroSecao titulo="Acessibilidade">
-            <Toggle checked={acessibilidade} onChange={setAcessibilidade} label="Necessita de acessibilidade?" />
+          <FiltroSecao titulo={t.acessibilidade}>
+            <Toggle checked={acessibilidade} onChange={setAcessibilidade} label={t.necessitaAcessibilidade} />
           </FiltroSecao>
         </div>
 
@@ -357,13 +361,13 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
             className="text-sm text-gray-500 hover:text-gray-800 transition-colors underline bg-transparent border-none cursor-pointer font-[inherit]"
             onClick={limpar}
           >
-            Remover todos
+            {t.removerTodos}
           </button>
           <button
             className="bg-[#ff385c] hover:bg-[#e0304f] text-white font-bold py-3 px-8 rounded-xl text-sm transition-colors border-none cursor-pointer font-[inherit]"
             onClick={aplicar}
           >
-            Mostrar resultados
+            {t.mostrarResultados}
           </button>
         </div>
       </div>

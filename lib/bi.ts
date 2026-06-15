@@ -22,6 +22,8 @@
 //   • Determinístico e testável: o "hoje" entra por parâmetro (hojeYMD). Nenhum
 //     relógio escondido dentro do cálculo de período/ocupação.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas (puras, fuso-agnósticas — só-data ancorada à meia-noite local) ──────
 function pad2(n: number): string { return String(n).padStart(2, '0') }
 
@@ -559,13 +561,6 @@ export function serieMensal<T>(
     if (mes && base.has(mes)) base.set(mes, (base.get(mes) || 0) + (Number(valorDe(it)) || 0))
   }
   return [...base.entries()].map(([mes, valor]) => ({ mes, valor }))
-}
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
 }
 
 // ── Agendamento de relatórios (próxima execução) ─────────────────────────────

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { authHeaders } from '@/lib/supabase'
-import { brl } from '@/lib/fees'
+import { useTOptional } from '@/components/i18n/I18nProvider'
+import { formatMoney } from '@/lib/i18n/format'
 
 declare global {
   interface Window {
@@ -29,6 +30,8 @@ export default function CheckoutPlano({
   onPaid: () => void
   onClose: () => void
 }) {
+  const { dict, locale } = useTOptional()
+  const t = dict.planos.checkout
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const brickRef = useRef<any>(null)
   const [sdkLoaded, setSdkLoaded] = useState(false)
@@ -39,7 +42,7 @@ export default function CheckoutPlano({
   useEffect(() => {
     if (!sdkLoaded || pix || brickRef.current) return
     const pk = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY
-    if (!pk || !window.MercadoPago) { setMsg('Checkout indisponível (chave do Mercado Pago ausente).'); return }
+    if (!pk || !window.MercadoPago) { setMsg(t.msgChaveAusente); return }
 
     const mp = new window.MercadoPago(pk, { locale: 'pt-BR' })
     mp.bricks()
@@ -48,7 +51,7 @@ export default function CheckoutPlano({
         customization: { paymentMethods: { creditCard: 'all', debitCard: 'all', bankTransfer: 'all', ticket: [], mercadoPago: [] } },
         callbacks: {
           onReady: () => setReady(true),
-          onError: () => setMsg('Erro ao carregar o checkout. Tente novamente.'),
+          onError: () => setMsg(t.msgErroCarregar),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onSubmit: async ({ formData }: any) => {
             setMsg('')
@@ -62,49 +65,49 @@ export default function CheckoutPlano({
               if (json.error) { setMsg(json.error); return }
               if (json.status === 'approved') { onPaid() }
               else if (json.pix) { setPix(json.pix) }
-              else { setMsg('Pagamento ' + (json.status || 'pendente') + '. Confirmaremos assim que cair.') }
+              else { setMsg(t.msgPendente.replace('{status}', json.status || t.statusPendente)) }
             } catch {
-              setMsg('Não foi possível concluir o pagamento.')
+              setMsg(t.msgFalhaConcluir)
             }
           },
         },
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((c: any) => { brickRef.current = c })
-      .catch(() => setMsg('Erro ao iniciar o checkout.'))
+      .catch(() => setMsg(t.msgErroIniciar))
 
     return () => {
       try { brickRef.current?.unmount?.() } catch { /* noop */ }
       brickRef.current = null
     }
-  }, [sdkLoaded, pix, email, valor, plano, periodo, onPaid])
+  }, [sdkLoaded, pix, email, valor, plano, periodo, onPaid, t])
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[10000] flex items-start justify-center overflow-y-auto p-4">
       <div className="bg-white rounded-2xl max-w-lg w-full my-8 p-6 relative shadow-pop">
-        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-ink-muted">✕</button>
-        <h3 className="font-display text-xl font-bold text-ink mb-1">Assinar plano {plano.toUpperCase()}</h3>
-        <p className="text-sm text-ink-muted mb-4">Pix ou cartão, com segurança pelo Mercado Pago.</p>
+        <button onClick={onClose} aria-label={t.fechar} className="absolute top-4 right-4 w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-ink-muted">✕</button>
+        <h3 className="font-display text-xl font-bold text-ink mb-1">{t.titulo.replace('{plano}', plano.toUpperCase())}</h3>
+        <p className="text-sm text-ink-muted mb-4">{t.subtitulo}</p>
 
         <div className="rounded-xl bg-gray-50 border border-gray-200 p-3 text-sm mb-4 flex justify-between font-bold text-ink">
-          <span>Total ({periodo})</span>
-          <span>{brl(valor)}</span>
+          <span>{t.total.replace('{periodo}', periodo)}</span>
+          <span>{formatMoney(locale, valor)}</span>
         </div>
 
         {pix ? (
           <div className="text-center">
-            <p className="text-sm text-ink-soft mb-3">Escaneie o QR Code para pagar via Pix:</p>
+            <p className="text-sm text-ink-soft mb-3">{t.pixInstrucao}</p>
             {pix.qr_code_base64 && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`data:image/png;base64,${pix.qr_code_base64}`} alt="QR Code Pix" className="w-56 h-56 mx-auto rounded-lg" />
+              <img src={`data:image/png;base64,${pix.qr_code_base64}`} alt={t.pixAlt} className="w-56 h-56 mx-auto rounded-lg" />
             )}
             <textarea readOnly value={pix.qr_code} onClick={(e) => (e.target as HTMLTextAreaElement).select()} className="w-full mt-3 text-xs border border-gray-200 rounded-lg p-2 h-20 resize-none" />
-            <p className="text-xs text-ink-muted mt-2">Seu plano é ativado automaticamente após o pagamento.</p>
+            <p className="text-xs text-ink-muted mt-2">{t.pixAtivacao}</p>
           </div>
         ) : (
           <>
             <div id="mp-brick-plano" />
-            {!ready && <p className="text-sm text-ink-muted text-center py-4">Carregando checkout...</p>}
+            {!ready && <p className="text-sm text-ink-muted text-center py-4">{t.carregando}</p>}
           </>
         )}
 

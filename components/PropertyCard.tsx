@@ -3,6 +3,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import FavoriteButton from './client/FavoriteButton'
+import { useTOptional } from '@/components/i18n/I18nProvider'
+import { formatMoney } from '@/lib/i18n/format'
 import type { PropertySummary } from '@/types/client'
 
 interface Props {
@@ -35,6 +37,7 @@ export default function PropertyCard({
   onToggleFavorite,
   showActions = true,
 }: Props) {
+  const { dict, locale } = useTOptional()
   const [localFav, setLocalFav] = useState(false)
   const controlled = onToggleFavorite !== undefined
   const fav = controlled ? (isFavProp ?? false) : localFav
@@ -49,7 +52,7 @@ export default function PropertyCard({
     try { const h = new URL(img).hostname; return h.endsWith('.supabase.co') || h.endsWith('picsum.photos') }
     catch { return false }
   })()
-  const nome    = property.nome || 'Sem nome'
+  const nome    = property.nome || dict.componentes.card.semNome
   const cidade  = property.cidade || property.estado || ''
   const nota    = property._nota ?? (property.avaliacao > 0 ? String(property.avaliacao) : null)
 
@@ -72,7 +75,7 @@ export default function PropertyCard({
           )}
           {isUltra && (
             <div className="absolute top-4 -right-6 z-10 bg-gradient-to-br from-[#f0c040] to-[#d4a000] text-white text-[9px] font-black tracking-wider uppercase py-0.5 px-8 rotate-45 shadow-sm">
-              Premium
+              {dict.componentes.card.premium}
             </div>
           )}
 
@@ -85,12 +88,12 @@ export default function PropertyCard({
             ) : <FotoPlaceholder />}
             {isUltra && (
               <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full backdrop-blur-sm">
-                ✦ Premium
+                ✦ {dict.componentes.card.premium}
               </span>
             )}
             {isPro && !isUltra && (
               <span className="absolute bottom-2 left-2 bg-[#0d0d0d]/80 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm">
-                Pro
+                {dict.componentes.card.pro}
               </span>
             )}
           </div>
@@ -101,10 +104,10 @@ export default function PropertyCard({
             <div className="flex items-center justify-between">
               {preco != null ? (
                 <span className="text-[.76rem] text-gray-600">
-                  A partir de <strong className="text-[#0d0d0d] font-bold">R$ {Number(preco).toLocaleString('pt-BR')}</strong>
+                  {dict.componentes.card.aPartirDe} <strong className="text-[#0d0d0d] font-bold">{formatMoney(locale, Number(preco))}</strong>
                 </span>
               ) : (
-                <span className="text-[.76rem] text-gray-300">Sob consulta</span>
+                <span className="text-[.76rem] text-gray-300">{dict.componentes.card.sobConsulta}</span>
               )}
               {nota && (
                 <span className="flex items-center gap-0.5 text-[.75rem] font-bold text-[#0d0d0d]">
@@ -119,7 +122,7 @@ export default function PropertyCard({
         <button
           className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm border-none flex items-center justify-center text-sm cursor-pointer transition-all hover:scale-110 hover:bg-white z-20 ${fav ? 'text-[#ff385c]' : 'text-gray-400'}`}
           onClick={e => { e.stopPropagation(); toggleFav() }}
-          aria-label={fav ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+          aria-label={fav ? dict.componentes.card.removerFavorito : dict.componentes.card.salvarFavorito}
         >
           {fav ? '❤' : '♡'}
         </button>
@@ -129,7 +132,7 @@ export default function PropertyCard({
 
   /* ── Grid: search results ────────────────────────────────────────── */
   if (variant === 'grid') {
-    const capacidade = property.capacidade ? `${property.capacidade} pessoas` : ''
+    const capacidade = property.capacidade ? `${property.capacidade} ${dict.componentes.card.pessoas}` : ''
     const categoria  = property.categoria || ''
     return (
       <div
@@ -152,11 +155,11 @@ export default function PropertyCard({
             ) : <FotoPlaceholder />}
             {isUltra ? (
               <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full">
-                ✦ Premium
+                ✦ {dict.componentes.card.premium}
               </span>
             ) : isPro ? (
               <span className="absolute bottom-2 left-2 bg-[#0d0d0d]/80 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/20">
-                Pro
+                {dict.componentes.card.pro}
               </span>
             ) : categoria ? (
               <span className="absolute bottom-2 left-2 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-full">
@@ -198,11 +201,11 @@ export default function PropertyCard({
             </div>
             <p className="text-sm mt-auto pt-2 border-t border-gray-100">
               {property.valor_hora > 0 ? (
-                <><strong className="text-[#0d0d0d]">R$ {Number(property.valor_hora).toLocaleString('pt-BR')}</strong><span className="text-gray-400 text-xs"> / hora</span></>
+                <><strong className="text-[#0d0d0d]">{formatMoney(locale, Number(property.valor_hora))}</strong><span className="text-gray-400 text-xs"> {dict.componentes.card.porHora}</span></>
               ) : property.valor_base > 0 ? (
-                <strong className="text-[#0d0d0d]">R$ {Number(property.valor_base).toLocaleString('pt-BR')}</strong>
+                <strong className="text-[#0d0d0d]">{formatMoney(locale, Number(property.valor_base))}</strong>
               ) : (
-                <span className="text-gray-300 text-xs">Sob consulta</span>
+                <span className="text-gray-300 text-xs">{dict.componentes.card.sobConsulta}</span>
               )}
             </p>
           </div>
@@ -211,7 +214,7 @@ export default function PropertyCard({
         <button
           className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer z-20"
           onClick={e => { e.stopPropagation(); toggleFav() }}
-          aria-label={fav ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+          aria-label={fav ? dict.componentes.card.removerFavorito : dict.componentes.card.salvarFavorito}
         >
           <span className={fav ? 'text-[#ff385c]' : 'text-white drop-shadow'}>{fav ? '❤' : '♡'}</span>
         </button>
@@ -221,10 +224,10 @@ export default function PropertyCard({
 
   /* ── Default: client area ────────────────────────────────────────── */
   const precoDisplay = property.valor_hora > 0
-    ? `R$ ${Number(property.valor_hora).toLocaleString('pt-BR')}/h`
+    ? `${formatMoney(locale, Number(property.valor_hora))}/h`
     : property.valor_base > 0
-      ? `R$ ${Number(property.valor_base).toLocaleString('pt-BR')}`
-      : 'A consultar'
+      ? formatMoney(locale, Number(property.valor_base))
+      : dict.componentes.card.aConsultar
 
   return (
     <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.09)]">

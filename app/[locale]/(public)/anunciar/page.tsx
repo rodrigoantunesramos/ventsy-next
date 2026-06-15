@@ -7,6 +7,7 @@ import { supabase, authHeaders } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { CATS, ESTADOS } from '@/lib/data'
+import { useT } from '@/components/i18n/I18nProvider'
 
 const COMODIDADES = [
   'Wi-Fi', 'Estacionamento', 'Churrasqueira', 'Piscina', 'Ar-condicionado',
@@ -36,6 +37,8 @@ async function geocode(cidade: string, uf: string): Promise<{ lat: number; lng: 
 
 export default function AnunciarPage() {
   const router = useRouter()
+  const { dict, lhref } = useT()
+  const t = dict.anunciar
 
   const [userId, setUserId] = useState<string | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
@@ -72,8 +75,8 @@ export default function AnunciarPage() {
   function onSelecionarFoto(e: ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
-    if (!f.type.startsWith('image/')) { setErro('Selecione um arquivo de imagem (JPG, PNG ou WebP).'); return }
-    if (f.size > 8 * 1024 * 1024) { setErro('A imagem deve ter no máximo 8 MB.'); return }
+    if (!f.type.startsWith('image/')) { setErro(t.erros.imagemTipo); return }
+    if (f.size > 8 * 1024 * 1024) { setErro(t.erros.imagemTamanho); return }
     setErro('')
     if (fotoPreview) URL.revokeObjectURL(fotoPreview)
     setFotoFile(f)
@@ -81,11 +84,11 @@ export default function AnunciarPage() {
   }
 
   function validar(): string | null {
-    if (nome.trim().length < 3) return 'Informe o nome do espaço (mín. 3 caracteres).'
-    if (!categoria) return 'Escolha a categoria do espaço.'
-    if (!estado) return 'Selecione o estado.'
-    if (cidade.trim().length < 2) return 'Informe a cidade.'
-    if (!valorHora && !valorBase) return 'Informe ao menos um preço (por hora ou diária).'
+    if (nome.trim().length < 3) return t.erros.nomeCurto
+    if (!categoria) return t.erros.categoria
+    if (!estado) return t.erros.estado
+    if (cidade.trim().length < 2) return t.erros.cidade
+    if (!valorHora && !valorBase) return t.erros.preco
     return null
   }
 
@@ -97,7 +100,7 @@ export default function AnunciarPage() {
     if (msg) { setErro(msg); return }
 
     if (!userId) {
-      setErro('Você precisa estar logado para publicar. Entre ou crie sua conta.')
+      setErro(t.erros.naoLogado)
       return
     }
 
@@ -134,7 +137,7 @@ export default function AnunciarPage() {
         .single()
 
       if (error) {
-        setErro(`Não foi possível publicar: ${error.message}`)
+        setErro(`${t.erros.publicarPrefixo} ${error.message}`)
         setEnviando(false)
         return
       }
@@ -152,7 +155,7 @@ export default function AnunciarPage() {
 
       router.push(`/propriedade/${data.id}`)
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Ocorreu um erro ao publicar. Tente novamente.')
+      setErro(e instanceof Error ? e.message : t.erros.publicarGenerico)
       setEnviando(false)
     }
   }
@@ -164,22 +167,22 @@ export default function AnunciarPage() {
       <main className="max-w-3xl mx-auto px-5 pt-28 pb-20">
         <div className="mb-8">
           <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand bg-brand-50 px-3 py-1 rounded-full">
-            Anuncie grátis
+            {t.hero.tag}
           </span>
           <h1 className="font-display text-3xl md:text-4xl font-black text-ink mt-3 tracking-tight">
-            Anuncie seu espaço
+            {t.hero.titulo}
           </h1>
           <p className="text-ink-muted mt-2">
-            Preencha as informações do seu espaço. Ele aparecerá na busca assim que publicado.
+            {t.hero.subtitulo}
           </p>
         </div>
 
         {authChecked && !userId && (
           <div className="mb-6 rounded-2xl border border-brand-200 bg-brand-50 px-5 py-4 text-sm text-ink-soft">
-            Você está navegando deslogado.{' '}
-            <Link href="/login" className="text-brand font-semibold underline">Entre</Link> ou{' '}
-            <Link href="/cadastro" className="text-brand font-semibold underline">crie sua conta</Link>{' '}
-            para publicar o anúncio.
+            {t.avisoDeslogadoInicio}{' '}
+            <Link href={lhref('/login')} className="text-brand font-semibold underline">{t.avisoDeslogadoEntre}</Link> {t.avisoDeslogadoOu}{' '}
+            <Link href={lhref('/cadastro')} className="text-brand font-semibold underline">{t.avisoDeslogadoCriar}</Link>{' '}
+            {t.avisoDeslogadoFim}
           </div>
         )}
 
@@ -191,82 +194,82 @@ export default function AnunciarPage() {
 
         {/* Básico */}
         <section className="rounded-2xl border border-gray-200 bg-white shadow-card p-5 md:p-6 mb-5">
-          <h2 className="font-display text-lg font-bold text-ink mb-4">Sobre o espaço</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-4">{t.secaoSobre.titulo}</h2>
           <div className="grid gap-4">
             <div>
-              <label className={labelCls}>Nome do espaço *</label>
-              <input className={inputCls} value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Chácara Recanto Verde" />
+              <label className={labelCls}>{t.secaoSobre.nomeLabel}</label>
+              <input className={inputCls} value={nome} onChange={(e) => setNome(e.target.value)} placeholder={t.secaoSobre.nomePlaceholder} />
             </div>
             <div>
-              <label className={labelCls}>Categoria *</label>
+              <label className={labelCls}>{t.secaoSobre.categoriaLabel}</label>
               <select className={inputCls} value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-                <option value="">Selecione a categoria</option>
+                <option value="">{t.secaoSobre.categoriaPlaceholder}</option>
                 {CATS.map((c) => (
                   <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className={labelCls}>Descrição</label>
-              <textarea className={`${inputCls} min-h-[110px] resize-y`} value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Conte o que torna o seu espaço especial..." />
+              <label className={labelCls}>{t.secaoSobre.descricaoLabel}</label>
+              <textarea className={`${inputCls} min-h-[110px] resize-y`} value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder={t.secaoSobre.descricaoPlaceholder} />
             </div>
           </div>
         </section>
 
         {/* Localização */}
         <section className="rounded-2xl border border-gray-200 bg-white shadow-card p-5 md:p-6 mb-5">
-          <h2 className="font-display text-lg font-bold text-ink mb-4">Localização</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-4">{t.secaoLocalizacao.titulo}</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Estado *</label>
+              <label className={labelCls}>{t.secaoLocalizacao.estadoLabel}</label>
               <select className={inputCls} value={estado} onChange={(e) => setEstado(e.target.value)}>
-                <option value="">UF</option>
+                <option value="">{t.secaoLocalizacao.estadoPlaceholder}</option>
                 {ESTADOS.map((e) => (
                   <option key={e.s} value={e.s}>{e.n} ({e.s})</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className={labelCls}>Cidade *</label>
-              <input className={inputCls} value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" />
+              <label className={labelCls}>{t.secaoLocalizacao.cidadeLabel}</label>
+              <input className={inputCls} value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder={t.secaoLocalizacao.cidadePlaceholder} />
             </div>
             <div>
-              <label className={labelCls}>Bairro</label>
-              <input className={inputCls} value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" />
+              <label className={labelCls}>{t.secaoLocalizacao.bairroLabel}</label>
+              <input className={inputCls} value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder={t.secaoLocalizacao.bairroPlaceholder} />
             </div>
             <div>
-              <label className={labelCls}>Endereço</label>
-              <input className={inputCls} value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Rua, número" />
+              <label className={labelCls}>{t.secaoLocalizacao.enderecoLabel}</label>
+              <input className={inputCls} value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder={t.secaoLocalizacao.enderecoPlaceholder} />
             </div>
           </div>
           <p className="text-xs text-ink-muted mt-3">
-            Usamos cidade e estado para posicionar seu espaço no mapa da busca.
+            {t.secaoLocalizacao.ajuda}
           </p>
         </section>
 
         {/* Capacidade & preço */}
         <section className="rounded-2xl border border-gray-200 bg-white shadow-card p-5 md:p-6 mb-5">
-          <h2 className="font-display text-lg font-bold text-ink mb-4">Capacidade e preço</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-4">{t.secaoCapacidade.titulo}</h2>
           <div className="grid sm:grid-cols-3 gap-4">
             <div>
-              <label className={labelCls}>Capacidade (pessoas)</label>
-              <input className={inputCls} type="number" min={0} value={capacidade} onChange={(e) => setCapacidade(e.target.value)} placeholder="Ex: 150" />
+              <label className={labelCls}>{t.secaoCapacidade.capacidadeLabel}</label>
+              <input className={inputCls} type="number" min={0} value={capacidade} onChange={(e) => setCapacidade(e.target.value)} placeholder={t.secaoCapacidade.capacidadePlaceholder} />
             </div>
             <div>
-              <label className={labelCls}>Valor por hora (R$)</label>
-              <input className={inputCls} type="number" min={0} value={valorHora} onChange={(e) => setValorHora(e.target.value)} placeholder="Ex: 500" />
+              <label className={labelCls}>{t.secaoCapacidade.valorHoraLabel}</label>
+              <input className={inputCls} type="number" min={0} value={valorHora} onChange={(e) => setValorHora(e.target.value)} placeholder={t.secaoCapacidade.valorHoraPlaceholder} />
             </div>
             <div>
-              <label className={labelCls}>Valor da diária (R$)</label>
-              <input className={inputCls} type="number" min={0} value={valorBase} onChange={(e) => setValorBase(e.target.value)} placeholder="Ex: 3000" />
+              <label className={labelCls}>{t.secaoCapacidade.valorDiariaLabel}</label>
+              <input className={inputCls} type="number" min={0} value={valorBase} onChange={(e) => setValorBase(e.target.value)} placeholder={t.secaoCapacidade.valorDiariaPlaceholder} />
             </div>
           </div>
-          <p className="text-xs text-ink-muted mt-3">Informe ao menos um dos valores.</p>
+          <p className="text-xs text-ink-muted mt-3">{t.secaoCapacidade.ajuda}</p>
         </section>
 
         {/* Comodidades */}
         <section className="rounded-2xl border border-gray-200 bg-white shadow-card p-5 md:p-6 mb-5">
-          <h2 className="font-display text-lg font-bold text-ink mb-4">Comodidades</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-4">{t.secaoComodidades.titulo}</h2>
           <div className="flex flex-wrap gap-2">
             {COMODIDADES.map((c) => {
               const on = comodidades.includes(c)
@@ -279,7 +282,7 @@ export default function AnunciarPage() {
                     on ? 'bg-brand text-white border-brand' : 'bg-white text-ink-soft border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  {c}
+                  {t.comodidadesLabels[c as keyof typeof t.comodidadesLabels] ?? c}
                 </button>
               )
             })}
@@ -288,14 +291,14 @@ export default function AnunciarPage() {
 
         {/* Contato & mídia */}
         <section className="rounded-2xl border border-gray-200 bg-white shadow-card p-5 md:p-6 mb-6">
-          <h2 className="font-display text-lg font-bold text-ink mb-4">Contato e mídia</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-4">{t.secaoContato.titulo}</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>WhatsApp</label>
-              <input className={inputCls} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(21) 99999-9999" />
+              <label className={labelCls}>{t.secaoContato.whatsappLabel}</label>
+              <input className={inputCls} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder={t.secaoContato.whatsappPlaceholder} />
             </div>
             <div>
-              <label className={labelCls} htmlFor="anuncio-foto">Foto de capa</label>
+              <label className={labelCls} htmlFor="anuncio-foto">{t.secaoContato.fotoLabel}</label>
               <input
                 id="anuncio-foto"
                 type="file"
@@ -304,9 +307,9 @@ export default function AnunciarPage() {
                 className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:text-white file:px-4 file:py-2 file:font-semibold file:cursor-pointer hover:file:bg-brand-600 cursor-pointer"
               />
               {fotoPreview ? (
-                <img src={fotoPreview} alt="Pré-visualização da foto de capa" className="mt-3 h-32 w-full max-w-xs object-cover rounded-xl border border-gray-200" />
+                <img src={fotoPreview} alt={t.secaoContato.fotoPreviewAlt} className="mt-3 h-32 w-full max-w-xs object-cover rounded-xl border border-gray-200" />
               ) : (
-                <p className="text-xs text-ink-muted mt-2">JPG, PNG ou WebP, até 8 MB. Você poderá adicionar mais fotos depois, no painel.</p>
+                <p className="text-xs text-ink-muted mt-2">{t.secaoContato.fotoAjuda}</p>
               )}
             </div>
           </div>
@@ -317,7 +320,7 @@ export default function AnunciarPage() {
           disabled={enviando}
           className="w-full sm:w-auto bg-brand hover:bg-brand-600 disabled:opacity-60 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-colors inline-flex items-center justify-center gap-2"
         >
-          {enviando ? 'Publicando...' : 'Publicar espaço'}
+          {enviando ? t.publicando : t.publicar}
         </button>
       </main>
 

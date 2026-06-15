@@ -17,6 +17,8 @@
 //   • Valores monetários trafegam CRUS (`valor_num`) — quem envia formata. Assim a
 //     mensagem nunca carrega "R$" hardcoded vindo daqui.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Domínio: gatilhos, ações, canais ─────────────────────────────────────────
 export type Gatilho =
   | 'evento_criado'           // novo evento entrou no funil (criado nas últimas 24h)
@@ -270,9 +272,6 @@ export const LINK_POR_ESCOPO: Record<Escopo, string> = {
 };
 
 // ── Helpers genéricos ─────────────────────────────────────────────────────────
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
-}
 export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, ''); }
 export function emailValido(s: string | null | undefined): boolean {
   return !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());

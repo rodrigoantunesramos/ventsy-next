@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
+import { getDictionary } from '@/lib/i18n/getDictionary'
+import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
 
-export const metadata: Metadata = {
-  title: 'Fale conosco',
-  description:
-    'Dúvidas, sugestões ou suporte? Fale com a equipe VENTSY por WhatsApp, e-mail ou pelo formulário de contato. Respondemos em até 48h úteis.',
-  alternates: { canonical: '/fale-conosco' },
-  openGraph: {
-    title: 'Fale conosco · VENTSY',
-    description: 'Fale com a equipe VENTSY por WhatsApp, e-mail ou formulário de contato.',
-    url: '/fale-conosco',
-  },
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
+  const dict = getDictionary(locale)
+  const m = dict.faleConosco.meta
+  return {
+    title: m.title,
+    description: m.description,
+    alternates: { canonical: localizar(locale, '/fale-conosco') },
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: localizar(locale, '/fale-conosco'),
+    },
+  }
 }
 
 export default function FaleConoscoLayout({ children }: { children: React.ReactNode }) {

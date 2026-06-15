@@ -1,0 +1,63 @@
+// English dictionary — `auth` namespace. Typed by `T` (from pt/auth) to
+// guarantee key parity.
+import type { T } from '../pt/auth'
+
+const auth: T = {
+  meta: {
+    loginTitulo: 'Sign in',
+    loginDescricao: 'Access your VENTSY account to manage your venues, bookings and listings.',
+  },
+  login: {
+    tag: 'Access',
+    bemVindo: 'Welcome back to',
+    subtitulo: 'Sign in with your email and password to access your account.',
+    emailLabel: 'Email',
+    emailPlaceholder: 'you@email.com',
+    senhaLabel: 'Password',
+    senhaPlaceholder: 'Your password',
+    mostrarSenha: 'Show password',
+    ocultarSenha: 'Hide password',
+    esqueceuSenha: 'Forgot your password?',
+    entrar: 'Sign in',
+    entrando: 'Signing in...',
+    semConta: "Don't have an account?",
+    criarConta: 'Create a free account',
+    erroCamposObrigatorios: 'Enter your email and password to continue.',
+    erroGenerico: 'Error signing in. Please try again.',
+    erroCredenciais: 'Incorrect email or password.',
+    erroEmailNaoConfirmado: 'Confirm your email before signing in. Check your inbox.',
+  },
+  recuperar: {
+    titulo: 'Reset password',
+    descricao: 'Enter your registered email and we will send you a link to reset your password.',
+    emailPlaceholder: 'you@email.com',
+    emailAriaLabel: 'Email for password recovery',
+    dialogAriaLabel: 'Reset password',
+    cancelar: 'Cancel',
+    enviarLink: 'Send link',
+    enviando: 'Sending...',
+    sucessoTitulo: 'Email sent!',
+    sucessoDescricao: 'Check your inbox and follow the instructions to reset your password.',
+    fechar: 'Close',
+  },
+  redefinir: {
+    titulo: 'Reset password',
+    verificando: 'Verifying the link…',
+    linkInvalidoInicio: 'Invalid or expired link. Go back to',
+    linkInvalidoLink: 'login',
+    linkInvalidoFim: 'and request a new reset email.',
+    sucesso: 'Password reset successfully! Redirecting to login…',
+    definaNova: 'Set your new access password.',
+    novaSenhaLabel: 'New password',
+    novaSenhaPlaceholder: 'At least 8 characters',
+    confirmarSenhaLabel: 'Confirm password',
+    mostrarSenha: 'Show password',
+    botao: 'Reset password',
+    salvando: 'Saving…',
+    erroSenhaCurta: 'The password must be at least 8 characters.',
+    erroSenhasDiferentes: 'The passwords do not match.',
+    erroGenerico: 'Could not reset the password.',
+  },
+}
+
+export default auth

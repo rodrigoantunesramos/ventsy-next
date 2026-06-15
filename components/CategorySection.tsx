@@ -1,15 +1,19 @@
 // Server Component: seção/carrossel de uma categoria na home. "Ver todos" é um
 // <Link> rastreável (era router.push em client). Os cards são ilhas cliente.
 import Link from 'next/link'
+import { getDictionary } from '@/lib/i18n/getDictionary'
+import { localizar, type Locale } from '@/lib/i18n/config'
 import PropertyCard from './PropertyCard'
 import type { PropertySummary } from '@/types/client'
 
 interface Props {
   cat: { nome: string; emoji: string }
   props: PropertySummary[]
+  locale: Locale
 }
 
-export default function CategorySection({ cat, props }: Props) {
+export default function CategorySection({ cat, props, locale }: Props) {
+  const dict = getDictionary(locale)
   return (
     <section className="max-w-[1440px] mx-auto px-[5%] pt-1 pb-0">
       {/* Cabeçalho da seção */}
@@ -19,10 +23,10 @@ export default function CategorySection({ cat, props }: Props) {
           {cat.nome}
         </h2>
         <Link
-          href={`/busca?tipo=${encodeURIComponent(cat.nome)}`}
+          href={`${localizar(locale, '/busca')}?tipo=${encodeURIComponent(cat.nome)}`}
           className="ml-auto bg-[#0d0d0d] hover:bg-[#ff385c] text-white no-underline rounded-full px-5 py-2 text-[.8rem] font-bold cursor-pointer whitespace-nowrap flex items-center gap-1.5 transition-all duration-200 hover:scale-[1.03]"
         >
-          Ver todos
+          {dict.componentes.categoria.verTodos}
           <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
