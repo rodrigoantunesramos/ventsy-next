@@ -459,7 +459,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
               {hostFoto?<img src={hostFoto} alt={hostNome} className="pp-avatar"/>:<div className="pp-avatar-inicial">{hostNome.charAt(0)}</div>}
               <div>
                 <h3 className="pp-anf-nome">{hostNome}</h3>
-                <p className="pp-anf-sub">Proprietário • Na VENTSY há {anfTempo}</p>
+                <p className="pp-anf-sub">{t.anfitriao.proprietario} • {t.anfitriao.naVentsyHa} {anfTempo}</p>
                 {hostBio&&<p className="mt-1 text-[.86rem] leading-relaxed text-[#666]">{hostBio}</p>}
               </div>
             </div>
