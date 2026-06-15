@@ -213,9 +213,7 @@ export const selCls = 'rounded-xl border border-black/10 bg-white px-3 py-2 text
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Rótulo do alvo (ativo › espaço › propriedade) ────────────────────────────
 export function alvoLabel(

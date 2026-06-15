@@ -217,9 +217,7 @@ export async function removeArquivo(path: string | null): Promise<void> {
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ───────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Mapeamento de linha do banco → view em memória ────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */

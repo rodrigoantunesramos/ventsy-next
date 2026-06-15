@@ -206,9 +206,7 @@ export function mapRecebimento(r: any): Recebimento {
 
 // ── "Tabela ainda não criada" (rodar a migration) ────────────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Helpers genéricos ─────────────────────────────────────────────────────────
 export function ymd(d: Date): string {

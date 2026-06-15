@@ -99,9 +99,7 @@ export function slugComSufixo(titulo: string, sufixo: string): string {
 }
 
 // ── Erro de tabela ausente (degrade p/ needsSetup) ───────────────────────────
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Normalização banco → tipos ───────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
