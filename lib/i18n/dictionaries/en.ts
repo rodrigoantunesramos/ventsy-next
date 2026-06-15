@@ -33,6 +33,8 @@ const en: Dictionary = {
     verTodos: 'See all',
     carregarMais: 'Load more',
     erroGenerico: 'Something went wrong. Please try again.',
+    paginaNaoEncontrada: 'Page not found.',
+    voltarInicio: 'Back to home',
   },
   header: {
     anuncieSeuEspaco: 'List your space',

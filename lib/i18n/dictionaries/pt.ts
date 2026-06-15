@@ -37,6 +37,8 @@ const pt = {
     verTodos: 'Ver todos',
     carregarMais: 'Carregar mais',
     erroGenerico: 'Algo deu errado. Tente novamente.',
+    paginaNaoEncontrada: 'Página não encontrada.',
+    voltarInicio: 'Voltar ao início',
   },
   header: {
     anuncieSeuEspaco: 'Anuncie seu espaço',

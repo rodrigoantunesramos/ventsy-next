@@ -34,6 +34,8 @@ const es: Dictionary = {
     verTodos: 'Ver todos',
     carregarMais: 'Cargar más',
     erroGenerico: 'Algo salió mal. Inténtalo de nuevo.',
+    paginaNaoEncontrada: 'Página no encontrada.',
+    voltarInicio: 'Volver al inicio',
   },
   header: {
     anuncieSeuEspaco: 'Anuncia tu espacio',
