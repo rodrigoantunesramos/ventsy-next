@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Edição de planos (preço/benefícios/status) na fonte única `planos_config`,
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'planos', 'ver')
   if (!ctx) return forbidden()
 
-  const { data } = await supabaseAdminAny.from('planos_config').select('*')
+  const { data } = await supabaseAdmin.from('planos_config').select('*')
   const map = new Map<string, Record<string, unknown>>()
   for (const p of (data ?? []) as Array<Record<string, unknown>>) map.set(p.id as string, p)
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   if (!registros.length) return Response.json({ error: 'Nada para salvar.' }, { status: 400 })
 
-  const { error } = await supabaseAdminAny.from('planos_config').upsert(registros, { onConflict: 'id' })
+  const { error } = await supabaseAdmin.from('planos_config').upsert(registros, { onConflict: 'id' })
   if (error) return Response.json({ error: error.message }, { status: 500 })
   await registrarAcaoAdmin(ctx, 'planos', 'salvar', null, { planos: registros.length })
   return Response.json({ ok: true })
