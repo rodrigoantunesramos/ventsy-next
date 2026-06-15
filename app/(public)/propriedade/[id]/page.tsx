@@ -5,7 +5,7 @@
 
 import type { Metadata } from 'next'
 import { SITE_NAME, abs } from '@/lib/site'
-import { fetchPropriedadeMeta, type PropMeta } from './_data'
+import { fetchPropriedadeMeta, fetchPropriedadeFotos, type PropMeta } from './_data'
 import PropriedadeClient from './_PropriedadeClient'
 
 export const revalidate = 300
@@ -76,14 +76,19 @@ function eventVenueLd(prop: PropMeta) {
 }
 
 export default async function PropriedadePage({ params }: { params: { id: string } }) {
-  const prop = await fetchPropriedadeMeta(Number(params.id))
+  // Busca a propriedade e suas fotos no servidor para semear a ilha cliente:
+  // o herói entra no HTML inicial (LCP) em vez de aparecer só após o fetch.
+  const [prop, fotos] = await Promise.all([
+    fetchPropriedadeMeta(Number(params.id)),
+    fetchPropriedadeFotos(Number(params.id)),
+  ])
 
   return (
     <>
       {prop && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventVenueLd(prop)) }} />
       )}
-      <PropriedadeClient />
+      <PropriedadeClient initialProp={prop} initialFotos={fotos} />
     </>
   )
 }

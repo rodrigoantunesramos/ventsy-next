@@ -7,7 +7,7 @@
 // (aqui a atualização é só otimista). Exige login: sem sessão, manda para /login.
 
 import { useEffect, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 type Tipo = 'curtir' | 'salvar' | 'seguir';
 

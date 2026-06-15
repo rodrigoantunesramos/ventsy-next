@@ -6,12 +6,12 @@ import { getAuthUser, unauthorized, forbidden } from '@/lib/apiAuth'
 // atualizar a média em propriedades (UPDATE bloqueado para anon sob RLS).
 const supabase = supabaseAdmin
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const supabaseAny = supabaseAdmin as any
+const supabase = supabaseAdmin as any
 
 // Recalcula a média pública da propriedade considerando só avaliações
 // verificadas e NÃO ocultas (a moderação do dono reflete no número público).
 async function recomputarMedia(propriedadeId: number | string) {
-  const { data: todas } = await supabaseAny
+  const { data: todas } = await supabase
     .from('avaliacoes')
     .select('nota')
     .eq('propriedade_id', propriedadeId)
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
   // Avaliações verificadas de uma propriedade — público
   if (propriedadeId) {
-    const { data, error } = await supabaseAny
+    const { data, error } = await supabase
       .from('avaliacoes')
       .select('*')
       .eq('propriedade_id', propriedadeId)
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
   if (userId !== null) {
     const user = await getAuthUser(req)
     if (!user) return unauthorized()
-    const { data, error } = await supabaseAny
+    const { data, error } = await supabase
       .from('avaliacoes')
       .select('*, propriedade:propriedades(id,nome,cidade,estado,foto_capa,imagem_url)')
       .eq('user_id', user.id)
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Verificar se o usuário já avaliou esta propriedade
-  const { data: existing } = await supabaseAny
+  const { data: existing } = await supabase
     .from('avaliacoes')
     .select('id')
     .eq('user_id', user_id)
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     year: 'numeric',
   })
 
-  const { data, error } = await supabaseAny
+  const { data, error } = await supabase
     .from('avaliacoes')
     .insert({
       user_id,
@@ -131,14 +131,14 @@ export async function PATCH(req: NextRequest) {
   if (!id) return Response.json({ error: 'id obrigatório' }, { status: 400 })
 
   // Carrega a avaliação e confirma que o espaço pertence ao usuário autenticado.
-  const { data: aval } = await supabaseAny
+  const { data: aval } = await supabase
     .from('avaliacoes')
     .select('id, propriedade_id')
     .eq('id', id)
     .maybeSingle()
   if (!aval) return Response.json({ error: 'Avaliação não encontrada.' }, { status: 404 })
 
-  const { data: prop } = await supabaseAny
+  const { data: prop } = await supabase
     .from('propriedades')
     .select('usuario_id')
     .eq('id', aval.propriedade_id)
@@ -158,7 +158,7 @@ export async function PATCH(req: NextRequest) {
     return Response.json({ error: 'Nada para atualizar.' }, { status: 400 })
   }
 
-  const { data, error } = await supabaseAny
+  const { data, error } = await supabase
     .from('avaliacoes')
     .update(patch)
     .eq('id', id)

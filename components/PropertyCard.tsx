@@ -64,62 +64,65 @@ export default function PropertyCard({
           ${isUltra ? 'card-ultra-border shadow-[0_4px_18px_rgba(240,192,64,.2)] w-[208px]' : 'border border-gray-200'}
           ${isPro && !isUltra ? 'border border-gray-300 shadow-sm' : ''}`}
         style={{ animationDelay: `${delay}s` }}
-        onClick={() => { window.location.href = `/propriedade/${property.id}` }}
         title={nome}
       >
-        {isUltra && (
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#f0c040] via-[#ff385c] to-[#f0c040] z-10" />
-        )}
-        {isUltra && (
-          <div className="absolute top-4 -right-6 z-10 bg-gradient-to-br from-[#f0c040] to-[#d4a000] text-white text-[9px] font-black tracking-wider uppercase py-0.5 px-8 rotate-45 shadow-sm">
-            Premium
-          </div>
-        )}
-
-        <div className={`relative overflow-hidden ${isUltra ? 'h-[132px]' : 'h-[120px]'}`}>
-          {temFoto ? (
-            <Image
-              src={img} alt={nome} fill sizes="208px"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : <FotoPlaceholder />}
+        <Link href={`/propriedade/${property.id}`} className="block no-underline text-inherit">
           {isUltra && (
-            <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full backdrop-blur-sm">
-              ✦ Premium
-            </span>
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#f0c040] via-[#ff385c] to-[#f0c040] z-10" />
           )}
-          {isPro && !isUltra && (
-            <span className="absolute bottom-2 left-2 bg-[#0d0d0d]/80 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm">
-              Pro
-            </span>
+          {isUltra && (
+            <div className="absolute top-4 -right-6 z-10 bg-gradient-to-br from-[#f0c040] to-[#d4a000] text-white text-[9px] font-black tracking-wider uppercase py-0.5 px-8 rotate-45 shadow-sm">
+              Premium
+            </div>
           )}
-          <button
-            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm border-none flex items-center justify-center text-sm cursor-pointer transition-all hover:scale-110 hover:bg-white z-10 ${fav ? 'text-[#ff385c]' : 'text-gray-400'}`}
-            onClick={e => { e.stopPropagation(); toggleFav() }}
-          >
-            {fav ? '❤' : '♡'}
-          </button>
-        </div>
 
-        <div className="px-3 py-3">
-          <div className="font-bold text-[#0d0d0d] text-[.86rem] truncate mb-0.5">{nome}</div>
-          {cidade && <div className="text-gray-400 text-[.73rem] mb-2 truncate">{cidade}</div>}
-          <div className="flex items-center justify-between">
-            {preco != null ? (
-              <span className="text-[.76rem] text-gray-600">
-                A partir de <strong className="text-[#0d0d0d] font-bold">R$ {Number(preco).toLocaleString('pt-BR')}</strong>
+          <div className={`relative overflow-hidden ${isUltra ? 'h-[132px]' : 'h-[120px]'}`}>
+            {temFoto ? (
+              <Image
+                src={img} alt={nome} fill sizes="208px"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : <FotoPlaceholder />}
+            {isUltra && (
+              <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full backdrop-blur-sm">
+                ✦ Premium
               </span>
-            ) : (
-              <span className="text-[.76rem] text-gray-300">Sob consulta</span>
             )}
-            {nota && (
-              <span className="flex items-center gap-0.5 text-[.75rem] font-bold text-[#0d0d0d]">
-                <StarIcon />
-                {parseFloat(nota).toFixed(1)}
+            {isPro && !isUltra && (
+              <span className="absolute bottom-2 left-2 bg-[#0d0d0d]/80 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm">
+                Pro
               </span>
             )}
           </div>
-        </div>
+
+          <div className="px-3 py-3">
+            <div className="font-bold text-[#0d0d0d] text-[.86rem] truncate mb-0.5">{nome}</div>
+            {cidade && <div className="text-gray-400 text-[.73rem] mb-2 truncate">{cidade}</div>}
+            <div className="flex items-center justify-between">
+              {preco != null ? (
+                <span className="text-[.76rem] text-gray-600">
+                  A partir de <strong className="text-[#0d0d0d] font-bold">R$ {Number(preco).toLocaleString('pt-BR')}</strong>
+                </span>
+              ) : (
+                <span className="text-[.76rem] text-gray-300">Sob consulta</span>
+              )}
+              {nota && (
+                <span className="flex items-center gap-0.5 text-[.75rem] font-bold text-[#0d0d0d]">
+                  <StarIcon />
+                  {parseFloat(nota).toFixed(1)}
+                </span>
+              )}
+            </div>
+          </div>
+        </Link>
+
+        <button
+          className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm border-none flex items-center justify-center text-sm cursor-pointer transition-all hover:scale-110 hover:bg-white z-20 ${fav ? 'text-[#ff385c]' : 'text-gray-400'}`}
+          onClick={e => { e.stopPropagation(); toggleFav() }}
+          aria-label={fav ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+        >
+          {fav ? '❤' : '♡'}
+        </button>
       </div>
     )
   }
@@ -130,85 +133,88 @@ export default function PropertyCard({
     const categoria  = property.categoria || ''
     return (
       <div
-        className={`bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col
+        className={`bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col relative
           transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg
           ${isUltra ? 'card-ultra-border shadow-[0_4px_18px_rgba(240,192,64,.2)]' : 'border border-gray-200'}`}
-        onClick={() => { window.location.href = `/propriedade/${property.id}` }}
       >
-        {isUltra && (
-          <div className="h-[3px] bg-gradient-to-r from-[#f0c040] via-[#ff385c] to-[#f0c040]" />
-        )}
+        <Link href={`/propriedade/${property.id}`} className="flex flex-col flex-1 no-underline text-inherit">
+          {isUltra && (
+            <div className="h-[3px] bg-gradient-to-r from-[#f0c040] via-[#ff385c] to-[#f0c040]" />
+          )}
 
-        <div className="relative h-48 overflow-hidden">
-          {temFoto ? (
-            <Image
-              src={img} alt={nome} fill
-              sizes="(min-width:1280px) 30vw, (min-width:1024px) 45vw, 50vw"
-              className="object-cover"
-            />
-          ) : <FotoPlaceholder />}
-          {isUltra ? (
-            <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full">
-              ✦ Premium
-            </span>
-          ) : isPro ? (
-            <span className="absolute bottom-2 left-2 bg-[#0d0d0d]/80 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/20">
-              Pro
-            </span>
-          ) : categoria ? (
-            <span className="absolute bottom-2 left-2 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-full">
-              {categoria}
-            </span>
-          ) : null}
-          <button
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer z-10"
-            onClick={e => { e.stopPropagation(); toggleFav() }}
-          >
-            <span className={fav ? 'text-[#ff385c]' : 'text-white drop-shadow'}>{fav ? '❤' : '♡'}</span>
-          </button>
-        </div>
+          <div className="relative h-48 overflow-hidden">
+            {temFoto ? (
+              <Image
+                src={img} alt={nome} fill
+                sizes="(min-width:1280px) 30vw, (min-width:1024px) 45vw, 50vw"
+                className="object-cover"
+              />
+            ) : <FotoPlaceholder />}
+            {isUltra ? (
+              <span className="absolute bottom-2 left-2 bg-amber-400 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full">
+                ✦ Premium
+              </span>
+            ) : isPro ? (
+              <span className="absolute bottom-2 left-2 bg-[#0d0d0d]/80 text-white text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/20">
+                Pro
+              </span>
+            ) : categoria ? (
+              <span className="absolute bottom-2 left-2 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-full">
+                {categoria}
+              </span>
+            ) : null}
+          </div>
 
-        <div className="p-3 flex flex-col gap-1.5 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-[#0d0d0d] text-sm leading-tight line-clamp-2 flex-1">{nome}</h3>
-            {nota && (
-              <span className="flex items-center gap-0.5 text-xs text-gray-600 flex-shrink-0">
-                <StarIcon />
-                {parseFloat(nota).toFixed(1)}
-              </span>
-            )}
+          <div className="p-3 flex flex-col gap-1.5 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-[#0d0d0d] text-sm leading-tight line-clamp-2 flex-1">{nome}</h3>
+              {nota && (
+                <span className="flex items-center gap-0.5 text-xs text-gray-600 flex-shrink-0">
+                  <StarIcon />
+                  {parseFloat(nota).toFixed(1)}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+              {cidade && (
+                <span className="flex items-center gap-1">
+                  <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                    <circle cx="12" cy="9" r="2.5" />
+                  </svg>
+                  {cidade}
+                </span>
+              )}
+              {capacidade && (
+                <span className="flex items-center gap-1">
+                  <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  {capacidade}
+                </span>
+              )}
+            </div>
+            <p className="text-sm mt-auto pt-2 border-t border-gray-100">
+              {property.valor_hora > 0 ? (
+                <><strong className="text-[#0d0d0d]">R$ {Number(property.valor_hora).toLocaleString('pt-BR')}</strong><span className="text-gray-400 text-xs"> / hora</span></>
+              ) : property.valor_base > 0 ? (
+                <strong className="text-[#0d0d0d]">R$ {Number(property.valor_base).toLocaleString('pt-BR')}</strong>
+              ) : (
+                <span className="text-gray-300 text-xs">Sob consulta</span>
+              )}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-            {cidade && (
-              <span className="flex items-center gap-1">
-                <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-                {cidade}
-              </span>
-            )}
-            {capacidade && (
-              <span className="flex items-center gap-1">
-                <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-                {capacidade}
-              </span>
-            )}
-          </div>
-          <p className="text-sm mt-auto pt-2 border-t border-gray-100">
-            {property.valor_hora > 0 ? (
-              <><strong className="text-[#0d0d0d]">R$ {Number(property.valor_hora).toLocaleString('pt-BR')}</strong><span className="text-gray-400 text-xs"> / hora</span></>
-            ) : property.valor_base > 0 ? (
-              <strong className="text-[#0d0d0d]">R$ {Number(property.valor_base).toLocaleString('pt-BR')}</strong>
-            ) : (
-              <span className="text-gray-300 text-xs">Sob consulta</span>
-            )}
-          </p>
-        </div>
+        </Link>
+
+        <button
+          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer z-20"
+          onClick={e => { e.stopPropagation(); toggleFav() }}
+          aria-label={fav ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+        >
+          <span className={fav ? 'text-[#ff385c]' : 'text-white drop-shadow'}>{fav ? '❤' : '♡'}</span>
+        </button>
       </div>
     )
   }

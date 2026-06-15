@@ -10,6 +10,7 @@ import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
 import { comodidadeLabel } from '@/lib/data'
 import { formatMoney } from '@/lib/format'
+import type { PropMeta, FotoMeta } from './_data'
 import './propriedade.css'
 
 /* ── tipos ── */
@@ -79,17 +80,25 @@ function FotoEspaco({ url, alt, focal_x, focal_y, sizes, priority = false, class
   return <img src={url} alt={alt} loading={priority ? undefined : 'lazy'} className={`w-full h-full object-cover ${className}`.trim()} style={{ objectPosition }} />
 }
 
-function PropriedadeContent() {
+function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMeta | null; initialFotos: FotoMeta[] }) {
   const params = useParams()
   const propId    = params.id as string
   const propIdNum = Number(propId)
 
-  const [prop,setProp]         = useState<any>(null)
-  const [fotos,setFotos]       = useState<Foto[]>([])
+  // Semeia o estado com o que veio do servidor (initialProp/initialFotos) para o
+  // herói/galeria renderizarem já no HTML — o useEffect re-busca e enriquece.
+  const [prop,setProp]         = useState<any>(initialProp ?? null)
+  const [fotos,setFotos]       = useState<Foto[]>(
+    initialFotos.length
+      ? initialFotos
+      : initialProp?.imagem_url
+        ? [{ url: initialProp.imagem_url, titulo: '', ordem: 0, tipo: null, focal_x: null, focal_y: null, alt: null }]
+        : []
+  )
   const [videos,setVideos]     = useState<Video[]>([])
   const [avaliacoes,setAval]   = useState<Avaliacao[]>([])
   const [plano,setPlano]       = useState<'basico'|'pro'|'ultra'>('basico')
-  const [loading,setLoading]   = useState(true)
+  const [loading,setLoading]   = useState(!initialProp)
   const [naoEncontrado,setNaoEncontrado] = useState(false)
   const [anfNome,setAnfNome]   = useState('—')
   const [anfTempo,setAnfTempo] = useState('—')
@@ -176,7 +185,7 @@ function PropriedadeContent() {
       )
 
       if (!p) {
-        setNaoEncontrado(true)
+        if (!initialProp) setNaoEncontrado(true)
         setLoading(false)
         return
       }
@@ -252,8 +261,11 @@ function PropriedadeContent() {
       }).catch(() => {})
 
     } catch(e) {
-      // Em produção um erro não pode virar a propriedade de demonstração: mostra "não encontrado".
-      if (process.env.NODE_ENV !== 'production') loadDemo()
+      // Com dados iniciais do servidor (initialProp), um erro de enriquecimento no
+      // cliente NÃO pode derrubar a página: mantém o que veio do SSR. Sem eles,
+      // mostra demo (dev) ou "não encontrado" (prod) — nunca a demo em produção.
+      if (initialProp) { /* mantém a tela já renderizada com os dados do servidor */ }
+      else if (process.env.NODE_ENV !== 'production') loadDemo()
       else setNaoEncontrado(true)
     } finally {
       setLoading(false)
@@ -764,10 +776,10 @@ function PropriedadeContent() {
   )
 }
 
-export default function PropriedadeClient() {
+export default function PropriedadeClient({ initialProp = null, initialFotos = [] }: { initialProp?: PropMeta | null; initialFotos?: FotoMeta[] }) {
   return (
     <Suspense fallback={<div className="pp-loading"><div className="pp-loading-logo"><em>VENTSY</em></div><div className="pp-loading-dots"><span/><span/><span/></div></div>}>
-      <PropriedadeContent/>
+      <PropriedadeContent initialProp={initialProp} initialFotos={initialFotos}/>
     </Suspense>
   )
 }
