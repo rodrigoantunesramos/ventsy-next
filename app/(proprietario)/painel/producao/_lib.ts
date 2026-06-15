@@ -7,7 +7,8 @@
 // (dependência) passam pela rota AUTORITATIVA /api/producao; o demais (briefing,
 // CRUD de tarefas/run-show) é feito pelo client via RLS.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import {
   type Producao, type Tarefa, type RunshowItem, type Briefing, type AnexoRef, type ContatoChave,
   mesclarBriefing,
@@ -145,13 +146,13 @@ export async function salvarProducao(id: string, patch: Partial<{ status: string
   return sb.from('producao').update(patch).eq('id', id)
 }
 export async function criarTarefa(row: Record<string, unknown>) {
-  return sb.from('producao_tarefas').insert(row).select(SEL_TAR).single()
+  return sb.from('producao_tarefas').insert(row as TablesInsert<'producao_tarefas'>).select(SEL_TAR).single()
 }
 export async function excluirTarefa(id: string) {
   return sb.from('producao_tarefas').delete().eq('id', id)
 }
 export async function criarRunshow(row: Record<string, unknown>) {
-  return sb.from('runshow').insert(row).select(SEL_RUN).single()
+  return sb.from('runshow').insert(row as TablesInsert<'runshow'>).select(SEL_RUN).single()
 }
 export async function salvarRunshow(id: string, patch: Record<string, unknown>) {
   return sb.from('runshow').update(patch).eq('id', id).select(SEL_RUN).single()

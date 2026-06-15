@@ -10,7 +10,7 @@
 // Tipos/helpers em ../_lib; motor puro em lib/manutencao; UI em ./ui.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatDate, formatMonth } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

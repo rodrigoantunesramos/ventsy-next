@@ -17,7 +17,8 @@
 // /api/acesso. Sem "R$" hardcoded — datas/números via lib/format.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { formatDate, formatDateTime, formatNumber, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -182,7 +183,7 @@ export default function AcessoPage() {
       toast.success('Credencial atualizada.');
     } else {
       const row = { ...payload, usuario_id: userId, evento_id: eventoSel, qr_token: gerarToken(), status: 'emitida' };
-      const { error } = await sb.from('credenciais').insert(row);
+      const { error } = await sb.from('credenciais').insert(row as TablesInsert<'credenciais'>);
       if (error) { toast.error('Não foi possível emitir a credencial.'); return false; }
       toast.success('Credencial emitida.');
     }
@@ -242,10 +243,10 @@ export default function AcessoPage() {
   async function salvarZona(z: Partial<Zona> & { id?: string }): Promise<boolean> {
     if (!userId || !eventoSel) return false;
     if (z.id) {
-      const { error } = await sb.from('acesso_zonas').update({ nome: z.nome, capacidade: z.capacidade, cor: z.cor, tipos_permitidos: z.tipos_permitidos, ordem: z.ordem }).eq('id', z.id);
+      const { error } = await sb.from('acesso_zonas').update({ nome: z.nome, capacidade: z.capacidade, cor: z.cor, tipos_permitidos: z.tipos_permitidos, ordem: z.ordem } as TablesUpdate<'acesso_zonas'>).eq('id', z.id);
       if (error) { toast.error('Não foi possível salvar a zona.'); return false; }
     } else {
-      const { error } = await sb.from('acesso_zonas').insert({ usuario_id: userId, evento_id: eventoSel, codigo: z.codigo, nome: z.nome, capacidade: z.capacidade || 0, cor: z.cor || null, tipos_permitidos: z.tipos_permitidos || [], ordem: z.ordem || zonas.length });
+      const { error } = await sb.from('acesso_zonas').insert({ usuario_id: userId, evento_id: eventoSel, codigo: z.codigo, nome: z.nome, capacidade: z.capacidade || 0, cor: z.cor || null, tipos_permitidos: z.tipos_permitidos || [], ordem: z.ordem || zonas.length } as TablesInsert<'acesso_zonas'>);
       if (error) { toast.error(error.message?.includes('duplicate') ? 'Já existe uma zona com esse código.' : 'Não foi possível criar a zona.'); return false; }
     }
     refetch();
@@ -264,7 +265,7 @@ export default function AcessoPage() {
       const { error } = await sb.from('acesso_ocorrencias').update(payload).eq('id', editing.id);
       if (error) { toast.error('Não foi possível salvar.'); return false; }
     } else {
-      const { error } = await sb.from('acesso_ocorrencias').insert({ ...payload, usuario_id: userId, evento_id: eventoSel });
+      const { error } = await sb.from('acesso_ocorrencias').insert({ ...payload, usuario_id: userId, evento_id: eventoSel } as TablesInsert<'acesso_ocorrencias'>);
       if (error) { toast.error('Não foi possível registrar.'); return false; }
     }
     toast.success('Ocorrência registrada.');

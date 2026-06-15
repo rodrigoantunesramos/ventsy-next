@@ -4,7 +4,7 @@
 // banco, a leitura escopada por usuario_id (via RLS — a trilha é só-leitura no
 // client) e helpers de UI (premium, hoje, retenção, download).
 
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { authHeaders } from '@/lib/supabase'
 import { logsParaCSV, isMissingTable, type AuditLogLike } from '@/lib/audit'
 import type { Json } from '@/types/supabase'

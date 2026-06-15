@@ -1,4 +1,4 @@
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { sendEmail } from '@/lib/email'
 
 // Recebe o formulário público "Fale Conosco": persiste em mensagens_contato e
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     mensagem,
   }
 
-  const { error } = await supabaseAdminAny.from('mensagens_contato').insert(registro)
+  const { error } = await supabaseAdmin.from('mensagens_contato').insert(registro)
   if (error) return Response.json({ error: 'Não foi possível enviar. Tente novamente.' }, { status: 500 })
 
   // Avisa o suporte (best-effort — não bloqueia se o SMTP não estiver configurado).

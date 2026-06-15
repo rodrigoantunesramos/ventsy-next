@@ -9,7 +9,7 @@
 // As regras puras (alçada, comparativo, economia, lead time) ficam em
 // lib/compras.ts (testadas) e são re-exportadas no fim.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 // ── Status / prioridade / unidades ────────────────────────────────────────────
 export type Prioridade = 'baixa' | 'media' | 'alta' | 'urgente';

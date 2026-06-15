@@ -10,7 +10,8 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import Link from 'next/link'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import { formatMoney, formatMoneyShort, formatNumber, formatPercent } from '@/lib/format'
 import { useToast } from '@/components/Toast'
 import { getUnidadeCtx, setUnidadeCtx, onUnidadeCtx } from '@/lib/unidadeCtx'
@@ -127,7 +128,7 @@ export default function UnidadesPage() {
     if (!userId) return
     try {
       const { error } = await sb.from('unidades_config').upsert(
-        { usuario_id: userId, ...payload }, { onConflict: 'usuario_id,propriedade_id' },
+        { usuario_id: userId, ...payload } as TablesInsert<'unidades_config'>, { onConflict: 'usuario_id,propriedade_id' },
       )
       if (error) throw error
       toast.success('Unidade atualizada.')

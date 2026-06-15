@@ -4,7 +4,7 @@ import { getAuthUser, unauthorized } from '@/lib/apiAuth';
 import { encryptSecret, decryptSecret } from '@/lib/crypto';
 
 // `documentos` ainda não está nos tipos gerados (migration via MCP) — acesso
-// não-tipado, igual ao supabaseAny usado no resto do módulo.
+// não-tipado, igual ao supabase usado no resto do módulo.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const admin = supabaseAdmin as any;
 

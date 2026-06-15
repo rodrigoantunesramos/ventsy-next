@@ -9,7 +9,7 @@
 // Rascunho via RLS (tabela inventarios); ajustes via API autoritativa.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatNumber, formatPercent, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import { type Produto, type Inventario as Inv, type InvItem, LOCAIS, localLabel, inp, postMov, ymd } from '../_lib';

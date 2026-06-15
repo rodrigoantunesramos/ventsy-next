@@ -10,7 +10,8 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -26,11 +27,11 @@ type Filtro = 'todos' | 'aberto' | 'atrasado' | 'agendado' | 'pago';
 // Insere despesa no caixa; tenta com fornecedor_id e cai p/ sem ele se a coluna
 // não existir (migração de Fornecedores ainda não aplicada).
 async function inserirDespesa(payload: Record<string, unknown>): Promise<{ id: number } | null> {
-  let r = await sb.from('lancamentos').insert(payload).select('id').single();
+  let r = await sb.from('lancamentos').insert(payload as TablesInsert<'lancamentos'>).select('id').single();
   if (r.error && (r.error.code === 'PGRST204' || r.error.code === '42703' || /fornecedor_id/i.test(r.error.message || ''))) {
     const semForn = { ...payload };
     delete semForn.fornecedor_id;
-    r = await sb.from('lancamentos').insert(semForn).select('id').single();
+    r = await sb.from('lancamentos').insert(semForn as TablesInsert<'lancamentos'>).select('id').single();
   }
   return r.error ? null : (r.data as { id: number });
 }

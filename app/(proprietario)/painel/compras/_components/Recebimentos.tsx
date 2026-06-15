@@ -6,7 +6,8 @@
 // fechando o rastro requisição → pedido → recebimento → pagamento.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -206,7 +207,7 @@ function ReceberModal({ bag, pedido, onClose, onSaved }: { bag: ComprasBag; pedi
         custo_unit_num: r.item.valor_unit_num, motivo: `Recebimento ${pedido.numero}`, recebimento_id: recId,
       }));
       if (movs.length) {
-        const r = await sb.from('estoque_mov').insert(movs);
+        const r = await sb.from('estoque_mov').insert(movs as TablesInsert<'estoque_mov'>[]);
         if (r.error) estoqueMsg = ''; // Estoque ainda não ativo — silencioso
         else estoqueMsg = ' Entrada no estoque registrada.';
       }

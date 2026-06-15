@@ -5,7 +5,7 @@
 // nº de convidados). Persiste em precos_regras (com usuario_id p/ RLS).
 
 import { useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import type { AjusteTipo, Condicao, PrecoRegra, PrecoTabela, RegraTipo } from '@/lib/pricing';
 import {

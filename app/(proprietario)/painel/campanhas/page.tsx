@@ -12,7 +12,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { formatNumber, formatPercent, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -118,8 +119,8 @@ export default function CampanhasPage() {
       const uid = session.user.id;
       setUserId(uid);
       try {
-        const { data: a } = await sb.from('assinaturas').select('plano_ativo, plano').eq('usuario_id', uid).maybeSingle();
-        setPlano((a?.plano_ativo || a?.plano || 'basico').toString().toLowerCase());
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', uid).maybeSingle();
+        setPlano((a?.plano_ativo || 'basico').toString().toLowerCase());
       } catch { /* plano opcional */ }
       try {
         const { data: cfg } = await sb.from('empresa_config').select('*').eq('usuario_id', uid).maybeSingle();
@@ -177,11 +178,11 @@ export default function CampanhasPage() {
       assunto: campos.canal === 'email' ? campos.assunto : null, corpo: campos.corpo, segmento: filtro,
     };
     if (editing?.id) {
-      const { error } = await sb.from('campanhas').update(payload).eq('id', editing.id);
+      const { error } = await sb.from('campanhas').update(payload as TablesUpdate<'campanhas'>).eq('id', editing.id);
       if (error) { toast.error('Não foi possível salvar a campanha.'); return null; }
       return editing.id;
     }
-    const { data, error } = await sb.from('campanhas').insert({ ...payload, status: 'rascunho' }).select().single();
+    const { data, error } = await sb.from('campanhas').insert({ ...payload, status: 'rascunho' } as TablesInsert<'campanhas'>).select().single();
     if (error) { toast.error('Não foi possível criar a campanha.'); return null; }
     setEditing(normCampanha(data));
     return String(data.id);
@@ -200,7 +201,7 @@ export default function CampanhasPage() {
       vars: varsDoAlvo(alvo, empresa), status: 'fila',
     }));
     for (let i = 0; i < rows.length; i += 500) {
-      const { error } = await sb.from('campanhas_envios').insert(rows.slice(i, i + 500));
+      const { error } = await sb.from('campanhas_envios').insert(rows.slice(i, i + 500) as TablesInsert<'campanhas_envios'>[]);
       if (error) { toast.error('Falha ao montar a fila de envio.'); break; }
     }
     return rows.length;
@@ -298,7 +299,7 @@ export default function CampanhasPage() {
     const { error } = await sb.from('campanhas').insert({
       usuario_id: userId, nome: `${c.nome} (cópia)`, canal: c.canal, assunto: c.assunto, corpo: c.corpo,
       segmento: c.segmento, status: 'rascunho',
-    });
+    } as TablesInsert<'campanhas'>);
     if (error) { toast.error('Falha ao duplicar.'); return; }
     toast.success('Campanha duplicada como rascunho.');
     await carregar(userId!);

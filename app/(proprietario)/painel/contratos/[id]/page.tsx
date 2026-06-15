@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatDate, formatDateTime } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -39,7 +39,7 @@ export default function ContratoDetailPage() {
     const uid = session.user.id;
     const { data: c, error } = await sb.from('contratos').select('*').eq('id', id).eq('usuario_id', uid).maybeSingle();
     if (isMissingTable(error) || !c) { setContrato(null); setLoading(false); return; }
-    setContrato({ ...(c as Contrato), valor_num: Number(c.valor_num) || 0, variaveis: c.variaveis || {} });
+    setContrato({ ...(c as Contrato), valor_num: Number(c.valor_num) || 0, variaveis: (c.variaveis || {}) as Record<string, string> });
     const [{ data: assin }, { data: emp }] = await Promise.all([
       sb.from('contratos_assinaturas').select('*').eq('contrato_id', id).order('ordem'),
       sb.from('empresa_config').select('razao_social,fantasia').eq('usuario_id', uid).maybeSingle(),

@@ -5,7 +5,7 @@
 // venda é o `valor_num` (fechado), com sugestão = soma dos itens.
 
 import { useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { formatMoney, getFormatPrefs } from '@/lib/format';
 import { inp } from '../_lib';

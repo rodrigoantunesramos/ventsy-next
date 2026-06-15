@@ -6,7 +6,8 @@
 // BUSCA da previsão (API de meteo + cache) passa pela rota /api/plano-b; o CRUD
 // de planos e a previsão MANUAL são feitos pelo client via RLS.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import {
   type Plano, type Gatilho, type ChecklistItem, type ClimaResumo, type ClimaHora,
   type RiscoTipo, type Metrica, type Operador, type PlanoStatus, type Avaliacao, type NivelRisco,
@@ -165,11 +166,11 @@ export async function buscarPrevisao(evento_id: string): Promise<PrevisaoResult>
 // ── CRUD via RLS (client) — planos + previsão manual ─────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function criarPlano(row: Record<string, unknown>) {
-  return sb.from('plano_contingencia').insert(row).select(SEL_PLANO).single()
+  return sb.from('plano_contingencia').insert(row as TablesInsert<'plano_contingencia'>).select(SEL_PLANO).single()
 }
 /** Insere vários planos de uma vez (gerar do modelo). */
 export async function bulkInserirPlanos(rows: Record<string, unknown>[]) {
-  return sb.from('plano_contingencia').insert(rows)
+  return sb.from('plano_contingencia').insert(rows as TablesInsert<'plano_contingencia'>[])
 }
 export async function salvarPlano(id: string, patch: Record<string, unknown>) {
   return sb.from('plano_contingencia').update(patch).eq('id', id).select(SEL_PLANO).single()

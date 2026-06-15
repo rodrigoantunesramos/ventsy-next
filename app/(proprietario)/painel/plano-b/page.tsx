@@ -17,7 +17,7 @@
 // aplicado, e para entrada manual quando não há API/coordenadas. Sem "R$".
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -94,7 +94,7 @@ export default function PlanoBPage() {
       } catch { /* opcional */ }
       try {
         const { data: cfg } = await sb.from('empresa_config').select('*').eq('usuario_id', uid).maybeSingle();
-        nomeEmpresa = cfg?.nome_empresa || cfg?.nome || cfg?.razao_social || nomeEmpresa;
+        nomeEmpresa = cfg?.fantasia || cfg?.razao_social || nomeEmpresa;
       } catch { /* opcional */ }
       setEmpresa(nomeEmpresa);
 

@@ -5,7 +5,7 @@
 // (view v_indicacoes_dashboard). Porta o módulo legado.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 type Indicacao = { propriedade: string | null; data: string | null; status: string | null; status_label: string | null; recompensa: string | null; recompensa_label: string | null };
 

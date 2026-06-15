@@ -6,7 +6,8 @@
 // Fluxo de status: aberta → aprovada/reprovada → em_cotacao (→ pedido/recebida).
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -313,7 +314,7 @@ function RequisicaoModal({ bag, editando, itensIniciais, onClose, onSaved }: {
       requisicao_id: reqId, usuario_id: userId, descricao: i.descricao,
       quantidade: Number(i.quantidade) || 1, unidade: i.unidade || 'un', valor_estimado_num: Number(i.valor_estimado) || 0,
     }));
-    const { error: eItens } = await sb.from('requisicao_itens').insert(payloadItens);
+    const { error: eItens } = await sb.from('requisicao_itens').insert(payloadItens as TablesInsert<'requisicao_itens'>[]);
     setSaving(false);
     if (eItens) { toast.error('Requisição salva, mas houve erro nos itens.'); return; }
     toast.success(editando ? 'Requisição atualizada!' : 'Requisição criada!');

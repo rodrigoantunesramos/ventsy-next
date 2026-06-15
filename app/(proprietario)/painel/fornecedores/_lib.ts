@@ -3,7 +3,7 @@
 // Regra de ouro: NADA de "R$"/percentual/data formatada aqui — só números/datas
 // cruas; toda a formatação fica em lib/format, chamada nas páginas.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 // ── Tipos (espelham docs/sql/fornecedores.sql) ───────────────────────────────
 export type TipoForn = 'pf' | 'pj';

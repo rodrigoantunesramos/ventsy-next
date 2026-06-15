@@ -7,7 +7,7 @@
 // contratos_templates (RLS por dono). Sem "R$" hardcoded.
 
 import { useRef, useState } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import {
   VAR_DEFS, CLAUSULAS_PRESET, templatePadrao, TIPOS_EVENTO,

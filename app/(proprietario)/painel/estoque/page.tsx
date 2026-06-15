@@ -13,7 +13,7 @@
 // lib/format; toast pelo ToastProvider do layout. Sem "R$" hardcoded.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import type { MovTipo } from '@/lib/estoque';
 import {
   type Produto, type EstoqueMov, type Inventario as Inv, type EventoLite,

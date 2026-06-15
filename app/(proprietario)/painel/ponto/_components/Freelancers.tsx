@@ -6,7 +6,7 @@
 // pagamento (aba Apuração). Sem "R$" hardcoded — tudo via lib/format.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import { FUNCOES, funcaoLabel, funcaoCor, type Freelancer } from '@/lib/ponto';

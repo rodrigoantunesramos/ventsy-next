@@ -14,7 +14,7 @@
 // (motor puro, testado). Esta página é só-leitura sobre a trilha.
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { formatNumber } from '@/lib/format'
 import { resumoAuditoria, atividadePorDia } from '@/lib/audit'
 import {
@@ -59,8 +59,8 @@ export default function AuditoriaPage() {
       setUserId(uid)
 
       try {
-        const { data: a } = await sb.from('assinaturas').select('plano_ativo,plano').eq('usuario_id', uid).maybeSingle()
-        const plano = (a?.plano_ativo || a?.plano || 'basico') as string
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', uid).maybeSingle()
+        const plano = (a?.plano_ativo || 'basico') as string
         setPremium(isPremium(plano))
         if (isPremium(plano)) await carregar(uid)
       } catch {

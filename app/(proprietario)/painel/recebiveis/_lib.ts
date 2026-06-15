@@ -6,7 +6,7 @@
 // "A receber" = tabela `parcelas` (parcelamento de eventos, já existia).
 // "A pagar"   = tabela `contas_pagar` (ver docs/sql/contas-pagar.sql).
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 // ── A receber: parcelas + eventos ─────────────────────────────────────────────
 export type ParcelaStatus = 'pendente' | 'pago' | 'cancelado';

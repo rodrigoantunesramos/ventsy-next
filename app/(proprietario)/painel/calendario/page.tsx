@@ -13,7 +13,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { DEFAULT_LOCALE, formatMoney, formatPercent, formatDate, formatDateTime } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import { ReservaEditor } from '@/components/ReservaEditor';

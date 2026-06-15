@@ -8,7 +8,7 @@
 // hardcoded — moeda via lib/format.
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { formatMoney, formatDate } from '@/lib/format'
 import { useToast } from '@/components/Toast'
 import { MODULOS_PORTAL, modulosVisiveis, isMissingTable, type ModulosMap } from '@/lib/portal'

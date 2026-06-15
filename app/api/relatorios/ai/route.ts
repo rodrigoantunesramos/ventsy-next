@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { generateText } from 'ai'
-import { supabaseAdminAny as db } from '@/lib/supabaseAdmin'
+import { supabaseAdmin as db } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized } from '@/lib/apiAuth'
 
 export const runtime = 'nodejs'
@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
 
   // Gate Pro+ (checagem no servidor, não confia só no client).
   try {
-    const { data: a } = await db.from('assinaturas').select('plano_ativo,plano').eq('usuario_id', user.id).maybeSingle()
-    if (!isPremium(a?.plano_ativo || a?.plano)) return Response.json({ code: 'NEED_PRO' })
+    const { data: a } = await db.from('assinaturas').select('plano_ativo').eq('usuario_id', user.id).maybeSingle()
+    if (!isPremium(a?.plano_ativo)) return Response.json({ code: 'NEED_PRO' })
   } catch { /* sem assinatura → trata como não-premium abaixo */ return Response.json({ code: 'NEED_PRO' }) }
 
   if (!process.env.AI_GATEWAY_API_KEY) return Response.json({ code: 'NO_KEY' })

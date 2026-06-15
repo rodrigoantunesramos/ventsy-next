@@ -1,7 +1,7 @@
 // Núcleo compartilhado do módulo Documentos (/painel/documentos/*).
 // Tipos, constantes (categorias/status), helpers de validade e de Supabase Storage.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 
 // ── Tipo (espelha a tabela public.documentos) ──────────────────────────────────
 export type Doc = {

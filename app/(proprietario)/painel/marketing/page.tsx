@@ -19,7 +19,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatNumber, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -159,8 +159,8 @@ export default function MarketingPage() {
       const uid = session.user.id;
       setUserId(uid);
       try {
-        const { data: a } = await sb.from('assinaturas').select('plano_ativo, plano').eq('usuario_id', uid).maybeSingle();
-        setPlano((a?.plano_ativo || a?.plano || 'basico').toString().toLowerCase());
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', uid).maybeSingle();
+        setPlano((a?.plano_ativo || 'basico').toString().toLowerCase());
       } catch { /* plano opcional */ }
       try {
         const { data: cfg } = await sb.from('empresa_config').select('*').eq('usuario_id', uid).maybeSingle();

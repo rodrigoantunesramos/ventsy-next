@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
+import { supabase, authHeaders } from '@/lib/supabase'
 import { CATS, ESTADOS } from '@/lib/data'
 
 const COMODIDADES = [
@@ -67,7 +67,7 @@ function EditarModal({ espaco, onClose, onSaved }: { espaco: Espaco; onClose: ()
       imagem_url: imagemUrl.trim() || null,
       comodidades: comods.length ? `{${comods.join(',')}}` : null,
     }
-    const { error } = await supabaseAny.from('propriedades').update(payload).eq('id', espaco.id)
+    const { error } = await supabase.from('propriedades').update(payload).eq('id', espaco.id)
     if (error) { setErro(error.message); setSalvando(false); return }
     onSaved({ ...espaco, ...payload })
   }
@@ -192,7 +192,7 @@ function FotosModal({ espaco, onClose, onCover }: { espaco: Espaco; onClose: () 
   const fileRef = useRef<HTMLInputElement>(null)
 
   const load = async (): Promise<Espaco[]> => {
-    const { data } = await supabaseAny.from('fotos_imovel').select('*').eq('propriedade_id', espaco.id).order('ordem', { ascending: true })
+    const { data } = await supabase.from('fotos_imovel').select('*').eq('propriedade_id', espaco.id).order('ordem', { ascending: true })
     const list = (data || []) as Espaco[]
     setFotos(list); setLoading(false)
     return list
@@ -313,7 +313,7 @@ export default function MeusEspacosPage() {
 
   const load = async (uid: string) => {
     setLoading(true)
-    const { data } = await supabaseAny.from('propriedades').select('*').eq('usuario_id', uid).order('id', { ascending: false })
+    const { data } = await supabase.from('propriedades').select('*').eq('usuario_id', uid).order('id', { ascending: false })
     setEspacos((data || []) as Espaco[])
     setLoading(false)
   }
@@ -329,7 +329,7 @@ export default function MeusEspacosPage() {
   const togglePublicar = async (esp: Espaco) => {
     const novo = !esp.publicada
     setEspacos((prev) => prev.map((e) => (e.id === esp.id ? { ...e, publicada: novo } : e)))
-    await supabaseAny.from('propriedades').update({ publicada: novo }).eq('id', esp.id)
+    await supabase.from('propriedades').update({ publicada: novo }).eq('id', esp.id)
   }
 
   return (

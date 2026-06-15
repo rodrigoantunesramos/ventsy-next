@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { supabase, supabaseAny } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { calcularTaxas, brl } from '@/lib/fees'
 
 type Reserva = {
@@ -62,7 +62,7 @@ export default function GanhosPage() {
 
   const load = useCallback(async (uid: string) => {
     setLoading(true)
-    const { data } = await supabaseAny
+    const { data } = await supabase
       .from('reservas')
       .select('*, propriedade:propriedades(id,nome,cidade,estado)')
       .order('criado_em', { ascending: false })

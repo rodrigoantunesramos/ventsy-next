@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatNumber, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -72,7 +72,7 @@ export default function AtivosPage() {
       sb.from('ativos_manutencao').select('ativo_id,status,custo_num').eq('usuario_id', uid),
       sb.from('propriedades').select('id,nome,cidade').eq('usuario_id', uid),
     ]);
-    setManuts(mRes.error ? [] : (mRes.data || []).map((m: { ativo_id: string; status: string; custo_num: number | null }) => ({ ...m, custo_num: Number(m.custo_num) || 0 })));
+    setManuts(mRes.error ? [] : (mRes.data || []).map((m) => ({ ...m, custo_num: Number(m.custo_num) || 0 })) as Pick<AtivoManutencao, 'ativo_id' | 'status' | 'custo_num'>[]);
     setProps(pRes.error ? [] : (pRes.data || []) as PropriedadeLite[]);
   }, []);
 

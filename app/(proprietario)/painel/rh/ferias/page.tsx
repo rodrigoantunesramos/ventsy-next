@@ -7,7 +7,7 @@
 // (RLS) + equipe (contexto). Sem "R$" hardcoded.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { formatDate } from '@/lib/format';
 import {

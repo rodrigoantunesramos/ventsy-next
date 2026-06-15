@@ -6,7 +6,8 @@
 // que alimentam "pendências do dia". Regra de ouro: NADA de "R$"/data formatada
 // aqui — só dados crus; a formatação fica em lib/format, nos componentes.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import {
   type Automacao, type Notificacao, type AutomacaoLog, type DadosSelecao,
   type EventoLite, type ParcelaLite, type ContratoLite, type LicencaLite,
@@ -122,7 +123,7 @@ export async function salvarAutomacao(uid: string, f: AutomacaoForm): Promise<st
     const { error } = await sb.from('automacoes').update(payload).eq('id', f.id);
     return error ? null : f.id;
   }
-  const { data, error } = await sb.from('automacoes').insert(payload).select('id').single();
+  const { data, error } = await sb.from('automacoes').insert(payload as TablesInsert<'automacoes'>).select('id').single();
   return error || !data ? null : String(data.id);
 }
 

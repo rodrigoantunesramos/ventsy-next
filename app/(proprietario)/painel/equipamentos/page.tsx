@@ -16,7 +16,7 @@
 // (autoritativo). Sem "R$" hardcoded — tudo via lib/format.
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatNumber, formatDate, formatDateRange } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

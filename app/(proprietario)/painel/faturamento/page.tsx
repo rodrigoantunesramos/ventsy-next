@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatDate, type Currency } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -89,10 +89,10 @@ export default function FaturamentoPage() {
     setEventos(((eRes.data || []) as Evento[]).map((e) => ({ ...e, valor_total_num: e.valor_total_num != null ? Number(e.valor_total_num) : null })));
     setParcelas(((pRes.data || []) as Parcela[]).map((p) => ({ ...p, id: Number(p.id), valor: Number(p.valor) })));
     if (cRes.data) {
-      const cf = cRes.data.config_fiscal || {};
+      const cf = (cRes.data.config_fiscal || {}) as EmpresaInfo['config_fiscal'];
       setEmpresa({
         fantasia: cRes.data.fantasia, razao_social: cRes.data.razao_social, cnpj: cRes.data.cnpj, im: cRes.data.im,
-        contatos: cRes.data.contatos, endereco: cRes.data.endereco,
+        contatos: cRes.data.contatos as EmpresaPdf['contatos'], endereco: cRes.data.endereco as EmpresaPdf['endereco'],
         moeda: (cRes.data.moeda || 'BRL') as Currency, config_fiscal: cf,
       });
     }

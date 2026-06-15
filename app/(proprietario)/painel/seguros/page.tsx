@@ -14,7 +14,7 @@
 // do prêmio lança despesa em `lancamentos`.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type Seguro, type Sinistro, type PropriedadeLite, type EventoLite,
   SEL_SEGURO, SEL_SINISTRO, SEL_PROP, SEL_EVENTO,

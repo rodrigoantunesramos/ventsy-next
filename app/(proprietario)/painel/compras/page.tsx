@@ -10,7 +10,7 @@
 // fornecedores, clientes_eventos, centros_custo. Sem "R$" hardcoded — lib/format.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type Requisicao, type RequisicaoItem, type Cotacao, type CotacaoItem, type Pedido, type Recebimento,
   type FornecedorLite, type EventoLite, type CentroCustoLite, type ComprasBag, type Aba,

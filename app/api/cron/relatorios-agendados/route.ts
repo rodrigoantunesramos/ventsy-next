@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdminAny as db } from '@/lib/supabaseAdmin'
+import { supabaseAdmin as db } from '@/lib/supabaseAdmin'
 import { sendEmail, emailConfigurado } from '@/lib/email'
 import { formatMoneyShort, formatPercent, formatNumber } from '@/lib/format'
 import {

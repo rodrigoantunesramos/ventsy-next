@@ -17,7 +17,8 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatPercent, formatNumber, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -312,7 +313,7 @@ export default function ComissoesPage() {
     if (!userId) return;
     let error;
     if (id) ({ error } = await sb.from('parceiros').update(payload).eq('id', id).eq('usuario_id', userId));
-    else ({ error } = await sb.from('parceiros').insert({ ...payload, usuario_id: userId }));
+    else ({ error } = await sb.from('parceiros').insert({ ...payload, usuario_id: userId } as TablesInsert<'parceiros'>));
     if (error) { toast.error('Erro ao salvar parceiro.'); return; }
     setParceiroModal(null); toast.success(id ? 'Parceiro atualizado!' : 'Parceiro cadastrado!'); await carregar(userId);
   }

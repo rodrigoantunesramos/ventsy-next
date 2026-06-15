@@ -12,7 +12,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { supabase, supabaseAny, authHeaders } from '@/lib/supabase';
+import { supabase, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatDate, formatDateTime } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import CheckoutReserva from '@/components/CheckoutReserva';
@@ -116,9 +116,9 @@ export default function ReservasPage() {
   const load = useCallback(async (uid: string) => {
     setLoading(true);
     const [rRes, pRes, eRes] = await Promise.all([
-      supabaseAny.from('reservas').select('*, propriedade:propriedades(id,nome,cidade,estado)').order('criado_em', { ascending: false }),
-      supabaseAny.from('propriedades').select('id,nome').eq('usuario_id', uid),
-      supabaseAny.from('espacos').select('*').eq('usuario_id', uid).order('ordem'),
+      supabase.from('reservas').select('*, propriedade:propriedades(id,nome,cidade,estado)').order('criado_em', { ascending: false }),
+      supabase.from('propriedades').select('id,nome').eq('usuario_id', uid),
+      supabase.from('espacos').select('*').eq('usuario_id', uid).order('ordem'),
     ]);
     setReservas((rRes.data || []) as ReservaRow[]);
     setProps((pRes.data || []) as Prop[]);
@@ -183,7 +183,7 @@ export default function ReservasPage() {
   const onStatus = async (id: string, status: string) => {
     const prev = reservas;
     setReservas((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
-    const { error } = await supabaseAny.from('reservas').update({ status }).eq('id', id);
+    const { error } = await supabase.from('reservas').update({ status }).eq('id', id);
     if (error) { setReservas(prev); toast.error(error.message || 'Não foi possível atualizar a reserva.'); }
   };
 
@@ -214,7 +214,7 @@ export default function ReservasPage() {
     const key = `esp:${e.id}`;
     if (confirmKey !== key) { setConfirmKey(key); toast.info('Clique novamente para remover o espaço.'); setTimeout(() => setConfirmKey((c) => (c === key ? null : c)), 3000); return; }
     setConfirmKey(null);
-    const { error } = await supabaseAny.from('espacos').delete().eq('id', e.id);
+    const { error } = await supabase.from('espacos').delete().eq('id', e.id);
     if (error) { toast.error('Não foi possível remover.'); return; }
     setEspacos((a) => a.filter((x) => x.id !== e.id));
     toast.success('Espaço removido.');

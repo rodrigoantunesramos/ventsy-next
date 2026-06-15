@@ -8,7 +8,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesUpdate } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatDate, formatDateRange, formatPercent } from '@/lib/format';
 
 // ── Modelo de status ──────────────────────────────────────────────────────
@@ -406,7 +407,7 @@ export default function LeadsPage() {
   async function persistDraft() {
     const d = draftRef.current;
     if (!d || !userId) return;
-    const { error } = await sb.from('clientes_eventos').update(montarPayload(d)).eq('id', d.id).eq('usuario_id', userId);
+    const { error } = await sb.from('clientes_eventos').update(montarPayload(d) as TablesUpdate<'clientes_eventos'>).eq('id', d.id).eq('usuario_id', userId);
     if (error) { setSaude('idle'); pushToast('Erro ao salvar', 'erro'); return; }
     setLeads((arr) => arr.map((l) => (l.id === d.id ? { ...l, ...d } : l)));
     setSaude('saved');

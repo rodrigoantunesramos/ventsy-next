@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatDate, formatPercent, getFormatPrefs, type Currency } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import type { PrecoTabela, PrecoRegra, Taxa } from '@/lib/pricing';

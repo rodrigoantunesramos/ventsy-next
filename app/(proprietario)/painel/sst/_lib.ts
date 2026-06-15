@@ -6,7 +6,8 @@
 // abaixo p/ um só import. O dimensionamento autoritativo passa por /api/sst; o
 // restante do CRUD é feito pelo client via RLS.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import {
   type PlanoTipo, type PlanoStatus, type RecursoTipo, type RecursoStatus,
   type OcorrenciaTipo, type Gravidade, type SimuladoTipo, type Risco,
@@ -210,7 +211,7 @@ export async function carregarCatalogos(uid: string): Promise<{
 // Planos
 export const listarPlanos = (uid: string) =>
   sb.from('sst_planos').select(SEL_PLANO).eq('usuario_id', uid).order('atualizado_em', { ascending: false })
-export const criarPlano = (row: Record<string, unknown>) => sb.from('sst_planos').insert(row).select(SEL_PLANO).single()
+export const criarPlano = (row: Record<string, unknown>) => sb.from('sst_planos').insert(row as TablesInsert<'sst_planos'>).select(SEL_PLANO).single()
 export const salvarPlano = (id: string, patch: Record<string, unknown>) => sb.from('sst_planos').update(patch).eq('id', id).select(SEL_PLANO).single()
 export const excluirPlano = (id: string) => sb.from('sst_planos').delete().eq('id', id)
 
@@ -221,31 +222,31 @@ export const listarRecursos = (uid: string, eventoId: string) =>
 export const listarRecursosTodos = (uid: string) =>
   sb.from('sst_recursos_evento').select(SEL_RECURSO).eq('usuario_id', uid)
 export const salvarRecurso = (id: string, patch: Record<string, unknown>) => sb.from('sst_recursos_evento').update(patch).eq('id', id).select(SEL_RECURSO).single()
-export const criarRecurso = (row: Record<string, unknown>) => sb.from('sst_recursos_evento').insert(row).select(SEL_RECURSO).single()
+export const criarRecurso = (row: Record<string, unknown>) => sb.from('sst_recursos_evento').insert(row as TablesInsert<'sst_recursos_evento'>).select(SEL_RECURSO).single()
 export const excluirRecurso = (id: string) => sb.from('sst_recursos_evento').delete().eq('id', id)
 
 // Ocorrências
 export const listarOcorrencias = (uid: string) =>
   sb.from('sst_ocorrencias').select(SEL_OCORR).eq('usuario_id', uid).order('data', { ascending: false })
-export const criarOcorrencia = (row: Record<string, unknown>) => sb.from('sst_ocorrencias').insert(row).select(SEL_OCORR).single()
+export const criarOcorrencia = (row: Record<string, unknown>) => sb.from('sst_ocorrencias').insert(row as TablesInsert<'sst_ocorrencias'>).select(SEL_OCORR).single()
 export const salvarOcorrencia = (id: string, patch: Record<string, unknown>) => sb.from('sst_ocorrencias').update(patch).eq('id', id).select(SEL_OCORR).single()
 export const excluirOcorrencia = (id: string) => sb.from('sst_ocorrencias').delete().eq('id', id)
 
 // EPIs
 export const listarEpis = (uid: string) => sb.from('sst_epis').select(SEL_EPI).eq('usuario_id', uid).order('nome')
-export const criarEpi = (row: Record<string, unknown>) => sb.from('sst_epis').insert(row).select(SEL_EPI).single()
+export const criarEpi = (row: Record<string, unknown>) => sb.from('sst_epis').insert(row as TablesInsert<'sst_epis'>).select(SEL_EPI).single()
 export const salvarEpi = (id: string, patch: Record<string, unknown>) => sb.from('sst_epis').update(patch).eq('id', id).select(SEL_EPI).single()
 export const excluirEpi = (id: string) => sb.from('sst_epis').delete().eq('id', id)
 
 // Treinamentos / NRs
 export const listarTreinamentos = (uid: string) => sb.from('sst_treinamentos').select(SEL_TREIN).eq('usuario_id', uid).order('validade', { ascending: true, nullsFirst: false })
-export const criarTreinamento = (row: Record<string, unknown>) => sb.from('sst_treinamentos').insert(row).select(SEL_TREIN).single()
+export const criarTreinamento = (row: Record<string, unknown>) => sb.from('sst_treinamentos').insert(row as TablesInsert<'sst_treinamentos'>).select(SEL_TREIN).single()
 export const salvarTreinamento = (id: string, patch: Record<string, unknown>) => sb.from('sst_treinamentos').update(patch).eq('id', id).select(SEL_TREIN).single()
 export const excluirTreinamento = (id: string) => sb.from('sst_treinamentos').delete().eq('id', id)
 
 // Simulados / inspeções
 export const listarSimulados = (uid: string) => sb.from('sst_simulados').select(SEL_SIM).eq('usuario_id', uid).order('data', { ascending: false })
-export const criarSimulado = (row: Record<string, unknown>) => sb.from('sst_simulados').insert(row).select(SEL_SIM).single()
+export const criarSimulado = (row: Record<string, unknown>) => sb.from('sst_simulados').insert(row as TablesInsert<'sst_simulados'>).select(SEL_SIM).single()
 export const salvarSimulado = (id: string, patch: Record<string, unknown>) => sb.from('sst_simulados').update(patch).eq('id', id).select(SEL_SIM).single()
 export const excluirSimulado = (id: string) => sb.from('sst_simulados').delete().eq('id', id)
 /* eslint-enable @typescript-eslint/no-explicit-any */

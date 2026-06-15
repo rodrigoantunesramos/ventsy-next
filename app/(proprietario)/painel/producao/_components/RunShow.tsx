@@ -7,7 +7,7 @@
 // vivo, com destaque do item atual). Multi-dia (feira/festival). Sem "R$".
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -79,7 +79,8 @@ export default function RunShow({ bag }: { bag: ProducaoBag }) {
       let empresa: { nome: string | null; contato: string | null } = { nome: null, contato: null };
       try {
         const { data } = await sb.from('empresa_config').select('razao_social,fantasia,contatos').eq('usuario_id', bag.userId).maybeSingle();
-        if (data) empresa = { nome: data.fantasia || data.razao_social || null, contato: (data.contatos?.telefone || data.contatos?.email) ?? null };
+        const contatos = (data?.contatos ?? null) as { telefone?: string | null; email?: string | null } | null;
+        if (data) empresa = { nome: data.fantasia || data.razao_social || null, contato: (contatos?.telefone || contatos?.email) ?? null };
       } catch { /* sem config — usa marca padrão */ }
       const { buildRunshowPDF } = await import('../_pdf');
       const doc = await buildRunshowPDF({

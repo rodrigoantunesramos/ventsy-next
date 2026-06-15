@@ -5,7 +5,7 @@
 // LicencaModal (RLS), documento, e lançar/estornar o custo no caixa (/api/licencas).
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import {
   type Licenca, statusEfetivo, STATUS_META, type LicencaStatus,

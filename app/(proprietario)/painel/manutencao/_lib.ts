@@ -5,7 +5,7 @@
 // MTTR, agenda preventiva, custo por ativo) vive em lib/manutencao (motor puro,
 // testado) e é re-exportada abaixo para um import único nas abas.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import type {
   OSTipo, OSStatus, Prioridade, ResponsavelTipo, Periodicidade, ChecklistItem, Peca,
 } from '@/lib/manutencao';

@@ -12,7 +12,8 @@
 // (lançamentos, clientes_eventos, parcelas, pesquisas_respostas, avaliacoes) —
 // cada leitura degrada para null se a tabela ainda não existir.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import {
   type Periodo, type Area, type Granularidade, type Store,
   diasAte, metricaMeta, isMissingTable,
@@ -207,7 +208,7 @@ export async function computarRealizado(
 // ── CRUD via RLS (client) ─────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function criarMeta(row: Record<string, unknown>) {
-  return sb.from('metas').insert(row).select(SEL_META).single();
+  return sb.from('metas').insert(row as TablesInsert<'metas'>).select(SEL_META).single();
 }
 export async function salvarMeta(id: string, patch: Record<string, unknown>) {
   return sb.from('metas').update(patch).eq('id', id).select(SEL_META).single();
@@ -216,7 +217,7 @@ export async function excluirMeta(id: string) {
   return sb.from('metas').delete().eq('id', id);
 }
 export async function criarOkr(row: Record<string, unknown>) {
-  return sb.from('okrs').insert(row).select(SEL_OKR).single();
+  return sb.from('okrs').insert(row as TablesInsert<'okrs'>).select(SEL_OKR).single();
 }
 export async function salvarOkr(id: string, patch: Record<string, unknown>) {
   return sb.from('okrs').update(patch).eq('id', id).select(SEL_OKR).single();

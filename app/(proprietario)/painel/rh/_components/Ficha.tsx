@@ -6,7 +6,7 @@
 // demanda. Reaproveita os motores lib/folha (holerite) e lib/rh (férias/validade).
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatDate } from '@/lib/format';
 import { calcularHolerite, DEFAULT_CHARGES, CONTRATO_MAP } from '@/lib/folha';
 import {

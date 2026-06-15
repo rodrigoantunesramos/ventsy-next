@@ -16,7 +16,8 @@
 // Sem "R$" hardcoded — moeda/datas/números via lib/format.
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatNumber, formatPercent, formatDate, formatDateTime } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -143,7 +144,7 @@ export default function EstacionamentoPage() {
       toast.success('Setor atualizado.');
     } else {
       const row = { ...payload, usuario_id: userId, propriedade_id: evento?.propriedade_id ?? null, ordem: setores.length };
-      const { error } = await sb.from('estacionamento_setores').insert(row);
+      const { error } = await sb.from('estacionamento_setores').insert(row as TablesInsert<'estacionamento_setores'>);
       if (error) { toast.error('Não foi possível criar o setor.'); return false; }
       toast.success('Setor criado.');
     }

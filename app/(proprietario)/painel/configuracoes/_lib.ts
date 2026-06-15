@@ -1,9 +1,9 @@
 // Tipos, defaults e acesso a dados da página de Configurações.
 // A tabela `empresa_config` (1 linha por dono) é criada pela migration
 // docs/sql/empresa-config-rbac.sql — enquanto types/supabase.ts não a inclui,
-// usamos supabaseAny. TODO: regenerar types/supabase.ts após rodar a migration.
+// usamos supabase. TODO: regenerar types/supabase.ts após rodar a migration.
 
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import type { Idioma, FormatoData } from '@/lib/prefs'
 import type { Currency } from '@/lib/format'
 
@@ -101,20 +101,20 @@ export async function carregarEmpresa(uid: string): Promise<{ data: EmpresaConfi
     data: {
       razao_social: data.razao_social ?? '', fantasia: data.fantasia ?? '',
       cnpj: data.cnpj ?? '', ie: data.ie ?? '', im: data.im ?? '',
-      endereco: { ...EMPTY_ENDERECO, ...(data.endereco ?? {}) },
-      contatos: { ...EMPTY_CONTATOS, ...(data.contatos ?? {}) },
+      endereco: { ...EMPTY_ENDERECO, ...((data.endereco ?? {}) as Partial<Endereco>) },
+      contatos: { ...EMPTY_CONTATOS, ...((data.contatos ?? {}) as Partial<Contatos>) },
       logo_url: data.logo_url ?? '',
-      cores_marca: { ...DEFAULT_CORES, ...(data.cores_marca ?? {}) },
+      cores_marca: { ...DEFAULT_CORES, ...((data.cores_marca ?? {}) as Partial<CoresMarca>) },
       idioma: (data.idioma ?? 'pt') as Idioma,
       moeda: (data.moeda ?? 'BRL') as Currency,
       fuso: data.fuso ?? 'America/Sao_Paulo',
-      config_fiscal: { ...EMPTY_FISCAL, ...(data.config_fiscal ?? {}) },
+      config_fiscal: { ...EMPTY_FISCAL, ...((data.config_fiscal ?? {}) as Partial<ConfigFiscal>) },
       preferencias: {
         ...EMPTY_PREFS,
-        ...(data.preferencias ?? {}),
-        numeracao: { ...EMPTY_NUMERACAO, ...((data.preferencias ?? {}).numeracao ?? {}) },
+        ...((data.preferencias ?? {}) as Partial<Preferencias>),
+        numeracao: { ...EMPTY_NUMERACAO, ...(((data.preferencias ?? {}) as Partial<Preferencias>).numeracao ?? {}) },
       },
-      notificacoes: { ...NOTIF_DEFAULTS, ...(data.notificacoes ?? {}) },
+      notificacoes: { ...NOTIF_DEFAULTS, ...((data.notificacoes ?? {}) as Notificacoes) },
       retencao_meses: data.retencao_meses ?? 24,
       exclusao_solicitada_em: data.exclusao_solicitada_em ?? null,
     },

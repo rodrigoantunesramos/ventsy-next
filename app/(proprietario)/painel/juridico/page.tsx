@@ -21,7 +21,7 @@
 //   CRUD via RLS. Degrada para um setup-card até o SQL ser aplicado. Sem "R$".
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import {
   type Tab, type JuridicoBag,
@@ -142,7 +142,7 @@ export default function JuridicoPage() {
       } catch { /* opcional */ }
       try {
         const { data: cfg } = await sb.from('empresa_config').select('*').eq('usuario_id', uid).maybeSingle();
-        nome = cfg?.fantasia || cfg?.razao_social || cfg?.nome_empresa || nome;
+        nome = cfg?.fantasia || cfg?.razao_social || nome;
       } catch { /* opcional */ }
       setEmpresa(nome);
 

@@ -5,7 +5,7 @@
 // despesas em aberto (a pagar). Cálculo via engine pura.
 
 import { useMemo, useState } from 'react'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { useToast } from '@/components/Toast'
 import { formatMoney, formatMoneyShort, formatMonth } from '@/lib/format'
 import { posicaoPorConta, projecaoFluxo, type ContaBancaria, type Lancamento, type ParcelaProj } from '@/lib/contabilidade'

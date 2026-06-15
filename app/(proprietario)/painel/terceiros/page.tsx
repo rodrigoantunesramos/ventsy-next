@@ -18,7 +18,7 @@
 // matemática vive em lib/terceiros (motor puro, testado). Sem "R$" hardcoded.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type Terceiro, type ResultadoTerceiro, type FornecedorLite,
   type EventoLite, type DespesaLite, type TerceiroAgg,

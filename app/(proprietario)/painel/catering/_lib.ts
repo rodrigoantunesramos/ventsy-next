@@ -7,7 +7,8 @@
 // baixa de consumo (Estoque) passam pela rota AUTORITATIVA /api/catering; o
 // restante (cardápios, A&B/bar do evento) é gravado pelo client via RLS.
 
-import { authHeaders, supabaseAny as sb } from '@/lib/supabase'
+import { authHeaders, supabase as sb } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import type {
   Cardapio, CardapioItem, FichaInsumo, Drink, ConsumoDrink, RestricaoLinha,
   CardapioTipo, BarTipo, LinhaDimensionada,
@@ -199,7 +200,7 @@ export const estornarConsumo = (evento_id: string) => call({ op: 'estornar', eve
 
 // ── CRUD via RLS (client) — cardápios, A&B e bar do evento ───────────────────
 export async function criarCardapio(row: Record<string, unknown>) {
-  return sb.from('cardapios').insert(row).select(SEL_CARDAPIO).single()
+  return sb.from('cardapios').insert(row as TablesInsert<'cardapios'>).select(SEL_CARDAPIO).single()
 }
 export async function salvarCardapio(id: string, patch: Record<string, unknown>) {
   return sb.from('cardapios').update(patch).eq('id', id).select(SEL_CARDAPIO).single()

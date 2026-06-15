@@ -12,7 +12,7 @@
 // recebe status MASCARADO via /api/integracoes/*. Tabelas: docs/sql/integracoes.sql.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { CATALOGO, isMissingTable } from '@/lib/integracoes';
 import {
   carregarConexoes, carregarWebhooks, carregarChaves,

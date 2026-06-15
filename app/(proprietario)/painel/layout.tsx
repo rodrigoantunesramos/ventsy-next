@@ -7,9 +7,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
-import { applyPrefs } from '@/lib/prefs';
+import { applyPrefs, type Idioma, type FormatoData } from '@/lib/prefs';
+import type { Currency } from '@/lib/format';
 import { ToastProvider } from '@/components/Toast';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -171,15 +172,15 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
       try {
         const { data: assin } = await sb.from('assinaturas').select('*').eq('usuario_id', user.id).maybeSingle();
         if (assin) {
-          plano = (assin.plano_ativo || assin.plano || 'basico').toString().toLowerCase();
-          validade = assin.fim_periodo || assin.validade || null;
+          plano = (assin.plano_ativo || 'basico').toString().toLowerCase();
+          validade = assin.fim_periodo || null;
         }
       } catch { /* assinatura opcional */ }
 
       // Aplica idioma/moeda/fuso (empresa_config) ao painel inteiro via lib/format.
       try {
         const { data: cfg } = await sb.from('empresa_config').select('idioma, moeda, fuso, preferencias').eq('usuario_id', user.id).maybeSingle();
-        if (cfg) applyPrefs({ idioma: cfg.idioma, moeda: cfg.moeda, fuso: cfg.fuso, formato_data: cfg.preferencias?.formato_data });
+        if (cfg) applyPrefs({ idioma: cfg.idioma as Idioma, moeda: cfg.moeda as Currency, fuso: cfg.fuso, formato_data: (cfg.preferencias as { formato_data?: FormatoData } | null)?.formato_data });
       } catch { /* sem config — usa defaults/localStorage */ }
 
       const inicial = (nome.split(' ')[0]?.[0] ?? '?').toUpperCase();

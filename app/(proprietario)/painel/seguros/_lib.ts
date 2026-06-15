@@ -5,7 +5,8 @@
 // (vigência, prêmio, sinistralidade, rateio, exigências) vive em lib/seguros
 // (motor puro, testado) e é re-exportada abaixo para um import único nas abas.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import type {
   Escopo, StatusAdmin, SinistroStatus, Cobertura, Anexo,
 } from '@/lib/seguros';
@@ -205,7 +206,7 @@ export async function estornarDespesa(lancamentoId: number | null): Promise<void
 // ── CRUD via RLS (client) — apólices + sinistros ─────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function criarSeguro(row: Record<string, unknown>) {
-  return sb.from('seguros').insert(row).select(SEL_SEGURO).single();
+  return sb.from('seguros').insert(row as TablesInsert<'seguros'>).select(SEL_SEGURO).single();
 }
 export async function salvarSeguro(id: string, patch: Record<string, unknown>) {
   return sb.from('seguros').update(patch).eq('id', id).select(SEL_SEGURO).single();
@@ -214,7 +215,7 @@ export async function excluirSeguro(id: string) {
   return sb.from('seguros').delete().eq('id', id);
 }
 export async function criarSinistro(row: Record<string, unknown>) {
-  return sb.from('sinistros').insert(row).select(SEL_SINISTRO).single();
+  return sb.from('sinistros').insert(row as TablesInsert<'sinistros'>).select(SEL_SINISTRO).single();
 }
 export async function salvarSinistro(id: string, patch: Record<string, unknown>) {
   return sb.from('sinistros').update(patch).eq('id', id).select(SEL_SINISTRO).single();

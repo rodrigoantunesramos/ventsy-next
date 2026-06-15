@@ -4,8 +4,9 @@
 // vínculo de lançamentos legados (por categoria) e import/export CSV.
 
 import { useMemo, useState } from 'react'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { useToast } from '@/components/Toast'
+import type { TablesInsert } from '@/types/supabase'
 import type { DreLinha, Lancamento, PlanoConta } from '@/lib/contabilidade'
 import {
   CONTA_TIPO_LABEL, DRE_LABELS, DRE_LINHAS, SEED_CONTAS, btnGhost, btnPrimary, inp,
@@ -127,7 +128,7 @@ export default function PlanoContas({ userId, contas, lancamentos, recarregar }:
     }
     if (!rows.length) { toast.error('Nenhuma conta válida no CSV.'); return }
     setBusy(true)
-    const { error } = await sb.from('plano_contas').upsert(rows, { onConflict: 'usuario_id,codigo' })
+    const { error } = await sb.from('plano_contas').upsert(rows as TablesInsert<'plano_contas'>[], { onConflict: 'usuario_id,codigo' })
     setBusy(false)
     if (error) { toast.error('Erro ao importar.'); return }
     toast.success(`${rows.length} conta(s) importada(s).`); await recarregar()

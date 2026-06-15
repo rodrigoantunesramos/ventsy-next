@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDateTime } from '@/lib/format';
 
 type Notif = { id: string; tipo: string; titulo: string; corpo: string | null; link: string | null; urgencia: string; lida: boolean; criado_em: string };
