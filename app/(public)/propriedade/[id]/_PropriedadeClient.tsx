@@ -5,7 +5,7 @@ import { useParams, notFound } from 'next/navigation'
 import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { supabase, supabaseAny, authHeaders } from '@/lib/supabase'
+import { supabase, authHeaders } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
 import { comodidadeLabel } from '@/lib/data'
@@ -203,7 +203,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
           .select('url,titulo')
           .eq('propriedade_id', propIdNum),
 
-        supabaseAny
+        supabase
           .from('avaliacoes')
           .select('*')
           .eq('propriedade_id', propIdNum)
@@ -211,7 +211,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
           .eq('oculta', false)
           .order('criado_em', { ascending: false }),
 
-        supabaseAny
+        supabase
           .from('perfis_publicos')
           .select('id, id_prop, nome, usuario, criado_em')
           .eq(
@@ -293,8 +293,8 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   // ── Verificar se já avaliou esta propriedade ─────────────────────────────
   useEffect(()=>{
     if(!clientUserId || !propId || propId==='demo') return
-    supabaseAny.from('avaliacoes').select('id').eq('user_id',clientUserId).eq('propriedade_id',propId).maybeSingle()
-      .then(({ data }: { data: any })=>{ if(data) setJaAvaliou(true) })
+    supabase.from('avaliacoes').select('id').eq('user_id',clientUserId).eq('propriedade_id',Number(propId)).maybeSingle()
+      .then(({ data })=>{ if(data) setJaAvaliou(true) })
   },[clientUserId,propId])
 
   useEffect(()=>{
@@ -339,10 +339,10 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
     try{
       const dataRef=formInicio||new Date().toISOString().split('T')[0]
       if(dataRef){
-        const{data:bloq}=await supabaseAny.from('disponibilidade').select('bloqueado').eq('prop_id',prop?.id).eq('data',dataRef).maybeSingle()
+        const{data:bloq}=await supabase.from('disponibilidade').select('bloqueado').eq('prop_id',prop?.id).eq('data',dataRef).maybeSingle()
         if(bloq?.bloqueado){setReservaToast('Essa data está indisponível neste espaço. Escolha outra.');setEnviandoReserva(false);setTimeout(()=>setReservaToast(''),4000);return}
       }
-      const{error}=await supabaseAny.from('reservas').insert({
+      const{error}=await supabase.from('reservas').insert({
         propriedade_id:prop?.id, usuario_id:clientUserId,
         nome:formNome||clientNome, email:formEmail, telefone:formTel,
         tipo_evento:formTipo, modo:formModo,

@@ -31,11 +31,6 @@ export const supabase: TypedClient = new Proxy({} as TypedClient, {
   },
 })
 
-// Untyped client for tables not yet in the generated schema (pending migrations).
-// Replace usages with typed equivalents after the corresponding migration is applied.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const supabaseAny = supabase as any
-
 // Authorization header da sessão atual do navegador (vazio se deslogado).
 // Mantido por compatibilidade durante a migração para cookies: as rotas que
 // ainda dependem do Bearer continuam funcionando. Quando todas as rotas lerem
