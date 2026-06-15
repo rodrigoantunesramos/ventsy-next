@@ -175,11 +175,7 @@ export function ymd(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, ''); }
-export function waLink(fone: string | null | undefined): string | null {
-  const d = soDigitos(fone);
-  if (!d) return null;
-  return `https://wa.me/${d.length <= 11 ? '55' + d : d}`;
-}
+export { waLink } from '@/lib/waLink';
 export function telLink(fone: string | null | undefined): string | null {
   const d = soDigitos(fone);
   return d ? `tel:+${d.length <= 11 ? '55' + d : d}` : null;

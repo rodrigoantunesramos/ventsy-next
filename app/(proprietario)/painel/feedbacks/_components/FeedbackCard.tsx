@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/format';
+import { waLink } from '@/lib/waLink';
 import {
   type Feedback, type FeedbackAcao, type StatusFeedback, type StatusAcao,
   CRITERIOS, CANAL_BY, STATUS_FEEDBACK, STATUS_FB_BY, STATUS_ACAO, STATUS_ACAO_BY,
@@ -24,7 +25,7 @@ function contatoLinks(contato: string | null, texto: string): { wa: string | nul
   if (c.includes('@')) return { wa: null, mail: `mailto:${c}?body=${encodeURIComponent(texto)}` };
   const d = soDigitos(c);
   if (!d) return { wa: null, mail: null };
-  return { wa: `https://wa.me/${d.length <= 11 ? '55' + d : d}?text=${encodeURIComponent(texto)}`, mail: null };
+  return { wa: waLink(c, texto), mail: null };
 }
 
 export type CardCallbacks = {

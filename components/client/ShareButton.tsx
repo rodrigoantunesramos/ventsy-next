@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { waShareLink } from '@/lib/waLink'
 
 interface Props {
   url?: string
@@ -51,7 +52,7 @@ export default function ShareButton({ url, title = 'Confira este espaço' }: Pro
             {copied ? '✅ Link copiado!' : '🔗 Copiar link'}
           </button>
           <a
-            href={`https://wa.me/?text=${encodeURIComponent(title + ' — ' + href)}`}
+            href={waShareLink(title + ' — ' + href)}
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full px-4 py-2.5 text-[.86rem] text-gray-700 no-underline transition-colors hover:bg-gray-50"

@@ -126,12 +126,7 @@ export function ymd(d: Date): string {
 export function diffDias(dateStr: string, base: Date): number {
   return Math.floor((new Date(dateStr + 'T12:00:00').getTime() - base.getTime()) / 86400000);
 }
-export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, ''); }
-export function waLink(fone: string | null | undefined, msg: string): string | null {
-  const d = soDigitos(fone);
-  if (!d) return null;
-  return `https://wa.me/${d.length <= 11 ? '55' + d : d}?text=${encodeURIComponent(msg)}`;
-}
+export { waLink } from '@/lib/waLink';
 
 // ── Status efetivo (deriva "atrasado" de vencimento) ──────────────────────────
 export function efetivoReceber(p: Parcela, hoje: string): EfetivoReceber {
