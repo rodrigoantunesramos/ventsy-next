@@ -1,8 +1,11 @@
-// ⚠️ TRADUÇÃO AUTOMÁTICA — requer revisão jurídica humana antes de produção.
+// Tradução de REFERÊNCIA. A versão PT (pt/legal.ts) é a juridicamente vinculante;
+// o `avisoTraducao` abaixo é exibido ao usuário nas páginas EN/ES.
 // Namespace `legal` — Español. Tipado por `T` (de pt/legal) para paridad de claves.
 import type { T } from '../pt/legal'
 
 const legal: T = {
+  avisoTraducao:
+    'Esta es una traducción de referencia proporcionada por conveniencia. La versión legalmente vinculante es la portuguesa.',
   termos: {
     meta: {
       title: 'Términos de Uso',

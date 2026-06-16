@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { getDictionary } from '@/lib/i18n/getDictionary';
 import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config';
+import { buildAlternates } from '@/lib/i18n/seo';
 import {
   fetchListasPublicas, categoriaLabel, engajamento, type PublicLista,
 } from './_data';
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   return {
     title: t.indexTitle,
     description: t.indexDescription,
-    alternates: { canonical: localizar(locale, '/listas') },
+    alternates: buildAlternates(locale, '/listas'),
     openGraph: {
       title: t.indexOgTitle,
       description: t.indexOgDescription,

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getDictionary } from '@/lib/i18n/getDictionary'
 import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 import '../legal.css'
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -12,7 +13,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return {
     title: p.meta.title,
     description: p.meta.description,
-    alternates: { canonical: localizar(locale, '/privacidade') },
+    alternates: buildAlternates(locale, '/privacidade'),
   }
 }
 
@@ -22,7 +23,8 @@ const nums = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
 
 export default function PrivacidadePage({ params }: { params: { locale: string } }) {
   const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
-  const p = getDictionary(locale).legal.privacidade
+  const legal = getDictionary(locale).legal
+  const p = legal.privacidade
 
   return (
     <>
@@ -43,6 +45,13 @@ export default function PrivacidadePage({ params }: { params: { locale: string }
         <div className="update-badge">
           📅 {p.atualizadoLabel} <span>{p.atualizadoData}</span>
         </div>
+
+        {legal.avisoTraducao && (
+          <div className="alerta">
+            <span className="alerta-icon">🌐</span>
+            <span>{legal.avisoTraducao}</span>
+          </div>
+        )}
 
         {/* ── ÍNDICE ── */}
         <div className="indice">

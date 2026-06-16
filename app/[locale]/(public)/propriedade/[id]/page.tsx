@@ -6,6 +6,7 @@
 import type { Metadata } from 'next'
 import { SITE_NAME, abs } from '@/lib/site'
 import { isLocale, defaultLocale, localizar, htmlLang, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 import propriedadePt from '@/lib/i18n/dictionaries/pt/propriedade'
 import propriedadeEn from '@/lib/i18n/dictionaries/en/propriedade'
 import propriedadeEs from '@/lib/i18n/dictionaries/es/propriedade'
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: { params: { locale: string; i
   return {
     title: titulo,
     description: desc,
-    alternates: { canonical: url },
+    alternates: buildAlternates(locale, `/propriedade/${prop.id}`),
     openGraph: {
       title: prop.nome || titulo,
       description: desc,

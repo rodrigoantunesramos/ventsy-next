@@ -11,6 +11,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { getDictionary } from '@/lib/i18n/getDictionary';
 import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config';
+import { buildAlternates } from '@/lib/i18n/seo';
 import {
   fetchListaPorSlug, fetchRelacionadas, categoriaLabel, TIPO_LABEL, type PublicItem,
 } from '../_data';
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: { params: { locale: string; s
   return {
     title: titulo,
     description: desc,
-    alternates: { canonical },
+    alternates: buildAlternates(locale, `/listas/${params.slug}`),
     openGraph: {
       title: lista.titulo,
       description: desc,

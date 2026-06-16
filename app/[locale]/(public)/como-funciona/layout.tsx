@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { getDictionary } from '@/lib/i18n/getDictionary'
 import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
@@ -9,7 +10,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
   return {
     title: dict.comoFunciona.meta.title,
     description: dict.comoFunciona.meta.description,
-    alternates: { canonical: url },
+    alternates: buildAlternates(locale, '/como-funciona'),
     openGraph: {
       title: dict.comoFunciona.meta.ogTitle,
       description: dict.comoFunciona.meta.ogDescription,

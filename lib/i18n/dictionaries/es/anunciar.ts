@@ -6,6 +6,15 @@
 import type { T } from '../pt/anunciar'
 
 const anunciar: T = {
+  // ── Metadatos (<head>) ──
+  meta: {
+    title: 'Anuncia tu espacio',
+    description:
+      'Anuncia tu espacio de eventos en VENTSY y llega a miles de personas que buscan el lugar ideal. Registro rápido y gratuito.',
+    ogTitle: 'Anuncia tu espacio · VENTSY',
+    ogDescription: 'Registra tu espacio de eventos y recibe solicitudes de quienes buscan el lugar ideal. Gratis para empezar.',
+  },
+
   hero: {
     tag: 'Anuncia gratis',
     titulo: 'Anuncia tu espacio',

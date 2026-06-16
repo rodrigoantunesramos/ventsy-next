@@ -2,6 +2,15 @@
 // en/cadastro.ts e es/cadastro.ts são tipados por `T` para garantir paridade.
 
 const cadastro = {
+  // ── Metadados (<head>) ──
+  meta: {
+    title: 'Criar conta',
+    description:
+      'Crie sua conta gratuita na VENTSY para anunciar seu espaço de eventos ou gerenciar suas reservas. Leva menos de um minuto.',
+    ogTitle: 'Criar conta · VENTSY',
+    ogDescription: 'Crie sua conta gratuita para anunciar seu espaço ou reservar o local do seu evento.',
+  },
+
   // ── Topo ──
   tag: 'Novo cadastro',
   tituloAntes: 'Crie sua conta na',

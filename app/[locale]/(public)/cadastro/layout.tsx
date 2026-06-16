@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
+import { getDictionary } from '@/lib/i18n/getDictionary'
+import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 
-export const metadata: Metadata = {
-  title: 'Criar conta',
-  description:
-    'Crie sua conta gratuita na VENTSY para anunciar seu espaço de eventos ou gerenciar suas reservas. Leva menos de um minuto.',
-  alternates: { canonical: '/cadastro' },
-  openGraph: {
-    title: 'Criar conta · VENTSY',
-    description: 'Crie sua conta gratuita para anunciar seu espaço ou reservar o local do seu evento.',
-    url: '/cadastro',
-  },
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
+  const dict = getDictionary(locale)
+  return {
+    title: dict.cadastro.meta.title,
+    description: dict.cadastro.meta.description,
+    alternates: buildAlternates(locale, '/cadastro'),
+    openGraph: {
+      title: dict.cadastro.meta.ogTitle,
+      description: dict.cadastro.meta.ogDescription,
+      url: localizar(locale, '/cadastro'),
+    },
+  }
 }
 
 export default function CadastroLayout({ children }: { children: React.ReactNode }) {

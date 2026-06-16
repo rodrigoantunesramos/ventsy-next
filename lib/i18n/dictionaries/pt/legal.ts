@@ -2,6 +2,8 @@
 // Sub-objetos `termos` (Termos de Uso) e `privacidade` (Política de Privacidade).
 // Arrays de cláusulas/itens DEVEM ter o mesmo comprimento nos 3 idiomas.
 const legal = {
+  // Vazio em PT: a versão portuguesa é a juridicamente vinculante (sem aviso).
+  avisoTraducao: '',
   termos: {
     meta: {
       title: 'Termos de Uso',

@@ -11,6 +11,7 @@ import propriedade from './es/propriedade'
 import legal from './es/legal'
 import listas from './es/listas'
 import vagas from './es/vagas'
+import dados from './es/dados'
 
 const es: Dictionary = {
   common: {
@@ -187,6 +188,7 @@ const es: Dictionary = {
   legal,
   listas,
   vagas,
+  dados,
 }
 
 export default es

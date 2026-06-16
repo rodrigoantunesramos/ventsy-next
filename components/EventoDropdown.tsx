@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { EVENTOS_CATS } from '@/lib/data'
 import { useT } from './i18n/I18nProvider'
+import { rotuloDado } from '@/lib/i18n/dados'
 
 interface Props {
   onChange: (value: string) => void
@@ -39,7 +40,7 @@ export default function EventoDropdown({ onChange }: Props) {
     const v = [...selected][0]
     const flat = EVENTOS_CATS.flatMap(c => c.items)
     const item = flat.find(i => i.v === v)
-    displayText = item ? `${item.emoji} ${item.v}` : v
+    displayText = item ? `${item.emoji} ${rotuloDado(dict.dados.eventos, item.v)}` : v
   } else if (count > 1) {
     displayText = dict.componentes.evento.varios
   }
@@ -76,10 +77,16 @@ export default function EventoDropdown({ onChange }: Props) {
               ✕ {dict.componentes.evento.limpar}
             </button>
 
-            {EVENTOS_CATS.map(cat => (
+            {EVENTOS_CATS.map(cat => {
+              // cat.label = "emoji Grupo" (ex.: "🏢 Corporativo"); separa emoji do nome
+              // e traduz só o nome (chave canônica em dict.dados.gruposEvento).
+              const sep = cat.label.indexOf(' ')
+              const grupoEmoji = sep > 0 ? cat.label.slice(0, sep) : ''
+              const grupoNome = sep > 0 ? cat.label.slice(sep + 1) : cat.label
+              return (
               <div key={cat.label} className="mb-3">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2 px-1">
-                  {cat.label}
+                  {grupoEmoji} {rotuloDado(dict.dados.gruposEvento, grupoNome)}
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   {cat.items.map(item => (
@@ -92,12 +99,13 @@ export default function EventoDropdown({ onChange }: Props) {
                       onClick={() => toggle(item.v)}
                     >
                       <span>{item.emoji}</span>
-                      {item.label}
+                      {rotuloDado(dict.dados.eventos, item.v)}
                     </div>
                   ))}
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

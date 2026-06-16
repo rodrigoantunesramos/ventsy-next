@@ -8,9 +8,10 @@ import Footer from '@/components/Footer'
 import { supabase, authHeaders } from '@/lib/supabase'
 import ReviewForm from '@/components/client/ReviewForm'
 import type { ReviewFormData } from '@/types/client'
-import { comodidadeLabel } from '@/lib/data'
+import { comodidadeLabel, COMODIDADES } from '@/lib/data'
 import { useT } from '@/components/i18n/I18nProvider'
 import { formatMoney } from '@/lib/i18n/format'
+import { rotuloDado } from '@/lib/i18n/dados'
 import propriedadePt from '@/lib/i18n/dictionaries/pt/propriedade'
 import propriedadeEn from '@/lib/i18n/dictionaries/en/propriedade'
 import propriedadeEs from '@/lib/i18n/dictionaries/es/propriedade'
@@ -93,10 +94,17 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   const params = useParams()
   const propId    = params.id as string
   const propIdNum = Number(propId)
-  const { lhref, locale } = useT()
+  const { dict, lhref, locale } = useT()
   const t = propDicts[locale] ?? propriedadePt
   // Rótulo traduzido de um tipo de evento (valor salvo em PT). Fallback: o próprio valor.
   const tipoEventoLabel = (v: string) => (t.tiposEvento as Record<string, string>)[v] || v
+  // Comodidade exibida: preserva o emoji canônico (de lib/data) e traduz só o texto
+  // via dict.dados.comodidades (chave = slug). Valores legados/demo (string com emoji,
+  // sem slug correspondente) caem no rótulo cru de comodidadeLabel.
+  const comodidadeLabelI18n = (c: string) => {
+    const item = COMODIDADES.find(x => x.slug === c)
+    return item ? `${item.emoji} ${rotuloDado(dict.dados.comodidades, item.slug)}` : comodidadeLabel(c)
+  }
 
   // Semeia o estado com o que veio do servidor (initialProp/initialFotos) para o
   // herói/galeria renderizarem já no HTML — o useEffect re-busca e enriquece.
@@ -466,7 +474,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
             {/* Detalhes */}
             <div className="pp-detalhes">
-              {[{label:t.detalhes.capacidade,valor:prop?.capacidade?`${prop.capacidade} ${t.detalhes.pessoas}`:'—'},{label:t.detalhes.tipoEspaco,valor:prop?.tipo_propriedade||'—'},{label:t.detalhes.localizacao,valor:prop?.cidade||'—'}].map(d=>(
+              {[{label:t.detalhes.capacidade,valor:prop?.capacidade?`${prop.capacidade} ${t.detalhes.pessoas}`:'—'},{label:t.detalhes.tipoEspaco,valor:prop?.tipo_propriedade?rotuloDado(dict.dados.categorias,prop.tipo_propriedade):'—'},{label:t.detalhes.localizacao,valor:prop?.cidade||'—'}].map(d=>(
                 <div key={d.label} className="pp-detalhe-item"><span className="pp-det-label">{d.label}</span><span className="pp-det-valor">{d.valor}</span></div>
               ))}
             </div>
@@ -482,7 +490,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
             {/* Comodidades */}
             <div className="pp-comodidades"><h2>{t.comodidades.titulo}</h2>
               <div className="pp-como-grid">
-                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{comodidadeLabel(c)}</div>):<p className="text-[#aaa] text-[.88rem]">{t.comodidades.naoInformado}</p>}
+                {comodidades.length?comodidades.map((c:string,i:number)=><div key={i} className="pp-comodidade">{comodidadeLabelI18n(c)}</div>):<p className="text-[#aaa] text-[.88rem]">{t.comodidades.naoInformado}</p>}
               </div>
             </div>
 

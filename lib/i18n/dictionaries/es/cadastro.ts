@@ -3,6 +3,15 @@
 import type { T } from '../pt/cadastro'
 
 const cadastro: T = {
+  // ── Metadatos (<head>) ──
+  meta: {
+    title: 'Crear cuenta',
+    description:
+      'Crea tu cuenta gratuita en VENTSY para anunciar tu espacio de eventos o gestionar tus reservas. Tarda menos de un minuto.',
+    ogTitle: 'Crear cuenta · VENTSY',
+    ogDescription: 'Crea tu cuenta gratuita para anunciar tu espacio o reservar el lugar de tu evento.',
+  },
+
   // ── Encabezado ──
   tag: 'Nueva cuenta',
   tituloAntes: 'Crea tu cuenta en',

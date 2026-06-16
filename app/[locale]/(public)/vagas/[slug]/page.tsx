@@ -9,6 +9,7 @@ import { formatMoneyShort } from '@/lib/format'
 import { SITE_NAME, SITE_URL } from '@/lib/site'
 import { getDictionary } from '@/lib/i18n/getDictionary'
 import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 import { fetchVagaPorSlug, type Vaga } from './_data'
 import Candidatura from './_Candidatura'
 
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: { params: { locale: string; s
   return {
     title: `${vaga.titulo}${vaga.local ? ` — ${vaga.local}` : ''}`,
     description: desc,
-    alternates: { canonical: url },
+    alternates: buildAlternates(locale, `/vagas/${vaga.slug}`),
     openGraph: { title: vaga.titulo, description: desc, type: 'article', url },
   }
 }

@@ -3,6 +3,7 @@ import RootHtml from '@/components/RootHtml'
 import { I18nProvider } from '@/components/i18n/I18nProvider'
 import { getDictionary } from '@/lib/i18n/getDictionary'
 import { locales, isLocale, defaultLocale, htmlLang, ogLocale, localizar, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site'
 
 // Root layout das rotas LOCALIZADAS (/pt /en /es). Define <html lang> por idioma,
@@ -20,7 +21,7 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     title: { default: title, template: '%s · VENTSY' },
     description: SITE_DESCRIPTION,
     applicationName: SITE_NAME,
-    alternates: { canonical: localizar(locale, '/') },
+    alternates: buildAlternates(locale, '/'),
     openGraph: {
       type: 'website',
       locale: ogLocale[locale],

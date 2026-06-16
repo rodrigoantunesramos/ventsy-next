@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { getDictionary } from '@/lib/i18n/getDictionary'
 import { localizar, type Locale } from '@/lib/i18n/config'
+import { rotuloDado } from '@/lib/i18n/dados'
 import PropertyCard from './PropertyCard'
 import type { PropertySummary } from '@/types/client'
 
@@ -20,7 +21,7 @@ export default function CategorySection({ cat, props, locale }: Props) {
       <div className="flex items-center gap-3 mb-3">
         <span className="text-lg leading-none" aria-hidden="true">{cat.emoji}</span>
         <h2 className="font-['Playfair_Display'] text-[1.1rem] font-black text-[#0d0d0d] tracking-tight">
-          {cat.nome}
+          {rotuloDado(dict.dados.categorias, cat.nome)}
         </h2>
         <Link
           href={`${localizar(locale, '/busca')}?tipo=${encodeURIComponent(cat.nome)}`}

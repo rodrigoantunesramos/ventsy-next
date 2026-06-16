@@ -5,6 +5,7 @@ import Image from 'next/image'
 import FavoriteButton from './client/FavoriteButton'
 import { useTOptional } from '@/components/i18n/I18nProvider'
 import { formatMoney } from '@/lib/i18n/format'
+import { rotuloDado } from '@/lib/i18n/dados'
 import type { PropertySummary } from '@/types/client'
 
 interface Props {
@@ -163,7 +164,7 @@ export default function PropertyCard({
               </span>
             ) : categoria ? (
               <span className="absolute bottom-2 left-2 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-full">
-                {categoria}
+                {rotuloDado(dict.dados.categorias, categoria)}
               </span>
             ) : null}
           </div>

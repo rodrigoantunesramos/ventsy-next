@@ -8,6 +8,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { CATS, ESTADOS } from '@/lib/data'
 import { useT } from '@/components/i18n/I18nProvider'
+import { rotuloDado } from '@/lib/i18n/dados'
 
 const COMODIDADES = [
   'Wi-Fi', 'Estacionamento', 'Churrasqueira', 'Piscina', 'Ar-condicionado',
@@ -205,7 +206,7 @@ export default function AnunciarPage() {
               <select className={inputCls} value={categoria} onChange={(e) => setCategoria(e.target.value)}>
                 <option value="">{t.secaoSobre.categoriaPlaceholder}</option>
                 {CATS.map((c) => (
-                  <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
+                  <option key={c.nome} value={c.nome}>{c.emoji} {rotuloDado(dict.dados.categorias, c.nome)}</option>
                 ))}
               </select>
             </div>

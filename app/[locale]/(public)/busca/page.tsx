@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { SITE_NAME, abs } from '@/lib/site'
 import { getDictionary } from '@/lib/i18n/getDictionary'
 import { isLocale, defaultLocale, localizar, type Locale } from '@/lib/i18n/config'
+import { buildAlternates } from '@/lib/i18n/seo'
 import BuscaClient from './_BuscaClient'
 import { fetchBuscaInicial } from './_data'
 
@@ -56,7 +57,9 @@ export async function generateMetadata(
   return {
     title: titulo,
     description: desc,
-    alternates: { canonical },
+    // hreflang sem a query string (rota base /busca); mantém o canonical por
+    // região (estado/cidade/tipo) que concentra o sinal de SEO.
+    alternates: { ...buildAlternates(locale, '/busca'), canonical },
     openGraph: { title: `${titulo} · ${SITE_NAME}`, description: desc, url: abs(canonical) },
   }
 }

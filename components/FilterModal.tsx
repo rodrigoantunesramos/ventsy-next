@@ -3,6 +3,15 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ESTADOS } from '@/lib/data'
 import { useT } from '@/components/i18n/I18nProvider'
+import { rotuloDado } from '@/lib/i18n/dados'
+
+// Rótulo exibido = emoji do label local + texto traduzido (chave = valor canônico).
+// Preserva o emoji embutido no label e troca só o texto via o mapa do dicionário.
+function rotuloComEmoji(mapa: Record<string, string>, valor: string, labelComEmoji: string): string {
+  const sep = labelComEmoji.indexOf(' ')
+  const emoji = sep > 0 ? labelComEmoji.slice(0, sep) : ''
+  return emoji ? `${emoji} ${rotuloDado(mapa, valor)}` : rotuloDado(mapa, valor)
+}
 
 const CATEGORIAS = [
   { v: 'Casas de Festas',                  label: '🏠 Casas de Festas' },
@@ -308,7 +317,7 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
               {CATEGORIAS.map(c => (
                 <Chip
                   key={c.v}
-                  label={c.label}
+                  label={rotuloComEmoji(dict.dados.categorias, c.v, c.label)}
                   checked={categorias.has(c.v)}
                   onClick={() => toggleCategoria(c.v)}
                 />
@@ -322,7 +331,7 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
               {TIPOS_EVENTO.map(ev => (
                 <Chip
                   key={ev.v}
-                  label={ev.label}
+                  label={rotuloComEmoji(dict.dados.eventos, ev.v, ev.label)}
                   checked={tiposEvento.has(ev.v)}
                   onClick={() => toggleEvento(ev.v)}
                 />

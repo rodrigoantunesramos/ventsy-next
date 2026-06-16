@@ -6,6 +6,15 @@
 import type { T } from '../pt/anunciar'
 
 const anunciar: T = {
+  // ── Metadata (<head>) ──
+  meta: {
+    title: 'List your space',
+    description:
+      'List your event space on VENTSY and reach thousands of people looking for the ideal venue. Quick and free signup.',
+    ogTitle: 'List your space · VENTSY',
+    ogDescription: 'List your event space and receive requests from people looking for the ideal venue. Free to get started.',
+  },
+
   hero: {
     tag: 'List for free',
     titulo: 'List your space',
