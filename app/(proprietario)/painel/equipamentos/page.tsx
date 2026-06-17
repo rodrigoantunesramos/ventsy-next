@@ -30,6 +30,7 @@ import {
   type EventoLite, type FornecedorLite, type LinhaInventario,
   eventoLabel, fornecedorLabel, iniciais, exportEquipamentosCSV,
 } from './_lib';
+import { EmptyState } from '@/components/ui/Estados';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 const inp = 'w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20';
@@ -275,7 +276,12 @@ export default function EquipamentosPage() {
       )}
 
       {!needsSetup && equipamentos.length === 0 ? (
-        <EmptyEquipamentos onNovo={() => setItemEditor({ editing: null })} />
+        <EmptyState
+          icone={<IcoBox size={30} />}
+          titulo="Seu inventário locável começa aqui"
+          descricao="Cadastre mesas, cadeiras, tendas, som, palco, gerador, banheiro químico… defina a quantidade e veja a disponibilidade por data. Aloque itens a cada evento — o sistema bloqueia superalocação e sugere sublocação."
+          acao={<button onClick={() => setItemEditor({ editing: null })} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600">+ Adicionar primeiro item</button>}
+        />
       ) : !needsSetup && (
         <>
           {/* Tabs */}
@@ -530,18 +536,6 @@ export default function EquipamentosPage() {
       {devolver && (
         <DevolverModal aloc={devolver} equip={equipById.get(devolver.equipamento_id) || null} onClose={() => setDevolver(null)} onConfirm={confirmarDevolucao} />
       )}
-    </div>
-  );
-}
-
-// ── Empty state ────────────────────────────────────────────────────────────────
-function EmptyEquipamentos({ onNovo }: { onNovo: () => void }) {
-  return (
-    <div className="mt-6 rounded-2xl bg-white p-10 text-center shadow-card">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand"><IcoBox size={30} /></div>
-      <h2 className="text-lg font-bold text-ink">Seu inventário locável começa aqui</h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-ink-muted">Cadastre mesas, cadeiras, tendas, som, palco, gerador, banheiro químico… defina a quantidade e veja a disponibilidade por data. Aloque itens a cada evento — o sistema bloqueia superalocação e sugere sublocação.</p>
-      <button onClick={onNovo} className="mt-6 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600">+ Adicionar primeiro item</button>
     </div>
   );
 }

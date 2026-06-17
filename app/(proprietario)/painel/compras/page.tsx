@@ -18,6 +18,7 @@ import {
   isMissingTable, getAlcada, setAlcada as persistAlcada,
 } from './_lib';
 import { IcoCart, IcoDoc, IcoCompare, IcoTruck, IcoInbox } from './_components/ui';
+import { SetupCard } from '@/components/ui/Estados';
 import Painel from './_components/Painel';
 import Requisicoes from './_components/Requisicoes';
 import Cotacoes from './_components/Cotacoes';
@@ -123,11 +124,7 @@ export default function ComprasPage() {
         </div>
       </div>
 
-      {needsSetup && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          O módulo de Compras ainda não foi criado. Rode a migration <code className="rounded bg-amber-100 px-1 py-0.5">docs/sql/compras.sql</code> no Supabase para ativar.
-        </div>
-      )}
+      {needsSetup && <SetupCard sql="compras.sql">O módulo de Compras ainda não foi criado.</SetupCard>}
 
       {!needsSetup && bag && (
         <>

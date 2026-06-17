@@ -26,6 +26,7 @@ import {
   type NotaFiscal, type Fatura, type Evento, type Parcela, type ProvedorStatus, type FaturaStatus,
 } from './_lib';
 import { buildNotaPDF, type EmpresaPdf } from './_pdf';
+import { SetupCard } from '@/components/ui/Estados';
 
 const MESES_PT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const PALETTE = ['#10b981', '#1a73e8', '#f59e0b', '#8b5cf6', '#ec4899', '#94a3b8'];
@@ -229,11 +230,7 @@ export default function FaturamentoPage() {
         </div>
       </div>
 
-      {needsSetup && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          As tabelas de faturamento ainda não existem. Rode a migration <code className="rounded bg-amber-100 px-1 py-0.5">docs/sql/faturamento.sql</code> no Supabase para ativar o módulo.
-        </div>
-      )}
+      {needsSetup && <SetupCard sql="faturamento.sql">As tabelas de faturamento ainda não existem.</SetupCard>}
 
       {/* Banner provedor */}
       <div className={`mt-4 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 ${provedorConfigurado ? 'border-emerald-200 bg-emerald-50/60' : 'border-blue-200 bg-blue-50/60'}`}>
