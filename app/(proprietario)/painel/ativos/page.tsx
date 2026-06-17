@@ -11,6 +11,7 @@
 // Sem "R$" hardcoded — tudo via lib/format.
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { SetupCard, EmptyState } from '@/components/ui/Estados';
 import { useRouter } from 'next/navigation';
 import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatNumber, formatPercent } from '@/lib/format';
@@ -198,14 +199,19 @@ export default function AtivosPage() {
         </div>
       </div>
 
-      {needsSetup && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          O inventário de patrimônio ainda não foi criado. Rode a migration <code className="rounded bg-amber-100 px-1 py-0.5">docs/sql/ativos.sql</code> no Supabase para ativar o módulo.
-        </div>
-      )}
+      {needsSetup && <SetupCard sql="ativos.sql">O inventário de patrimônio ainda não foi criado.</SetupCard>}
 
       {!needsSetup && ativos.length === 0 ? (
-        <EmptyAtivos onNovo={() => setNovo(true)} />
+        <EmptyState
+          icone={<IcoBox size={30} />}
+          titulo="Seu inventário de patrimônio começa aqui"
+          descricao="Cadastre imóveis, móveis, equipamentos, veículos e estruturas: saiba o valor contábil (com depreciação), onde cada bem está, garantia, seguro e histórico de manutenção."
+          acao={
+            <button onClick={() => setNovo(true)} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600">
+              + Adicionar primeiro ativo
+            </button>
+          }
+        />
       ) : !needsSetup && (
         <>
           {/* KPIs */}
@@ -418,18 +424,6 @@ function DepBar({ pct }: { pct: number }) {
 }
 
 // ── Empty state ────────────────────────────────────────────────────────────────
-function EmptyAtivos({ onNovo }: { onNovo: () => void }) {
-  return (
-    <div className="mt-6 rounded-2xl bg-white p-10 text-center shadow-card">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand"><IcoBox size={30} /></div>
-      <h2 className="text-lg font-bold text-ink">Seu inventário de patrimônio começa aqui</h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-ink-muted">Cadastre imóveis, móveis, equipamentos, veículos e estruturas: saiba o valor contábil (com depreciação), onde cada bem está, garantia, seguro e histórico de manutenção.</p>
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-        <button onClick={onNovo} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600">+ Adicionar primeiro ativo</button>
-      </div>
-    </div>
-  );
-}
 
 // ── Modal: novo ativo ──────────────────────────────────────────────────────────
 function NovoAtivoModal({ userId, props, onClose, onSaved }: { userId: string; props: PropriedadeLite[]; onClose: () => void; onSaved: (id?: string) => void }) {
