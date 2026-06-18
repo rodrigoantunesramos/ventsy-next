@@ -7,24 +7,15 @@ import type { Metadata } from 'next'
 import { SITE_NAME, abs } from '@/lib/site'
 import { isLocale, defaultLocale, localizar, htmlLang, type Locale } from '@/lib/i18n/config'
 import { buildAlternates } from '@/lib/i18n/seo'
-import propriedadePt from '@/lib/i18n/dictionaries/pt/propriedade'
-import propriedadeEn from '@/lib/i18n/dictionaries/en/propriedade'
-import propriedadeEs from '@/lib/i18n/dictionaries/es/propriedade'
+import { getDictionary } from '@/lib/i18n/getDictionary'
 import { fetchPropriedadeMeta, fetchPropriedadeFotos, type PropMeta } from './_data'
 import PropriedadeClient from './_PropriedadeClient'
 
 export const revalidate = 300
 
-// Namespace `propriedade` por locale. Acessado direto (e não via getDictionary)
-// porque o índice central ainda não registra esta chave — o orquestrador o fará.
-const dicts = { pt: propriedadePt, en: propriedadeEn, es: propriedadeEs }
-function getPropDict(locale: Locale) {
-  return dicts[locale] ?? propriedadePt
-}
-
 export async function generateMetadata({ params }: { params: { locale: string; id: string } }): Promise<Metadata> {
   const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
-  const t = getPropDict(locale)
+  const t = getDictionary(locale).propriedade
   const prop = await fetchPropriedadeMeta(Number(params.id))
   if (!prop) return { title: t.meta.tituloFallback }
 
@@ -57,7 +48,7 @@ export async function generateMetadata({ params }: { params: { locale: string; i
 }
 
 function eventVenueLd(prop: PropMeta, locale: Locale) {
-  const t = getPropDict(locale)
+  const t = getDictionary(locale).propriedade
   const img = prop.imagem_url
   const capacidade = prop.capacidade ? Number(String(prop.capacidade).replace(/\D/g, '')) : 0
   const nota = prop.avaliacao ? Number(prop.avaliacao) : 0

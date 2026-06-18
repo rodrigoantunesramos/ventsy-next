@@ -13,6 +13,8 @@ import { applyPrefs, type Idioma, type FormatoData } from '@/lib/prefs';
 import type { Currency } from '@/lib/format';
 import { ToastProvider } from '@/components/Toast';
 import NotificationBell from '@/components/NotificationBell';
+import { useT } from '@/components/i18n/I18nProvider';
+import type { T as PainelDict } from '@/lib/i18n/dictionaries/pt/painel';
 
 type Profile = {
   nome: string;
@@ -23,121 +25,135 @@ type Profile = {
   validade: string | null;
 };
 
-type NavItem = { href: string; label: string; icon: keyof typeof ICONS; enabled?: boolean };
-type NavGroup = { group: string; items: NavItem[] };
+type GroupKey = keyof PainelDict['nav']['grupos'];
+type ItemKey = keyof PainelDict['nav']['itens'];
+
+type NavItem = { href: string; key: ItemKey; label: string; icon: keyof typeof ICONS; enabled?: boolean };
+type NavGroup = { group: string; gkey: GroupKey; items: NavItem[] };
 
 const NAV: NavGroup[] = [
   {
     group: 'Geral',
+    gkey: 'geral',
     items: [
-      { href: '/painel', label: 'Painel', icon: 'home', enabled: true },
-      { href: '/painel/minha-propriedade', label: 'Minha Propriedade', icon: 'building', enabled: true },
-      { href: '/painel/meus-espacos', label: 'Meus Espaços', icon: 'spaces', enabled: true },
-      { href: '/painel/fotos', label: 'Fotos', icon: 'image', enabled: true },
+      { href: '/painel', key: 'painel', label: 'Painel', icon: 'home', enabled: true },
+      { href: '/painel/minha-propriedade', key: 'minhaPropriedade', label: 'Minha Propriedade', icon: 'building', enabled: true },
+      { href: '/painel/meus-espacos', key: 'meusEspacos', label: 'Meus Espaços', icon: 'spaces', enabled: true },
+      { href: '/painel/fotos', key: 'fotos', label: 'Fotos', icon: 'image', enabled: true },
     ],
   },
   {
     group: 'Gestão',
+    gkey: 'gestao',
     items: [
-      { href: '/painel/calendario', label: 'Calendário', icon: 'calendar', enabled: true },
-      { href: '/painel/reservas', label: 'Reservas', icon: 'ticket', enabled: true },
-      { href: '/painel/precificacao', label: 'Precificação', icon: 'tag', enabled: true },
-      { href: '/painel/propostas', label: 'Propostas', icon: 'proposal', enabled: true },
-      { href: '/painel/ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
-      { href: '/painel/clientes', label: 'Clientes', icon: 'contacts', enabled: true },
-      { href: '/painel/avaliacoes', label: 'Avaliações', icon: 'star', enabled: true },
-      { href: '/painel/feedbacks', label: 'Feedbacks', icon: 'chat', enabled: true },
-      { href: '/painel/leads', label: 'Leads', icon: 'target', enabled: true },
-      { href: '/painel/relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
-      { href: '/painel/documentos', label: 'Documentos', icon: 'doc', enabled: true },
-      { href: '/painel/contratos', label: 'Contratos', icon: 'signature', enabled: true },
-      { href: '/painel/diario', label: 'Diário', icon: 'book', enabled: true },
+      { href: '/painel/calendario', key: 'calendario', label: 'Calendário', icon: 'calendar', enabled: true },
+      { href: '/painel/reservas', key: 'reservas', label: 'Reservas', icon: 'ticket', enabled: true },
+      { href: '/painel/precificacao', key: 'precificacao', label: 'Precificação', icon: 'tag', enabled: true },
+      { href: '/painel/propostas', key: 'propostas', label: 'Propostas', icon: 'proposal', enabled: true },
+      { href: '/painel/ganhos', key: 'ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
+      { href: '/painel/clientes', key: 'clientes', label: 'Clientes', icon: 'contacts', enabled: true },
+      { href: '/painel/avaliacoes', key: 'avaliacoes', label: 'Avaliações', icon: 'star', enabled: true },
+      { href: '/painel/feedbacks', key: 'feedbacks', label: 'Feedbacks', icon: 'chat', enabled: true },
+      { href: '/painel/leads', key: 'leads', label: 'Leads', icon: 'target', enabled: true },
+      { href: '/painel/relatorios', key: 'relatorios', label: 'Relatórios', icon: 'chart', enabled: true },
+      { href: '/painel/documentos', key: 'documentos', label: 'Documentos', icon: 'doc', enabled: true },
+      { href: '/painel/contratos', key: 'contratos', label: 'Contratos', icon: 'signature', enabled: true },
+      { href: '/painel/diario', key: 'diario', label: 'Diário', icon: 'book', enabled: true },
     ],
   },
   {
     group: 'Marketing',
+    gkey: 'marketing',
     items: [
-      { href: '/painel/marketing', label: 'Marketing', icon: 'growth', enabled: true },
-      { href: '/painel/campanhas', label: 'Campanhas', icon: 'megaphone', enabled: true },
-      { href: '/painel/listas', label: 'Listas Oficiais', icon: 'list', enabled: true },
-      { href: '/painel/pesquisas', label: 'Pesquisas & NPS', icon: 'poll', enabled: true },
-      { href: '/painel/portal', label: 'Portal do Cliente', icon: 'portal', enabled: true },
+      { href: '/painel/marketing', key: 'marketing', label: 'Marketing', icon: 'growth', enabled: true },
+      { href: '/painel/campanhas', key: 'campanhas', label: 'Campanhas', icon: 'megaphone', enabled: true },
+      { href: '/painel/listas', key: 'listas', label: 'Listas Oficiais', icon: 'list', enabled: true },
+      { href: '/painel/pesquisas', key: 'pesquisas', label: 'Pesquisas & NPS', icon: 'poll', enabled: true },
+      { href: '/painel/portal', key: 'portal', label: 'Portal do Cliente', icon: 'portal', enabled: true },
     ],
   },
   {
     group: 'Operações',
+    gkey: 'operacoes',
     items: [
-      { href: '/painel/producao', label: 'Produção', icon: 'clapper', enabled: true },
-      { href: '/painel/logistica', label: 'Logística', icon: 'cone', enabled: true },
-      { href: '/painel/acesso', label: 'Acesso & Credenciamento', icon: 'shield', enabled: true },
-      { href: '/painel/bilheteria', label: 'Bilheteria', icon: 'tickets', enabled: true },
-      { href: '/painel/expositores', label: 'Expositores & Patrocínios', icon: 'expo', enabled: true },
-      { href: '/painel/catering', label: 'Catering & Bar', icon: 'utensils', enabled: true },
-      { href: '/painel/estacionamento', label: 'Estacionamento & Mobilidade', icon: 'car', enabled: true },
-      { href: '/painel/layouts', label: 'Layouts & Plantas', icon: 'blueprint', enabled: true },
-      { href: '/painel/plano-b', label: 'Clima & Plano B', icon: 'cloud', enabled: true },
+      { href: '/painel/producao', key: 'producao', label: 'Produção', icon: 'clapper', enabled: true },
+      { href: '/painel/logistica', key: 'logistica', label: 'Logística', icon: 'cone', enabled: true },
+      { href: '/painel/acesso', key: 'acesso', label: 'Acesso & Credenciamento', icon: 'shield', enabled: true },
+      { href: '/painel/bilheteria', key: 'bilheteria', label: 'Bilheteria', icon: 'tickets', enabled: true },
+      { href: '/painel/expositores', key: 'expositores', label: 'Expositores & Patrocínios', icon: 'expo', enabled: true },
+      { href: '/painel/catering', key: 'catering', label: 'Catering & Bar', icon: 'utensils', enabled: true },
+      { href: '/painel/estacionamento', key: 'estacionamento', label: 'Estacionamento & Mobilidade', icon: 'car', enabled: true },
+      { href: '/painel/layouts', key: 'layouts', label: 'Layouts & Plantas', icon: 'blueprint', enabled: true },
+      { href: '/painel/plano-b', key: 'planoB', label: 'Clima & Plano B', icon: 'cloud', enabled: true },
     ],
   },
   {
     group: 'Pessoas',
+    gkey: 'pessoas',
     items: [
-      { href: '/painel/rh', label: 'RH', icon: 'people', enabled: true },
-      { href: '/painel/equipe', label: 'Equipe', icon: 'users', enabled: true },
-      { href: '/painel/ponto', label: 'Ponto & Escala', icon: 'clock', enabled: true },
+      { href: '/painel/rh', key: 'rh', label: 'RH', icon: 'people', enabled: true },
+      { href: '/painel/equipe', key: 'equipe', label: 'Equipe', icon: 'users', enabled: true },
+      { href: '/painel/ponto', key: 'ponto', label: 'Ponto & Escala', icon: 'clock', enabled: true },
     ],
   },
   {
     group: 'Financeiro',
+    gkey: 'financeiro',
     items: [
-      { href: '/painel/financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
-      { href: '/painel/recebiveis', label: 'Contas a pagar/receber', icon: 'receipt', enabled: true },
-      { href: '/painel/faturamento', label: 'Faturamento', icon: 'invoice', enabled: true },
-      { href: '/painel/comissoes', label: 'Comissões', icon: 'commission', enabled: true },
-      { href: '/painel/contabilidade', label: 'Contabilidade', icon: 'ledger', enabled: true },
+      { href: '/painel/financeiro', key: 'financeiro', label: 'Financeiro', icon: 'wallet', enabled: true },
+      { href: '/painel/recebiveis', key: 'recebiveis', label: 'Contas a pagar/receber', icon: 'receipt', enabled: true },
+      { href: '/painel/faturamento', key: 'faturamento', label: 'Faturamento', icon: 'invoice', enabled: true },
+      { href: '/painel/comissoes', key: 'comissoes', label: 'Comissões', icon: 'commission', enabled: true },
+      { href: '/painel/contabilidade', key: 'contabilidade', label: 'Contabilidade', icon: 'ledger', enabled: true },
     ],
   },
   {
     group: 'Suprimentos',
+    gkey: 'suprimentos',
     items: [
-      { href: '/painel/fornecedores', label: 'Fornecedores', icon: 'truck', enabled: true },
-      { href: '/painel/compras', label: 'Compras', icon: 'cart', enabled: true },
-      { href: '/painel/estoque', label: 'Estoque', icon: 'package', enabled: true },
-      { href: '/painel/ativos', label: 'Ativos & Bens', icon: 'assets', enabled: true },
-      { href: '/painel/equipamentos', label: 'Equipamentos', icon: 'layers', enabled: true },
-      { href: '/painel/manutencao', label: 'Manutenção', icon: 'wrench', enabled: true },
+      { href: '/painel/fornecedores', key: 'fornecedores', label: 'Fornecedores', icon: 'truck', enabled: true },
+      { href: '/painel/compras', key: 'compras', label: 'Compras', icon: 'cart', enabled: true },
+      { href: '/painel/estoque', key: 'estoque', label: 'Estoque', icon: 'package', enabled: true },
+      { href: '/painel/ativos', key: 'ativos', label: 'Ativos & Bens', icon: 'assets', enabled: true },
+      { href: '/painel/equipamentos', key: 'equipamentos', label: 'Equipamentos', icon: 'layers', enabled: true },
+      { href: '/painel/manutencao', key: 'manutencao', label: 'Manutenção', icon: 'wrench', enabled: true },
     ],
   },
   {
     group: 'Conformidade',
+    gkey: 'conformidade',
     items: [
-      { href: '/painel/licencas', label: 'Licenças & Alvarás', icon: 'compliance', enabled: true },
-      { href: '/painel/seguros', label: 'Seguros', icon: 'umbrella', enabled: true },
-      { href: '/painel/sst', label: 'Saúde & Segurança (SST)', icon: 'safety', enabled: true },
-      { href: '/painel/juridico', label: 'Jurídico & LGPD', icon: 'scale', enabled: true },
+      { href: '/painel/licencas', key: 'licencas', label: 'Licenças & Alvarás', icon: 'compliance', enabled: true },
+      { href: '/painel/seguros', key: 'seguros', label: 'Seguros', icon: 'umbrella', enabled: true },
+      { href: '/painel/sst', key: 'sst', label: 'Saúde & Segurança (SST)', icon: 'safety', enabled: true },
+      { href: '/painel/juridico', key: 'juridico', label: 'Jurídico & LGPD', icon: 'scale', enabled: true },
     ],
   },
   {
     group: 'Inteligência',
+    gkey: 'inteligencia',
     items: [
-      { href: '/painel/terceiros', label: 'Terceiros (custo × retorno)', icon: 'exchange', enabled: true },
+      { href: '/painel/terceiros', key: 'terceiros', label: 'Terceiros (custo × retorno)', icon: 'exchange', enabled: true },
     ],
   },
   {
     group: 'Conta',
+    gkey: 'conta',
     items: [
-      { href: '/painel/metas', label: 'Metas & OKR', icon: 'goal', enabled: true },
-      { href: '/painel/automacoes', label: 'Automações', icon: 'bolt', enabled: true },
-      { href: '/painel/unidades', label: 'Unidades', icon: 'network', enabled: true },
-      { href: '/painel/indique', label: 'Indique & Ganhe', icon: 'gift', enabled: true },
-      { href: '/painel/integracoes', label: 'Integrações', icon: 'plug', enabled: true },
-      { href: '/painel/configuracoes', label: 'Configurações', icon: 'cog', enabled: true },
-      { href: '/painel/auditoria', label: 'Auditoria & Logs', icon: 'audit', enabled: true },
-      { href: '/painel/planos', label: 'Planos', icon: 'card', enabled: true },
+      { href: '/painel/metas', key: 'metas', label: 'Metas & OKR', icon: 'goal', enabled: true },
+      { href: '/painel/automacoes', key: 'automacoes', label: 'Automações', icon: 'bolt', enabled: true },
+      { href: '/painel/unidades', key: 'unidades', label: 'Unidades', icon: 'network', enabled: true },
+      { href: '/painel/indique', key: 'indique', label: 'Indique & Ganhe', icon: 'gift', enabled: true },
+      { href: '/painel/integracoes', key: 'integracoes', label: 'Integrações', icon: 'plug', enabled: true },
+      { href: '/painel/configuracoes', key: 'configuracoes', label: 'Configurações', icon: 'cog', enabled: true },
+      { href: '/painel/auditoria', key: 'auditoria', label: 'Auditoria & Logs', icon: 'audit', enabled: true },
+      { href: '/painel/planos', key: 'planos', label: 'Planos', icon: 'card', enabled: true },
     ],
   },
 ];
 
 export default function PainelLayout({ children }: { children: React.ReactNode }) {
+  const { dict } = useT();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -231,7 +247,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen((v) => !v)}
-            aria-label="Menu"
+            aria-label={dict.painel.shell.menu}
             className="flex flex-col gap-[5px] p-2 md:hidden"
           >
             <span className="block h-[2px] w-[22px] rounded-sm bg-ink-soft" />
@@ -259,16 +275,16 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
                 <div className="mt-0.5 text-xs text-ink-muted">{profile?.email}</div>
               </div>
               <Link href="/painel" className="block px-4 py-2.5 text-sm hover:bg-[#f7f7f7]" onClick={() => setAvatarOpen(false)}>
-                Painel
+                {dict.painel.nav.itens.painel}
               </Link>
               <Link href="/" className="block px-4 py-2.5 text-sm hover:bg-[#f7f7f7]" onClick={() => setAvatarOpen(false)}>
-                Ver o site
+                {dict.painel.shell.verSite}
               </Link>
               <button
                 onClick={handleSair}
                 className="mt-1 w-full border-t border-black/[0.06] px-4 py-2.5 text-left text-sm text-brand"
               >
-                Sair da conta
+                {dict.painel.shell.sairConta}
               </button>
             </div>
           )}
@@ -298,16 +314,16 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
               {planoEmoji} {profile?.plano}
             </div>
             {profile?.validade && (
-              <div className="mt-1 text-[0.72rem] text-ink-muted">Válido até {formatDate(profile.validade)}</div>
+              <div className="mt-1 text-[0.72rem] text-ink-muted">{dict.painel.shell.validoAte} {formatDate(profile.validade)}</div>
             )}
           </div>
 
           {/* Menu */}
           <nav className="py-3">
             {NAV.map((grupo) => (
-              <div key={grupo.group}>
+              <div key={grupo.gkey}>
                 <div className="px-5 pb-1 pt-2.5 text-[0.68rem] font-bold uppercase tracking-[0.08em] text-ink-muted/70">
-                  {grupo.group}
+                  {dict.painel.nav.grupos[grupo.gkey]}
                 </div>
                 {grupo.items.map((item) => {
                   const active = pathname === item.href || (item.href !== '/painel' && pathname.startsWith(item.href + '/'));
@@ -323,7 +339,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
                         }`}
                       >
                         <Icon name={item.icon} />
-                        {item.label}
+                        {dict.painel.nav.itens[item.key]}
                       </Link>
                     );
                   }
@@ -331,12 +347,12 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
                     <div
                       key={item.href}
                       className="flex cursor-not-allowed items-center gap-3 border-l-[3px] border-transparent px-5 py-2.5 text-sm text-ink-muted/50"
-                      title="Em breve"
+                      title={dict.painel.shell.emBreve}
                     >
                       <Icon name={item.icon} />
-                      <span className="flex-1">{item.label}</span>
+                      <span className="flex-1">{dict.painel.nav.itens[item.key]}</span>
                       <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-ink-muted">
-                        Em breve
+                        {dict.painel.shell.emBreve}
                       </span>
                     </div>
                   );

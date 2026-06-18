@@ -12,16 +12,8 @@ import { comodidadeLabel, COMODIDADES } from '@/lib/data'
 import { useT } from '@/components/i18n/I18nProvider'
 import { formatMoney } from '@/lib/i18n/format'
 import { rotuloDado } from '@/lib/i18n/dados'
-import propriedadePt from '@/lib/i18n/dictionaries/pt/propriedade'
-import propriedadeEn from '@/lib/i18n/dictionaries/en/propriedade'
-import propriedadeEs from '@/lib/i18n/dictionaries/es/propriedade'
-import type { Locale } from '@/lib/i18n/config'
 import type { PropMeta, FotoMeta } from './_data'
 import './propriedade.css'
-
-// Namespace `propriedade` por locale. Acessado direto (e não via dict.propriedade)
-// porque o índice central ainda não registra esta chave — o orquestrador o fará.
-const propDicts: Record<Locale, typeof propriedadePt> = { pt: propriedadePt, en: propriedadeEn, es: propriedadeEs }
 
 /* ── tipos ── */
 interface Foto { url: string; titulo: string; ordem: number; tipo?: string | null; focal_x?: number | null; focal_y?: number | null; alt?: string | null }
@@ -95,7 +87,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   const propId    = params.id as string
   const propIdNum = Number(propId)
   const { dict, lhref, locale } = useT()
-  const t = propDicts[locale] ?? propriedadePt
+  const t = dict.propriedade
   // Rótulo traduzido de um tipo de evento (valor salvo em PT). Fallback: o próprio valor.
   const tipoEventoLabel = (v: string) => (t.tiposEvento as Record<string, string>)[v] || v
   // Comodidade exibida: preserva o emoji canônico (de lib/data) e traduz só o texto
@@ -338,12 +330,15 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
   const calcTotal=()=>{const vh=parseFloat(prop?.valor_hora)||0;const vd=parseFloat(prop?.valor_base||prop?.preco)||0;if(formModo==='hora')return vh*Math.max(1,formHoras);if(formModo==='diaria'&&formInicio&&formFim){const d=Math.max(0,Math.round((new Date(formFim).getTime()-new Date(formInicio).getTime())/86400000));return vd*Math.max(1,d)}return vd||vh}
   const total=calcTotal()
-  const formValido=formNome.trim().length>=3&&/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail)&&formTel.replace(/\D/g,'').length===11&&!!formTipo&&!!formModo
+  // Captura de lead funciona com ou sem preço cadastrado: boa parte do catálogo
+  // ainda não tem valor. Sem preço, o "modo de cobrança" deixa de ser obrigatório.
+  const temPreco=Number(prop?.valor_hora)>0||Number(prop?.valor_base)>0
+  const formValido=formNome.trim().length>=3&&/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail)&&formTel.replace(/\D/g,'').length===11&&!!formTipo&&(!temPreco||!!formModo)
 
   const irWppDireto=async()=>{const msg=t.whatsapp.msgDireto.replace('{nome}',prop?.nome||t.whatsapp.nomePadrao);fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propriedade_id:prop?.id,evento_tipo:'whatsapp'})}).catch(()=>{});window.open(`https://wa.me/${wppRef.current}?text=${encodeURIComponent(msg)}`,'_blank')}
 
   const enviarWpp=async()=>{
-    if(!formValido){const e:Record<string,boolean>={};if(formNome.trim().length<3)e.nome=true;if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail))e.email=true;if(formTel.replace(/\D/g,'').length!==11)e.tel=true;if(!formTipo)e.tipo=true;if(!formModo)e.modo=true;setFormErros(e);return}
+    if(!formValido){const e:Record<string,boolean>={};if(formNome.trim().length<3)e.nome=true;if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formEmail))e.email=true;if(formTel.replace(/\D/g,'').length!==11)e.tel=true;if(!formTipo)e.tipo=true;if(temPreco&&!formModo)e.modo=true;setFormErros(e);return}
     setFormErros({})
     const fmt=(d:string)=>d?formatMoneyDate(d):t.whatsapp.aCombinar
     let db='';if(formModo==='hora')db=`⏱ *${t.whatsapp.tipoLocacao}* ${t.whatsapp.porHora} (${formHoras}h)`;if(formModo==='diaria')db=`📅 *${t.whatsapp.periodo}* ${fmt(formInicio)} ${t.whatsapp.ate} ${fmt(formFim)}`
@@ -369,7 +364,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
       const{error}=await supabase.from('reservas').insert({
         propriedade_id:prop?.id, usuario_id:clientUserId,
         nome:formNome||clientNome, email:formEmail, telefone:formTel,
-        tipo_evento:formTipo, modo:formModo,
+        tipo_evento:formTipo, modo:formModo||null,
         data_inicio:formInicio||null, data_fim:formModo==='diaria'?(formFim||null):null,
         horas:formModo==='hora'?formHoras:null, pessoas:formPessoas,
         valor_estimado:total||null, status:'solicitada',
@@ -673,8 +668,10 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
               <div className="pp-precos">
                 {prop?.valor_hora>0&&<div className="pp-preco-item"><span className="pp-preco-label">{t.cardLateral.porHora}</span><span className="pp-preco-valor">{formatMoney(locale,Number(prop.valor_hora))}<em>{t.cardLateral.porHoraSufixo}</em></span></div>}
                 {(prop?.valor_base||prop?.preco)>0&&<div className="pp-preco-item"><span className="pp-preco-label">{t.cardLateral.diaria}</span><span className="pp-preco-valor">{formatMoney(locale,Number(prop?.valor_base||prop?.preco))}</span></div>}
+                {!temPreco&&<div className="pp-preco-item"><span className="pp-preco-valor">{t.form.aConsultar}</span></div>}
               </div>
-              {plano!=='basico'?(
+              {/* Captura de lead para TODOS os planos; recursos premium (vídeos,
+                  selo, prioridade na busca) seguem exclusivos do plano pago. */}
                 <>
                   {wppRef.current&&<button className="pp-btn-wpp" onClick={irWppDireto}>{WPP_SVG} {t.cardLateral.whatsappDireto}</button>}
                   <div className="pp-form">
@@ -694,6 +691,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                         {TIPOS_EVENTO.map(tp=><option key={tp} value={tp}>{tipoEventoLabel(tp)}</option>)}
                       </select>
                     </div>
+                    {temPreco&&(
                     <div className="pp-form-grupo">
                       <label>{t.form.modoCobrancaLabel}</label>
                       <div className="pp-modo-wrap">
@@ -701,6 +699,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                         {(prop?.valor_base||prop?.preco)>0&&<label className={`pp-modo-btn${formModo==='diaria'?' pp-modo-on':''}`}><input type="radio" name="modo" checked={formModo==='diaria'} onChange={()=>setFormModo('diaria')}/>{t.form.modoDiaria}</label>}
                       </div>
                     </div>
+                    )}
                     {formModo==='hora'&&(
                       <div className="pp-form-grupo"><label>{t.form.horasLabel}</label>
                         <div className="flex gap-[10px] items-center">
@@ -721,11 +720,15 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                         <input type="number" min={1} max={prop?.capacidade||500} value={formPessoas} onChange={e=>setFormPessoas(Number(e.target.value))} className="w-16 px-2 py-1 border-[1.5px] border-[#ddd] rounded-lg text-center font-[inherit] text-[.85rem]"/>
                       </div>
                     </div>
+                    {temPreco?(
                     <div className="pp-simulador">
                       <div className="pp-sim-label">{t.form.estimativaTitulo}</div>
                       <div className="pp-sim-total"><span>{t.form.totalEstimado}</span><span>{total>0?formatMoney(locale,total):t.form.aConsultar}</span></div>
                       <div className="pp-sim-aviso">{t.form.estimativaAviso}</div>
                     </div>
+                    ):(
+                      <div className="pp-simulador"><div className="pp-sim-aviso">{t.cardLateral.basicoCta}</div></div>
+                    )}
                     <button
                       type="button"
                       onClick={solicitarReserva}
@@ -739,12 +742,6 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                     <p className="pp-form-hint">{t.form.hint}</p>
                   </div>
                 </>
-              ):(
-                <div className="pp-basico-cta">
-                  <p>{t.cardLateral.basicoCta}</p>
-                  {wppRef.current&&<button className="pp-btn-wpp mt-4" onClick={irWppDireto}>{t.cardLateral.falarWhatsapp}</button>}
-                </div>
-              )}
             </div>
           </div>
         </div>

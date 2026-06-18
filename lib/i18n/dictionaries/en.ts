@@ -11,6 +11,7 @@ import legal from './en/legal'
 import listas from './en/listas'
 import vagas from './en/vagas'
 import dados from './en/dados'
+import painel from './en/painel'
 
 const en: Dictionary = {
   common: {
@@ -188,6 +189,7 @@ const en: Dictionary = {
   listas,
   vagas,
   dados,
+  painel,
 }
 
 export default en

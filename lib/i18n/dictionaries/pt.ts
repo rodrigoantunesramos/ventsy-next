@@ -15,6 +15,7 @@ import legal from './pt/legal'
 import listas from './pt/listas'
 import vagas from './pt/vagas'
 import dados from './pt/dados'
+import painel from './pt/painel'
 
 const pt = {
   common: {
@@ -192,6 +193,7 @@ const pt = {
   listas,
   vagas,
   dados,
+  painel,
 }
 
 export type Dictionary = typeof pt

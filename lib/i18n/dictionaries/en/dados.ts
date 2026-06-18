@@ -56,6 +56,7 @@ const eventos: Record<string, string> = {
   'Conferência': 'Conference',
   'Congresso': 'Congress',
   'Seminário': 'Seminar',
+  'Seminários': 'Seminars',
   'Hackathon': 'Hackathon',
   'Happy Hour': 'Happy Hour',
   'Confraternização': 'Get-together',
