@@ -304,6 +304,26 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   },[])
 
   // ── Verificar se já avaliou esta propriedade ─────────────────────────────
+  // Restaura o rascunho do formulário de reserva após o login (A2).
+  useEffect(()=>{
+    if(!propId || propId==='demo') return
+    try{
+      const raw=sessionStorage.getItem(`ventsy_lead_${propId}`)
+      if(!raw)return
+      const d=JSON.parse(raw)
+      if(d.formNome!=null)setFormNome(d.formNome)
+      if(d.formTel!=null)setFormTel(d.formTel)
+      if(d.formEmail!=null)setFormEmail(d.formEmail)
+      if(d.formTipo!=null)setFormTipo(d.formTipo)
+      if(d.formModo!=null)setFormModo(d.formModo)
+      if(d.formHoras!=null)setFormHoras(d.formHoras)
+      if(d.formInicio!=null)setFormInicio(d.formInicio)
+      if(d.formFim!=null)setFormFim(d.formFim)
+      if(d.formPessoas!=null)setFormPessoas(d.formPessoas)
+      sessionStorage.removeItem(`ventsy_lead_${propId}`)
+    }catch{}
+  },[propId])
+
   useEffect(()=>{
     if(!clientUserId || !propId || propId==='demo') return
     supabase.from('avaliacoes').select('id').eq('user_id',clientUserId).eq('propriedade_id',Number(propId)).maybeSingle()
@@ -352,7 +372,14 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
   const solicitarReserva=async()=>{
     if(enviandoReserva)return
-    if(!clientUserId){setReservaToast(t.reserva.loginNecessario);setTimeout(()=>setReservaToast(''),4000);return}
+    if(!clientUserId){
+      // Sem login: preserva o que já foi preenchido e leva ao login; ao voltar,
+      // o rascunho é restaurado (o caminho via WhatsApp não exige login).
+      try{ sessionStorage.setItem(`ventsy_lead_${propId}`, JSON.stringify({formNome,formTel,formEmail,formTipo,formModo,formHoras,formInicio,formFim,formPessoas})) }catch{}
+      const back = window.location.pathname + window.location.search
+      window.location.href = `${lhref('/login')}?redirect=${encodeURIComponent(back)}`
+      return
+    }
     if(!formValido){setReservaToast(t.reserva.preenchaCampos);setTimeout(()=>setReservaToast(''),4000);return}
     setEnviandoReserva(true)
     try{
