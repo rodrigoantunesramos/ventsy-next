@@ -24,9 +24,13 @@ export default function RootHtml({
   return (
     <html lang={lang} className={`${inter.variable} ${playfair.variable}`}>
       <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        {/* Material Icons ainda é webfont; preconectar às origens do Google Fonts
+            acelera seu carregamento (display=block evita o flash do texto da
+            ligadura). flatpickr e Leaflet saíram do shell — agora vêm por import
+            nos componentes (SearchBar/SearchMap), carregados só onde são usados. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block" />
         {jsonLd && (
           <script
             type="application/ld+json"

@@ -3,6 +3,9 @@ import { useEffect, useRef } from 'react'
 import type { Map as LeafletMap, LayerGroup } from 'leaflet'
 import { useT } from '@/components/i18n/I18nProvider'
 import { formatMoney } from '@/lib/i18n/format'
+// CSS do Leaflet via import de componente: o Next o code-splita para a rota /busca,
+// em vez de carregá-lo (de um CDN, render-blocking) em todas as páginas.
+import 'leaflet/dist/leaflet.css'
 
 type LeafletModule = typeof import('leaflet')
 

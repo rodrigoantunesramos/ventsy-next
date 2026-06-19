@@ -6,6 +6,8 @@ import OndeSearch from './OndeSearch'
 import EventoDropdown from './EventoDropdown'
 import { useT } from './i18n/I18nProvider'
 import { formatDate } from '@/lib/i18n/format'
+// CSS do flatpickr self-hosted (bundle), em vez de um <link> de CDN no shell.
+import 'flatpickr/dist/flatpickr.min.css'
 
 // Data em ISO local (YYYY-MM-DD) — vai para a URL e é usada pela busca/disponibilidade.
 const iso = (d: Date) =>
