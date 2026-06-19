@@ -192,10 +192,15 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
         return
       }
 
-      const { data: p } = await withTimeout(
-        supabase.from('propriedades').select('*').eq('id', propIdNum).single(),
-        8000
-      )
+      // Reusa a propriedade já trazida pelo SSR (initialProp = select '*'); só
+      // re-busca se ela não veio. Corta uma query e um round-trip serial.
+      const p: any =
+        initialProp && propId !== 'demo'
+          ? initialProp
+          : (await withTimeout(
+              supabase.from('propriedades').select('*').eq('id', propIdNum).single(),
+              8000,
+            )).data
 
       if (!p) {
         if (!initialProp) setNaoEncontrado(true)
@@ -203,36 +208,23 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
         return
       }
 
-      const { data: fts } = await withTimeout(
-        supabase.from('fotos_imovel').select('*').eq('propriedade_id', propIdNum).order('ordem', { ascending: true }) as PromiseLike<{data: any[]}>,
-        8000
-      ).catch(() => ({ data: [] as any[] }))
+      // Fotos + enriquecimento em PARALELO (antes eram awaits sequenciais). Cada
+      // item tem .catch próprio — uma falha isolada não derruba os demais.
+      const [fts, planoRes, vids, avals, usr] = await withTimeout(Promise.all([
+        supabase.from('fotos_imovel').select('*').eq('propriedade_id', propIdNum).order('ordem', { ascending: true })
+          .then((r: any) => r.data || [], () => [] as any[]),
 
-      const [planoRes, { data: vids }, { data: avals }, { data: usr }] = await withTimeout(Promise.all([
         fetch(`/api/planos?usuario_id=${encodeURIComponent(p.usuario_id || '')}`).then(r => r.json()).then(j => j.plano || 'basico').catch(() => 'basico'),
 
-        supabase
-          .from('videos_propriedade')
-          .select('url,titulo')
-          .eq('propriedade_id', propIdNum),
+        supabase.from('videos_propriedade').select('url,titulo').eq('propriedade_id', propIdNum)
+          .then((r: any) => r.data || [], () => [] as any[]),
 
-        supabase
-          .from('avaliacoes')
-          .select('*')
-          .eq('propriedade_id', propIdNum)
-          .eq('verificada', true)
-          .eq('oculta', false)
-          .order('criado_em', { ascending: false }),
+        supabase.from('avaliacoes').select('*').eq('propriedade_id', propIdNum).eq('verificada', true).eq('oculta', false).order('criado_em', { ascending: false })
+          .then((r: any) => r.data || [], () => [] as any[]),
 
-        supabase
-          .from('perfis_publicos')
-          .select('id, id_prop, nome, usuario, criado_em')
-          .eq(
-            p.usuario_id?.length === 36 ? 'id' : 'id_prop',
-            p.usuario_id || ''
-          )
-          .single(),
-      ]), 8000).catch(() => ['basico', { data: [] }, { data: [] }, { data: null }] as any)
+        supabase.from('perfis_publicos').select('id, id_prop, nome, usuario, criado_em').eq(p.usuario_id?.length === 36 ? 'id' : 'id_prop', p.usuario_id || '').single()
+          .then((r: any) => r.data, () => null),
+      ]), 8000).catch(() => [[], 'basico', [], [], null] as any)
 
       if (['basico', 'pro', 'ultra'].includes(planoRes)) {
         setPlano(planoRes as 'basico' | 'pro' | 'ultra')

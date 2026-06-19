@@ -20,6 +20,10 @@ export type PropMeta = {
   tipo_propriedade: string | null
   publicada: boolean | null
   nAvaliacoes: number
+  // A consulta é select('*'): além dos campos acima (tipados p/ metadata e
+  // JSON-LD), o objeto carrega o resto da linha, consumido pela ilha cliente.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [k: string]: any
 }
 
 // Forma mínima de foto para semear a galeria no SSR (espelha o mapeamento do
@@ -39,7 +43,9 @@ export const fetchPropriedadeMeta = cache(async (id: number): Promise<PropMeta |
   try {
     const { data: prop } = await admin
       .from('propriedades')
-      .select('id,nome,descricao,cidade,estado,capacidade,valor_base,valor_hora,avaliacao,imagem_url,tipo_propriedade,publicada')
+      // select('*') para a ilha cliente reusar a propriedade inteira (comodidades,
+      // faq, whatsapp, usuario_id, etc.) sem re-buscar — elimina a "dupla-busca".
+      .select('*')
       .eq('id', id)
       .maybeSingle()
     if (!prop) return null

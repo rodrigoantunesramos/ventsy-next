@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { useEffect, useRef } from 'react'
@@ -96,9 +97,11 @@ export default function ComoFuncionaPage() {
         {/* Bloco 1 — Donos de espaço */}
         <div className="cf-publico-bloco cf-reveal">
           <div className="cf-publico-foto">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80"
               alt={t.imgAlt.espaco}
+              fill
+              sizes="(min-width: 900px) 45vw, 100vw"
             />
             <div className="cf-foto-badge">{t.dono.badge}</div>
           </div>
@@ -123,9 +126,11 @@ export default function ComoFuncionaPage() {
         {/* Bloco 2 — Quem busca (invertido) */}
         <div className="cf-publico-bloco cf-invertido cf-reveal">
           <div className="cf-publico-foto">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80"
               alt={t.imgAlt.evento}
+              fill
+              sizes="(min-width: 900px) 45vw, 100vw"
             />
             <div className="cf-foto-badge">{t.busca.badge}</div>
           </div>

@@ -20,7 +20,10 @@ async function fetchHomeFeed(): Promise<Record<string, PropertySummary[]>> {
 
   try {
     const [{ data: props }, { data: assinaturas }] = await Promise.all([
-      admin.from('propriedades').select('*').eq('publicada', true),
+      admin.from('propriedades')
+        .select('id,nome,cidade,estado,bairro,imagem_url,categoria,tipo_propriedade,avaliacao,valor_base,valor_hora,capacidade,usuario_id')
+        .limit(300)
+        .eq('publicada', true),
       admin.from('assinaturas').select('usuario_id, plano_ativo, status').in('status', ['ativa', 'trial']),
     ])
     raw = props || []
