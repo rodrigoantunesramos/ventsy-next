@@ -9,7 +9,7 @@ import FilterModal, { type Filtros } from '@/components/FilterModal'
 import SearchMap from '@/components/SearchMap'
 import { supabase } from '@/lib/supabase'
 import { useT } from '@/components/i18n/I18nProvider'
-import { filtrosFromParams, paramsFromFiltros, contarFiltros, aplicarFiltrosNaQuery, ordenarPorRelevancia } from './_filtros'
+import { filtrosFromParams, paramsFromFiltros, contarFiltros, aplicarFiltrosNaQuery, ordenarPorRelevancia, idsIndisponiveis, excluirIds } from './_filtros'
 import type { PropertySummary } from '@/types/client'
 import type { Locale } from '@/lib/i18n/config'
 
@@ -73,6 +73,8 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
     const f = filtrosFromParams(params)
     let query = supabase.from('propriedades').select('*').eq('publicada', true)
     query = aplicarFiltrosNaQuery(query, params)
+    // Data: remove espaços com data bloqueada no intervalo selecionado.
+    query = excluirIds(query, await idsIndisponiveis(supabase, params.get('data_inicio') || '', params.get('data_fim') || ''))
 
     if (f.ultra) {
       const { planos } = await fetch('/api/planos').then(r => r.json()).catch(() => ({ planos: {} }))

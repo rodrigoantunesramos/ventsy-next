@@ -57,20 +57,19 @@ export default function SearchBar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale])
 
-  const canSearch = !!ondeSelected
+  // Permite buscar por local, tipo de evento e/ou data — qualquer combinação.
+  const canSearch = !!ondeSelected || !!eventoValue || !!datas.ini
 
   const handleSearch = async () => {
-    if (!ondeSelected) return
-
-    if (ondeSelected.tipo === 'prop' && ondeSelected.id) {
+    if (ondeSelected?.tipo === 'prop' && ondeSelected.id) {
       router.push(lhref(`/propriedade/${ondeSelected.id}`))
       return
     }
 
     const params = new URLSearchParams()
-    if (ondeSelected.estado) params.set('estado', ondeSelected.estado)
-    if (ondeSelected.cidade) params.set('cidade', ondeSelected.cidade)
-    if (ondeSelected.bairro) params.set('bairro', ondeSelected.bairro)
+    if (ondeSelected?.estado) params.set('estado', ondeSelected.estado)
+    if (ondeSelected?.cidade) params.set('cidade', ondeSelected.cidade)
+    if (ondeSelected?.bairro) params.set('bairro', ondeSelected.bairro)
     if (eventoValue)         params.set('evento', eventoValue)
     if (datas.ini)           params.set('data_inicio', datas.ini)
     if (datas.fim)           params.set('data_fim', datas.fim)

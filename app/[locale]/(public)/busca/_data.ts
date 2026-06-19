@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { filtrosFromParams, aplicarFiltrosNaQuery, ordenarPorRelevancia, type SP } from './_filtros'
+import { filtrosFromParams, aplicarFiltrosNaQuery, ordenarPorRelevancia, idsIndisponiveis, excluirIds, type SP } from './_filtros'
 
 // Server-only: este módulo importa supabaseAdmin (service-role). NUNCA importar
 // no client — a lógica de filtros pura fica em _filtros.ts.
@@ -26,6 +26,8 @@ export async function fetchBuscaInicial(sp: SP): Promise<BuscaInicial> {
   const f = filtrosFromParams(sp)
   let query = admin.from('propriedades').select('*').eq('publicada', true)
   query = aplicarFiltrosNaQuery(query, sp)
+  // Data: remove espaços com data bloqueada no intervalo selecionado.
+  query = excluirIds(query, await idsIndisponiveis(admin, sp.get('data_inicio') || '', sp.get('data_fim') || ''))
 
   if (f.ultra) {
     const ultraIds = Object.entries(planos).filter(([, p]) => p === 'ultra').map(([uid]) => uid)

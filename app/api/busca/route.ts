@@ -14,12 +14,11 @@ export async function GET(req: NextRequest) {
     global: authHeader ? { headers: { Authorization: authHeader } } : {},
   })
 
+  // Busca acento-insensível via RPC: casa nome/cidade/bairro ignorando acentos
+  // e caixa (antes era ilike só no nome, accent-sensitive).
   const { data, error } = await supabase
-    .from('propriedades')
-    .select('id, nome, cidade, estado, bairro, imagem_url, foto_capa')
-    .eq('publicada', true)
-    .ilike('nome', `%${q}%`)
-    .limit(8)
+    .rpc('buscar_espacos', { termo: q })
+    .select('id, nome, cidade, estado, bairro, imagem_url')
 
   if (error) return Response.json({ data: [] })
   return Response.json({ data: data || [] })

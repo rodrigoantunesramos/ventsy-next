@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { ESTADOS, norm } from '@/lib/data'
 import { useT } from './i18n/I18nProvider'
 
@@ -113,19 +112,13 @@ export default function OndeSearch({ onSelect }: Props) {
 
     const nq = norm(q)
 
-    const [buscaRes, { data: locationProps }] = await Promise.all([
-      fetch(`/api/busca?q=${encodeURIComponent(q)}`).then(r => r.json()).catch(() => ({ data: [] })),
-      supabase
-        .from('propriedades')
-        .select('cidade, estado, bairro')
-        .eq('publicada', true)
-        .or(`cidade.ilike.%${q}%,bairro.ilike.%${q}%`)
-        .limit(30),
-    ])
+    // Fonte única: a RPC (via /api/busca) já casa nome, cidade e bairro sem acento.
+    // Antes havia uma segunda consulta direta (accent-sensitive) — redundante agora.
+    const buscaRes = await fetch(`/api/busca?q=${encodeURIComponent(q)}`).then(r => r.json()).catch(() => ({ data: [] }))
     const propsByName: any[] = buscaRes?.data ?? []
     const estadosMatch = ESTADOS.filter(e => norm(e.n).includes(nq) || norm(e.s).includes(nq))
 
-    const allLocations = [...(locationProps || []), ...propsByName]
+    const allLocations = propsByName
 
     const bairroMap = new Map<string, { bairro: string; cidade: string; estado: string }>()
     allLocations.forEach(p => {

@@ -77,8 +77,20 @@ export function aplicarFiltrosNaQuery(query: any, sp: SP) {
   if (f.cidade) query = query.ilike('cidade', `%${f.cidade}%`)
   if (bairro) query = query.ilike('bairro', `%${bairro}%`)
   if (f.capacidade > 0) query = query.gte('capacidade', f.capacidade)
-  if (f.precoMin > 0) query = query.gte('valor_hora', f.precoMin)
-  if (f.precoMax < 10000) query = query.lte('valor_hora', f.precoMax)
+  // Preço: casa se valor_hora OU valor_base cair na faixa (espaços precificam
+  // por hora ou por diária). Antes só olhava valor_hora — zerava os resultados
+  // de quem cadastra apenas a diária.
+  const precoMin = f.precoMin > 0 ? f.precoMin : null
+  const precoMax = f.precoMax < 10000 ? f.precoMax : null
+  if (precoMin !== null || precoMax !== null) {
+    const faixa = (col: string) => {
+      const ps: string[] = []
+      if (precoMin !== null) ps.push(`${col}.gte.${precoMin}`)
+      if (precoMax !== null) ps.push(`${col}.lte.${precoMax}`)
+      return ps.length > 1 ? `and(${ps.join(',')})` : ps[0]
+    }
+    query = query.or(`${faixa('valor_hora')},${faixa('valor_base')}`)
+  }
   if (f.acessibilidade) query = query.eq('acessibilidade', true)
   if (f.somAlto) query = query.eq('som_alto', true)
   if (f.somTarde) query = query.eq('som_tarde', true)
@@ -108,4 +120,28 @@ export function ordenarPorRelevancia<T extends Record<string, any>>(props: T[], 
     if (dn !== 0) return dn
     return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR')
   })
+}
+
+// Disponibilidade por data: ids dos espaços com data bloqueada no intervalo.
+// O `client` (supabase no cliente, admin no servidor) é injetado — mantém este
+// módulo sem dependência direta de Supabase.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function idsIndisponiveis(client: any, dataInicio: string, dataFim?: string): Promise<Array<number | string>> {
+  const di = (dataInicio || '').trim()
+  if (!di) return []
+  const df = (dataFim || '').trim() || di
+  const { data } = await client
+    .from('disponibilidade')
+    .select('prop_id')
+    .eq('bloqueado', true)
+    .gte('data', di)
+    .lte('data', df)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return [...new Set((data || []).map((b: any) => b.prop_id).filter((v: any) => v != null))] as Array<number | string>
+}
+
+// Remove da query os ids indisponíveis (no-op se a lista vier vazia).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function excluirIds(query: any, ids: Array<number | string>) {
+  return ids.length ? query.not('id', 'in', `(${ids.join(',')})`) : query
 }
