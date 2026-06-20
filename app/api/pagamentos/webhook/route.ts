@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { ativarAssinatura } from '@/lib/assinatura'
+import { ativarModulo } from '@/lib/moduloAvulso'
 import { baixarParcela, resolverTokenMpDono } from '@/lib/portalServer'
 import { registrarAuditoria } from '@/lib/auditServer'
 import { verificarWebhookMP } from '@/lib/mpWebhook'
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     // localiza nosso registro p/ achar a reserva e o anfitrião (define o token)
     const { data: pag } = await admin
       .from('pagamentos')
-      .select('reserva_id, plano_id, usuario_id, meses, valor, parcela_id')
+      .select('reserva_id, plano_id, usuario_id, meses, valor, parcela_id, modulo_key')
       .eq('mp_payment_id', paymentId)
       .maybeSingle()
 
@@ -77,6 +78,20 @@ export async function POST(req: NextRequest) {
       if (pag?.parcela_id || ext.startsWith('parcela:')) {
         const parcelaId = pag?.parcela_id ?? ext.slice('parcela:'.length)
         if (parcelaId) await baixarParcela(parcelaId, { metodo: 'Pix (Portal)' })
+      } else if (pag?.modulo_key || ext.startsWith('modulo:')) {
+        // Compra avulsa de módulo (add-on) — external_reference: modulo:<usuario>:<key>
+        const partes = ext.startsWith('modulo:') ? ext.split(':') : []
+        const moduloKey = pag?.modulo_key ?? partes[2]
+        const usuarioId = pag?.usuario_id ?? partes[1]
+        if (moduloKey && usuarioId) {
+          await ativarModulo({
+            usuario_id: usuarioId,
+            modulo_key: moduloKey,
+            meses: pag?.meses || 1,
+            valor: Number(pag?.valor) || 0,
+            mp_payment_id: paymentId,
+          })
+        }
       } else if (pag?.plano_id && pag?.usuario_id) {
         await ativarAssinatura({
           usuario_id: pag.usuario_id,

@@ -25,6 +25,7 @@ const painel: T = {
       propostas: 'Proposals',
       ganhos: 'Earnings',
       clientes: 'Customers',
+      conversas: 'Messages',
       avaliacoes: 'Reviews',
       feedbacks: 'Feedback',
       leads: 'Leads',

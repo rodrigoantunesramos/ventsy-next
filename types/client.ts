@@ -64,6 +64,10 @@ export interface Conversation {
   ultima_mensagem_em?: string
   propriedade?: PropertySummary
   owner_nome?: string
+  /** Papel do usuário autenticado nesta conversa (preenchido por /api/conversas). */
+  papel?: 'cliente' | 'dono'
+  /** Quando o usuário é o dono, a contraparte é o cliente (nome p/ o inbox). */
+  contraparte?: { id: string; nome: string | null } | null
 }
 
 export interface Message {

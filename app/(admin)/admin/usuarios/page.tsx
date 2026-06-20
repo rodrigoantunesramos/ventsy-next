@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import ModulosUsuario from './_ModulosUsuario'
 
 type Usuario = {
   id: string
@@ -21,6 +22,7 @@ export default function AdminUsuarios() {
   const [erro, setErro] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [editando, setEditando] = useState<Usuario | null>(null)
+  const [modsUser, setModsUser] = useState<Usuario | null>(null)
   const [salvando, setSalvando] = useState(false)
 
   const carregar = useCallback(async (busca: string) => {
@@ -208,6 +210,12 @@ export default function AdminUsuarios() {
                         Editar
                       </button>
                       <button
+                        onClick={() => setModsUser(u)}
+                        className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[0.78rem] hover:bg-white/[0.04]"
+                      >
+                        Módulos
+                      </button>
+                      <button
                         onClick={() => resetSenha(u)}
                         className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[0.78rem] hover:bg-white/[0.04]"
                       >
@@ -269,6 +277,13 @@ export default function AdminUsuarios() {
             </div>
           </form>
         </div>
+      )}
+
+      {modsUser && (
+        <ModulosUsuario
+          usuario={{ id: modsUser.id, nome: modsUser.nome, email: modsUser.email }}
+          onClose={() => setModsUser(null)}
+        />
       )}
     </div>
   )

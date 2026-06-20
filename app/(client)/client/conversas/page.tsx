@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -23,19 +23,39 @@ export default function ConversasPage() {
   const [conversas, setConversas] = useState<Conversation[]>([])
   const [loading,   setLoading]   = useState(true)
 
-  useEffect(() => {
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
+  const carregar = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { router.push('/login'); return }
 
-      const res  = await fetch(`/api/conversas?user_id=${session.user.id}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      const json = await res.json()
-      setConversas(json.data || [])
-      setLoading(false)
-    })()
+    const res  = await fetch('/api/conversas', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+    const json = await res.json()
+    // Na área do cliente mostramos as conversas em que ele é o contratante.
+    const lista = ((json.data || []) as Conversation[]).filter((c) => c.papel !== 'dono')
+    setConversas(lista)
+    setLoading(false)
   }, [router])
+
+  useEffect(() => { carregar() }, [carregar])
+
+  // Tempo real: nova mensagem/conversa minha atualiza a lista na hora.
+  useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      channel = supabase
+        .channel('conversas-cliente')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'conversas', filter: `user_id=eq.${session.user.id}` },
+          () => { carregar() },
+        )
+        .subscribe()
+    })()
+    return () => { if (channel) supabase.removeChannel(channel) }
+  }, [carregar])
 
   if (loading) return null
 

@@ -15,6 +15,16 @@ import { ToastProvider } from '@/components/Toast';
 import NotificationBell from '@/components/NotificationBell';
 import { useT } from '@/components/i18n/I18nProvider';
 import type { T as PainelDict } from '@/lib/i18n/dictionaries/pt/painel';
+import UpgradeGate from '@/components/UpgradeGate';
+import {
+  MODULOS_PAINEL, moduloDaRota, moduloDef, planoMinimoParaModulo,
+  modulosDefaultDoPlano, resolverEntitlement, PLANO_LABEL,
+} from '@/lib/modulos';
+
+// Cliente sem tipos para colunas/tabelas novas (planos_config.modulos,
+// modulos_config, usuarios_modulos) até types/supabase.ts ser regenerado.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sbAny = sb as any;
 
 type Profile = {
   nome: string;
@@ -52,6 +62,7 @@ const NAV: NavGroup[] = [
       { href: '/painel/propostas', key: 'propostas', label: 'Propostas', icon: 'proposal', enabled: true },
       { href: '/painel/ganhos', key: 'ganhos', label: 'Ganhos', icon: 'coins', enabled: true },
       { href: '/painel/clientes', key: 'clientes', label: 'Clientes', icon: 'contacts', enabled: true },
+      { href: '/painel/conversas', key: 'conversas', label: 'Mensagens', icon: 'chat', enabled: true },
       { href: '/painel/avaliacoes', key: 'avaliacoes', label: 'Avaliações', icon: 'star', enabled: true },
       { href: '/painel/feedbacks', key: 'feedbacks', label: 'Feedbacks', icon: 'chat', enabled: true },
       { href: '/painel/leads', key: 'leads', label: 'Leads', icon: 'target', enabled: true },
@@ -158,6 +169,10 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
+  // Entitlement por plano (módulos liberados) + add-ons + config global de módulos.
+  const [entitled, setEntitled] = useState<Set<string> | null>(null);
+  const [planosModulos, setPlanosModulos] = useState<Record<string, string[]>>({});
+  const [modCfg, setModCfg] = useState<Record<string, { ativo: boolean; vendavel: boolean; preco: number }>>({});
 
   const router = useRouter();
   const pathname = usePathname();
@@ -199,6 +214,33 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
         if (cfg) applyPrefs({ idioma: cfg.idioma as Idioma, moeda: cfg.moeda as Currency, fuso: cfg.fuso, formato_data: (cfg.preferencias as { formato_data?: FormatoData } | null)?.formato_data });
       } catch { /* sem config — usa defaults/localStorage */ }
 
+      // Resolve o que o plano + add-ons liberam. Falha-aberto: nunca tranca por erro.
+      try {
+        const [{ data: planosRows }, { data: extrasRows }, { data: modRows }] = await Promise.all([
+          sbAny.from('planos_config').select('id, modulos'),
+          sbAny.from('usuarios_modulos').select('modulo_key, fim').eq('usuario_id', user.id).eq('status', 'ativo'),
+          sbAny.from('modulos_config').select('key, ativo, vendavel, preco_avulso'),
+        ]);
+        const pm: Record<string, string[]> = {};
+        for (const r of (planosRows ?? []) as Array<{ id: string; modulos: string[] | null }>) {
+          pm[r.id] = Array.isArray(r.modulos) && r.modulos.length ? r.modulos : modulosDefaultDoPlano(r.id);
+        }
+        for (const id of ['basico', 'pro', 'ultra']) if (!pm[id]) pm[id] = modulosDefaultDoPlano(id);
+        const mc: Record<string, { ativo: boolean; vendavel: boolean; preco: number }> = {};
+        for (const r of (modRows ?? []) as Array<{ key: string; ativo: boolean | null; vendavel: boolean | null; preco_avulso: number | null }>) {
+          mc[r.key] = { ativo: r.ativo !== false, vendavel: r.vendavel === true, preco: Number(r.preco_avulso) || 0 };
+        }
+        const hoje = new Date().toISOString().slice(0, 10);
+        const extras = ((extrasRows ?? []) as Array<{ modulo_key: string; fim: string | null }>)
+          .filter((r) => !r.fim || r.fim >= hoje)
+          .map((r) => r.modulo_key);
+        setPlanosModulos(pm);
+        setModCfg(mc);
+        setEntitled(resolverEntitlement(pm[plano] ?? modulosDefaultDoPlano(plano), extras));
+      } catch {
+        setEntitled(new Set(MODULOS_PAINEL.map((m) => m.key)));
+      }
+
       const inicial = (nome.split(' ')[0]?.[0] ?? '?').toUpperCase();
       setProfile({ nome, email: user.email ?? '', usuario, inicial, plano, validade });
       setLoading(false);
@@ -222,7 +264,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
 
   const planoEmoji = profile?.plano === 'ultra' ? '🚀' : profile?.plano === 'pro' ? '⭐' : '🏷️';
 
-  if (loading) {
+  if (loading || !entitled) {
     return (
       <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white">
         <div className="font-display text-[2rem] italic text-brand">VENTSY</div>
@@ -327,7 +369,14 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
                 </div>
                 {grupo.items.map((item) => {
                   const active = pathname === item.href || (item.href !== '/painel' && pathname.startsWith(item.href + '/'));
-                  if (item.enabled) {
+                  const modKey = moduloDaRota(item.href);
+                  const def = modKey ? moduloDef(modKey) : undefined;
+                  // Módulo desligado globalmente pelo admin some do menu (núcleo nunca some).
+                  if (def && !def.core && modKey && modCfg[modKey]?.ativo === false) return null;
+                  // Travado: existe no catálogo, não é núcleo e o plano/add-ons não liberam.
+                  const locked = !!def && !def.core && !!modKey && !!entitled && !entitled.has(modKey);
+
+                  if (item.enabled !== false && !locked) {
                     return (
                       <Link
                         key={item.href}
@@ -343,6 +392,31 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
                       </Link>
                     );
                   }
+
+                  if (locked) {
+                    const planoMin = planoMinimoParaModulo(modKey!, planosModulos);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="flex items-center gap-3 border-l-[3px] border-transparent px-5 py-2.5 text-sm text-ink-muted/60 transition-colors hover:bg-black/[0.02]"
+                        title={planoMin ? `Disponível no plano ${PLANO_LABEL[planoMin]}` : 'Plano superior'}
+                      >
+                        <Icon name={item.icon} />
+                        <span className="flex-1">{dict.painel.nav.itens[item.key]}</span>
+                        {planoMin && (
+                          <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[0.56rem] font-bold uppercase tracking-wide text-amber-700">
+                            {PLANO_LABEL[planoMin]}
+                          </span>
+                        )}
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-ink-muted/70">
+                          <rect x="3" y="11" width="18" height="11" rx="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      </Link>
+                    );
+                  }
+
                   return (
                     <div
                       key={item.href}
@@ -362,7 +436,26 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
           </nav>
         </aside>
 
-        <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+          {(() => {
+            const curKey = moduloDaRota(pathname);
+            const curDef = curKey ? moduloDef(curKey) : undefined;
+            const curLocked = !!curDef && !curDef.core && !!curKey && !!entitled && !entitled.has(curKey);
+            if (!curLocked) return children;
+            const planoMin = planoMinimoParaModulo(curKey!, planosModulos);
+            return (
+              <UpgradeGate
+                moduloKey={curKey!}
+                label={curDef!.label}
+                grupo={curDef!.grupo}
+                planoMinLabel={planoMin ? PLANO_LABEL[planoMin] : null}
+                vendavel={modCfg[curKey!]?.vendavel}
+                precoAvulso={modCfg[curKey!]?.preco}
+                email={profile?.email}
+              />
+            );
+          })()}
+        </main>
       </div>
     </div>
     </ToastProvider>

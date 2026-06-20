@@ -31,5 +31,18 @@ export async function GET(
     .eq('conversation_id', params.id)
     .order('created_at', { ascending: true })
 
-  return Response.json({ data: { conversa, mensagens: mensagens || [] }, error: mErr })
+  // Papel do usuário + nome do outro lado (cabeçalho do inbox, p/ ambos os lados).
+  const papel = conversa.owner_id === user.id ? 'dono' : 'cliente'
+  const outroId = papel === 'dono' ? conversa.user_id : conversa.owner_id
+  let contraparte: { id: string; nome: string | null } | null = null
+  if (outroId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: u } = await (supabase as any).from('usuarios').select('id, nome').eq('id', outroId).maybeSingle()
+    contraparte = { id: outroId, nome: u?.nome ?? null }
+  }
+
+  return Response.json({
+    data: { conversa: { ...conversa, papel, contraparte }, mensagens: mensagens || [] },
+    error: mErr,
+  })
 }
