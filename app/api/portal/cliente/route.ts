@@ -3,7 +3,8 @@ import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized, forbidden } from '@/lib/apiAuth'
 import { resolverTokenMpDono, baixarParcela } from '@/lib/portalServer'
-import { modulosVisiveis, parcelaPaga, parcelaCancelada } from '@/lib/portal'
+import { modulosVisiveis, parcelaPaga, parcelaCancelada, parcelaEmAberto, contratoPendente, diasAte, parseData, type ParcelaLite } from '@/lib/portal'
+import { normalizarCriterios } from '@/lib/feedback'
 
 // Rota AUTENTICADA do CONTRATANTE (área (client)/eventos). É a ÚNICA porta de
 // entrada do cliente aos dados do evento — tudo passa por aqui (service-role) e
@@ -127,6 +128,111 @@ export async function POST(req: NextRequest) {
     return Response.json({ eventos: eventosOut })
   }
 
+  // ── Resumo p/ o início do cliente: eventos + pendências acionáveis ───────────
+  // Agrega num só request: lista de eventos, a próxima parcela em aberto e um
+  // contrato aguardando assinatura — sempre respeitando os módulos que o dono
+  // liberou (financeiro/contrato) por evento.
+  if (action === 'resumo') {
+    const { data: acessos } = await admin
+      .from('portal_acessos').select('*').eq('user_id', user.id).neq('status', 'revogado')
+    const lista = (acessos || []) as Record<string, any>[]
+    if (!lista.length) return Response.json({ eventos: [], proxima_parcela: null, contrato_pendente: null })
+
+    const eventoIds = lista.map((a) => a.evento_id)
+    const { data: eventos } = await admin
+      .from('clientes_eventos')
+      .select('id, usuario_id, nome_evento, tipo_evento, data_inicio, data_fim, status, propriedade_id')
+      .in('id', eventoIds)
+    const evList = (eventos || []) as Record<string, any>[]
+    const evById = new Map(evList.map((e) => [e.id, e]))
+
+    const propIds = [...new Set(evList.map((e) => e.propriedade_id).filter(Boolean))]
+    const { data: props } = propIds.length
+      ? await admin.from('propriedades').select('id, nome, cidade, estado').in('id', propIds)
+      : { data: [] }
+    const propById = new Map(((props || []) as Record<string, any>[]).map((p) => [p.id, p]))
+
+    const donoIds = [...new Set(evList.map((e) => e.usuario_id).filter(Boolean))]
+    const { data: cfgs } = donoIds.length
+      ? await admin.from('portal_config').select('usuario_id, ativo, modulos').in('usuario_id', donoIds)
+      : { data: [] }
+    const cfgByDono = new Map(((cfgs || []) as Record<string, any>[]).map((c) => [c.usuario_id, c]))
+    const acByEvento = new Map(lista.map((a) => [a.evento_id, a]))
+
+    // Visibilidade de módulos por evento (config do dono + override do acesso).
+    const visByEvento = new Map<string, Record<string, boolean>>()
+    for (const e of evList) visByEvento.set(e.id, modulosVisiveis(cfgByDono.get(e.usuario_id) || null, acByEvento.get(e.id) || null))
+
+    // Próxima parcela em aberto (só eventos com módulo financeiro visível).
+    const idsFin = evList.filter((e) => visByEvento.get(e.id)?.financeiro).map((e) => e.id)
+    let proxParcela: Record<string, any> | null = null
+    if (idsFin.length) {
+      const { data: parcelas } = await admin
+        .from('parcelas').select('id, evento_id, numero, descricao, valor, vencimento, status').in('evento_id', idsFin)
+      for (const p of (parcelas || []) as Record<string, any>[]) {
+        if (!parcelaEmAberto(p as ParcelaLite)) continue
+        if (!proxParcela) { proxParcela = p; continue }
+        const cur = parseData(proxParcela.vencimento)?.getTime() ?? Infinity
+        const cand = parseData(p.vencimento)?.getTime() ?? Infinity
+        if (cand < cur) proxParcela = p
+      }
+    }
+
+    // Contrato aguardando assinatura (só eventos com módulo contrato visível).
+    const idsCtr = evList.filter((e) => visByEvento.get(e.id)?.contrato).map((e) => e.id)
+    let contratoPend: Record<string, any> | null = null
+    if (idsCtr.length) {
+      const { data: contratos } = await admin
+        .from('contratos').select('evento_id, titulo, numero, status, assinado_em').in('evento_id', idsCtr).eq('status', 'enviado')
+      contratoPend = ((contratos || []) as Record<string, any>[]).find((c) => contratoPendente(c)) || null
+    }
+
+    const now = new Date()
+    const eventosOut = (lista.map((a) => {
+      const ev = evById.get(a.evento_id)
+      if (!ev) return null
+      const prop = propById.get(ev.propriedade_id)
+      const cfg = cfgByDono.get(ev.usuario_id)
+      return {
+        evento_id: ev.id,
+        nome_evento: ev.nome_evento,
+        tipo_evento: ev.tipo_evento,
+        data_inicio: ev.data_inicio,
+        data_fim: ev.data_fim,
+        status: ev.status,
+        propriedade: prop ? { nome: prop.nome, cidade: prop.cidade, estado: prop.estado } : null,
+        portal_ativo: cfg ? cfg.ativo !== false : true,
+        dias_ate: diasAte(ev.data_inicio, now),
+      }
+    }).filter(Boolean)) as Record<string, any>[]
+
+    // Próximos primeiro; passados ao fim (mais recente antes).
+    eventosOut.sort((a, b) => {
+      const da = a.dias_ate as number | null, db = b.dias_ate as number | null
+      const fa = da != null && da >= 0, fb = db != null && db >= 0
+      if (fa && fb) return da! - db!
+      if (fa !== fb) return fa ? -1 : 1
+      return (db ?? -Infinity) - (da ?? -Infinity)
+    })
+
+    return Response.json({
+      eventos: eventosOut,
+      proxima_parcela: proxParcela ? {
+        evento_id: proxParcela.evento_id,
+        nome_evento: evById.get(proxParcela.evento_id)?.nome_evento ?? null,
+        valor: Number(proxParcela.valor) || 0,
+        vencimento: proxParcela.vencimento,
+        descricao: proxParcela.descricao,
+        numero: proxParcela.numero,
+        vencida: (() => { const d = diasAte(proxParcela.vencimento, now); return d != null && d < 0 })(),
+      } : null,
+      contrato_pendente: contratoPend ? {
+        evento_id: contratoPend.evento_id,
+        nome_evento: evById.get(contratoPend.evento_id)?.nome_evento ?? null,
+      } : null,
+    })
+  }
+
   // Daqui pra baixo, tudo exige evento_id + acesso válido.
   const eventoId = String(body.evento_id || '').trim()
   if (!eventoId) return Response.json({ error: 'evento_id é obrigatório.' }, { status: 400 })
@@ -194,6 +300,14 @@ export async function POST(req: NextRequest) {
     const { token: mpToken } = await resolverTokenMpDono(donoId)
     const mpDisponivel = !!mpToken
 
+    // Já avaliou? (evento → feedback privado pelo portal; espaço → avaliação pública)
+    const [{ data: fbExist }, { data: avExist }] = await Promise.all([
+      admin.from('feedbacks').select('id').eq('evento_id', eventoId).eq('canal', 'portal').maybeSingle(),
+      ev.propriedade_id
+        ? admin.from('avaliacoes').select('id').eq('user_id', user.id).eq('propriedade_id', ev.propriedade_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ])
+
     // Marca o último acesso (best-effort)
     admin.from('portal_acessos').update({ ultimo_acesso_em: new Date().toISOString() }).eq('id', ac.id).then(() => {}, () => {})
 
@@ -209,6 +323,8 @@ export async function POST(req: NextRequest) {
       convidados,
       conversa_id: conversaId,
       mp_disponivel: mpDisponivel,
+      feedback_enviado: !!fbExist,
+      avaliacao_enviada: !!avExist,
     })
   }
 
@@ -353,6 +469,48 @@ export async function POST(req: NextRequest) {
       .single()
     if (error) return Response.json({ error: 'Não foi possível abrir a conversa.' }, { status: 500 })
     return Response.json({ ok: true, conversa_id: nova.id })
+  }
+
+  // ── Avaliar o EVENTO (feedback privado ao organizador) ─────────────────────
+  // Grava em `feedbacks` (canal 'portal') autenticado pelo portal_acessos —
+  // espelha /api/feedbacks/publico, mas sem token: a posse já foi validada.
+  if (action === 'avaliar_evento') {
+    const { erro, ev } = await carregarAcesso(user.id, eventoId)
+    if (erro) return erro
+
+    const nota = Math.round(Number(body.nota_geral))
+    if (!Number.isFinite(nota) || nota < 1 || nota > 5) {
+      return Response.json({ error: 'Dê uma nota geral de 1 a 5.' }, { status: 422 })
+    }
+
+    // Um feedback de portal por evento (idempotência amigável).
+    const { data: existente } = await admin.from('feedbacks').select('id').eq('evento_id', eventoId).eq('canal', 'portal').maybeSingle()
+    if (existente) return Response.json({ error: 'Você já avaliou este evento.' }, { status: 409 })
+
+    const criterios = normalizarCriterios(body.criterios)
+    const { error } = await admin.from('feedbacks').insert({
+      usuario_id: ev.usuario_id,
+      cliente_id: ev.cliente_id ?? null,
+      evento_id: ev.id,
+      propriedade_id: ev.propriedade_id ?? null,
+      autor_nome: String(body.autor_nome || ev.quem_contratou || '').trim() || (email ? email.split('@')[0] : null),
+      autor_contato: email || null,
+      canal: 'portal',
+      nota_geral: nota,
+      criterios,
+      comentario: String(body.comentario || '').trim().slice(0, 2000) || null,
+      pontos_positivos: String(body.pontos_positivos || '').trim().slice(0, 2000) || null,
+      pontos_negativos: String(body.pontos_negativos || '').trim().slice(0, 2000) || null,
+      permite_publicar: !!body.permite_publicar,
+      status: 'novo',
+    })
+    if (error) {
+      if (error.code === 'PGRST205' || error.code === '42P01') {
+        return Response.json({ error: 'Avaliação de evento indisponível no momento.' }, { status: 503 })
+      }
+      return Response.json({ error: 'Não foi possível registrar sua avaliação. Tente novamente.' }, { status: 500 })
+    }
+    return Response.json({ ok: true })
   }
 
   return Response.json({ error: 'Ação inválida.' }, { status: 400 })

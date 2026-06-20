@@ -10,7 +10,9 @@ interface Props {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 }
 
 export default function ReviewCard({ review, showProperty = true }: Props) {
@@ -34,6 +36,13 @@ export default function ReviewCard({ review, showProperty = true }: Props) {
 
       {review.evento_tipo && (
         <div className="text-[.75rem] text-gray-400 mt-1.5">🎉 {review.evento_tipo}</div>
+      )}
+
+      {review.resposta && (
+        <div className="mt-3 rounded-xl border border-[#f0f0f0] bg-[#f7f7f8] px-3.5 py-2.5">
+          <div className="mb-0.5 text-[.72rem] font-semibold text-gray-500">↩︎ Resposta do anfitrião</div>
+          <p className="m-0 text-[.83rem] leading-[1.5] text-gray-600">{review.resposta}</p>
+        </div>
       )}
     </div>
   )

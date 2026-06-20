@@ -13,7 +13,7 @@
 export { isMissingTable } from '@/lib/dbErrors';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
-export type CanalFeedback = 'formulario' | 'whatsapp' | 'presencial' | 'email';
+export type CanalFeedback = 'formulario' | 'whatsapp' | 'presencial' | 'email' | 'portal';
 export type StatusFeedback = 'novo' | 'em_tratativa' | 'resolvido';
 export type StatusAcao = 'aberta' | 'em_andamento' | 'concluida' | 'cancelada';
 
@@ -84,6 +84,7 @@ export const CRITERIO_LABEL: Record<string, string> = Object.fromEntries(CRITERI
 
 export const CANAIS: { v: CanalFeedback; label: string; icon: string }[] = [
   { v: 'formulario', label: 'Formulário', icon: '📝' },
+  { v: 'portal', label: 'Portal do cliente', icon: '🌐' },
   { v: 'whatsapp', label: 'WhatsApp', icon: '💬' },
   { v: 'presencial', label: 'Presencial', icon: '🤝' },
   { v: 'email', label: 'E-mail', icon: '✉️' },

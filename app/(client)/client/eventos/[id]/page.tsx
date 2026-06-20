@@ -16,6 +16,9 @@ import {
   type ModuloKey, type Notificacao,
 } from '@/lib/portal'
 import { portalClienteApi, type ParcelaCli, type ContratoCli, type ConvidadoCli } from '../_lib'
+import RatingStars from '@/components/client/RatingStars'
+import ReviewForm from '@/components/client/ReviewForm'
+import { CRITERIOS } from '@/lib/feedback'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Evento = Record<string, any>
@@ -32,6 +35,8 @@ type Detalhe = {
   convidados: ConvidadoCli[]
   conversa_id: string | null
   mp_disponivel: boolean
+  feedback_enviado?: boolean
+  avaliacao_enviada?: boolean
 }
 
 type Flash = { kind: 'ok' | 'err'; msg: string } | null
@@ -161,7 +166,7 @@ export default function PortalEventoPage() {
         {aba === 'convidados' && <Convidados d={d} eventoId={eventoId} cor={cor} onChange={carregar} showFlash={showFlash} />}
         {aba === 'documentos' && <Documentos contrato={d.contrato} />}
         {aba === 'mensagens' && <Mensagens eventoId={eventoId} conversaId={d.conversa_id} showFlash={showFlash} />}
-        {aba === 'avaliacao' && <Avaliacao ev={ev} now={now} cor={cor} />}
+        {aba === 'avaliacao' && <Avaliacao d={d} ev={ev} now={now} cor={cor} eventoId={eventoId} onChange={carregar} showFlash={showFlash} />}
       </div>
     </div>
   )
@@ -574,25 +579,142 @@ function Mensagens({ eventoId, conversaId, showFlash }: { eventoId: string; conv
   )
 }
 
-// ── Avaliação ───────────────────────────────────────────────────────────────
-function Avaliacao({ ev, now, cor }: { ev: Evento; now: Date; cor: string }) {
+// ── Avaliação (duas funções: avaliar o EVENTO e avaliar o ESPAÇO) ────────────
+function Avaliacao({
+  d, ev, now, cor, eventoId, onChange, showFlash,
+}: { d: Detalhe; ev: Evento; now: Date; cor: string; eventoId: string; onChange: () => void; showFlash: (k: 'ok' | 'err', m: string) => void }) {
   const ocorreu = eventoJaOcorreu(ev, now)
+  const [modalFb, setModalFb] = useState(false)
+  const [modalAv, setModalAv] = useState(false)
+  const propNome = d.propriedade?.nome || 'o espaço'
+
+  if (!ocorreu) {
+    return <Vazio icon="⭐" titulo="Avaliação após o evento" texto="Assim que o evento acontecer, você poderá avaliar o evento e o espaço por aqui." />
+  }
+
   return (
-    <div className="rounded-2xl border border-[#f0f0f0] bg-white p-6 text-center shadow-[0_2px_12px_rgba(0,0,0,.05)]">
-      <div className="mb-2 text-[2.4rem]">⭐</div>
-      {ocorreu ? (
-        <>
-          <div className="text-[.95rem] font-bold text-gray-900">Como foi o seu evento?</div>
-          <p className="mx-auto mt-1 max-w-sm text-[.84rem] text-gray-500">Sua avaliação ajuda o organizador e outros clientes.</p>
-          <Link href="/client/avaliacoes" className="mt-4 inline-block rounded-xl px-5 py-2.5 text-sm font-semibold text-white" style={{ background: cor }}>Avaliar agora</Link>
-        </>
-      ) : (
-        <>
-          <div className="text-[.95rem] font-bold text-gray-900">Avaliação após o evento</div>
-          <p className="mx-auto mt-1 max-w-sm text-[.84rem] text-gray-500">Assim que o evento acontecer, você poderá deixar sua avaliação por aqui.</p>
-        </>
+    <div className="space-y-4">
+      {/* Avaliar o EVENTO — feedback privado ao organizador */}
+      <div className="rounded-2xl border border-[#f0f0f0] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,.05)]">
+        <div className="flex items-start gap-3">
+          <div className="text-[1.6rem]">💬</div>
+          <div className="flex-1">
+            <div className="text-[.95rem] font-bold text-gray-900">Como foi o seu evento?</div>
+            <p className="mt-0.5 text-[.84rem] text-gray-500">Uma avaliação reservada ao organizador — ajuda a melhorar os próximos eventos.</p>
+            {d.feedback_enviado ? (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-[.82rem] font-semibold text-emerald-700">✓ Avaliação enviada. Obrigado!</div>
+            ) : (
+              <button onClick={() => setModalFb(true)} className="mt-3 rounded-xl px-5 py-2.5 text-sm font-semibold text-white" style={{ background: cor }}>Avaliar o evento</button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Avaliar o ESPAÇO — avaliação pública (estrelas no anúncio) */}
+      <div className="rounded-2xl border border-[#f0f0f0] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,.05)]">
+        <div className="flex items-start gap-3">
+          <div className="text-[1.6rem]">⭐</div>
+          <div className="flex-1">
+            <div className="text-[.95rem] font-bold text-gray-900">Avalie o espaço</div>
+            <p className="mt-0.5 text-[.84rem] text-gray-500">Sua avaliação pública com estrelas ajuda outras pessoas a escolherem {propNome}.</p>
+            {d.avaliacao_enviada ? (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-[.82rem] font-semibold text-emerald-700">✓ Você já avaliou este espaço.</div>
+            ) : ev.propriedade_id ? (
+              <button onClick={() => setModalAv(true)} className="mt-3 rounded-xl border-2 px-5 py-2 text-sm font-semibold" style={{ borderColor: cor, color: cor }}>Avaliar o espaço</button>
+            ) : (
+              <div className="mt-3 text-[.8rem] text-gray-400">Este evento não está vinculado a um espaço.</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {modalFb && (
+        <FeedbackEventoModal
+          cor={cor}
+          eventoId={eventoId}
+          onClose={() => setModalFb(false)}
+          onSent={() => { setModalFb(false); showFlash('ok', 'Avaliação enviada. Obrigado!'); onChange() }}
+        />
+      )}
+      {modalAv && d.propriedade && (
+        <ReviewForm
+          propertyName={d.propriedade.nome || undefined}
+          onClose={() => setModalAv(false)}
+          onSubmit={async (data) => {
+            const { data: { session } } = await supabase.auth.getSession()
+            const res = await fetch('/api/avaliacoes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token ?? ''}` },
+              body: JSON.stringify({ propriedade_id: ev.propriedade_id, nota: data.nota, texto: data.texto, evento_tipo: data.evento_tipo }),
+            })
+            const json = await res.json()
+            if (json.error) throw new Error(json.error)
+            setModalAv(false); showFlash('ok', 'Avaliação publicada!'); onChange()
+          }}
+        />
       )}
     </div>
+  )
+}
+
+// Formulário de feedback do evento (privado) — grava em `feedbacks` via portal.
+function FeedbackEventoModal({ cor, eventoId, onClose, onSent }: { cor: string; eventoId: string; onClose: () => void; onSent: () => void }) {
+  const [notaGeral, setNotaGeral] = useState(0)
+  const [criterios, setCriterios] = useState<Record<string, number>>({})
+  const [positivos, setPositivos] = useState('')
+  const [negativos, setNegativos] = useState('')
+  const [comentario, setComentario] = useState('')
+  const [permitePublicar, setPermitePublicar] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [erro, setErro] = useState('')
+  const inp = 'w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm focus:border-[#ff385c] focus:outline-none focus:ring-2 focus:ring-[#ff385c]/20'
+
+  async function enviar() {
+    if (notaGeral < 1) { setErro('Dê uma nota geral de 1 a 5 estrelas.'); return }
+    setBusy(true); setErro('')
+    try {
+      await portalClienteApi('avaliar_evento', {
+        evento_id: eventoId, nota_geral: notaGeral, criterios,
+        pontos_positivos: positivos, pontos_negativos: negativos, comentario, permite_publicar: permitePublicar,
+      })
+      onSent()
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Não foi possível enviar.')
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal onClose={onClose} titulo="Avaliar o evento">
+      <div className="space-y-3">
+        <div>
+          <div className="mb-1 text-[.82rem] font-semibold text-gray-600">Nota geral *</div>
+          <RatingStars value={notaGeral} onChange={setNotaGeral} size="lg" />
+        </div>
+        <div>
+          <div className="mb-1.5 text-[.82rem] font-semibold text-gray-600">Por critério</div>
+          <div className="space-y-1.5">
+            {CRITERIOS.map((c) => (
+              <div key={c.v} className="flex items-center justify-between gap-2">
+                <span className="text-[.84rem] text-gray-600">{c.label}</span>
+                <RatingStars value={criterios[c.v] || 0} onChange={(v) => setCriterios((p) => ({ ...p, [c.v]: v }))} size="sm" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <input className={inp} placeholder="O que você mais gostou?" value={positivos} onChange={(e) => setPositivos(e.target.value)} maxLength={500} />
+        <input className={inp} placeholder="O que poderia melhorar?" value={negativos} onChange={(e) => setNegativos(e.target.value)} maxLength={500} />
+        <textarea className={inp} rows={3} placeholder="Comentário (opcional)" value={comentario} onChange={(e) => setComentario(e.target.value)} maxLength={2000} />
+        <label className="flex items-center gap-2 text-[.82rem] text-gray-600">
+          <input type="checkbox" checked={permitePublicar} onChange={(e) => setPermitePublicar(e.target.checked)} />
+          Autorizo usar minha avaliação como depoimento público.
+        </label>
+        {erro && <div className="rounded-lg bg-red-50 p-2 text-[.82rem] text-red-700">{erro}</div>}
+        <button onClick={enviar} disabled={busy || notaGeral < 1} className="w-full rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50" style={{ background: cor }}>
+          {busy ? 'Enviando…' : 'Enviar avaliação'}
+        </button>
+      </div>
+    </Modal>
   )
 }
 
