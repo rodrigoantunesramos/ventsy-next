@@ -5,7 +5,7 @@
 // MTTR, agenda preventiva, custo por ativo) vive em lib/manutencao (motor puro,
 // testado) e é re-exportada abaixo para um import único nas abas.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import type {
   OSTipo, OSStatus, Prioridade, ResponsavelTipo, Periodicidade, ChecklistItem, Peca,
 } from '@/lib/manutencao';
@@ -213,9 +213,7 @@ export const selCls = 'rounded-xl border border-black/10 bg-white px-3 py-2 text
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Rótulo do alvo (ativo › espaço › propriedade) ────────────────────────────
 export function alvoLabel(

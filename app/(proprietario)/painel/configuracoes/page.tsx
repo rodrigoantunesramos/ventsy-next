@@ -5,10 +5,10 @@
 // (perfil, segurança, preferências, plano, LGPD) + Equipe & Permissões (RBAC).
 // É fundação: idioma/moeda/fuso definidos aqui valem no painel todo via lib/format
 // (applyPrefs). Dados em empresa_config / usuarios_papeis (migration
-// docs/sql/empresa-config-rbac.sql) — enquanto types não os incluem, usa supabaseAny.
+// docs/sql/empresa-config-rbac.sql) — enquanto types não os incluem, usa supabase.
 
 import { useCallback, useEffect, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { applyPrefs } from '@/lib/prefs';
 import { carregarEmpresa, salvarEmpresa, EMPTY_EMPRESA, type EmpresaConfig } from './_lib';

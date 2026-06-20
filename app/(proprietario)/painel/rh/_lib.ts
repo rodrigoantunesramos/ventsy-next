@@ -181,9 +181,7 @@ export const inp = 'w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-
 
 // ── Setup / premium probing ───────────────────────────────────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table.
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 export function isPremium(plano: string | null | undefined): boolean {
   const p = (plano || 'basico').toLowerCase();
   return p === 'pro' || p === 'ultra';

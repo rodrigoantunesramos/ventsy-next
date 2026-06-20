@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { isMissingTable, type Automacao, type Notificacao, type AutomacaoLog, type DadosSelecao } from '@/lib/automacoes';
 import {
   type AutomacoesCtx, SEL_AUTO, SEL_NOTIF, SEL_LOG,
@@ -98,8 +98,8 @@ export default function AutomacoesPage() {
       if (probe.error && isMissingTable(probe.error)) { setNeedsSetup(true); setLoading(false); return; }
 
       try {
-        const { data: a } = await sb.from('assinaturas').select('plano_ativo, plano').eq('usuario_id', uid).maybeSingle();
-        setPlano((a?.plano_ativo || a?.plano || 'basico').toString().toLowerCase());
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', uid).maybeSingle();
+        setPlano((a?.plano_ativo || 'basico').toString().toLowerCase());
       } catch { /* opcional */ }
       try {
         const { data: cfg } = await sb.from('empresa_config').select('fantasia, razao_social').eq('usuario_id', uid).maybeSingle();

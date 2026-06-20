@@ -4,7 +4,7 @@
 // Marcável como obrigatória (entra sempre no total) e reembolsável (ex.: caução).
 
 import { useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { getFormatPrefs } from '@/lib/format';
 import type { Taxa, TaxaTipo } from '@/lib/pricing';

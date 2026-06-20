@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { maskTelefone, maskCpfCnpj } from '@/lib/masks';
 import { useToast } from '@/components/Toast';
 import { Section, Campo, SaveBar, inp } from './ui';

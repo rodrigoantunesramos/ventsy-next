@@ -6,7 +6,7 @@
 // Regra de ouro: NADA de "R$"/percentual/data formatada para EXIBIÇÃO aqui —
 // só dados crus; a formatação fica em lib/format, na página/componentes.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
 import type { ExigenciaTemplate, Licenca, TipoLicenca } from '@/lib/licencas'
 
 // ── Contexto compartilhado passado às abas (page → seções) ───────────────────

@@ -1,11 +1,11 @@
 'use client';
 
 // Modal de criação/edição de uma TABELA de preço (valor base + unidade por
-// espaço). Autossuficiente: persiste via supabaseAny e avisa a página por
+// espaço). Autossuficiente: persiste via supabase e avisa a página por
 // onSaved(). Sem "R$" hardcoded — valores via MoneyInput (moeda da tabela).
 
 import { useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import type { Currency } from '@/lib/format';
 import type { Base, PrecoTabela } from '@/lib/pricing';

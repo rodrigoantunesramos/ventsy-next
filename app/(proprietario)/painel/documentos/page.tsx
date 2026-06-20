@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
 import {
   type Doc, type StatusKey, type SortKey, CATS, CAT_BY_V, STATUS_META, ORDEM_GRUPOS, GRUPO_LABEL,

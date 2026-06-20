@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { formatMonth } from '@/lib/format'
 import { useToast } from '@/components/Toast'
 import {

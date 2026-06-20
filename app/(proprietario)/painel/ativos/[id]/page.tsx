@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatNumber, formatDate, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

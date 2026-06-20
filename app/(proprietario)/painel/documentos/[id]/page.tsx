@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

@@ -428,8 +428,4 @@ export function convidadosAnonimos(n: number): Convidado[] {
 }
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
-}
+export { isMissingTable } from '@/lib/dbErrors'

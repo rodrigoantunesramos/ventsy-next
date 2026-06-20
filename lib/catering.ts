@@ -472,9 +472,7 @@ export const barTipoLabel = (v: string | null): string => BARTIPO_LABEL[v || 'se
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01'
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Templates de cardápio (semente rápida; ficha já liga insumos do Estoque) ─
 // `produto_id` fica null nos templates (o usuário casa com os produtos depois);

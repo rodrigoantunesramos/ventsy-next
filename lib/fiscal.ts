@@ -202,12 +202,4 @@ export const STATUS_META: Record<NotaStatus, { label: string; cls: string }> = {
 
 // ── Tabela ainda não criada (migration pendente) ─────────────────────────────
 // REST (PostgREST) devolve PGRST205; Postgres cru, 42P01 — tratamos ambos.
-export function isMissingTable(err: { code?: string; message?: string } | null | undefined): boolean {
-  if (!err) return false
-  return (
-    err.code === '42P01' ||
-    err.code === 'PGRST205' ||
-    err.code === 'PGRST202' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
-  )
-}
+export { isMissingTable } from '@/lib/dbErrors'

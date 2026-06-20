@@ -6,7 +6,8 @@
 // CRUD das 6 tabelas é via RLS no client; exportar/anonimizar um titular passa
 // pela rota /api/juridico (service-role).
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
+import type { TablesInsert, TablesUpdate } from '@/types/supabase'
 import {
   type JuridicoContrato, type ContratoClienteRef, type Processo,
   type Consentimento, type Solicitacao, type ContratoConsolidado, type PrazoItem,
@@ -174,28 +175,28 @@ export type JuridicoBag = {
 
 // ── CRUD via RLS (client) ─────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const criarContratoJur = (row: Record<string, unknown>) => sb.from('juridico_contratos').insert(row).select(SEL_JC).single()
-export const salvarContratoJur = (id: string, patch: Record<string, unknown>) => sb.from('juridico_contratos').update(patch).eq('id', id).select(SEL_JC).single()
+export const criarContratoJur = (row: Record<string, unknown>) => sb.from('juridico_contratos').insert(row as TablesInsert<'juridico_contratos'>).select(SEL_JC).single()
+export const salvarContratoJur = (id: string, patch: Record<string, unknown>) => sb.from('juridico_contratos').update(patch as TablesUpdate<'juridico_contratos'>).eq('id', id).select(SEL_JC).single()
 export const excluirContratoJur = (id: string) => sb.from('juridico_contratos').delete().eq('id', id)
 
-export const criarProcesso = (row: Record<string, unknown>) => sb.from('juridico_processos').insert(row).select(SEL_PROC).single()
-export const salvarProcesso = (id: string, patch: Record<string, unknown>) => sb.from('juridico_processos').update(patch).eq('id', id).select(SEL_PROC).single()
+export const criarProcesso = (row: Record<string, unknown>) => sb.from('juridico_processos').insert(row as TablesInsert<'juridico_processos'>).select(SEL_PROC).single()
+export const salvarProcesso = (id: string, patch: Record<string, unknown>) => sb.from('juridico_processos').update(patch as TablesUpdate<'juridico_processos'>).eq('id', id).select(SEL_PROC).single()
 export const excluirProcesso = (id: string) => sb.from('juridico_processos').delete().eq('id', id)
 
-export const criarConsentimento = (row: Record<string, unknown>) => sb.from('lgpd_consentimentos').insert(row).select(SEL_CONSENT).single()
-export const salvarConsentimento = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_consentimentos').update(patch).eq('id', id).select(SEL_CONSENT).single()
+export const criarConsentimento = (row: Record<string, unknown>) => sb.from('lgpd_consentimentos').insert(row as TablesInsert<'lgpd_consentimentos'>).select(SEL_CONSENT).single()
+export const salvarConsentimento = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_consentimentos').update(patch as TablesUpdate<'lgpd_consentimentos'>).eq('id', id).select(SEL_CONSENT).single()
 export const excluirConsentimento = (id: string) => sb.from('lgpd_consentimentos').delete().eq('id', id)
 
-export const criarSolicitacao = (row: Record<string, unknown>) => sb.from('lgpd_solicitacoes').insert(row).select(SEL_SOLIC).single()
-export const salvarSolicitacao = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_solicitacoes').update(patch).eq('id', id).select(SEL_SOLIC).single()
+export const criarSolicitacao = (row: Record<string, unknown>) => sb.from('lgpd_solicitacoes').insert(row as TablesInsert<'lgpd_solicitacoes'>).select(SEL_SOLIC).single()
+export const salvarSolicitacao = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_solicitacoes').update(patch as TablesUpdate<'lgpd_solicitacoes'>).eq('id', id).select(SEL_SOLIC).single()
 export const excluirSolicitacao = (id: string) => sb.from('lgpd_solicitacoes').delete().eq('id', id)
 
-export const criarRetencao = (row: Record<string, unknown>) => sb.from('lgpd_retencao').insert(row).select(SEL_RETEN).single()
-export const salvarRetencao = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_retencao').update(patch).eq('id', id).select(SEL_RETEN).single()
+export const criarRetencao = (row: Record<string, unknown>) => sb.from('lgpd_retencao').insert(row as TablesInsert<'lgpd_retencao'>).select(SEL_RETEN).single()
+export const salvarRetencao = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_retencao').update(patch as TablesUpdate<'lgpd_retencao'>).eq('id', id).select(SEL_RETEN).single()
 export const excluirRetencao = (id: string) => sb.from('lgpd_retencao').delete().eq('id', id)
 
-export const criarPolitica = (row: Record<string, unknown>) => sb.from('lgpd_politicas').insert(row).select(SEL_POL).single()
-export const salvarPolitica = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_politicas').update(patch).eq('id', id).select(SEL_POL).single()
+export const criarPolitica = (row: Record<string, unknown>) => sb.from('lgpd_politicas').insert(row as TablesInsert<'lgpd_politicas'>).select(SEL_POL).single()
+export const salvarPolitica = (id: string, patch: Record<string, unknown>) => sb.from('lgpd_politicas').update(patch as TablesUpdate<'lgpd_politicas'>).eq('id', id).select(SEL_POL).single()
 export const excluirPolitica = (id: string) => sb.from('lgpd_politicas').delete().eq('id', id)
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

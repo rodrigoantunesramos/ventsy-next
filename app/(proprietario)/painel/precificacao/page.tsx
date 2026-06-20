@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import type { PrecoTabela, PrecoRegra, Taxa } from '@/lib/pricing';
@@ -139,7 +139,7 @@ export default function PrecificacaoPage() {
       setTimeout(() => setConfirmDel((c) => (c?.id === target.id ? null : c)), 3000);
       return;
     }
-    const table = { tabela: 'precos_tabela', regra: 'precos_regras', taxa: 'taxas', pacote: 'pacotes' }[target.kind];
+    const table = ({ tabela: 'precos_tabela', regra: 'precos_regras', taxa: 'taxas', pacote: 'pacotes' } as const)[target.kind];
     const { error } = await sb.from(table).delete().eq('id', target.id);
     setConfirmDel(null);
     if (error) { toast.error('Não foi possível remover.'); return; }
@@ -151,7 +151,7 @@ export default function PrecificacaoPage() {
   }
 
   async function toggleAtivo(kind: DelTarget['kind'], id: string, atual: boolean) {
-    const table = { tabela: 'precos_tabela', regra: 'precos_regras', taxa: 'taxas', pacote: 'pacotes' }[kind];
+    const table = ({ tabela: 'precos_tabela', regra: 'precos_regras', taxa: 'taxas', pacote: 'pacotes' } as const)[kind];
     const set = { tabela: setTabelas, regra: setRegras, taxa: setTaxas, pacote: setPacotes }[kind] as React.Dispatch<React.SetStateAction<{ id: string; ativo: boolean }[]>>;
     set((a: { id: string; ativo: boolean }[]) => a.map((x) => (x.id === id ? { ...x, ativo: !atual } : x)));
     const { error } = await sb.from(table).update({ ativo: !atual }).eq('id', id);

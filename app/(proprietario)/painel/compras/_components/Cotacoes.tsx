@@ -6,7 +6,8 @@
 // item destacado + cotação recomendada). Escolher a vencedora libera o pedido.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatMoney, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -279,7 +280,7 @@ function CotacaoModal({ bag, req, itens, editando, itensEditando, onClose, onSav
       cotacao_id: cotId, requisicao_item_id: i.id, usuario_id: userId, descricao: i.descricao,
       quantidade: i.quantidade, valor_unit_num: Number(precos[i.id]?.unit) || 0, disponivel: precos[i.id]?.disp !== false,
     }));
-    const { error: eItens } = await sb.from('cotacao_itens').insert(payload);
+    const { error: eItens } = await sb.from('cotacao_itens').insert(payload as TablesInsert<'cotacao_itens'>[]);
     setSaving(false);
     if (eItens) { toast.error('Cotação salva, mas houve erro nos itens.'); return; }
     toast.success(editando ? 'Cotação atualizada!' : 'Cotação registrada!');

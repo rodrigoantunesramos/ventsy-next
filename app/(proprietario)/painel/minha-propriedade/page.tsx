@@ -7,7 +7,7 @@
 // anfitrião, máscaras/validação, prévia ao vivo e aviso de alterações não salvas.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { comprimirImagem } from '@/lib/imageUpload';
 import { CATS, ESTADOS, EVENTOS_CATS, COMODIDADES } from '@/lib/data';
 import { maskCEP, maskTelefone, maskMoeda, parseMoeda, moedaFromNumber, onlyDigits, validarEmail, normalizeInstagram } from '@/lib/masks';

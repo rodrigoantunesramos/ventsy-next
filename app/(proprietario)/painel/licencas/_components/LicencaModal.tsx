@@ -6,7 +6,7 @@
 // Nada de "R$" hardcoded: o preview de custo usa formatMoney (locale do painel).
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

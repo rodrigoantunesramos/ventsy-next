@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 // Visão financeira da plataforma (assinaturas + MRR/ARR). Via service-role após
 // requireAdmin — por isso enxerga as assinaturas de TODOS (o admin legado via 0,
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'financeiro', 'ver')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const [{ data: assinaturas }, { data: planos }, { data: usuarios }] = await Promise.all([
     admin
       .from('assinaturas')

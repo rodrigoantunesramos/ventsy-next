@@ -17,7 +17,7 @@
 // setup-card até o SQL ser aplicado. Sem "R$" hardcoded — tudo via lib/format.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

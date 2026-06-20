@@ -158,9 +158,7 @@ export function ymd(d: Date): string {
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01'
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── API de movimentação (autoritativa: /api/estoque) ─────────────────────────
 export type MovPayload = {

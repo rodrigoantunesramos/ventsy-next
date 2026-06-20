@@ -198,9 +198,9 @@ function acaoChip(a: AcaoRetencao): string {
 
 // Inserção em lote do modelo de retenção (via supabase client — RLS).
 async function criarRetencaoBulk(rows: Record<string, unknown>[]) {
-  const { supabaseAny } = await import('@/lib/supabase');
+  const { supabase } = await import('@/lib/supabase');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (supabaseAny as any).from('lgpd_retencao').insert(rows);
+  return (supabase as any).from('lgpd_retencao').insert(rows);
 }
 
 function RetencaoModal({ bag, editando, onClose, onSaved }: { bag: JuridicoBag; editando: RegraRetencao | null; onClose: () => void; onSaved: () => void }) {

@@ -7,7 +7,8 @@
 // rota AUTORITATIVA /api/layouts; o CRUD de layouts e a edição do mapa de mesas
 // são feitos pelo client via RLS.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import {
   type Planta, type MapaMesas, type Elemento, type Convidado,
   type SetupKey, type ElementoTipo,
@@ -148,7 +149,7 @@ export function layoutParaRow(l: Partial<Layout> & { usuario_id?: string }): Rec
   }
 }
 export async function criarLayout(row: Record<string, unknown>) {
-  return sb.from('layouts').insert(row).select(SEL_LAYOUT).single()
+  return sb.from('layouts').insert(row as TablesInsert<'layouts'>).select(SEL_LAYOUT).single()
 }
 export async function salvarLayout(id: string, row: Record<string, unknown>) {
   return sb.from('layouts').update(row).eq('id', id).select(SEL_LAYOUT).single()

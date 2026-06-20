@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // CRUD de cupons pelo admin (a tabela `cupons` tem policy is_admin, mas
@@ -12,9 +12,9 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'cupons', 'ver')
   if (!ctx) return forbidden()
 
-  const { data } = await supabaseAdminAny.from('cupons').select('*').order('criado_em', { ascending: false })
+  const { data } = await supabaseAdmin.from('cupons').select('*').order('criado_em', { ascending: false })
   const hoje = Date.now()
-  const cupons = ((data ?? []) as Array<Record<string, unknown>>).map((c) => ({
+  const cupons = (data ?? []).map((c) => ({
     id: c.id,
     codigo: c.codigo,
     descricao: c.descricao ?? null,
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   if (!ctx) return forbidden()
   await registrarAcaoAdmin(ctx, 'cupons', action ?? 'acao', (body.id as string) ?? (body.codigo as string) ?? null)
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
 
   if (action === 'criar') {
     const codigo = String(body.codigo || '').trim().toUpperCase()
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ ok: true })
   }
 
-  const id = body.id
+  const id = body.id as string
   if (!id) return Response.json({ error: 'ID ausente.' }, { status: 400 })
 
   if (action === 'excluir') {

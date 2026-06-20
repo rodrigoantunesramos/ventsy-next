@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { formatDateTime } from '@/lib/format';
 import { type Notificacao, contarNaoLidas } from '@/lib/automacoes';

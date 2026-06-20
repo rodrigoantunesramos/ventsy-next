@@ -6,8 +6,9 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 // devolvendo o espaço à agenda. A UI já trata holds vencidos como livres em
 // tempo real (lib/reservas.holdExpirado); este cron é a limpeza autoritativa.
 //
-// Segurança: exige CRON_SECRET. A Vercel injeta `Authorization: Bearer <secret>`.
-// Teste manual: ?secret=<CRON_SECRET>. Force simulação com ?dry=1.
+// Segurança: exige CRON_SECRET via `Authorization: Bearer <secret>` (header). Force
+// simulação com ?dry=1. (O segredo NÃO é aceito por query string — evita vazá-lo em
+// logs de acesso/proxy/Referer.)
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -19,8 +20,7 @@ function autorizado(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
   if (!secret) return false
   const bearer = (req.headers.get('authorization') || '').replace('Bearer ', '').trim()
-  const qs = new URL(req.url).searchParams.get('secret') || ''
-  return bearer === secret || qs === secret
+  return bearer === secret
 }
 
 export async function GET(req: NextRequest) {

@@ -7,7 +7,7 @@
 // lista vazia (o dashboard mostra "sem dados", nunca quebra). O needsSetup do
 // MÓDULO trata só as tabelas próprias do BI (relatorios_salvos/_agendados).
 
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { formatMoneyShort, formatPercent, formatNumber, formatDate } from '@/lib/format'
 import {
   type EventoBI, type LancamentoBI, type ParcelaBI, type ReservaBI, type EspacoBI,

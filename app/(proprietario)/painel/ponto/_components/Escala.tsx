@@ -7,7 +7,7 @@
 // das escalas é via RLS. Sem "R$" hardcoded — tudo via lib/format.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

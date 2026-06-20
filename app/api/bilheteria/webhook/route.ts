@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { confirmarPedido } from '../_confirmar'
+import { verificarWebhookMP } from '@/lib/mpWebhook'
 
 // Webhook do Mercado Pago para a BILHETERIA. Ao aprovar um pagamento, CONSULTA
 // o pagamento na API do MP (valida que é real e aprovado), resolve o pedido por
@@ -18,6 +19,12 @@ export const dynamic = 'force-dynamic'
 const admin = supabaseAdmin as any
 
 export async function POST(req: NextRequest) {
+  // V-05: rejeita notificações forjadas via HMAC do MP (x-signature). Degrada se
+  // MP_WEBHOOK_SECRET ausente — a reconsulta à API do MP segue como validação efetiva.
+  const assinatura = verificarWebhookMP(req)
+  if (assinatura === 'invalida') return Response.json({ error: 'assinatura inválida' }, { status: 401 })
+  if (assinatura === 'sem_chave') console.warn('[MP webhook bilheteria] MP_WEBHOOK_SECRET ausente — assinatura não verificada')
+
   try {
     const { searchParams } = new URL(req.url)
     const uid = searchParams.get('u') || ''

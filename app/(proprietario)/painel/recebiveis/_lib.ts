@@ -6,7 +6,7 @@
 // "A receber" = tabela `parcelas` (parcelamento de eventos, já existia).
 // "A pagar"   = tabela `contas_pagar` (ver docs/sql/contas-pagar.sql).
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 // ── A receber: parcelas + eventos ─────────────────────────────────────────────
 export type ParcelaStatus = 'pendente' | 'pago' | 'cancelado';
@@ -126,12 +126,7 @@ export function ymd(d: Date): string {
 export function diffDias(dateStr: string, base: Date): number {
   return Math.floor((new Date(dateStr + 'T12:00:00').getTime() - base.getTime()) / 86400000);
 }
-export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, ''); }
-export function waLink(fone: string | null | undefined, msg: string): string | null {
-  const d = soDigitos(fone);
-  if (!d) return null;
-  return `https://wa.me/${d.length <= 11 ? '55' + d : d}?text=${encodeURIComponent(msg)}`;
-}
+export { waLink } from '@/lib/waLink';
 
 // ── Status efetivo (deriva "atrasado" de vencimento) ──────────────────────────
 export function efetivoReceber(p: Parcela, hoje: string): EfetivoReceber {
@@ -217,9 +212,7 @@ export async function removeArquivo(path: string | null): Promise<void> {
 
 // ── Detecção de "tabela ainda não criada" (rodar o SQL) ───────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Mapeamento de linha do banco → view em memória ────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */

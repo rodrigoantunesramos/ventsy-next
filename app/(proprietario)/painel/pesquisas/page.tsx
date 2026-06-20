@@ -15,7 +15,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatDate, formatNumber, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -120,8 +121,8 @@ export default function PesquisasPage() {
       if (!session) { router.replace('/login'); return; }
       setUserId(session.user.id);
       try {
-        const { data: a } = await sb.from('assinaturas').select('plano_ativo, plano').eq('usuario_id', session.user.id).maybeSingle();
-        setPlano((a?.plano_ativo || a?.plano || 'basico').toString().toLowerCase());
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', session.user.id).maybeSingle();
+        setPlano((a?.plano_ativo || 'basico').toString().toLowerCase());
       } catch { /* plano opcional */ }
       await carregar(session.user.id);
       setLoading(false);
@@ -184,7 +185,7 @@ export default function PesquisasPage() {
     const row = {
       usuario_id: userId, titulo: p.titulo, descricao: p.descricao, tipo: p.tipo,
       perguntas: p.perguntas, gatilho: p.gatilho, dias_apos: p.dias_apos, ativo: p.ativo,
-    };
+    } as TablesInsert<'pesquisas'>;
     if (p.id) {
       const { data, error } = await sb.from('pesquisas').update(row).eq('id', p.id).select().single();
       if (error) { toast.error('Falha ao salvar a pesquisa.'); return false; }
@@ -239,7 +240,7 @@ export default function PesquisasPage() {
       autor_nome: r.autor_nome, autor_contato: r.autor_contato, canal: 'formulario',
       nota_geral: r.nps != null ? npsParaNota5(r.nps) : null,
       criterios: {}, comentario: r.comentario, permite_publicar: false, status: 'novo',
-    });
+    } as TablesInsert<'feedbacks'>);
     if (error) {
       if (isMissingTable(error)) { setFeedbacksOk(false); toast.info('Módulo Feedbacks indisponível.'); }
       else toast.error('Falha ao abrir a tratativa.');

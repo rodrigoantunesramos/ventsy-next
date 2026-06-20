@@ -24,8 +24,7 @@ function autorizado(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
   if (!secret) return false
   const bearer = (req.headers.get('authorization') || '').replace('Bearer ', '').trim()
-  const qs = new URL(req.url).searchParams.get('secret') || ''
-  return bearer === secret || qs === secret
+  return bearer === secret
 }
 
 async function fetchJson(url: string): Promise<unknown> {

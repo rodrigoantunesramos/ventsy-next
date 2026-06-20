@@ -8,7 +8,7 @@
 //   • Movimentar rápido reabre o MovModal já no produto
 
 import { useMemo, useRef, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatNumber } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import { statusMinimo, valorProduto, valorEstoque, diasParaVencer, type NivelEstoque } from '@/lib/estoque';

@@ -16,7 +16,7 @@
 // até o SQL ser aplicado. Sem "R$" hardcoded — tudo via lib/format.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { isMissingTable, todayYMD } from '@/lib/licencas';
 import {
   type LicencasCtx, type EventoLite, type PropriedadeLite, type ChecklistRow,

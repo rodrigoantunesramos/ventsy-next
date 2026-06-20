@@ -35,11 +35,7 @@ export function simboloMoeda(c?: Currency): string {
 }
 
 // Tabela ainda não criada (migration pendente): Postgres cru → 42P01; PostgREST → PGRST205.
-export function isMissingTable(err: { code?: string; message?: string } | null | undefined): boolean {
-  if (!err) return false;
-  return err.code === '42P01' || err.code === 'PGRST205' || err.code === 'PGRST202'
-    || /could not find the table|schema cache|does not exist/i.test(err.message || '');
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 export const numOrNull = (v: unknown) => (v == null || v === '' ? null : Number(v));
 

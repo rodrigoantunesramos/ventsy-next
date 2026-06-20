@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort } from '@/lib/format';
 // Motor de folha/encargos COMPARTILHADO (fonte única; reusado por /painel/rh).
 import {

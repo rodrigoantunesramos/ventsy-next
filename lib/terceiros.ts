@@ -21,6 +21,8 @@
 //     Nada de relógio/fetch escondido dentro da lógica.
 //   • i18n: os rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas e competências (agnósticas de fuso) ────────────────────────────────
 function pad2(n: number): string { return String(n).padStart(2, '0') }
 
@@ -647,11 +649,3 @@ export function normalizarTerceiro(r: any): Terceiro {
   }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-// PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
-}

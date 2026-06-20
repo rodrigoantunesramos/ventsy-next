@@ -101,6 +101,22 @@ export async function POST(req: NextRequest) {
   }).select('*').single()
   if (pedErr || !pedido) return Response.json({ error: 'Não foi possível criar o pedido.' }, { status: 500 })
 
+  // LGPD — registra a base legal (execução de contrato) da coleta de PII do
+  // comprador/titulares. Best-effort: nunca bloqueia a compra.
+  try {
+    const ipc = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim()
+      || req.headers.get('x-real-ip') || ''
+    await admin.from('lgpd_consentimentos').insert({
+      usuario_id: bilh.usuario_id,
+      titular_tipo: 'cliente',
+      titular_nome: nome.slice(0, 200),
+      finalidade: 'Compra de ingresso — dados do comprador e dos titulares',
+      base_legal: 'contrato',
+      canal: 'ingresso',
+      evidencia: `pedido=${pedido.id} · ip=${ipc || 'n/d'}`,
+    })
+  } catch { /* não bloqueia a compra */ }
+
   // Monta um ingresso por unidade, distribuindo titulares quando enviados.
   const linhasIngresso: Record<string, unknown>[] = []
   for (const i of limpos) {

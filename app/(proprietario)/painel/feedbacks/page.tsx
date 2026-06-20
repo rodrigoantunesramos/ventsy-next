@@ -14,7 +14,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { formatDate, formatNumber, formatPercent } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -241,7 +242,7 @@ export default function FeedbacksPage() {
     const { data, error } = await sb.from('feedbacks_acoes').insert({
       feedback_id: feedbackId, usuario_id: userId, descricao: a.descricao.trim(),
       responsavel: a.responsavel.trim() || null, prazo: a.prazo || null, status: 'aberta',
-    }).select().single();
+    } as TablesInsert<'feedbacks_acoes'>).select().single();
     if (error) { toast.error('Falha ao adicionar a ação.'); return false; }
     setAcoes((prev) => [...prev, normAcao(data)]);
     // primeiro plano de ação ⇒ move o feedback para "em tratativa" (se ainda "novo")
@@ -289,7 +290,7 @@ export default function FeedbacksPage() {
       nota_geral: p.nota_geral, criterios: normalizarCriterios(p.criterios),
       comentario: p.comentario || null, pontos_positivos: p.pontos_positivos || null,
       pontos_negativos: p.pontos_negativos || null, permite_publicar: p.permite_publicar, status: 'novo',
-    }).select().single();
+    } as TablesInsert<'feedbacks'>).select().single();
     if (error) { toast.error('Falha ao registrar o feedback.'); return false; }
     setFeedbacks((prev) => [normFeedback(data), ...prev]);
     toast.success('Feedback registrado.');

@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   RhContext, isMissingTable, isPremium, mapFunc, SEL_FUNC, type Funcionario,
 } from './_lib';

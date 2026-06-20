@@ -21,6 +21,7 @@
 //   • i18n: os rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
 import type { Json } from '@/types/supabase'
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Tipos de domínio ─────────────────────────────────────────────────────────
 export type AcaoAudit =
@@ -369,10 +370,4 @@ export function logsParaCSV(logs: AuditLogLike[]): string {
     ].map(csvEsc).join(',')
   })
   return [header, ...linhas].join('\r\n')
-}
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-// PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01'
 }

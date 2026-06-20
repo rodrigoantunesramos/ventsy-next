@@ -6,7 +6,7 @@
 // por município. Esses templates customizados aparecem em "Por evento".
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import {
   type ExigenciaTemplate, type TipoLicenca,

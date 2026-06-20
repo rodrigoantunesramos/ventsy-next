@@ -6,7 +6,7 @@
 // manualmente os pendentes, ignorar e reverter. Saldo conciliado vs. contábil.
 
 import { useMemo, useRef, useState } from 'react'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { useToast } from '@/components/Toast'
 import { formatDate, formatMoney, formatMoneyShort } from '@/lib/format'
 import {
@@ -59,7 +59,7 @@ export default function Conciliacao({ userId, lancamentos, bancos, extrato, reca
     const { error } = await sb.from('conciliacao_extrato').insert(rows)
     if (!error) {
       const ids = rows.filter((r) => r.lancamento_id).map((r) => r.lancamento_id)
-      if (ids.length) await sb.from('lancamentos').update({ conciliado: true }).in('id', ids)
+      if (ids.length) await sb.from('lancamentos').update({ conciliado: true }).in('id', ids as number[])
     }
     setBusy(false)
     if (error) { toast.error('Erro ao importar o extrato.'); return }

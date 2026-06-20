@@ -93,7 +93,10 @@ export async function registrarAuditoria(p: RegistroAuditoria): Promise<string |
 /** Expurga logs anteriores a `dias` (retenção). Devolve quantos foram removidos. */
 export async function expurgarAuditoria(contaId: string, dias: number): Promise<number> {
   if (!contaId || !Number.isFinite(dias) || dias <= 0) return 0
-  const limite = new Date(Date.now() - dias * 86_400_000).toISOString()
+  // Piso de segurança: logs com menos de 90 dias NUNCA são expurgados via app
+  // (anti-encobrimento de rastros), mesmo que a retenção configurada peça menos.
+  const PISO_DIAS = 90
+  const limite = new Date(Date.now() - Math.max(dias, PISO_DIAS) * 86_400_000).toISOString()
   try {
     const { data, error } = await admin
       .from('auditoria_log')

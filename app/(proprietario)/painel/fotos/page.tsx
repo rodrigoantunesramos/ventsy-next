@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { comprimirImagem, uploadComProgresso } from '@/lib/imageUpload';
 
 type Foto = { id: string; url: string | null; ordem: number | null; secao: string | null; tipo: string | null; focal_x: number | null; focal_y: number | null; alt: string | null };

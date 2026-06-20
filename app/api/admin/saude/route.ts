@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { emailConfigurado } from '@/lib/email'
 
 // Saúde do sistema: integrações configuradas, catálogo de crons (com os órfãos
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
   let webhooks: { total: number | null } = { total: null }
   try {
-    const { count } = await supabaseAdminAny
+    const { count } = await supabaseAdmin
       .from('integracoes_webhooks_log')
       .select('*', { count: 'exact', head: true })
     webhooks = { total: count ?? 0 }

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 // Leitura da trilha de auditoria do admin (somente leitura; a tabela é
 // append-only e só acessível via service-role).
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   if (!ctx) return forbidden()
 
   const modulo = new URL(req.url).searchParams.get('modulo') || ''
-  let q = supabaseAdminAny
+  let q = supabaseAdmin
     .from('admin_auditoria')
     .select('id, ator_email, modulo, acao, alvo, criado_em')
     .order('criado_em', { ascending: false })

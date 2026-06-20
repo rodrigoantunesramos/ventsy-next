@@ -7,7 +7,8 @@
 // no financeiro passam pela rota AUTORITATIVA /api/expositores; o CRUD demais
 // (criar estande/expositor/cota, marcar entregável) é feito pelo client via RLS.
 
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
+import type { TablesInsert } from '@/types/supabase'
 import {
   type Estande, type Expositor, type Cota, type Patrocinador,
   type Posicao, type Necessidades, type Entregavel, type EntregavelStatus,
@@ -191,19 +192,19 @@ export const enviarLogistica = (expositor_id: string) => call({ action: 'logisti
 
 // ── CRUD via RLS (client) ─────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const criarEstande = (row: Record<string, unknown>) => sb.from('expo_mapa').insert(row).select(SEL_ESTANDE).single()
+export const criarEstande = (row: Record<string, unknown>) => sb.from('expo_mapa').insert(row as TablesInsert<'expo_mapa'>).select(SEL_ESTANDE).single()
 export const salvarEstande = (id: string, patch: Record<string, unknown>) => sb.from('expo_mapa').update(patch).eq('id', id).select(SEL_ESTANDE).single()
 export const excluirEstande = (id: string) => sb.from('expo_mapa').delete().eq('id', id)
 
-export const criarExpositor = (row: Record<string, unknown>) => sb.from('expositores').insert(row).select(SEL_EXPOSITOR).single()
+export const criarExpositor = (row: Record<string, unknown>) => sb.from('expositores').insert(row as TablesInsert<'expositores'>).select(SEL_EXPOSITOR).single()
 export const salvarExpositor = (id: string, patch: Record<string, unknown>) => sb.from('expositores').update(patch).eq('id', id).select(SEL_EXPOSITOR).single()
 export const excluirExpositor = (id: string) => sb.from('expositores').delete().eq('id', id)
 
-export const criarCota = (row: Record<string, unknown>) => sb.from('patrocinio_cotas').insert(row).select(SEL_COTA).single()
+export const criarCota = (row: Record<string, unknown>) => sb.from('patrocinio_cotas').insert(row as TablesInsert<'patrocinio_cotas'>).select(SEL_COTA).single()
 export const salvarCota = (id: string, patch: Record<string, unknown>) => sb.from('patrocinio_cotas').update(patch).eq('id', id).select(SEL_COTA).single()
 export const excluirCota = (id: string) => sb.from('patrocinio_cotas').delete().eq('id', id)
 
-export const criarPatrocinador = (row: Record<string, unknown>) => sb.from('patrocinadores').insert(row).select(SEL_PATRO).single()
+export const criarPatrocinador = (row: Record<string, unknown>) => sb.from('patrocinadores').insert(row as TablesInsert<'patrocinadores'>).select(SEL_PATRO).single()
 export const salvarPatrocinador = (id: string, patch: Record<string, unknown>) => sb.from('patrocinadores').update(patch).eq('id', id).select(SEL_PATRO).single()
 export const excluirPatrocinador = (id: string) => sb.from('patrocinadores').delete().eq('id', id)
 /* eslint-enable @typescript-eslint/no-explicit-any */

@@ -11,6 +11,8 @@
 // lib/format, injetada pelas páginas. Compartilhado por painel + rota pública +
 // API + cron.
 
+export { isMissingTable } from '@/lib/dbErrors';
+
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 export type TipoPesquisa = 'nps' | 'csat' | 'custom';
 export type Gatilho = 'manual' | 'pos_evento' | 'dias_apos';
@@ -375,11 +377,6 @@ export function comentarios(list: RespostaPesquisa[]): string[] {
 export function npsParaNota5(nps: number): number {
   const v = Math.max(0, Math.min(NPS_MAX, Math.round(Number(nps) || 0)));
   return Math.max(1, Math.min(5, Math.round((v / NPS_MAX) * 5) || 1));
-}
-
-/** Detecta "tabela ausente" no Supabase (REST PGRST205 ou Postgres 42P01). */
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
 }
 
 // ── Export CSV (puro: retorna string; o download/DOM fica na página) ───────────

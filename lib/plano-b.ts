@@ -20,6 +20,9 @@
 //     "hoje"/dia entram por parâmetro; o parse recebe o JSON já buscado.
 //   • i18n: os rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
+// Detecção de "tabela ainda não criada" (rodar o SQL) → setup-card.
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas (puro, agnóstico de fuso) ───────────────────────────────────────────
 /** 'YYYY-MM-DD' + n dias → 'YYYY-MM-DD' (ancorado ao meio-dia p/ evitar DST/UTC off-by-one). */
 export function addDiasYMD(ymd: string, n: number): string {
@@ -631,11 +634,4 @@ export function templateKeyParaTipo(tipo: string | null | undefined): TemplateKe
 export function gerarPlanosDoTemplate(key: TemplateKey): PlanoSeed[] {
   const tpl = TEMPLATES[key] || TEMPLATES.generico
   return tpl.seeds.map((def, i) => seed(def, i))
-}
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
 }

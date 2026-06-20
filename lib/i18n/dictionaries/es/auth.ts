@@ -1,0 +1,65 @@
+// Diccionario en español — namespace `auth`. Tipado por `T` (de pt/auth) para
+// garantizar la paridad de claves.
+import type { T } from '../pt/auth'
+
+const auth: T = {
+  meta: {
+    loginTitulo: 'Iniciar sesión',
+    loginDescricao: 'Accede a tu cuenta de VENTSY para gestionar tus espacios, reservas y anuncios.',
+  },
+  login: {
+    tag: 'Acceso',
+    bemVindo: 'Bienvenido de nuevo a',
+    subtitulo: 'Inicia sesión con tu correo electrónico y contraseña para acceder a tu cuenta.',
+    emailLabel: 'Correo electrónico',
+    emailPlaceholder: 'tu@correo.com',
+    senhaLabel: 'Contraseña',
+    senhaPlaceholder: 'Tu contraseña',
+    mostrarSenha: 'Mostrar contraseña',
+    ocultarSenha: 'Ocultar contraseña',
+    esqueceuSenha: '¿Olvidaste tu contraseña?',
+    entrar: 'Iniciar sesión',
+    entrando: 'Iniciando sesión...',
+    ou: 'o',
+    continuarGoogle: 'Continuar con Google',
+    semConta: '¿No tienes cuenta?',
+    criarConta: 'Crear cuenta gratis',
+    erroCamposObrigatorios: 'Introduce tu correo electrónico y contraseña para continuar.',
+    erroGenerico: 'Error al iniciar sesión. Inténtalo de nuevo.',
+    erroCredenciais: 'Correo electrónico o contraseña incorrectos.',
+    erroEmailNaoConfirmado: 'Confirma tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.',
+  },
+  recuperar: {
+    titulo: 'Recuperar contraseña',
+    descricao: 'Introduce tu correo electrónico registrado y te enviaremos un enlace para restablecer tu contraseña.',
+    emailPlaceholder: 'tu@correo.com',
+    emailAriaLabel: 'Correo electrónico para recuperación de contraseña',
+    dialogAriaLabel: 'Recuperar contraseña',
+    cancelar: 'Cancelar',
+    enviarLink: 'Enviar enlace',
+    enviando: 'Enviando...',
+    sucessoTitulo: '¡Correo enviado!',
+    sucessoDescricao: 'Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.',
+    fechar: 'Cerrar',
+  },
+  redefinir: {
+    titulo: 'Restablecer contraseña',
+    verificando: 'Verificando el enlace…',
+    linkInvalidoInicio: 'Enlace no válido o caducado. Vuelve al',
+    linkInvalidoLink: 'inicio de sesión',
+    linkInvalidoFim: 'y solicita un nuevo correo de restablecimiento.',
+    sucesso: '¡Contraseña restablecida con éxito! Redirigiendo al inicio de sesión…',
+    definaNova: 'Define tu nueva contraseña de acceso.',
+    novaSenhaLabel: 'Nueva contraseña',
+    novaSenhaPlaceholder: 'Al menos 8 caracteres',
+    confirmarSenhaLabel: 'Confirmar contraseña',
+    mostrarSenha: 'Mostrar contraseña',
+    botao: 'Restablecer contraseña',
+    salvando: 'Guardando…',
+    erroSenhaCurta: 'La contraseña debe tener al menos 8 caracteres.',
+    erroSenhasDiferentes: 'Las contraseñas no coinciden.',
+    erroGenerico: 'No se pudo restablecer la contraseña.',
+  },
+}
+
+export default auth

@@ -12,7 +12,7 @@
 // (autoritativo p/ janelas → bloqueio em `reservas`). Sem "R$" hardcoded.
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatNumber, formatPercent, formatDate, formatDateTime, formatDateRange } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

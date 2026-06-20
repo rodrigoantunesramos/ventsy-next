@@ -7,6 +7,8 @@
 // Regra de ouro do projeto: NUNCA formate "R$" aqui — só números crus. A camada
 // de UI usa lib/format (formatMoney/formatDate) com o locale do usuário.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Catálogo de módulos ──────────────────────────────────────────────────────
 export type ModuloKey =
   | 'resumo'
@@ -288,10 +290,3 @@ export function eventoJaOcorreu(evento: EventoLite, agora: Date): boolean {
   return ref != null && ref < 0
 }
 
-// ── Erros ───────────────────────────────────────────────────────────────────────
-/** PGRST205/42P01 = tabela inexistente (módulo ainda não migrado → needsSetup).
- *  Nunca use probe com head:true: HEAD sem corpo mascara o PGRST205. */
-export function isMissingTable(error: { code?: string | null } | null | undefined): boolean {
-  const code = error?.code
-  return code === '42P01' || code === 'PGRST205'
-}

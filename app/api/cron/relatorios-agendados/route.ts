@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdminAny as db } from '@/lib/supabaseAdmin'
+import { supabaseAdmin as db } from '@/lib/supabaseAdmin'
 import { sendEmail, emailConfigurado } from '@/lib/email'
 import { formatMoneyShort, formatPercent, formatNumber } from '@/lib/format'
 import {
@@ -24,8 +24,7 @@ function autorizado(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
   if (!secret) return false
   const bearer = (req.headers.get('authorization') || '').replace('Bearer ', '').trim()
-  const qs = new URL(req.url).searchParams.get('secret') || ''
-  return bearer === secret || qs === secret
+  return bearer === secret
 }
 
 async function safe<T>(p: PromiseLike<{ data: T[] | null; error: unknown }>): Promise<T[]> {

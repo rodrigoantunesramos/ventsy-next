@@ -17,6 +17,8 @@
 //   • CAC/CPL/ROI/conversão e o funil são calculados aqui (puro) e reusados pela
 //     Visão, pela aba Canais e pelo ranking.
 
+export { isMissingTable } from '@/lib/dbErrors';
+
 // ── Tipos de domínio ──────────────────────────────────────────────────────────
 export type CanalTipo = 'organico' | 'pago' | 'parceria' | 'indicacao' | 'outro';
 export type TipoAcao = 'post' | 'anuncio' | 'parceria' | 'evento' | 'email';
@@ -132,11 +134,6 @@ export function ymd(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 export function ymKey(d: Date): string { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
-
-/** Erro de tabela ausente (mesma checagem das demais engines). */
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
-}
 
 // ── Período (espelha o financeiro) ──────────────────────────────────────────────
 /** Nº de meses do período — usado para prorratear o custo mensal dos canais. */

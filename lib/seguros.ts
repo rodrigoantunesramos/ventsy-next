@@ -21,6 +21,8 @@
 //     SEMPRE por parâmetro (hojeYmd, formato 'YYYY-MM-DD').
 //   • i18n: os rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Tipos de domínio ─────────────────────────────────────────────────────────
 export type Escopo = 'patrimonial' | 'rc' | 'evento' | 'acidentes' | 'frota' | 'equipamento'
 export type StatusAdmin = 'ativa' | 'em_cotacao' | 'cancelada' | 'renovada'
@@ -379,9 +381,3 @@ export function normalizarAnexos(v: any): Anexo[] {
     .map((a) => ({ url: String(a.url), nome: String(a.nome ?? a.url), tipo: a.tipo ?? null, tamanho: a.tamanho == null ? null : num(a.tamanho) }))
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-// PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01'
-}

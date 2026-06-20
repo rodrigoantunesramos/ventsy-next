@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdmin, supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 import { sendEmail } from '@/lib/email'
 
@@ -16,11 +16,34 @@ function estaBanido(bannedUntil: string | null | undefined): boolean {
   return Number.isFinite(t) && t > Date.now()
 }
 
+// Gera um link de uso único que estabelece a sessão pela nossa rota /auth/confirm
+// (verifyOtp server-side → grava cookie → passa no gate de /painel). Usa o
+// hashed_token do generateLink; NÃO usa o action_link, que volta a sessão por
+// hash (fluxo implícito, perde a corrida contra o gate) e cujo redirect cai no
+// Site URL do Supabase (hoje apontando para domínio diferente do site).
+async function linkConfirmacao(
+  email: string,
+  type: 'recovery' | 'magiclink',
+  next: string,
+): Promise<string | null> {
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ventsy.com.br'
+  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+    type,
+    email,
+    options: { redirectTo: `${site}${next}` },
+  })
+  if (error) return null
+  const tokenHash = (data as { properties?: { hashed_token?: string } })?.properties?.hashed_token
+  if (!tokenHash) return null
+  const qs = new URLSearchParams({ token_hash: tokenHash, type, next })
+  return `${site}/auth/confirm?${qs.toString()}`
+}
+
 export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'usuarios', 'ver')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const q = (new URL(req.url).searchParams.get('q') || '').toLowerCase().trim()
 
   const [{ data: perfis }, { data: assinaturas }] = await Promise.all([
@@ -73,7 +96,7 @@ export async function POST(req: NextRequest) {
   const ctx = await requireAdmin(req, 'usuarios', 'editar')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
   const action = body.action as string | undefined
   const id = body.id as string | undefined
@@ -107,14 +130,8 @@ export async function POST(req: NextRequest) {
     const { data: u } = await admin.from('usuarios').select('email').eq('id', id).maybeSingle()
     const emailAlvo = u?.email as string | undefined
     if (!emailAlvo) return Response.json({ error: 'Usuário sem e-mail cadastrado.' }, { status: 400 })
-    const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ventsy.com.br'
-    const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
-      email: emailAlvo,
-      options: { redirectTo: `${site}/redefinir-senha` },
-    })
-    if (error) return Response.json({ error: error.message }, { status: 500 })
-    const link = (linkData as { properties?: { action_link?: string } })?.properties?.action_link ?? null
+    const link = await linkConfirmacao(emailAlvo, 'recovery', '/redefinir-senha')
+    if (!link) return Response.json({ error: 'Falha ao gerar o link de redefinição.' }, { status: 500 })
     let enviado = false
     try {
       const r = await sendEmail({
@@ -135,14 +152,8 @@ export async function POST(req: NextRequest) {
     const { data: u } = await admin.from('usuarios').select('email').eq('id', id).maybeSingle()
     const emailAlvo = u?.email as string | undefined
     if (!emailAlvo) return Response.json({ error: 'Usuário sem e-mail cadastrado.' }, { status: 400 })
-    const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ventsy.com.br'
-    const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email: emailAlvo,
-      options: { redirectTo: `${site}/painel` },
-    })
-    if (error) return Response.json({ error: error.message }, { status: 500 })
-    const link = (linkData as { properties?: { action_link?: string } })?.properties?.action_link ?? null
+    const link = await linkConfirmacao(emailAlvo, 'magiclink', '/painel')
+    if (!link) return Response.json({ error: 'Falha ao gerar o link de acesso.' }, { status: 500 })
     return Response.json({ ok: true, link })
   }
 

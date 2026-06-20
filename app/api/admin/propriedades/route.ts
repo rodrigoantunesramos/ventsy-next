@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Moderação de propriedades pelo admin (fila de aprovação + destaque). Via
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'propriedades', 'ver')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const url = new URL(req.url)
   const status = url.searchParams.get('status') || 'todas' // pendentes|publicadas|todas
   const q = (url.searchParams.get('q') || '').toLowerCase().trim()
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   const ctx = await requireAdmin(req, 'propriedades', 'editar')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
   const action = body.action as string | undefined
   const id = body.id
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
   if (!patch) return Response.json({ error: 'Ação inválida.' }, { status: 400 })
   await registrarAcaoAdmin(ctx, 'propriedades', action, String(id))
 
-  const { error } = await admin.from('propriedades').update(patch).eq('id', id)
+  const { error } = await admin.from('propriedades').update(patch).eq('id', id as number)
   if (error) return Response.json({ error: error.message }, { status: 500 })
   return Response.json({ ok: true })
 }

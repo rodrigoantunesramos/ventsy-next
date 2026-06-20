@@ -9,7 +9,7 @@
 // As regras puras (alçada, comparativo, economia, lead time) ficam em
 // lib/compras.ts (testadas) e são re-exportadas no fim.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 // ── Status / prioridade / unidades ────────────────────────────────────────────
 export type Prioridade = 'baixa' | 'media' | 'alta' | 'urgente';
@@ -206,21 +206,13 @@ export function mapRecebimento(r: any): Recebimento {
 
 // ── "Tabela ainda não criada" (rodar a migration) ────────────────────────────
 // PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null } | null | undefined): boolean {
-  return err?.code === 'PGRST205' || err?.code === '42P01';
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 // ── Helpers genéricos ─────────────────────────────────────────────────────────
 export function ymd(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
-export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, ''); }
-export function waLink(fone: string | null | undefined, msg = ''): string | null {
-  const d = soDigitos(fone);
-  if (!d) return null;
-  const base = `https://wa.me/${d.length <= 11 ? '55' + d : d}`;
-  return msg ? `${base}?text=${encodeURIComponent(msg)}` : base;
-}
+export { waLink } from '@/lib/waLink';
 export function mailLink(email: string | null | undefined, subject = '', body = ''): string | null {
   if (!email || !email.includes('@')) return null;
   const q = [subject && `subject=${encodeURIComponent(subject)}`, body && `body=${encodeURIComponent(body)}`].filter(Boolean).join('&');

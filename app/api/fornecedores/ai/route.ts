@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { generateText } from 'ai';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getAuthUser, unauthorized } from '@/lib/apiAuth';
+import { formatMoney } from '@/lib/format';
 
 // IA de Fornecedores (/painel/fornecedores) via Vercel AI Gateway ("provider/model").
 // Ações: resumo (raio-x do fornecedor), negociacao (dicas de negociação),
@@ -11,8 +12,7 @@ const MODEL = process.env.FORNECEDORES_AI_MODEL || 'anthropic/claude-haiku-4-5';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sb = supabaseAdmin as any;
 
-const brl = (n: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n || 0);
+const brlInt = (n: number) => formatMoney(n, { maximumFractionDigits: 0 });
 const dt = (d: string | null) => (d ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T12:00:00' : d).toLocaleDateString('pt-BR') : '—');
 
 export async function POST(req: NextRequest) {
@@ -32,8 +32,11 @@ export async function POST(req: NextRequest) {
   if (!fornecedorId) return Response.json({ error: 'fornecedor_id obrigatório.' }, { status: 400 });
 
   // ── Carrega o fornecedor + histórico (sempre escopado ao dono) ──────────────
+  // Colunas explícitas (sem chave_pix/banco): dados bancários/PIX nem carregam nesta rota de IA.
   const { data: forn } = await sb
-    .from('fornecedores').select('*').eq('id', fornecedorId).eq('usuario_id', user.id).maybeSingle();
+    .from('fornecedores')
+    .select('id,nome,fantasia,tipo,categoria,cidade,estado,homologacao,condicoes_pagamento,prazo_entrega_dias,obs')
+    .eq('id', fornecedorId).eq('usuario_id', user.id).maybeSingle();
   if (!forn) return Response.json({ error: 'Fornecedor não encontrado.' }, { status: 404 });
 
   const [{ data: desp }, { data: avals }, { data: docs }] = await Promise.all([
@@ -70,7 +73,7 @@ export async function POST(req: NextRequest) {
     `Homologação: ${forn.homologacao}`,
     forn.condicoes_pagamento ? `Condições de pagamento: ${forn.condicoes_pagamento}` : '',
     forn.prazo_entrega_dias != null ? `Prazo de entrega: ${forn.prazo_entrega_dias} dias` : '',
-    `Gasto total (vida): ${brl(total)} · Gasto em ${ano}: ${brl(ytd)} · Em aberto: ${brl(aberto)} · ${despesas.length} compra(s)`,
+    `Gasto total (vida): ${brlInt(total)} · Gasto em ${ano}: ${brlInt(ytd)} · Em aberto: ${brlInt(aberto)} · ${despesas.length} compra(s)`,
     avaliacoes.length
       ? `Avaliação média: ${media.toFixed(1)}/5 em ${avaliacoes.length} avaliação(ões) — Qualidade ${criterioMedia('qualidade')}, Prazo ${criterioMedia('prazo')}, Preço ${criterioMedia('preco')}, Atendimento ${criterioMedia('atendimento')}`
       : 'Sem avaliações registradas',

@@ -7,7 +7,7 @@
 // checklist via /api/licencas (autoritativo). Sem "R$" cru.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

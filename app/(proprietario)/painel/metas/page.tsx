@@ -13,7 +13,7 @@
 // API (CRUD via RLS). i18n via lib/format — nada de "R$" hardcoded.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type MetaRow, type OkrRow, type MetaFinanceira, type PropriedadeLite,
   type Granularidade, type Realizado,

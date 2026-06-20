@@ -5,7 +5,7 @@
 // O modelo de papéis/níveis vem de lib/rbac e é reutilizado pelo gate e pela API.
 
 import { useCallback, useEffect, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { validarEmail } from '@/lib/masks';
 import { MODULOS, PAPEIS, NIVEIS, defaultPerms, papelLabel, type Papel, type Permissoes, type Nivel } from '@/lib/rbac';
@@ -41,7 +41,7 @@ export default function TabEquipe({ userId }: { userId: string }) {
     const { data, error } = await sb.from('usuarios_papeis').select('*').eq('usuario_id', userId).order('nome');
     if (error) { setNeedsSetup(true); setMembros([]); return; }
     setNeedsSetup(false);
-    setMembros((data || []).map((m: Membro) => ({ ...m, permissoes: m.permissoes || {} })));
+    setMembros((data || []).map((m) => ({ ...m, papel: m.papel as Papel, permissoes: (m.permissoes || {}) as Permissoes })));
   }, [userId]);
 
   useEffect(() => { (async () => { await carregar(); setLoading(false); })(); }, [carregar]);

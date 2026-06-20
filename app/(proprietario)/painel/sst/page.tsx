@@ -16,7 +16,7 @@
 // um setup-card até o SQL ser aplicado. Sem "R$".
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { type SstCtx, carregarCatalogos, isMissingTable } from './_lib';
 import { Ico } from './_components/ui';

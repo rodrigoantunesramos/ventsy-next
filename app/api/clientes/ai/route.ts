@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { generateText } from 'ai';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getAuthUser, unauthorized } from '@/lib/apiAuth';
+import { formatMoney } from '@/lib/format';
 
 // IA do CRM 360º (/painel/clientes) via Vercel AI Gateway (string "provider/model").
 // Ações: summary (raio-x do cliente), next_action (próxima melhor ação),
@@ -12,8 +13,7 @@ const MODEL = process.env.CLIENTES_AI_MODEL || 'anthropic/claude-haiku-4-5';
 const sb = supabaseAdmin as any;
 
 const GANHOS = new Set(['contratado', 'briefing', 'pronto', 'montagem', 'finalizado', 'pos']);
-const brl = (n: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n || 0);
+const brlInt = (n: number) => formatMoney(n, { maximumFractionDigits: 0 });
 const dt = (d: string | null) => (d ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T12:00:00' : d).toLocaleDateString('pt-BR') : '—');
 
 export async function POST(req: NextRequest) {
@@ -75,10 +75,10 @@ export async function POST(req: NextRequest) {
     (cliente.tags || []).length ? `Tags: ${(cliente.tags || []).join(', ')}` : '',
     cliente.segmento ? `Segmento (dono): ${cliente.segmento}` : '',
     `Eventos ganhos: ${ganhos.length} de ${eventos.length} no total`,
-    `Valor contratado (vida): ${brl(valorContratado)} · Recebido: ${brl(recebido)} · Em aberto: ${brl(emAberto)}`,
+    `Valor contratado (vida): ${brlInt(valorContratado)} · Recebido: ${brlInt(recebido)} · Em aberto: ${brlInt(emAberto)}`,
     passados.length ? `Último evento realizado: ${passados[0].tipo_evento || 'Evento'} em ${dt(passados[0].data_inicio)}` : 'Nenhum evento realizado ainda',
     futuros.length ? `Próximo evento: ${futuros[0].tipo_evento || 'Evento'} em ${dt(futuros[0].data_inicio)}` : 'Nenhum evento futuro agendado',
-    eventos.length ? 'Eventos:\n' + eventos.map((e: any) => `  - ${e.tipo_evento || 'Evento'} "${e.nome_evento || ''}" · ${e.status} · ${dt(e.data_inicio)} · ${brl(Number(e.valor_total_num) || 0)}`).join('\n') : '',
+    eventos.length ? 'Eventos:\n' + eventos.map((e: any) => `  - ${e.tipo_evento || 'Evento'} "${e.nome_evento || ''}" · ${e.status} · ${dt(e.data_inicio)} · ${brlInt(Number(e.valor_total_num) || 0)}`).join('\n') : '',
     (inter || []).length ? 'Interações recentes:\n' + (inter || []).map((i: any) => `  - (${dt(i.data)}) [${i.tipo}] ${i.conteudo || ''}`).join('\n') : '',
   ].filter(Boolean).join('\n');
 

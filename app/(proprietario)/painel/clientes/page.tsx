@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatPercent, formatDate, formatNumber } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -21,6 +21,7 @@ import {
   eventosDoCliente, metricsCliente, segmentar, iniciais, soDigitos, waLink,
   importClientesCSV, chaveDedupe, exportClientesCSV,
 } from './_lib';
+import { EmptyState } from '@/components/ui/Estados';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 20;
@@ -262,7 +263,20 @@ export default function ClientesPage() {
       )}
 
       {!needsSetup && clientes.length === 0 ? (
-        <EmptyClientes hasEventos={eventos.some((e) => (e.quem_contratou || '').trim())} derivBusy={derivBusy} onNovo={() => setNovo(true)} onDerivar={derivarDosEventos} />
+        (() => {
+          const hasEventos = eventos.some((e) => (e.quem_contratou || '').trim());
+          return (
+            <EmptyState
+              icone={<IcoUsers size={30} />}
+              titulo="Sua carteira de clientes começa aqui"
+              descricao="Reúna todo contratante num só lugar: histórico de eventos, financeiro, interações e segmentação automática."
+              acao={<>
+                {hasEventos && <button onClick={derivarDosEventos} disabled={derivBusy} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600 disabled:opacity-60">{derivBusy ? 'Importando…' : '✨ Importar clientes dos meus eventos'}</button>}
+                <button onClick={() => setNovo(true)} className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${hasEventos ? 'border border-black/10 text-ink-soft hover:border-brand/30 hover:text-brand' : 'bg-brand text-white hover:bg-brand-600'}`}>+ Adicionar primeiro cliente</button>
+              </>}
+            />
+          );
+        })()
       ) : !needsSetup && (
         <>
           {/* KPIs */}
@@ -443,21 +457,6 @@ export default function ClientesPage() {
       {novo && userId && <NovoClienteModal userId={userId} existentes={clientes} onClose={() => setNovo(false)} onSaved={async () => { setNovo(false); await carregar(userId); }} />}
       {importOpen && userId && <ImportModal userId={userId} existentes={clientes} onClose={() => setImportOpen(false)} onDone={async () => { setImportOpen(false); await carregar(userId); }} />}
       {mergeOpen && <MergeModal grupos={duplicados} onClose={() => setMergeOpen(false)} onConfirm={mesclarTodos} />}
-    </div>
-  );
-}
-
-// ── Empty state ────────────────────────────────────────────────────────────────
-function EmptyClientes({ hasEventos, derivBusy, onNovo, onDerivar }: { hasEventos: boolean; derivBusy: boolean; onNovo: () => void; onDerivar: () => void }) {
-  return (
-    <div className="mt-6 rounded-2xl bg-white p-10 text-center shadow-card">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand"><IcoUsers size={30} /></div>
-      <h2 className="text-lg font-bold text-ink">Sua carteira de clientes começa aqui</h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-ink-muted">Reúna todo contratante num só lugar: histórico de eventos, financeiro, interações e segmentação automática.</p>
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-        {hasEventos && <button onClick={onDerivar} disabled={derivBusy} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600 disabled:opacity-60">{derivBusy ? 'Importando…' : '✨ Importar clientes dos meus eventos'}</button>}
-        <button onClick={onNovo} className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${hasEventos ? 'border border-black/10 text-ink-soft hover:border-brand/30 hover:text-brand' : 'bg-brand text-white hover:bg-brand-600'}`}>+ Adicionar primeiro cliente</button>
-      </div>
     </div>
   );
 }

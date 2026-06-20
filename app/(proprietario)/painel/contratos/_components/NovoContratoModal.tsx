@@ -7,7 +7,7 @@
 // Moeda/idioma via lib/format — sem "R$" hardcoded.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { formatMoney, formatDate, getFormatPrefs, type Currency } from '@/lib/format';
 import {

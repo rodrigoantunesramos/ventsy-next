@@ -5,7 +5,7 @@
 // gera a conta a pagar e dá entrada no estoque) fica na aba Recebimentos.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatDate, getFormatPrefs } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -31,7 +31,7 @@ export default function Pedidos({ bag }: { bag: ComprasBag }) {
     (async () => {
       const { data } = await sb.from('empresa_config').select('razao_social,fantasia,cnpj,contatos').eq('usuario_id', userId).maybeSingle();
       if (data) {
-        const c = data.contatos || {};
+        const c = (data.contatos || {}) as { telefone?: string; whatsapp?: string; email?: string };
         setEmpresa({
           nome: data.fantasia || data.razao_social || null,
           contato: [c.telefone || c.whatsapp, c.email].filter(Boolean).join('  ·  ') || null,

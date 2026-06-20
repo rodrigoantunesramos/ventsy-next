@@ -5,7 +5,7 @@
 // (assinaturas) + upgrade reaproveitando o CheckoutPlano (Mercado Pago) existente.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoneyShort, formatDate } from '@/lib/format';
 import CheckoutPlano from '@/components/CheckoutPlano';
 

@@ -19,6 +19,10 @@
 //   • Determinístico e testável: o "agora" entra por parâmetro (nowMs). Nada de
 //     relógio escondido na lógica; credencial deriva só do id (sem Date/random).
 
+import { startOfDayLocal, ymd, addDaysYmd } from '@/lib/dateYmd'
+// Re-export: testes e call-sites externos importam estes helpers deste módulo.
+export { startOfDayLocal, ymd, addDaysYmd }
+
 // ── Vocabulário do domínio ───────────────────────────────────────────────────
 export type JanelaTipo = 'montagem' | 'desmontagem' | 'ensaio' | 'limpeza'
 export type ChegadaStatus = 'agendado' | 'chegou' | 'descarregando' | 'montado' | 'saiu' | 'cancelado'
@@ -109,22 +113,6 @@ export const DEFAULT_VIAGEM_MIN = 120    // duração padrão de viagem sem reto
 
 export type Range = { start: number; end: number }
 
-/** 'YYYY-MM-DD' → meia-noite local em ms (ancorado p/ evitar UTC off-by-one). */
-export function startOfDayLocal(ymdStr: string): number {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(ymdStr)
-  if (!m) return NaN
-  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0).getTime()
-}
-/** Date → 'YYYY-MM-DD' local. */
-export function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-/** Soma `n` dias a uma string 'YYYY-MM-DD' (local), devolvendo 'YYYY-MM-DD'. */
-export function addDaysYmd(s: string, n: number): string {
-  const t = startOfDayLocal(s)
-  if (Number.isNaN(t)) return s
-  return ymd(new Date(t + n * DIA))
-}
 /** ISO/timestamptz ou 'YYYY-MM-DD' → ms epoch (null se inválido). */
 export function parseTempo(v: string | null | undefined): number | null {
   if (!v) return null

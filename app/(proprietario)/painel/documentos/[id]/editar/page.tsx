@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { DocForm } from '../../_components/DocForm';
 import { type Doc, docToForm, type DocForm as FormShape } from '../../_lib';
 

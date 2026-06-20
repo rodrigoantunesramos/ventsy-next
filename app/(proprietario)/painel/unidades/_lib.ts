@@ -2,7 +2,7 @@
 // e detecta se as 3 tabelas novas (unidades_grupos/_config/_acesso) já existem.
 // A matemática (métricas/consolidação/ranking) vive em lib/unidades.ts (pura).
 
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import {
   isMissingTable,
   type PropriedadeLite, type LancamentoLite, type EventoLite,

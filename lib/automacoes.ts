@@ -17,6 +17,8 @@
 //   • Valores monetários trafegam CRUS (`valor_num`) — quem envia formata. Assim a
 //     mensagem nunca carrega "R$" hardcoded vindo daqui.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Domínio: gatilhos, ações, canais ─────────────────────────────────────────
 export type Gatilho =
   | 'evento_criado'           // novo evento entrou no funil (criado nas últimas 24h)
@@ -270,9 +272,6 @@ export const LINK_POR_ESCOPO: Record<Escopo, string> = {
 };
 
 // ── Helpers genéricos ─────────────────────────────────────────────────────────
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
-}
 export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, ''); }
 export function emailValido(s: string | null | undefined): boolean {
   return !!s && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
@@ -284,13 +283,7 @@ function intersecta(a: string[] | undefined, valor: string | null | undefined): 
 }
 
 /** Link wa.me com DDI BR (≤11 dígitos ganham '55') e texto opcional. */
-export function waLink(contato: string | null | undefined, texto?: string): string | null {
-  const d = soDigitos(contato);
-  if (!d) return null;
-  const fone = d.length <= 11 ? '55' + d : d;
-  const q = texto ? `?text=${encodeURIComponent(texto)}` : '';
-  return `https://wa.me/${fone}${q}`;
-}
+export { waLink } from '@/lib/waLink';
 
 // ── Datas (YMD puro, sem locale) ──────────────────────────────────────────────
 /** Primeiros 10 chars (YYYY-MM-DD) de uma data/timestamp; null se vazio. */

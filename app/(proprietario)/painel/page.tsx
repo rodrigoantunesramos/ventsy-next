@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatNumber } from '@/lib/format';
+import { useT } from '@/components/i18n/I18nProvider';
 
 type Propriedade = {
   id: number;
@@ -38,14 +39,15 @@ type KpiData = {
   visualizacoesDelta: number | null;
 };
 
-const QUICK_ACTIONS = [
-  { label: 'Editar Propriedade', emoji: '✏️', href: '/painel/minha-propriedade', desc: 'Dados, descrição e preços' },
-  { label: 'Ver Leads', emoji: '👥', href: '/painel/leads', desc: 'Contatos e solicitações' },
-  { label: 'Financeiro', emoji: '💰', href: '/painel/financeiro', desc: 'Receita e pagamentos' },
-  { label: 'Relatórios', emoji: '📊', href: '/painel/relatorios', desc: 'Métricas do anúncio' },
-];
-
 export default function PainelPage() {
+  const { dict } = useT();
+  const t = dict.painel.dashboard;
+  const QUICK_ACTIONS = [
+    { label: t.qaEditarTitulo, emoji: '✏️', href: '/painel/minha-propriedade', desc: t.qaEditarDesc },
+    { label: t.qaLeadsTitulo, emoji: '👥', href: '/painel/leads', desc: t.qaLeadsDesc },
+    { label: t.qaFinanceiroTitulo, emoji: '💰', href: '/painel/financeiro', desc: t.qaFinanceiroDesc },
+    { label: t.qaRelatoriosTitulo, emoji: '📊', href: '/painel/relatorios', desc: t.qaRelatoriosDesc },
+  ];
   const [loading, setLoading] = useState(true);
   const [prop, setProp] = useState<Propriedade | null>(null);
   const [nome, setNome] = useState('');
@@ -144,19 +146,19 @@ export default function PainelPage() {
     return (
       <div className="mx-auto max-w-3xl">
         <h1 className="text-xl font-bold text-ink sm:text-2xl">
-          Bem-vindo(a){primeiroNome ? ', ' : ''}<span className="text-brand">{primeiroNome}</span>!
+          {t.bemVindo}{primeiroNome ? ', ' : ''}<span className="text-brand">{primeiroNome}</span>!
         </h1>
         <div className="mt-6 rounded-2xl border border-dashed border-brand/30 bg-white p-8 text-center shadow-card">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-2xl">🏡</div>
-          <h2 className="text-lg font-bold text-ink">Cadastre sua propriedade</h2>
+          <h2 className="text-lg font-bold text-ink">{t.semPropTitulo}</h2>
           <p className="mx-auto mt-1 max-w-md text-sm text-ink-muted">
-            Você ainda não tem um espaço cadastrado. Crie seu anúncio para começar a receber reservas na Ventsy.
+            {t.semPropTexto}
           </p>
           <Link
             href="/anunciar"
             className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-600"
           >
-            Anunciar meu espaço →
+            {t.anunciarCta}
           </Link>
         </div>
       </div>
@@ -164,13 +166,13 @@ export default function PainelPage() {
   }
 
   const checklist: ChecklistItem[] = [
-    { label: 'Conta criada', done: true },
-    { label: 'Foto de capa', done: !!prop.imagem_url, href: '/painel/fotos' },
-    { label: 'Descrição do espaço', done: !!(prop.descricao && prop.descricao.trim().length > 20), href: '/painel/minha-propriedade' },
-    { label: 'Endereço completo', done: !!(prop.cep && prop.cidade) || !!prop.endereco, href: '/painel/minha-propriedade' },
-    { label: 'Contato (WhatsApp/e-mail)', done: !!(prop.whatsapp || prop.email_contato || prop.telefone), href: '/painel/minha-propriedade' },
-    { label: 'Valores do evento', done: !!(prop.valor_base || prop.valor_hora || prop.valor_periodo), href: '/painel/minha-propriedade' },
-    { label: 'Tipos de evento', done: !!prop.tipo_evento, href: '/painel/minha-propriedade' },
+    { label: t.clContaCriada, done: true },
+    { label: t.clFotoCapa, done: !!prop.imagem_url, href: '/painel/fotos' },
+    { label: t.clDescricao, done: !!(prop.descricao && prop.descricao.trim().length > 20), href: '/painel/minha-propriedade' },
+    { label: t.clEndereco, done: !!(prop.cep && prop.cidade) || !!prop.endereco, href: '/painel/minha-propriedade' },
+    { label: t.clContato, done: !!(prop.whatsapp || prop.email_contato || prop.telefone), href: '/painel/minha-propriedade' },
+    { label: t.clValores, done: !!(prop.valor_base || prop.valor_hora || prop.valor_periodo), href: '/painel/minha-propriedade' },
+    { label: t.clTiposEvento, done: !!prop.tipo_evento, href: '/painel/minha-propriedade' },
   ];
   const feitos = checklist.filter((c) => c.done).length;
   const pct = Math.round((feitos / checklist.length) * 100);
@@ -184,10 +186,10 @@ export default function PainelPage() {
       <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-card sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-ink sm:text-2xl">
-            Bem-vindo(a){primeiroNome ? ', ' : ''}<span className="text-brand">{primeiroNome}</span>!
+            {t.bemVindo}{primeiroNome ? ', ' : ''}<span className="text-brand">{primeiroNome}</span>!
           </h1>
           <p className="mt-1 text-sm text-ink-muted">
-            {prop.nome || 'Sua propriedade'}
+            {prop.nome || t.suaPropriedade}
             {prop.cidade ? ` · ${prop.cidade}${prop.estado ? `/${prop.estado}` : ''}` : ''}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -195,11 +197,11 @@ export default function PainelPage() {
               publicada ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
             }`}>
               <span className={`h-1.5 w-1.5 rounded-full ${publicada ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-              {publicada ? 'Publicada' : prop.status_publicacao || 'Em preparação'}
+              {publicada ? t.publicada : prop.status_publicacao || t.emPreparacao}
             </span>
             {!publicada && (
               <Link href="/painel/minha-propriedade" className="text-xs font-semibold text-brand underline-offset-2 hover:underline">
-                Completar cadastro →
+                {t.completarCadastro}
               </Link>
             )}
           </div>
@@ -209,14 +211,14 @@ export default function PainelPage() {
             onClick={handleCopy}
             className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink-soft transition hover:border-brand hover:text-brand"
           >
-            {copied ? '✓ Copiado!' : '🔗 Compartilhar'}
+            {copied ? `✓ ${t.copiado}` : `🔗 ${t.compartilhar}`}
           </button>
           <Link
             href={`/propriedade/${prop.id}`}
             target="_blank"
             className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600"
           >
-            Ver no site →
+            {t.verNoSite}
           </Link>
         </div>
       </div>
@@ -224,15 +226,15 @@ export default function PainelPage() {
       {/* KPIs ────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard
-          label="Visualizações"
+          label={t.kpiVisualizacoes}
           value={formatNumber(kpis.visualizacoes)}
           icon="👁️"
           delta={kpis.visualizacoesDelta}
-          sub="últimos 30 dias"
+          sub={t.ultimos30}
         />
-        <KpiCard label="Favoritos" value={kpis.favoritos == null ? '—' : formatNumber(kpis.favoritos)} icon="❤️" />
-        <KpiCard label="Conversas" value={kpis.conversas == null ? '—' : formatNumber(kpis.conversas)} icon="💬" />
-        <KpiCard label="Avaliação média" value={kpis.avaliacao} icon="⭐" />
+        <KpiCard label={t.kpiFavoritos} value={kpis.favoritos == null ? '—' : formatNumber(kpis.favoritos)} icon="❤️" />
+        <KpiCard label={t.kpiConversas} value={kpis.conversas == null ? '—' : formatNumber(kpis.conversas)} icon="💬" />
+        <KpiCard label={t.kpiAvaliacao} value={kpis.avaliacao} icon="⭐" />
       </div>
 
       {/* Ações rápidas ───────────────────────────────────── */}
@@ -255,8 +257,8 @@ export default function PainelPage() {
 
         <div className="lg:col-span-2 rounded-2xl bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-ink">Complete seu perfil</h3>
-            <span className="text-sm font-semibold text-ink-muted">{feitos} de {checklist.length}</span>
+            <h3 className="text-base font-bold text-ink">{t.completePerfil}</h3>
+            <span className="text-sm font-semibold text-ink-muted">{feitos} {t.de} {checklist.length}</span>
           </div>
           <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
             <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${pct}%` }} />
@@ -274,7 +276,7 @@ export default function PainelPage() {
                     {c.label}
                   </span>
                   {!c.done && c.href && (
-                    <span className="text-xs font-semibold text-brand">Completar →</span>
+                    <span className="text-xs font-semibold text-brand">{t.completar}</span>
                   )}
                 </>
               );
@@ -301,19 +303,19 @@ export default function PainelPage() {
         </div>
 
         <div className="rounded-2xl bg-white p-6 shadow-card">
-          <h3 className="text-base font-bold text-ink">Resumo</h3>
+          <h3 className="text-base font-bold text-ink">{t.resumo}</h3>
           <dl className="mt-4 space-y-3 text-sm">
-            <Linha termo="Categoria" valor={prop.categoria || '—'} />
-            <Linha termo="Valor de referência" valor={valorRef ? formatMoney(valorRef) : 'Sob consulta'} />
-            <Linha termo="Tipos de evento" valor={prop.tipo_evento || '—'} />
-            <Linha termo="Capacidade" valor={prop.capacidade ? `${formatNumber(prop.capacidade)} pessoas` : '—'} />
+            <Linha termo={t.categoria} valor={prop.categoria || '—'} />
+            <Linha termo={t.valorReferencia} valor={valorRef ? formatMoney(valorRef) : t.sobConsulta} />
+            <Linha termo={t.tiposEvento} valor={prop.tipo_evento || '—'} />
+            <Linha termo={t.capacidade} valor={prop.capacidade ? `${formatNumber(prop.capacidade)} ${t.pessoas}` : '—'} />
           </dl>
           <div className="mt-5 border-t border-black/[0.05] pt-4">
             <Link
               href="/painel/minha-propriedade"
               className="block w-full rounded-full border border-black/10 py-2 text-center text-sm font-semibold text-ink-soft transition hover:border-brand hover:text-brand"
             >
-              Editar propriedade
+              {t.editarPropriedade}
             </Link>
           </div>
         </div>

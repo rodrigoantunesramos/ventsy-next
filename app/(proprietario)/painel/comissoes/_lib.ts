@@ -118,12 +118,7 @@ export const BENEFICIARIO_META: Record<BeneficiarioTipo, { label: string; plural
 export const MEIOS = ['Pix', 'Transferência', 'Cartão de crédito', 'Dinheiro', 'Boleto', 'Outro']
 
 // ── Helpers genéricos ─────────────────────────────────────────────────────────
-export function soDigitos(s: string | null | undefined): string { return (s || '').replace(/\D/g, '') }
-export function waLink(fone: string | null | undefined): string | null {
-  const d = soDigitos(fone)
-  if (!d) return null
-  return `https://wa.me/${d.length <= 11 ? '55' + d : d}`
-}
+export { waLink } from '@/lib/waLink'
 export function mailLink(email: string | null | undefined): string | null {
   return email && email.includes('@') ? `mailto:${email.trim()}` : null
 }

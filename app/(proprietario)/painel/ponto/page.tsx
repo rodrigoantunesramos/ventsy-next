@@ -14,7 +14,7 @@
 // um setup-card até o SQL ser aplicado. Sem "R$" hardcoded — tudo via lib/format.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type PontoBag, type Escala, type EscalaAlocacao, type Freelancer, type PontoRegistro, type EventoLite, type EquipeLite,
   SEL_FREELANCER, SEL_ESCALA, SEL_ALOC, SEL_PONTO, SEL_EVENTO, SEL_EQUIPE,

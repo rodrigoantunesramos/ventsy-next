@@ -4,7 +4,7 @@
 // nicho de locação de eventos, rótulos de UI e a função que busca tudo escopado
 // por usuario_id (reaproveitando `lancamentos`/`parcelas`, sem duplicar o cockpit).
 
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import {
   DEFAULT_IMPOSTOS,
   type ConfigImpostos,
@@ -182,7 +182,7 @@ export async function carregarContabilidade(uid: string): Promise<DadosContabili
   // Sonda: plano_contas existe? (todas as tabelas vêm da mesma migration)
   const probe = await sb.from('plano_contas').select('id').limit(1)
   const cfgRes = await sb.from('empresa_config').select('config_fiscal,razao_social,fantasia').eq('usuario_id', uid).maybeSingle()
-  const configImpostos = lerConfigImpostos(cfgRes.data?.config_fiscal)
+  const configImpostos = lerConfigImpostos(cfgRes.data?.config_fiscal as Record<string, unknown> | null | undefined)
   const empresaNome = cfgRes.data?.fantasia || cfgRes.data?.razao_social || 'Ventsy'
 
   if (probe.error && SETUP_CODES.includes(probe.error.code)) {

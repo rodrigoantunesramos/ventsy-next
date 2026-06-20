@@ -5,7 +5,8 @@
 // matemática (mensalização, ROI, SLA, decisão, alertas) vive em lib/terceiros
 // (motor puro, testado) e é re-exportada para um import único nas abas.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import {
   normalizarTerceiro, normalizarResultado,
   type Terceiro, type ResultadoTerceiro, type SLA,
@@ -138,7 +139,7 @@ export async function removeArquivo(path: string | null): Promise<void> {
 // ── CRUD via RLS (client) — terceiros + resultados ───────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function criarTerceiro(row: Record<string, unknown>) {
-  return sb.from('terceiros').insert(row).select(SEL_TERCEIRO).single();
+  return sb.from('terceiros').insert(row as TablesInsert<'terceiros'>).select(SEL_TERCEIRO).single();
 }
 export async function salvarTerceiro(id: string, patch: Record<string, unknown>) {
   return sb.from('terceiros').update(patch).eq('id', id).select(SEL_TERCEIRO).single();
@@ -148,7 +149,7 @@ export async function excluirTerceiro(id: string) {
 }
 /** Upsert por (terceiro_id, competencia) — uma medição por mês. */
 export async function salvarResultado(row: Record<string, unknown>) {
-  return sb.from('terceiros_resultados').upsert(row, { onConflict: 'terceiro_id,competencia' }).select(SEL_RESULTADO).single();
+  return sb.from('terceiros_resultados').upsert(row as TablesInsert<'terceiros_resultados'>, { onConflict: 'terceiro_id,competencia' }).select(SEL_RESULTADO).single();
 }
 export async function excluirResultado(id: string) {
   return sb.from('terceiros_resultados').delete().eq('id', id);

@@ -1,6 +1,11 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import type { Map as LeafletMap, LayerGroup } from 'leaflet'
+import { useT } from '@/components/i18n/I18nProvider'
+import { formatMoney } from '@/lib/i18n/format'
+// CSS do Leaflet via import de componente: o Next o code-splita para a rota /busca,
+// em vez de carregá-lo (de um CDN, render-blocking) em todas as páginas.
+import 'leaflet/dist/leaflet.css'
 
 type LeafletModule = typeof import('leaflet')
 
@@ -15,10 +20,17 @@ export type MapProperty = {
 }
 
 export default function SearchMap({ properties }: { properties: MapProperty[] }) {
+  const { dict, locale } = useT()
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
   const layerRef = useRef<LayerGroup | null>(null)
   const LRef = useRef<LeafletModule | null>(null)
+  // Refs para o locale/dict atuais — drawMarkers roda dentro de effects sem eles
+  // nas deps; os refs garantem que o closure use sempre o valor mais recente.
+  const localeRef = useRef(locale)
+  const verLabelRef = useRef(dict.busca.mapaVer)
+  localeRef.current = locale
+  verLabelRef.current = dict.busca.mapaVer
 
   // Inicializa o mapa uma vez (import dinâmico — Leaflet acessa window)
   useEffect(() => {
@@ -63,7 +75,7 @@ export default function SearchMap({ properties }: { properties: MapProperty[] })
       const lng = Number(p.longitude)
       if (!lat || !lng || Number.isNaN(lat) || Number.isNaN(lng)) continue
       const valor = Number(p.valor_hora) > 0 ? Number(p.valor_hora) : Number(p.valor_base) > 0 ? Number(p.valor_base) : 0
-      const label = valor > 0 ? `R$ ${valor.toLocaleString('pt-BR')}` : 'Ver'
+      const label = valor > 0 ? formatMoney(localeRef.current, valor, { maximumFractionDigits: 0 }) : verLabelRef.current
       const ultra = p._plano === 'ultra' ? ' price-marker-ultra' : ''
       const icon = L.divIcon({
         className: 'price-marker-wrap',

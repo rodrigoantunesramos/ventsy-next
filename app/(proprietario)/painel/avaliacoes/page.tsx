@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatDate, formatNumber, formatPercent, formatMonth } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

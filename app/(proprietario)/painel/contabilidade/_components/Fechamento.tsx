@@ -5,7 +5,7 @@
 // pacote contábil (DRE + balancete) em PDF e XLSX para o contador.
 
 import { useMemo, useState } from 'react'
-import { supabaseAny as sb } from '@/lib/supabase'
+import { supabase as sb } from '@/lib/supabase'
 import { useToast } from '@/components/Toast'
 import { formatMoney, formatMoneyShort, formatMonth } from '@/lib/format'
 import { montarBalancete, montarDRE, type Fechamento as Fech, type Lancamento, type PlanoConta, type Regime } from '@/lib/contabilidade'

@@ -15,6 +15,8 @@
 //     fila — não recomputa segmento. Por isso o motor é compartilhado por painel,
 //     API de envio e cron.
 
+export { isMissingTable } from '@/lib/dbErrors';
+
 // ── Tipos de domínio ──────────────────────────────────────────────────────────
 export type Canal = 'email' | 'whatsapp' | 'sms';
 export type StatusCampanha = 'rascunho' | 'agendada' | 'enviando' | 'enviada' | 'pausada';
@@ -184,18 +186,7 @@ function intersecta(a: string[], b: string[]): boolean {
 }
 
 /** Link wa.me com prefixo BR (≤11 dígitos ganham '55') e texto opcional. */
-export function waLink(contato: string | null | undefined, texto?: string): string | null {
-  const d = soDigitos(contato);
-  if (!d) return null;
-  const fone = d.length <= 11 ? '55' + d : d;
-  const q = texto ? `?text=${encodeURIComponent(texto)}` : '';
-  return `https://wa.me/${fone}${q}`;
-}
-
-/** Erro de tabela ausente (mesma checagem das demais engines). */
-export function isMissingTable(err: { code?: string } | null | undefined): boolean {
-  return !!err && (err.code === 'PGRST205' || err.code === '42P01');
-}
+export { waLink } from '@/lib/waLink';
 
 // ── Interpolação de variáveis {{chave}} ───────────────────────────────────────
 // Substitui {{nome}}, {{evento}}, {{empresa}}, … por vars[chave]. Tolerante a

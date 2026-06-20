@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -25,6 +25,7 @@ import {
   type EventoLite, type ClienteLite, type Propriedade, type EmpresaConfig,
 } from './_lib';
 import { Icon, type IconName } from './_components/ui';
+import { SetupCard } from '@/components/ui/Estados';
 import { NovoContratoModal } from './_components/NovoContratoModal';
 import { TemplateModal } from './_components/TemplateModal';
 
@@ -199,11 +200,7 @@ export default function ContratosPage() {
         </div>
       </div>
 
-      {needsSetup && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          As tabelas de contratos ainda não foram criadas. Rode a migration <code className="rounded bg-amber-100 px-1 py-0.5">docs/sql/contratos.sql</code> no Supabase para ativar este módulo.
-        </div>
-      )}
+      {needsSetup && <SetupCard sql="contratos.sql">As tabelas de contratos ainda não foram criadas.</SetupCard>}
 
       {/* KPIs */}
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

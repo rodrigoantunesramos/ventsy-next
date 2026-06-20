@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdminAny as db } from '@/lib/supabaseAdmin'
+import { supabaseAdmin as db } from '@/lib/supabaseAdmin'
 import { getAuthUser, unauthorized } from '@/lib/apiAuth'
 import { todayYMD, proximaExecucao, isMissingTable, type Frequencia } from '@/lib/bi'
+import type { Json } from '@/types/supabase'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
       case 'salvar_relatorio': {
         const nome = String(body.nome || '').trim()
         if (!nome) return Response.json({ error: 'Nome obrigatório.' }, { status: 400 })
-        const config = (body.config && typeof body.config === 'object') ? body.config : {}
+        const config = ((body.config && typeof body.config === 'object') ? body.config : {}) as Json
         const { data, error } = await db.from('relatorios_salvos')
           .insert({ usuario_id: user.id, nome, descricao: body.descricao ? String(body.descricao) : null, config })
           .select('id,nome,descricao,config,criado_em').single()

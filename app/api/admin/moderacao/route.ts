@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
 // Moderação de conteúdo — avaliações públicas (ocultar/exibir/destacar/excluir).
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const ctx = await requireAdmin(req, 'moderacao', 'ver')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const filtro = new URL(req.url).searchParams.get('filtro') || 'todas'
 
   let q = admin
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const ids = Array.from(new Set(lista.map((a) => a.propriedade_id).filter(Boolean)))
   const propMap = new Map<number, string>()
   if (ids.length) {
-    const { data: props } = await admin.from('propriedades').select('id, nome').in('id', ids)
+    const { data: props } = await admin.from('propriedades').select('id, nome').in('id', ids as number[])
     for (const p of (props ?? []) as Array<{ id: number; nome?: string }>) propMap.set(p.id, p.nome ?? '')
   }
 
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   const ctx = await requireAdmin(req, 'moderacao', 'editar')
   if (!ctx) return forbidden()
 
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
   const action = body.action as string | undefined
   const id = body.id
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (action === 'excluir') {
-    const { error } = await admin.from('avaliacoes').delete().eq('id', id)
+    const { error } = await admin.from('avaliacoes').delete().eq('id', id as number)
     if (error) return Response.json({ error: error.message }, { status: 500 })
     await registrarAcaoAdmin(ctx, 'moderacao', 'excluir_avaliacao', String(id))
     return Response.json({ ok: true })
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   const patch = patches[action]
   if (!patch) return Response.json({ error: 'Ação inválida.' }, { status: 400 })
 
-  const { error } = await admin.from('avaliacoes').update(patch).eq('id', id)
+  const { error } = await admin.from('avaliacoes').update(patch).eq('id', id as number)
   if (error) return Response.json({ error: error.message }, { status: 500 })
   await registrarAcaoAdmin(ctx, 'moderacao', action, String(id))
   return Response.json({ ok: true })

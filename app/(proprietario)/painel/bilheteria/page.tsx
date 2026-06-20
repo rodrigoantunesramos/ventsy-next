@@ -16,7 +16,8 @@
 // autoritativos: /api/bilheteria. Sem "R$" hardcoded — tudo via lib/format.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { formatDate, getFormatPrefs } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {
@@ -120,13 +121,13 @@ export default function BilheteriaPage() {
   async function salvarBilheteria(payload: Partial<BilheteriaEvento>, editing: BilheteriaEvento | null): Promise<boolean> {
     if (!userId) return false;
     if (editing) {
-      const { error } = await sb.from('bilheteria_eventos').update(payload).eq('id', editing.id);
+      const { error } = await sb.from('bilheteria_eventos').update(payload as TablesUpdate<'bilheteria_eventos'>).eq('id', editing.id);
       if (error) { toast.error('Não foi possível salvar a bilheteria.'); return false; }
       toast.success('Bilheteria atualizada.');
       await refetchBase();
     } else {
       const row = { ...payload, usuario_id: userId, pagina_token: gerarToken(), status: payload.status || 'rascunho' };
-      const { data, error } = await sb.from('bilheteria_eventos').insert(row).select('*').single();
+      const { data, error } = await sb.from('bilheteria_eventos').insert(row as TablesInsert<'bilheteria_eventos'>).select('*').single();
       if (error) { toast.error('Não foi possível criar a bilheteria.'); return false; }
       toast.success('Bilheteria criada. Configure as categorias de ingresso.');
       const bs = await carregarBase(userId);
@@ -151,11 +152,11 @@ export default function BilheteriaPage() {
   async function salvarCategoria(payload: Partial<Categoria>, editing: Categoria | null): Promise<boolean> {
     if (!userId || !bilhSel) return false;
     if (editing) {
-      const { error } = await sb.from('ingressos_categorias').update(payload).eq('id', editing.id);
+      const { error } = await sb.from('ingressos_categorias').update(payload as TablesUpdate<'ingressos_categorias'>).eq('id', editing.id);
       if (error) { toast.error('Não foi possível salvar a categoria.'); return false; }
       toast.success('Categoria salva.');
     } else {
-      const { error } = await sb.from('ingressos_categorias').insert({ ...payload, usuario_id: userId, bilheteria_id: bilhSel, ordem: payload.ordem ?? categorias.length });
+      const { error } = await sb.from('ingressos_categorias').insert({ ...payload, usuario_id: userId, bilheteria_id: bilhSel, ordem: payload.ordem ?? categorias.length } as TablesInsert<'ingressos_categorias'>);
       if (error) { toast.error('Não foi possível criar a categoria.'); return false; }
       toast.success('Categoria criada.');
     }
@@ -176,7 +177,7 @@ export default function BilheteriaPage() {
       if (error) { toast.error('Não foi possível salvar o cupom.'); return false; }
       toast.success('Cupom salvo.');
     } else {
-      const { error } = await sb.from('bilheteria_cupons').insert({ ...payload, usuario_id: userId, bilheteria_id: bilhSel });
+      const { error } = await sb.from('bilheteria_cupons').insert({ ...payload, usuario_id: userId, bilheteria_id: bilhSel } as TablesInsert<'bilheteria_cupons'>);
       if (error) { toast.error(error.message?.includes('duplicate') ? 'Já existe um cupom com esse código.' : 'Não foi possível criar o cupom.'); return false; }
       toast.success('Cupom criado.');
     }

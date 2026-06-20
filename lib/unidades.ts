@@ -22,6 +22,8 @@
 //     (formato 'YYYY-MM-DD'). Nada de relógio/fetch escondido na lógica.
 //   • i18n: rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas (agnósticas de fuso: ancoram nos componentes Y-M-D em UTC) ──────────
 type Ymd = { y: number; m: number; d: number }
 function parseYmd(v: string | null | undefined): Ymd | null {
@@ -474,12 +476,4 @@ export function membroPodeVer(
   ctx: { dono?: boolean; membroId?: number | null },
 ): boolean {
   return unidadesVisiveis(acessos, todasIds, ctx).has(propriedadeId)
-}
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-// PGRST205 = REST não encontrou a tabela; 42P01 = undefined_table (SQL direto).
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
 }

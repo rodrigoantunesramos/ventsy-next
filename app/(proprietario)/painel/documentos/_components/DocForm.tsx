@@ -6,7 +6,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { useToast } from '@/components/Toast';
 import {
   CATS, EMPTY_FORM, type DocForm as FormShape, formToPayload, statusDe, diasRestantes,
@@ -102,7 +103,7 @@ export function DocForm({
         const { error } = await sb.from('documentos').update(payload).eq('id', docId).eq('usuario_id', uid);
         if (error) throw error;
       } else {
-        const { data, error } = await sb.from('documentos').insert({ ...payload, usuario_id: uid }).select('id').single();
+        const { data, error } = await sb.from('documentos').insert({ ...payload, usuario_id: uid } as TablesInsert<'documentos'>).select('id').single();
         if (error) throw error;
         savedId = data?.id;
       }

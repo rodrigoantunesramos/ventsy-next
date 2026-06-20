@@ -6,7 +6,7 @@
 // registra um evento 'admissao' na timeline. Sem "R$" hardcoded.
 
 import { useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { CONTRATOS, STATUS_LIST } from '@/lib/folha';
 import { ModalShell, Campo, btnPrimary } from './ui';

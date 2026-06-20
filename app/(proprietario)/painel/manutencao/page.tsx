@@ -13,7 +13,7 @@
 // docs/sql/manutencao.sql ser aplicado. i18n via lib/format; sem "R$" hardcoded.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type OS, type Plano, type PropriedadeLite, type EspacoLite, type FornecedorLite, type EquipeLite, type EventoLite,
   SEL_OS, SEL_PLANO, mapOS, mapPlano, isMissingTable,

@@ -6,7 +6,7 @@
 // `ponto_registros` via RLS. Cobre fixos e freelancers. Sem "R$" hardcoded.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatDate, formatDateTime } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 import {

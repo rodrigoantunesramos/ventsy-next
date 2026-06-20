@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatMoneyShort, formatPercent, formatDate } from '@/lib/format';
 import { useToast } from '@/components/Toast';
 
@@ -149,7 +149,7 @@ export default function FinanceiroPage() {
     setNeedsSetup(false);
 
     const coerce = (r: Lancamento) => ({ ...r, id: Number(r.id), valor: Number(r.valor) });
-    setItens((mainRes.data || []).map(coerce));
+    setItens(((mainRes.data || []) as Lancamento[]).map(coerce));
     setPrevItens(((prevRes.data || []) as Lancamento[]).map((r) => ({ ...r, valor: Number(r.valor) })));
 
     const base = build6m();

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { forbidden } from '@/lib/apiAuth'
-import { supabaseAdminAny } from '@/lib/supabaseAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { sendEmail } from '@/lib/email'
 import { registrarAcaoAdmin } from '@/lib/adminAudit'
 
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 const LIMITE = 300
 
 async function destinatarios(segmento: string): Promise<Array<{ email: string; nome: string | null }>> {
-  const admin = supabaseAdminAny
+  const admin = supabaseAdmin
 
   if (segmento === 'incompletos') {
     const { data } = await admin.from('cadastros_incompletos').select('email, nome')

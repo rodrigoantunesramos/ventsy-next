@@ -6,7 +6,7 @@
 // conflito) e se pode ser reservado isoladamente.
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import { ESPACO_TIPOS, ESPACO_TIPO_LABEL, type Espaco } from '@/lib/reservas';
 
 type PropRef = { id: number; nome: string | null };

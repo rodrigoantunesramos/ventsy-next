@@ -24,11 +24,7 @@ export function eventoLabel(e: EventoLite | null | undefined): string {
   return e.nome_evento || e.quem_contratou || e.tipo_evento || 'Evento sem nome'
 }
 
-export function isMissingTable(err: { code?: string; message?: string } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === '42P01' || err.code === 'PGRST205'
-    || /could not find the table|schema cache|does not exist/i.test(err.message || '')
-}
+export { isMissingTable } from '@/lib/dbErrors'
 
 /** Token único (página pública / QR de ingresso). 32 hex via crypto. */
 export function gerarToken(): string {

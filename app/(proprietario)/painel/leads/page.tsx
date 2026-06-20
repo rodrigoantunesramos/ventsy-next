@@ -8,8 +8,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import type { TablesUpdate } from '@/types/supabase';
 import { formatMoney, formatMoneyShort, formatDate, formatDateRange, formatPercent } from '@/lib/format';
+import { waLink } from '@/lib/waLink';
 
 // ── Modelo de status ──────────────────────────────────────────────────────
 type Grupo = 'negociando' | 'contratados' | 'finalizados' | 'perdidos';
@@ -118,12 +120,6 @@ function eachDayStr(a: string, b: string): string[] {
 // Statuses que "confirmam" o evento e devem bloquear o calendário automaticamente
 const STATUS_SYNC = new Set(['contratado', 'briefing', 'pronto', 'montagem', 'finalizado', 'pos']);
 
-function soDigitos(s: string) { return (s || '').replace(/\D/g, ''); }
-function waLink(fone: string) {
-  const d = soDigitos(fone);
-  if (!d) return null;
-  return `https://wa.me/${d.length <= 11 ? '55' + d : d}`;
-}
 function grupoDe(status: string | null): Grupo { return STATUS_BY_V[status || 'lead']?.grupo || 'negociando'; }
 function normalizar(c: Record<string, unknown>): Lead {
   return {
@@ -406,7 +402,7 @@ export default function LeadsPage() {
   async function persistDraft() {
     const d = draftRef.current;
     if (!d || !userId) return;
-    const { error } = await sb.from('clientes_eventos').update(montarPayload(d)).eq('id', d.id).eq('usuario_id', userId);
+    const { error } = await sb.from('clientes_eventos').update(montarPayload(d) as TablesUpdate<'clientes_eventos'>).eq('id', d.id).eq('usuario_id', userId);
     if (error) { setSaude('idle'); pushToast('Erro ao salvar', 'erro'); return; }
     setLeads((arr) => arr.map((l) => (l.id === d.id ? { ...l, ...d } : l)));
     setSaude('saved');

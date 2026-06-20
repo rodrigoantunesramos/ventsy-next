@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getAuthUser, unauthorized } from '@/lib/apiAuth'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { gerarSegredoWebhook } from '@/lib/webhooksServer'
-import { EVENTOS_WEBHOOK_SET, mascararTail } from '@/lib/integracoes'
+import { EVENTOS_WEBHOOK_SET, mascararTail, urlWebhookSegura } from '@/lib/integracoes'
 
 // Webhooks de saída: assina eventos do sistema e entrega numa URL do dono. Toda
 // leitura é MASCARADA (o segredo de assinatura só aparece UMA vez, ao criar).
@@ -16,7 +16,8 @@ const admin = supabaseAdmin as any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Dict = Record<string, any>
 
-const urlValida = (u: unknown): boolean => /^https:\/\/.+/i.test(String(u || '')) || /^http:\/\/localhost(:\d+)?\//i.test(String(u || ''))
+// Aceita https público (e http://localhost só em dev); bloqueia hosts internos/privados (anti-SSRF).
+const urlValida = (u: unknown): boolean => urlWebhookSegura(u, process.env.NODE_ENV !== 'production')
 
 function mascarar(w: Dict) {
   return {

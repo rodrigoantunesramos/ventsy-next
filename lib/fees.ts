@@ -67,7 +67,3 @@ export function calcularTaxas(
     comissaoVentsy: taxaAnfitriao,
   }
 }
-
-export function brl(n: number) {
-  return (n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}

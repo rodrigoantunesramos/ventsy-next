@@ -5,7 +5,7 @@
 // A matemática de depreciação/patrimônio fica no motor PURO lib/ativos.ts, que
 // re-exportamos no fim para a página importar tudo de um lugar só.
 
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 
 // ── Tipos (espelham docs/sql/ativos.sql) ─────────────────────────────────────
 export type Categoria = 'imovel' | 'movel' | 'equipamento' | 'veiculo' | 'estrutura' | 'ti' | 'outro';

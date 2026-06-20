@@ -4,11 +4,12 @@
 // da MESMA engine (lib/pricing.ts) que a Precificação/Simulador, com itens
 // editáveis, desconto, plano de pagamento (entrada + parcelas), validade,
 // observações/cláusulas e IA (Pro+). Pré-visualização ao vivo (PropostaView,
-// idêntica ao PDF/link público). Persiste via supabaseAny; cria o lead se novo.
+// idêntica ao PDF/link público). Persiste via supabase; cria o lead se novo.
 // Sem "R$" hardcoded — moeda da proposta vinda da tabela de preço escolhida.
 
 import { useMemo, useState } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
+import type { TablesInsert } from '@/types/supabase';
 import { useToast } from '@/components/Toast';
 import { formatMoney, getFormatPrefs, type Currency } from '@/lib/format';
 import { calcularPreco, type PrecoRegra, type PrecoTabela, type Taxa } from '@/lib/pricing';
@@ -126,7 +127,7 @@ export function Construtor(props: Props) {
         data_inicio: novo.data || null,
         propriedade_id: novo.prop ? Number(novo.prop) : null,
         status: 'negociacao',
-      }).select('id,cliente_id').single();
+      } as TablesInsert<'clientes_eventos'>).select('id,cliente_id').single();
       if (e1 || !lead) { setSaving(null); toast.error('Não foi possível criar o cliente/evento.'); return; }
       evId = lead.id;
       cliId = lead.cliente_id ?? null;

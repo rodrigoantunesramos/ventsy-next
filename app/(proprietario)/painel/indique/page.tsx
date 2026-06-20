@@ -5,7 +5,8 @@
 // (view v_indicacoes_dashboard). Porta o módulo legado.
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
+import { waShareLink } from '@/lib/waLink';
 
 type Indicacao = { propriedade: string | null; data: string | null; status: string | null; status_label: string | null; recompensa: string | null; recompensa_label: string | null };
 
@@ -76,7 +77,7 @@ export default function IndiquePage() {
           </div>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <a href={`https://wa.me/?text=${encodeURIComponent(msgWhats)}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur transition hover:bg-white/30">Compartilhar no WhatsApp</a>
+          <a href={waShareLink(msgWhats)} target="_blank" rel="noreferrer" className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur transition hover:bg-white/30">Compartilhar no WhatsApp</a>
           <a href={`mailto:?subject=${encodeURIComponent('Convite para anunciar na VENTSY')}&body=${encodeURIComponent(msgWhats)}`} className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur transition hover:bg-white/30">Enviar por e-mail</a>
         </div>
       </div>

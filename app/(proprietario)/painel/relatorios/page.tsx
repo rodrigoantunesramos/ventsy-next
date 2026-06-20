@@ -10,7 +10,7 @@
 // consistentes entre os dashboards e batendo com os módulos-fonte.
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase'
+import { supabase as sb, authHeaders } from '@/lib/supabase'
 import { formatDate } from '@/lib/format'
 import { useToast } from '@/components/Toast'
 import {
@@ -78,8 +78,8 @@ export default function RelatoriosPage() {
       setUserId(session.user.id)
       setEmail(session.user.email || '')
       try {
-        const { data: a } = await sb.from('assinaturas').select('plano_ativo,plano').eq('usuario_id', session.user.id).maybeSingle()
-        setPremium(isPremium(a?.plano_ativo || a?.plano))
+        const { data: a } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', session.user.id).maybeSingle()
+        setPremium(isPremium(a?.plano_ativo))
       } catch { /* plano opcional */ }
       const [d, setup] = await Promise.all([carregarBI(session.user.id), checarSetup()])
       setDados(d); setNeedsSetup(setup)

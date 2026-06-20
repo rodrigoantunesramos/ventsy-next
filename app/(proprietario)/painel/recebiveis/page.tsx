@@ -11,7 +11,7 @@
 // i18n via lib/format; toast pelo ToastProvider do layout. Sem "R$" hardcoded.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb } from '@/lib/supabase';
+import { supabase as sb } from '@/lib/supabase';
 import {
   type Parcela, type Evento, type ContaPagar, type FornecedorLite,
   mapContaPagar, isMissingTable,

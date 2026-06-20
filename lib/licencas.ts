@@ -20,6 +20,8 @@
 //     relógio escondido dentro da lógica de status/semáforo/prontidão.
 //   • i18n: rótulos PT são o default dos catálogos; a UI pode reescrevê-los.
 
+export { isMissingTable } from '@/lib/dbErrors'
+
 // ── Datas (puras, sem fuso — só-data ancorada à meia-noite local) ────────────
 function pad2(n: number): string { return String(n).padStart(2, '0') }
 
@@ -476,11 +478,4 @@ export function gerarLicencasDoEvento(itens: ExigenciaTemplate[], publico: numbe
     dias_aviso: Number(i.dias_aviso) || tipoMeta(i.tipo).diasAviso,
     obs: i.descricao || '',
   }))
-}
-
-// ── Detecção de "tabela ainda não criada" (rodar o SQL) ──────────────────────
-export function isMissingTable(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
-  if (!err) return false
-  return err.code === 'PGRST205' || err.code === '42P01' ||
-    /could not find the table|schema cache|does not exist/i.test(err.message || '')
 }

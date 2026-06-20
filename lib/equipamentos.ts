@@ -19,6 +19,10 @@
 //   • Determinístico e testável: o "agora" entra por parâmetro (nowMs). Nada de
 //     relógio escondido na lógica.
 
+import { startOfDayLocal, ymd, addDaysYmd } from '@/lib/dateYmd'
+// Re-export: testes e call-sites externos importam estes helpers deste módulo.
+export { startOfDayLocal, ymd, addDaysYmd }
+
 // ── Vocabulário do domínio ───────────────────────────────────────────────────
 /** Categoria do item locável (espelha docs/sql/equipamentos.sql). */
 export type EquipCategoria =
@@ -118,23 +122,6 @@ export function catEquipCor(v: string | null): string { return CAT_EQUIP_BY[v ||
 export const MINUTO = 60_000
 export const HORA = 60 * MINUTO
 export const DIA = 24 * HORA
-
-/** 'YYYY-MM-DD' → meia-noite local em ms (ancorado p/ evitar UTC off-by-one). */
-export function startOfDayLocal(ymd: string): number {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(ymd)
-  if (!m) return NaN
-  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0).getTime()
-}
-/** Date → 'YYYY-MM-DD' local. */
-export function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-/** Soma `n` dias a uma string 'YYYY-MM-DD' (local), devolvendo 'YYYY-MM-DD'. */
-export function addDaysYmd(s: string, n: number): string {
-  const t = startOfDayLocal(s)
-  if (Number.isNaN(t)) return s
-  return ymd(new Date(t + n * DIA))
-}
 
 export type Range = { start: number; end: number }
 

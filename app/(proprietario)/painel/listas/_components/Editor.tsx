@@ -8,7 +8,7 @@
 // upsert da lista + regrava os itens (delete+insert) — o n_itens é do trigger.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabaseAny as sb, authHeaders } from '@/lib/supabase';
+import { supabase as sb, authHeaders } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import {
   type Lista, type DraftItem, type ItemTipo, type PropriedadeLite,
