@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RatingStars from './RatingStars'
 import type { ReviewFormData } from '@/types/client'
 
@@ -23,6 +23,12 @@ export default function ReviewForm({ propertyName, onSubmit, onClose }: Props) {
   const [saving,     setSaving]     = useState(false)
   const [error,      setError]      = useState('')
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   const handleSubmit = async () => {
     if (nota === 0) { setError('Selecione uma nota de 1 a 5 estrelas.'); return }
     setSaving(true)
@@ -40,9 +46,12 @@ export default function ReviewForm({ propertyName, onSubmit, onClose }: Props) {
     <div
       className="fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center p-5"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-form-title"
     >
       <div className="bg-white rounded-[20px] p-7 w-full max-w-[480px] shadow-[0_20px_60px_rgba(0,0,0,.2)]">
-        <h3 className="m-0 mb-5 text-[1.1rem] font-extrabold text-gray-900">
+        <h3 id="review-form-title" className="m-0 mb-5 text-[1.1rem] font-extrabold text-gray-900">
           📝 Avaliar espaço{propertyName ? ` — ${propertyName}` : ''}
         </h3>
 

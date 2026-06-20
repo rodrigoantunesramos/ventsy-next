@@ -17,7 +17,7 @@ type Notif = { id: string; tipo: string; titulo: string; corpo: string | null; l
 const SEL = 'id,tipo,titulo,corpo,link,urgencia,lida,criado_em';
 const URG_DOT: Record<string, string> = { info: 'bg-sky-500', sucesso: 'bg-emerald-500', alerta: 'bg-amber-500', critico: 'bg-red-500' };
 
-export default function NotificationBell() {
+export default function NotificationBell({ verTodasHref = '/painel/automacoes?tab=notificacoes' }: { verTodasHref?: string | null } = {}) {
   const [userId, setUserId] = useState<string | null>(null);
   const [indisponivel, setIndisponivel] = useState(false);   // tabela ausente / deslogado
   const [open, setOpen] = useState(false);
@@ -126,10 +126,12 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <Link href="/painel/automacoes?tab=notificacoes" onClick={() => setOpen(false)}
-            className="block border-t border-black/[0.06] px-4 py-2.5 text-center text-sm font-semibold text-brand hover:bg-brand-50/50">
-            Ver todas
-          </Link>
+          {verTodasHref && (
+            <Link href={verTodasHref} onClick={() => setOpen(false)}
+              className="block border-t border-black/[0.06] px-4 py-2.5 text-center text-sm font-semibold text-brand hover:bg-brand-50/50">
+              Ver todas
+            </Link>
+          )}
         </div>
       )}
     </div>

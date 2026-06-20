@@ -18,16 +18,24 @@ export default function AvaliacoesPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
 
-      const res  = await fetch(`/api/avaliacoes?user_id=${session.user.id}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      const json = await res.json()
-      setAvaliacoes(json.data || [])
-      setLoading(false)
+      try {
+        const res  = await fetch(`/api/avaliacoes?user_id=${session.user.id}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const json = await res.json()
+        setAvaliacoes(json.data || [])
+      } catch { /* mantém */ } finally {
+        setLoading(false)
+      }
     })()
   }, [router])
 
-  if (loading) return null
+  if (loading) return (
+    <div className="px-6 py-7 max-w-[760px] mx-auto">
+      <div className="mb-6 h-8 w-48 animate-pulse rounded bg-black/[0.05]" />
+      <div className="flex flex-col gap-4">{[0, 1].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-black/[0.05]" />)}</div>
+    </div>
+  )
 
   const media = avaliacoes.length
     ? (avaliacoes.reduce((s, a) => s + a.nota, 0) / avaliacoes.length).toFixed(1)

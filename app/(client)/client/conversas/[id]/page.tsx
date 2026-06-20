@@ -26,18 +26,18 @@ export default function ConversaPage() {
 
       setUserId(session.user.id)
 
-      const res  = await fetch(`/api/conversas/${convId}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      const json = await res.json()
-
-      if (json.error || !json.data?.conversa) {
-        router.push('/client/conversas')
-        return
+      try {
+        const res  = await fetch(`/api/conversas/${convId}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const json = await res.json()
+        if (json.error || !json.data?.conversa) { router.push('/client/conversas'); return }
+        setConversa(json.data.conversa)
+      } catch {
+        router.push('/client/conversas'); return
+      } finally {
+        setLoading(false)
       }
-
-      setConversa(json.data.conversa)
-      setLoading(false)
     })()
   }, [convId, router])
 

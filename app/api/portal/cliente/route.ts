@@ -467,7 +467,13 @@ export async function POST(req: NextRequest) {
       .insert({ user_id: user.id, owner_id: prop?.usuario_id ?? ev.usuario_id, propriedade_id: propriedadeId })
       .select('id')
       .single()
-    if (error) return Response.json({ error: 'Não foi possível abrir a conversa.' }, { status: 500 })
+    if (error) {
+      // Corrida com o índice único (user_id, propriedade_id): a conversa já existe.
+      const { data: jaExiste } = await admin
+        .from('conversas').select('id').eq('user_id', user.id).eq('propriedade_id', propriedadeId).maybeSingle()
+      if (jaExiste) return Response.json({ ok: true, conversa_id: jaExiste.id })
+      return Response.json({ error: 'Não foi possível abrir a conversa.' }, { status: 500 })
+    }
     return Response.json({ ok: true, conversa_id: nova.id })
   }
 
@@ -505,6 +511,7 @@ export async function POST(req: NextRequest) {
       status: 'novo',
     })
     if (error) {
+      if (error.code === '23505') return Response.json({ error: 'Você já avaliou este evento.' }, { status: 409 })
       if (error.code === 'PGRST205' || error.code === '42P01') {
         return Response.json({ error: 'Avaliação de evento indisponível no momento.' }, { status: 503 })
       }

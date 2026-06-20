@@ -30,14 +30,18 @@ export default function PainelConversaThread() {
       if (!session) { router.replace('/login'); return }
       setUserId(session.user.id)
 
-      const res = await fetch(`/api/conversas/${convId}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      const json = await res.json()
-      if (json.error || !json.data?.conversa) { router.replace('/painel/conversas'); return }
-
-      setConversa(json.data.conversa)
-      setLoading(false)
+      try {
+        const res = await fetch(`/api/conversas/${convId}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const json = await res.json()
+        if (json.error || !json.data?.conversa) { router.replace('/painel/conversas'); return }
+        setConversa(json.data.conversa)
+      } catch {
+        router.replace('/painel/conversas'); return
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [convId, router])
 

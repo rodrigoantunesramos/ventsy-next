@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     if (!user) return unauthorized()
     const { data, error } = await supabase
       .from('avaliacoes')
-      .select('*, propriedade:propriedades(id,nome,cidade,estado,foto_capa,imagem_url)')
+      .select('*, propriedade:propriedades(id,nome,cidade,estado,imagem_url)')
       .eq('user_id', user.id)
       .order('criado_em', { ascending: false })
     return Response.json({ data, error })
@@ -131,7 +131,7 @@ export async function PATCH(req: NextRequest) {
   // Carrega a avaliação e confirma que o espaço pertence ao usuário autenticado.
   const { data: aval } = await supabase
     .from('avaliacoes')
-    .select('id, propriedade_id')
+    .select('id, propriedade_id, user_id')
     .eq('id', id)
     .maybeSingle()
   if (!aval) return Response.json({ error: 'Avaliação não encontrada.' }, { status: 404 })
@@ -166,6 +166,18 @@ export async function PATCH(req: NextRequest) {
   // Ocultar/reexibir altera o número público — recalcular a média do espaço.
   if (!error && 'oculta' in body) {
     await recomputarMedia(aval.propriedade_id as number)
+  }
+
+  // Notifica o autor quando o dono responde a avaliação (fecha o loop de relacionamento).
+  if (!error && 'resposta' in body && patch.resposta && aval.user_id) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('notificacoes').insert({
+        usuario_id: aval.user_id, tipo: 'avaliacao', titulo: 'O anfitrião respondeu sua avaliação',
+        corpo: String(patch.resposta).slice(0, 140), link: '/client/avaliacoes',
+        urgencia: 'info', origem: 'avaliacoes', lida: false,
+      })
+    } catch { /* best-effort: a resposta já foi salva */ }
   }
 
   return Response.json({ data, error })

@@ -31,7 +31,7 @@ type ContratoPendente = { evento_id: string; nome_evento: string | null } | null
 
 export default function ClientDashboard() {
   const router = useRouter()
-  const { isFavorite, toggle } = useFavorites()
+  const { toggle } = useFavorites()
 
   const [nome, setNome] = useState('')
   const [eventos, setEventos] = useState<EventoResumoLite[]>([])
@@ -160,7 +160,7 @@ export default function ClientDashboard() {
                   <PropertyCard
                     key={fav.id}
                     property={fav.propriedade}
-                    isFavorite={isFavorite(fav.property_id)}
+                    isFavorite
                     onToggleFavorite={() => toggle(fav.property_id)}
                   />
                 ))}

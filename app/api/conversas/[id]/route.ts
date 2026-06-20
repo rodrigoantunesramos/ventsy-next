@@ -12,7 +12,7 @@ export async function GET(
 
   const { data: conversa, error: cErr } = await supabase
     .from('conversas')
-    .select('*, propriedade:propriedades(id,nome,cidade,estado,foto_capa,imagem_url)')
+    .select('*, propriedade:propriedades(id,nome,cidade,estado,imagem_url)')
     .eq('id', params.id)
     .single()
 

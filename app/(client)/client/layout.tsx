@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import NotificationBell from '@/components/NotificationBell'
+import { ToastProvider } from '@/components/Toast'
 
 interface UserProfile {
   nome: string
@@ -14,6 +16,7 @@ interface UserProfile {
 const MENU_ITEMS = [
   { href: '/client',           label: '🏠 Início',            rota: '/client'           },
   { href: '/client/eventos',   label: '🎫 Meus Eventos',       rota: '/client/eventos'   },
+  { href: '/client/reservas',  label: '📅 Minhas Reservas',    rota: '/client/reservas'  },
   { href: '/client/favoritos', label: '❤️ Favoritos',          rota: '/client/favoritos' },
   { href: '/client/conversas', label: '💬 Conversas',          rota: '/client/conversas' },
   { href: '/client/avaliacoes',label: '⭐ Minhas Avaliações',  rota: '/client/avaliacoes'},
@@ -78,6 +81,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-[#f7f7f8]">
 
       {/* ── HEADER ──────────────────────────────────────────────── */}
@@ -98,8 +102,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           </Link>
         </div>
 
-        {/* Avatar dropdown */}
-        <div className="relative" ref={avatarRef}>
+        {/* Sino + Avatar */}
+        <div className="flex items-center gap-1.5">
+          <NotificationBell verTodasHref={null} />
+          <div className="relative" ref={avatarRef}>
           <button
             onClick={() => setAvatar(!avatarOpen)}
             className="w-[38px] h-[38px] rounded-full bg-[#ff385c] text-white border-none cursor-pointer text-base font-bold"
@@ -131,6 +137,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               </button>
             </div>
           )}
+          </div>
         </div>
       </header>
 
@@ -194,6 +201,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             >
               🔍 Explorar espaços
             </Link>
+            <Link
+              href="/client/ajuda"
+              className="block px-5 py-[9px] text-[.88rem] text-gray-600 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
+            >
+              ❓ Central de Ajuda
+            </Link>
           </nav>
         </aside>
 
@@ -203,5 +216,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </main>
       </div>
     </div>
+    </ToastProvider>
   )
 }

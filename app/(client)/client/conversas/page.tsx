@@ -27,14 +27,17 @@ export default function ConversasPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { router.push('/login'); return }
 
-    const res  = await fetch('/api/conversas', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-    const json = await res.json()
-    // Na área do cliente mostramos as conversas em que ele é o contratante.
-    const lista = ((json.data || []) as Conversation[]).filter((c) => c.papel !== 'dono')
-    setConversas(lista)
-    setLoading(false)
+    try {
+      const res  = await fetch('/api/conversas', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const json = await res.json()
+      // Na área do cliente mostramos as conversas em que ele é o contratante.
+      const lista = ((json.data || []) as Conversation[]).filter((c) => c.papel !== 'dono')
+      setConversas(lista)
+    } catch { /* mantém a lista atual */ } finally {
+      setLoading(false)
+    }
   }, [router])
 
   useEffect(() => { carregar() }, [carregar])
@@ -57,7 +60,12 @@ export default function ConversasPage() {
     return () => { if (channel) supabase.removeChannel(channel) }
   }, [carregar])
 
-  if (loading) return null
+  if (loading) return (
+    <div className="px-6 py-7 max-w-[760px] mx-auto">
+      <div className="mb-6 h-8 w-44 animate-pulse rounded bg-black/[0.05]" />
+      <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-[68px] animate-pulse rounded-xl bg-black/[0.05]" />)}</div>
+    </div>
+  )
 
   return (
     <div className="px-6 py-7 max-w-[760px] mx-auto">

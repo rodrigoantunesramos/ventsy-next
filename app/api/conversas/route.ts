@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const sb = supabase as any
   const { data, error } = await sb
     .from('conversas')
-    .select('*, propriedade:propriedades(id,nome,cidade,estado,foto_capa,imagem_url)')
+    .select('*, propriedade:propriedades(id,nome,cidade,estado,imagem_url)')
     .or(`user_id.eq.${user.id},owner_id.eq.${user.id}`)
     .order('ultima_mensagem_em', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
@@ -85,5 +85,11 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
+  if (error) {
+    // Corrida com o índice único (user_id, propriedade_id): devolve a existente.
+    const { data: jaExiste } = await supabase
+      .from('conversas').select('*').eq('user_id', user.id).eq('propriedade_id', propriedade_id).maybeSingle()
+    if (jaExiste) return Response.json({ data: jaExiste, error: null })
+  }
   return Response.json({ data, error })
 }

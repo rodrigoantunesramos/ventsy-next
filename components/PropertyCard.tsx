@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import FavoriteButton from './client/FavoriteButton'
@@ -39,10 +39,31 @@ export default function PropertyCard({
   showActions = true,
 }: Props) {
   const { dict, locale } = useTOptional()
-  const [localFav, setLocalFav] = useState(false)
   const controlled = onToggleFavorite !== undefined
+  // Sem controle do pai (busca/home): persistimos no localStorage para o favorito
+  // não sumir no reload — e hooks/useFavorites migra esses itens para a conta ao logar.
+  const [localFav, setLocalFav] = useState(false)
+  useEffect(() => {
+    if (controlled) return
+    try {
+      const favs: string[] = JSON.parse(localStorage.getItem('ventsy_favs') || '[]')
+      setLocalFav(favs.includes(String(property.id)))
+    } catch { /* ignore */ }
+  }, [controlled, property.id])
+  const toggleLocal = () => {
+    setLocalFav((prev) => {
+      const next = !prev
+      try {
+        const favs: string[] = JSON.parse(localStorage.getItem('ventsy_favs') || '[]')
+        const id = String(property.id)
+        const updated = next ? Array.from(new Set([...favs, id])) : favs.filter((x) => x !== id)
+        localStorage.setItem('ventsy_favs', JSON.stringify(updated))
+      } catch { /* ignore */ }
+      return next
+    })
+  }
   const fav = controlled ? (isFavProp ?? false) : localFav
-  const toggleFav = controlled ? onToggleFavorite! : () => setLocalFav(f => !f)
+  const toggleFav = controlled ? onToggleFavorite! : toggleLocal
 
   const isUltra = property._plano === 'ultra'
   const isPro   = property._plano === 'pro'

@@ -34,11 +34,14 @@ export default function PainelConversasPage() {
   const carregar = useCallback(async () => {
     const { data: { session } } = await sb.auth.getSession()
     if (!session) { router.replace('/login'); return }
-    const res = await fetch('/api/conversas', { headers: { Authorization: `Bearer ${session.access_token}` } })
-    const json = await res.json()
-    const lista = ((json.data || []) as Conversation[]).filter((c) => c.papel === 'dono')
-    setConversas(lista)
-    setLoading(false)
+    try {
+      const res = await fetch('/api/conversas', { headers: { Authorization: `Bearer ${session.access_token}` } })
+      const json = await res.json()
+      const lista = ((json.data || []) as Conversation[]).filter((c) => c.papel === 'dono')
+      setConversas(lista)
+    } catch { /* mantém a lista atual */ } finally {
+      setLoading(false)
+    }
   }, [router])
 
   useEffect(() => { carregar() }, [carregar])

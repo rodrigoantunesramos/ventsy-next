@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('favoritos')
-    .select('*, propriedade:propriedades(id,nome,cidade,estado,valor_base,valor_hora,avaliacao,foto_capa,imagem_url,tipo_propriedade,capacidade)')
+    .select('*, propriedade:propriedades(id,nome,cidade,estado,valor_base,valor_hora,avaliacao,imagem_url,tipo_propriedade,capacidade)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 

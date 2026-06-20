@@ -9,7 +9,7 @@ import type { Favorite } from '@/types/client'
 
 export default function FavoritosPage() {
   const router = useRouter()
-  const { isFavorite, toggle } = useFavorites()
+  const { toggle } = useFavorites()
 
   const [favoritos, setFavoritos] = useState<Favorite[]>([])
   const [loading,   setLoading]   = useState(true)
@@ -19,12 +19,15 @@ export default function FavoritosPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
 
-      const res  = await fetch(`/api/favoritos?user_id=${session.user.id}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      const json = await res.json()
-      setFavoritos(json.data || [])
-      setLoading(false)
+      try {
+        const res  = await fetch(`/api/favoritos?user_id=${session.user.id}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const json = await res.json()
+        setFavoritos(json.data || [])
+      } catch { /* mantém */ } finally {
+        setLoading(false)
+      }
     })()
   }, [router])
 
@@ -33,7 +36,12 @@ export default function FavoritosPage() {
     setFavoritos(prev => prev.filter(f => f.property_id !== propertyId))
   }
 
-  if (loading) return null
+  if (loading) return (
+    <div className="px-6 py-7 max-w-[980px] mx-auto">
+      <div className="mb-6 h-8 w-44 animate-pulse rounded bg-black/[0.05]" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{[0, 1, 2].map((i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-black/[0.05]" />)}</div>
+    </div>
+  )
 
   return (
     <div className="px-6 py-7 max-w-[980px] mx-auto">
@@ -58,7 +66,7 @@ export default function FavoritosPage() {
             <PropertyCard
               key={fav.id}
               property={fav.propriedade}
-              isFavorite={isFavorite(fav.property_id)}
+              isFavorite
               onToggleFavorite={() => handleToggle(fav.property_id)}
             />
           ))}

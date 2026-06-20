@@ -18,14 +18,33 @@ export function useFavorites() {
       const { data: { session } } = await supabase.auth.getSession()
 
       if (session) {
-        setUserId(session.user.id)
+        const uid = session.user.id
+        setUserId(uid)
+
+        // Migra favoritos salvos deslogado (localStorage) para a conta — uma vez.
+        let locais: string[] = []
+        try { locais = JSON.parse(localStorage.getItem('ventsy_favs') || '[]') } catch { locais = [] }
+        if (locais.length) {
+          const { data: existentes } = await supabase.from('favoritos').select('property_id').eq('user_id', uid)
+          const jaTem = new Set((existentes || []).map((f) => String(f.property_id)))
+          const novos = locais.filter((id) => id && !jaTem.has(String(id)))
+          let migrou = true
+          if (novos.length) {
+            const { error: insErr } = await supabase.from('favoritos').insert(novos.map((id) => ({ user_id: uid, property_id: Number(id) })))
+            migrou = !insErr
+          }
+          // Só limpa o localStorage se a migração deu certo (senão tenta de novo depois).
+          if (migrou) localStorage.removeItem('ventsy_favs')
+        }
+
         const { data } = await supabase
           .from('favoritos')
           .select('property_id')
-          .eq('user_id', session.user.id)
+          .eq('user_id', uid)
         setFavorites((data || []).map((f) => String(f.property_id)))
       } else {
-        const local: string[] = JSON.parse(localStorage.getItem('ventsy_favs') || '[]')
+        let local: string[] = []
+        try { local = JSON.parse(localStorage.getItem('ventsy_favs') || '[]') } catch { local = [] }
         setFavorites(local)
       }
 
