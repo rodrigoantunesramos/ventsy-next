@@ -98,16 +98,19 @@ export default function SearchBar() {
         <div className="w-px h-7 bg-gray-200 mx-1 flex-shrink-0" />
 
         {/* QUANDO */}
-        <div
-          className="flex flex-col px-3 py-1 cursor-pointer hover:bg-gray-50 rounded-full transition-colors min-w-[128px] flex-shrink-0"
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-label={`${dict.searchBar.quando}: ${dataDisplay}`}
+          className="flex flex-col items-start px-3 py-1 cursor-pointer hover:bg-gray-50 rounded-full transition-colors min-w-[128px] flex-shrink-0 bg-transparent border-none text-left font-[inherit]"
           onClick={() => pickerRef.current?.open()}
         >
-          <label className="text-[.68rem] font-extrabold uppercase tracking-[.05em] text-gray-800 cursor-pointer pointer-events-none">
+          <span className="text-[.68rem] font-extrabold uppercase tracking-[.05em] text-gray-800 pointer-events-none">
             {dict.searchBar.quando}
-          </label>
+          </span>
           <span className="text-[.83rem] text-gray-500 truncate">{dataDisplay}</span>
-          <input ref={inputRef} className="hidden" readOnly />
-        </div>
+          <input ref={inputRef} className="hidden" readOnly tabIndex={-1} aria-hidden="true" />
+        </button>
 
         <div className="w-px h-7 bg-gray-200 mx-1 flex-shrink-0" />
 

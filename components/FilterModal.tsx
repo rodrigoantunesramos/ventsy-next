@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ESTADOS } from '@/lib/data'
 import { useT } from '@/components/i18n/I18nProvider'
@@ -170,6 +170,31 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
       })
   }, [estado])
 
+  // Acessibilidade do diálogo: prende o foco dentro, Esc fecha e o foco volta
+  // ao elemento que abriu o modal quando ele fecha.
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const prev = document.activeElement as HTMLElement | null
+    const focaveis = () => Array.from(
+      dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    ).filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null)
+    focaveis()[0]?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); return }
+      if (e.key !== 'Tab') return
+      const f = focaveis()
+      if (!f.length) return
+      const first = f[0], last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('keydown', onKey); prev?.focus?.() }
+  }, [open])
+
   const toggleEvento    = (v: string) => { const s = new Set(tiposEvento); s.has(v) ? s.delete(v) : s.add(v); setTiposEvento(s) }
   const toggleCategoria = (v: string) => { const s = new Set(categorias);  s.has(v) ? s.delete(v) : s.add(v); setCategorias(s)  }
 
@@ -199,7 +224,13 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
       className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-[9999]"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white w-full md:w-[540px] max-h-[92vh] rounded-t-3xl md:rounded-3xl overflow-hidden flex flex-col shadow-2xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="filtros-titulo"
+        className="bg-white w-full md:w-[540px] max-h-[92vh] rounded-t-3xl md:rounded-3xl overflow-hidden flex flex-col shadow-2xl"
+      >
 
         {/* Cabeçalho */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
@@ -210,7 +241,7 @@ export default function FilterModal({ open, onClose, onApply, initialEstado = ''
           >
             ✕
           </button>
-          <h2 className="font-bold text-base text-gray-800">{t.titulo}</h2>
+          <h2 id="filtros-titulo" className="font-bold text-base text-gray-800">{t.titulo}</h2>
           <div className="w-6" />
         </div>
 

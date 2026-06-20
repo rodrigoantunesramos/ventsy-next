@@ -15,11 +15,13 @@ export default function EventoDropdown({ onChange }: Props) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const onClick = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('click', onClick)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('click', onClick); document.removeEventListener('keydown', onKey) }
   }, [])
 
   const toggle = (v: string) => {
@@ -48,8 +50,11 @@ export default function EventoDropdown({ onChange }: Props) {
   return (
     <div ref={ref} className="relative">
       {/* Trigger */}
-      <div
-        className="flex items-center gap-1.5 cursor-pointer"
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={open}
+        className="flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 font-[inherit] text-left"
         onClick={() => setOpen(!open)}
       >
         <span className="text-[.83rem] text-gray-500 truncate max-w-[110px]">{displayText}</span>
@@ -59,12 +64,13 @@ export default function EventoDropdown({ onChange }: Props) {
           </span>
         )}
         <svg
+          aria-hidden="true"
           className={`w-3 h-3 text-gray-400 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
-      </div>
+      </button>
 
       {/* Dropdown */}
       {open && (
@@ -90,17 +96,19 @@ export default function EventoDropdown({ onChange }: Props) {
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   {cat.items.map(item => (
-                    <div
+                    <button
                       key={item.v}
-                      className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg cursor-pointer transition-all
+                      type="button"
+                      aria-pressed={selected.has(item.v)}
+                      className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg cursor-pointer transition-all border-none font-[inherit] text-left w-full
                         ${selected.has(item.v)
                           ? 'bg-[#fff0f3] text-[#ff385c] font-semibold'
-                          : 'hover:bg-gray-50 text-gray-600'}`}
+                          : 'hover:bg-gray-50 text-gray-600 bg-transparent'}`}
                       onClick={() => toggle(item.v)}
                     >
-                      <span>{item.emoji}</span>
+                      <span aria-hidden="true">{item.emoji}</span>
                       {rotuloDado(dict.dados.eventos, item.v)}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
