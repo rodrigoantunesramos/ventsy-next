@@ -243,7 +243,7 @@ export default function OndeSearch({ onSelect }: Props) {
           id="onde-listbox"
           role="listbox"
           aria-label={dict.componentes.onde.label}
-          className="absolute top-full left-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[9999] max-h-80 overflow-y-auto"
+          className="absolute top-full left-0 mt-3 w-80 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[9999] max-h-80 overflow-y-auto"
         >
           {status === 'loading' && (
             <div className="flex items-center gap-2 px-4 py-3 text-gray-400 text-sm">

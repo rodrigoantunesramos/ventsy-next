@@ -27,6 +27,8 @@ const busca: T = {
   vazioBotao: 'Ver todos los espacios',
   carregarMais: 'Cargar más ({n} restantes)',
   mapaVer: 'Ver',
+  verMapa: 'Ver mapa',
+  verLista: 'Ver lista',
   filtros: {
     titulo: 'Filtros',
     fechar: 'Cerrar',

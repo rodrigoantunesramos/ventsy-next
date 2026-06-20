@@ -39,13 +39,13 @@ export default function Header() {
       </div>
 
       {/* SearchBar centralizada */}
-      <nav className="flex-[3] flex justify-center overflow-visible">
+      <nav className="flex-[3] flex justify-center overflow-visible min-w-0">
         <SearchBar />
       </nav>
 
       {/* Ações à direita */}
       <div className="flex-none flex items-center gap-3 ml-4">
-        <LocaleSwitcher />
+        <div className="hidden sm:block"><LocaleSwitcher /></div>
         {isLoggedIn ? (
           <Link
             href="/painel"
@@ -72,7 +72,7 @@ export default function Header() {
             className="bg-white border border-gray-200 rounded-full px-3.5 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:shadow-md transition-shadow font-[inherit]"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            <span aria-hidden="true">☰</span> {dict.common.menu}
+            <span aria-hidden="true">☰</span> <span className="hidden sm:inline">{dict.common.menu}</span>
           </button>
 
           {menuOpen && (

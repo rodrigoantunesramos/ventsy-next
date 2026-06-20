@@ -27,6 +27,8 @@ const busca: T = {
   vazioBotao: 'See all venues',
   carregarMais: 'Load more ({n} remaining)',
   mapaVer: 'View',
+  verMapa: 'Show map',
+  verLista: 'Show list',
   filtros: {
     titulo: 'Filters',
     fechar: 'Close',

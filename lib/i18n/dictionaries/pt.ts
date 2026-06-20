@@ -58,6 +58,8 @@ const pt = {
     anunciar: 'Anunciar',
     cadastrePropriedade: 'Cadastre sua propriedade',
     planosDisponiveis: 'Planos Disponíveis',
+    descubra: 'Descubra',
+    listasPublicas: 'Listas da comunidade',
     direitos: '© 2026 VENTSY. Todos os direitos reservados.',
   },
   searchBar: {

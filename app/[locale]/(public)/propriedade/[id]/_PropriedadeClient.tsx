@@ -12,6 +12,7 @@ import { comodidadeLabel, COMODIDADES } from '@/lib/data'
 import { useT } from '@/components/i18n/I18nProvider'
 import { formatMoney } from '@/lib/i18n/format'
 import { rotuloDado } from '@/lib/i18n/dados'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { PropMeta, FotoMeta } from './_data'
 import './propriedade.css'
 
@@ -331,6 +332,15 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   },[lbOpen,lbFotos.length])
 
   useEffect(()=>{document.body.style.overflow=(lbOpen||modalGal||modalVid)?'hidden':'';return()=>{document.body.style.overflow=''}},[lbOpen,modalGal,modalVid])
+
+  // Focus trap dos modais (a11y de diálogo). Quando o lightbox abre sobre a
+  // galeria, só o lightbox (que está por cima) prende o foco.
+  const modalGalRef = useRef<HTMLDivElement>(null)
+  const modalVidRef = useRef<HTMLDivElement>(null)
+  const lbRef       = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalGalRef, modalGal && !lbOpen)
+  useFocusTrap(modalVidRef, modalVid)
+  useFocusTrap(lbRef, lbOpen)
 
   const abrirLb=(urls:string[],i:number)=>{setLbFotos(urls);setLbIdx(i);setLbOpen(true)}
   const toggleFav=()=>{if(!prop?.id)return;const f:string[]=JSON.parse(localStorage.getItem('ventsy_favs')||'[]');const i=f.indexOf(prop.id);if(i>=0)f.splice(i,1);else f.push(prop.id);localStorage.setItem('ventsy_favs',JSON.stringify(f));setFav(i<0)}
@@ -768,8 +778,8 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
       {/* Modal galeria */}
       {modalGal&&(
-        <div className="pp-modal-galeria">
-          <div className="pp-modal-header"><h3>{t.galeria.todasAsFotos} ({fotosEspaco.length})</h3><button className="pp-btn-fechar" onClick={()=>setModalGal(false)}>✕</button></div>
+        <div ref={modalGalRef} role="dialog" aria-modal="true" aria-labelledby="pp-gal-titulo" className="pp-modal-galeria">
+          <div className="pp-modal-header"><h3 id="pp-gal-titulo">{t.galeria.todasAsFotos} ({fotosEspaco.length})</h3><button className="pp-btn-fechar" aria-label={dict.busca.filtros.fechar} onClick={()=>setModalGal(false)}>✕</button></div>
           {Object.entries(fotosEspaco.reduce((acc:Record<string,Foto[]>,f)=>{const k=f.titulo||t.galeria.geral;(acc[k]=acc[k]||[]).push(f);return acc},{})).map(([sec,arr])=>(
             <div key={sec} className="mb-5">
               <h4 className="text-[1rem] font-bold text-[#222] mb-2.5 px-1">{sec}</h4>
@@ -787,8 +797,8 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
       {/* Modal vídeos */}
       {modalVid&&(
-        <div className="pp-modal-videos">
-          <div className="pp-videos-header"><h3>{t.videos.titulo}</h3><button className="pp-btn-fechar" onClick={()=>setModalVid(false)}>✕</button></div>
+        <div ref={modalVidRef} role="dialog" aria-modal="true" aria-labelledby="pp-vid-titulo" className="pp-modal-videos">
+          <div className="pp-videos-header"><h3 id="pp-vid-titulo">{t.videos.titulo}</h3><button className="pp-btn-fechar" aria-label={dict.busca.filtros.fechar} onClick={()=>setModalVid(false)}>✕</button></div>
           <div className="pp-videos-content">
             {videos.length?videos.map((v,i)=>(
               <div key={i} className="pp-video-item">
@@ -802,8 +812,8 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
 
       {/* Lightbox */}
       {lbOpen&&(
-        <div className="pp-lightbox" onClick={()=>setLbOpen(false)}>
-          <button className="pp-lb-close" onClick={()=>setLbOpen(false)}>✕</button>
+        <div ref={lbRef} role="dialog" aria-modal="true" aria-label={t.galeria.todasAsFotos} className="pp-lightbox" onClick={()=>setLbOpen(false)}>
+          <button className="pp-lb-close" aria-label={dict.busca.filtros.fechar} onClick={()=>setLbOpen(false)}>✕</button>
           {lbFotos.length>1&&<button className="pp-lb-nav pp-lb-prev" onClick={e=>{e.stopPropagation();setLbIdx(i=>(i-1+lbFotos.length)%lbFotos.length)}}>‹</button>}
           <div className="pp-lb-img-wrap" onClick={e=>e.stopPropagation()}><img src={lbFotos[lbIdx]} alt=""/></div>
           {lbFotos.length>1&&<button className="pp-lb-nav pp-lb-next" onClick={e=>{e.stopPropagation();setLbIdx(i=>(i+1)%lbFotos.length)}}>›</button>}

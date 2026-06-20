@@ -20,6 +20,8 @@ const auth: T = {
     esqueceuSenha: 'Forgot your password?',
     entrar: 'Sign in',
     entrando: 'Signing in...',
+    ou: 'or',
+    continuarGoogle: 'Continue with Google',
     semConta: "Don't have an account?",
     criarConta: 'Create a free account',
     erroCamposObrigatorios: 'Enter your email and password to continue.',

@@ -71,7 +71,10 @@ export function contarFiltros(f: Filtros): number {
 export function aplicarFiltrosNaQuery(query: any, sp: SP) {
   const f = filtrosFromParams(sp)
   const bairro = sp.get('bairro') || ''
-  const tipo = sp.get('tipo') || sp.get('evento') || ''
+  const tipo = sp.get('tipo') || ''
+  // `evento` (singular, vindo da SearchBar) é filtro de TIPO DE EVENTO, não de
+  // categoria. Antes caía em .eq('categoria') e zerava a busca por evento.
+  const eventoSingular = sp.get('evento') || ''
 
   if (f.estado) query = query.eq('estado', f.estado)
   if (f.cidade) query = query.ilike('cidade', `%${f.cidade}%`)
@@ -99,7 +102,8 @@ export function aplicarFiltrosNaQuery(query: any, sp: SP) {
   if (f.estacionamento) query = query.ilike('comodidades', '%"estacionamento"%')
   if (f.seguranca) query = query.ilike('comodidades', '%"seguranca"%')
   if (f.espacoAberto) query = query.ilike('comodidades', '%"espaco-aberto"%')
-  if (f.tiposEvento.length > 0) query = query.or(f.tiposEvento.map((t) => `tipo_evento.ilike.%${t}%`).join(','))
+  const eventos = eventoSingular ? [...f.tiposEvento, eventoSingular] : f.tiposEvento
+  if (eventos.length > 0) query = query.or(eventos.map((t) => `tipo_evento.ilike.%${t}%`).join(','))
   if (f.categorias.length > 0) {
     query = query.or(f.categorias.flatMap((v) => [`tipo_propriedade.eq.${v}`, `categoria.eq.${v}`]).join(','))
   } else if (tipo) {

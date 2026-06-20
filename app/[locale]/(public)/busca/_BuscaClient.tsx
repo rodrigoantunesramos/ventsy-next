@@ -56,6 +56,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
   const [loading, setLoading]       = useState(false)
   const [planosMap]                 = useState<Record<string, string>>(initialPlanos)
   const [filtroOpen, setFiltroOpen] = useState(false)
+  const [mapaMobile, setMapaMobile] = useState(false) // alterna lista/mapa no mobile
   const [visiveis, setVisiveis]     = useState(24)
   const primeira = useRef(true)
 
@@ -110,7 +111,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
       <Header />
 
       <div className="mt-20 flex h-[calc(100vh-80px)]">
-        <section className="flex-1 overflow-y-auto px-5 py-5 min-w-0">
+        <section className={`flex-1 overflow-y-auto px-5 py-5 min-w-0 ${mapaMobile ? 'hidden lg:block' : ''}`}>
           <div className="flex items-center gap-4 flex-wrap mb-2">
             <h1 className="text-[1.4rem] font-extrabold text-[#0d0d0d] m-0">{titulo}</h1>
             <button
@@ -184,7 +185,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
           )}
         </section>
 
-        <section className="hidden lg:block w-[420px] xl:w-[480px] flex-shrink-0 sticky top-0 h-full">
+        <section className={`${mapaMobile ? 'block' : 'hidden'} lg:block w-full lg:w-[420px] xl:w-[480px] flex-shrink-0 sticky top-0 h-full`}>
           <SearchMap
             properties={props.map((p) => ({
               id: p.id,
@@ -198,6 +199,16 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
           />
         </section>
       </div>
+
+      {!loading && props.length > 0 && (
+        <button
+          type="button"
+          className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] bg-[#0d0d0d] text-white rounded-full px-5 py-3 text-sm font-bold shadow-pop flex items-center gap-2"
+          onClick={() => setMapaMobile((m) => !m)}
+        >
+          {mapaMobile ? `📋 ${t.verLista}` : `🗺️ ${t.verMapa}`}
+        </button>
+      )}
 
       <FilterModal
         open={filtroOpen}

@@ -55,6 +55,8 @@ const es: Dictionary = {
     anunciar: 'Anunciar',
     cadastrePropriedade: 'Anuncia tu propiedad',
     planosDisponiveis: 'Planes disponibles',
+    descubra: 'Descubre',
+    listasPublicas: 'Listas de la comunidad',
     direitos: '© 2026 VENTSY. Todos los derechos reservados.',
   },
   searchBar: {

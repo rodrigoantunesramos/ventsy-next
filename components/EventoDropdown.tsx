@@ -74,7 +74,7 @@ export default function EventoDropdown({ onChange }: Props) {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute top-full left-0 mt-3 w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden">
+        <div className="absolute top-full left-0 mt-3 w-[380px] max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden">
           <div className="max-h-72 overflow-y-auto p-3">
             <button
               className="w-full text-left text-xs text-gray-400 hover:text-gray-600 mb-3 transition-colors bg-transparent border-none cursor-pointer font-[inherit]"

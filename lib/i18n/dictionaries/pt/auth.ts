@@ -20,6 +20,8 @@ const auth = {
     esqueceuSenha: 'Esqueceu a senha?',
     entrar: 'Entrar',
     entrando: 'Entrando...',
+    ou: 'ou',
+    continuarGoogle: 'Continuar com Google',
     semConta: 'Não tem conta?',
     criarConta: 'Criar conta grátis',
     erroCamposObrigatorios: 'Preencha e-mail e senha para continuar.',

@@ -11,6 +11,7 @@ import { useParams } from 'next/navigation';
 import { formatMoney, formatDateTime, type Currency } from '@/lib/format';
 import ContractBody from '@/components/ContractBody';
 import { PAPEL_META, type Papel, type MetodoAssinatura } from '@/lib/contracts';
+import { maskCpfCnpj } from '@/lib/masks';
 
 type PubSign = {
   id: string; signatario_nome: string; papel: Papel; ordem: number;
@@ -141,9 +142,9 @@ function SignPanel({ token, signatario, onSigned }: { token: string; signatario:
   return (
     <div className="mt-3 space-y-3 border-t border-black/[0.06] pt-3">
       <div className="grid gap-2 sm:grid-cols-3">
-        <input value={nome} onChange={(e) => setNome(e.target.value)} className={inp} placeholder="Nome completo" />
-        <input value={doc} onChange={(e) => setDoc(e.target.value)} className={inp} placeholder="CPF/CNPJ" />
-        <input value={email} onChange={(e) => setEmail(e.target.value)} className={inp} placeholder="E-mail" />
+        <input value={nome} onChange={(e) => setNome(e.target.value)} className={inp} placeholder="Nome completo" aria-label="Nome completo" autoComplete="name" />
+        <input value={doc} onChange={(e) => setDoc(maskCpfCnpj(e.target.value))} className={inp} placeholder="CPF/CNPJ" aria-label="CPF ou CNPJ" inputMode="numeric" />
+        <input value={email} onChange={(e) => setEmail(e.target.value)} className={inp} placeholder="E-mail" aria-label="E-mail" type="email" autoComplete="email" inputMode="email" />
       </div>
 
       <div className="flex gap-2">
@@ -161,7 +162,7 @@ function SignPanel({ token, signatario, onSigned }: { token: string; signatario:
         <span>Declaro que li e concordo com todos os termos deste contrato e que esta é a minha assinatura eletrônica como <strong>{PAPEL_META[signatario.papel].label}</strong>.</span>
       </label>
 
-      {erro && <div className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{erro}</div>}
+      {erro && <div role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{erro}</div>}
 
       <button onClick={assinar} disabled={busy} className="w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-600 disabled:opacity-60">
         {busy ? 'Registrando assinatura…' : 'Assinar contrato'}

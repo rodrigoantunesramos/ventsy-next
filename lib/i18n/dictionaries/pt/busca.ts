@@ -36,6 +36,8 @@ const busca = {
   carregarMais: 'Carregar mais ({n} restantes)',
   // Rótulo do marcador no mapa quando não há preço.
   mapaVer: 'Ver',
+  verMapa: 'Ver mapa',
+  verLista: 'Ver lista',
   filtros: {
     titulo: 'Filtros',
     fechar: 'Fechar',

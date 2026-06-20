@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useT } from './i18n/I18nProvider'
+import { rotuloDado } from '@/lib/i18n/dados'
 
 export default function Footer() {
   const { dict, lhref } = useT()
@@ -21,6 +22,19 @@ export default function Footer() {
           <ul className="space-y-2 list-none">
             <li><Link href={lhref('/cadastro')} className="text-gray-400 hover:text-white text-sm no-underline transition-colors">{dict.footer.cadastrePropriedade}</Link></li>
             <li><Link href={lhref('/planos')} className="text-gray-400 hover:text-white text-sm no-underline transition-colors">{dict.footer.planosDisponiveis}</Link></li>
+          </ul>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-white font-semibold text-sm mb-4">{dict.footer.descubra}</h3>
+          <ul className="space-y-2 list-none">
+            {['Salão de Festas', 'Casas de Festas', 'Sítios', 'Chácaras', 'Rooftops'].map((cat) => (
+              <li key={cat}>
+                <Link href={`${lhref('/busca')}?tipo=${encodeURIComponent(cat)}`} className="text-gray-400 hover:text-white text-sm no-underline transition-colors">
+                  {rotuloDado(dict.dados.categorias, cat)}
+                </Link>
+              </li>
+            ))}
+            <li><Link href={lhref('/listas')} className="text-gray-400 hover:text-white text-sm no-underline transition-colors">{dict.footer.listasPublicas}</Link></li>
           </ul>
         </div>
       </div>

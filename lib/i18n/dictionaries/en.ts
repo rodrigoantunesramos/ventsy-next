@@ -54,6 +54,8 @@ const en: Dictionary = {
     anunciar: 'List your space',
     cadastrePropriedade: 'List your property',
     planosDisponiveis: 'Available plans',
+    descubra: 'Discover',
+    listasPublicas: 'Community lists',
     direitos: '© 2026 VENTSY. All rights reserved.',
   },
   searchBar: {

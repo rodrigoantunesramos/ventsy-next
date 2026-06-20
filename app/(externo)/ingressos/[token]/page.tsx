@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { setFormatPrefs, formatMoney, formatDateRange, type Currency, type Locale } from '@/lib/format';
 import { cotarPedido, descontoCupom, type Categoria, type CampoExtra } from '@/lib/bilheteria';
+import { maskCpfCnpj, maskTelefone } from '@/lib/masks';
 import { QrCode } from '../../../(proprietario)/painel/acesso/_components/QrCode';
 
 const LOCALE_BY_MOEDA: Record<string, Locale> = { BRL: 'pt-BR', USD: 'en-US', EUR: 'es-ES' };
@@ -238,8 +239,8 @@ function VendaView({ token }: { token: string }) {
                       <div key={`${catId}-${idx}`} className="rounded-xl border border-black/[0.06] p-3">
                         <div className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-muted">{cat.nome} · ingresso {idx + 1}</div>
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                          <input className={inp} placeholder="Nome completo" value={t.nome} onChange={(e) => setTitular(catId, idx, { nome: e.target.value })} />
-                          <input className={inp} placeholder="Documento (CPF/RG)" value={t.doc} onChange={(e) => setTitular(catId, idx, { doc: e.target.value })} />
+                          <input className={inp} placeholder="Nome completo" aria-label="Nome completo do titular" value={t.nome} onChange={(e) => setTitular(catId, idx, { nome: e.target.value })} />
+                          <input className={inp} placeholder="Documento (CPF/RG)" aria-label="Documento do titular (CPF ou RG)" value={t.doc} onChange={(e) => setTitular(catId, idx, { doc: e.target.value })} />
                           {(data.bilheteria.campos_extras || []).map((campo) => (
                             <ExtraField key={campo.chave} campo={campo} value={t.extras[campo.chave] || ''} onChange={(val) => setTitularExtra(catId, idx, campo.chave, val)} />
                           ))}
@@ -255,10 +256,10 @@ function VendaView({ token }: { token: string }) {
             <div className="mt-4 rounded-2xl bg-white p-5 shadow-card">
               <h2 className="text-base font-bold text-ink">Seus dados</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <input className={inp} placeholder="Nome completo *" value={comprador.nome} onChange={(e) => setComprador((c) => ({ ...c, nome: e.target.value }))} />
-                <input className={inp} type="email" placeholder="E-mail *" value={comprador.email} onChange={(e) => setComprador((c) => ({ ...c, email: e.target.value }))} />
-                <input className={inp} placeholder="Documento (CPF)" value={comprador.doc} onChange={(e) => setComprador((c) => ({ ...c, doc: e.target.value }))} />
-                <input className={inp} placeholder="Telefone" value={comprador.telefone} onChange={(e) => setComprador((c) => ({ ...c, telefone: e.target.value }))} />
+                <input className={inp} placeholder="Nome completo *" aria-label="Nome completo" autoComplete="name" value={comprador.nome} onChange={(e) => setComprador((c) => ({ ...c, nome: e.target.value }))} />
+                <input className={inp} type="email" placeholder="E-mail *" aria-label="E-mail" autoComplete="email" inputMode="email" value={comprador.email} onChange={(e) => setComprador((c) => ({ ...c, email: e.target.value }))} />
+                <input className={inp} placeholder="Documento (CPF)" aria-label="CPF" inputMode="numeric" value={comprador.doc} onChange={(e) => setComprador((c) => ({ ...c, doc: maskCpfCnpj(e.target.value) }))} />
+                <input className={inp} placeholder="Telefone" aria-label="Telefone" type="tel" inputMode="tel" value={comprador.telefone} onChange={(e) => setComprador((c) => ({ ...c, telefone: maskTelefone(e.target.value) }))} />
               </div>
               <p className="mt-2 text-xs text-ink-muted">Os ingressos com QR serão enviados para o seu e-mail.</p>
             </div>
@@ -267,7 +268,7 @@ function VendaView({ token }: { token: string }) {
             <div className="mt-4 rounded-2xl bg-white p-5 shadow-card">
               <h2 className="text-base font-bold text-ink">Cupom de desconto</h2>
               <div className="mt-2 flex gap-2">
-                <input className={inp} placeholder="Código do cupom" value={cupomInput} onChange={(e) => setCupomInput(e.target.value.toUpperCase())} />
+                <input className={inp} placeholder="Código do cupom" aria-label="Código do cupom" value={cupomInput} onChange={(e) => setCupomInput(e.target.value.toUpperCase())} />
                 <button onClick={aplicarCupom} className="shrink-0 rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold hover:bg-black/[0.03]">Aplicar</button>
               </div>
               {cupomMsg && <p className={`mt-2 text-xs font-medium ${cupom ? 'text-emerald-600' : 'text-red-600'}`}>{cupomMsg}</p>}
@@ -365,7 +366,7 @@ function ExtraField({ campo, value, onChange }: { campo: CampoExtra; value: stri
       </select>
     );
   }
-  return <input className={inp} type={campo.tipo === 'numero' ? 'number' : 'text'} placeholder={`${campo.label}${campo.obrigatorio ? ' *' : ''}`} value={value} onChange={(e) => onChange(e.target.value)} />;
+  return <input className={inp} type={campo.tipo === 'numero' ? 'number' : 'text'} placeholder={`${campo.label}${campo.obrigatorio ? ' *' : ''}`} aria-label={campo.label} value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
 function Linha({ label, valor, tone, muted }: { label: string; valor: string; tone?: 'emerald'; muted?: boolean }) {

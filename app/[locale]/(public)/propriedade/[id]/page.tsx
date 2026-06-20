@@ -86,6 +86,40 @@ function eventVenueLd(prop: PropMeta, locale: Locale) {
   }
 }
 
+// Breadcrumb (Início › região › espaço) — sinal de navegação para o Google.
+function breadcrumbLd(prop: PropMeta, locale: Locale) {
+  const local = prop.cidade || prop.estado || ''
+  const buscaPath = prop.cidade
+    ? localizar(locale, `/busca?cidade=${encodeURIComponent(prop.cidade)}`)
+    : prop.estado
+      ? localizar(locale, `/busca?estado=${encodeURIComponent(prop.estado)}`)
+      : localizar(locale, '/busca')
+  const nome = prop.nome || getDictionary(locale).propriedade.meta.tituloFallback
+  const itens: Array<Record<string, unknown>> = [
+    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: abs(localizar(locale, '/')) },
+  ]
+  if (local) itens.push({ '@type': 'ListItem', position: 2, name: local, item: abs(buscaPath) })
+  itens.push({ '@type': 'ListItem', position: local ? 3 : 2, name: nome })
+  return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: itens }
+}
+
+// FAQPage a partir do FAQ do anúncio (quando houver) — elegível a rich snippet.
+function faqLd(prop: PropMeta) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const faq = Array.isArray(prop.faq) ? (prop.faq as any[]).filter((f) => f?.pergunta && f?.resposta) : []
+  if (!faq.length) return null
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mainEntity: faq.map((f: any) => ({
+      '@type': 'Question',
+      name: f.pergunta,
+      acceptedAnswer: { '@type': 'Answer', text: f.resposta },
+    })),
+  }
+}
+
 export default async function PropriedadePage({ params }: { params: { locale: string; id: string } }) {
   const locale: Locale = isLocale(params.locale) ? params.locale : defaultLocale
   // Busca a propriedade e suas fotos no servidor para semear a ilha cliente:
@@ -95,10 +129,17 @@ export default async function PropriedadePage({ params }: { params: { locale: st
     fetchPropriedadeFotos(Number(params.id)),
   ])
 
+  const faqLdData = prop ? faqLd(prop) : null
   return (
     <>
       {prop && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventVenueLd(prop, locale)) }} />
+      )}
+      {prop && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd(prop, locale)) }} />
+      )}
+      {faqLdData && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLdData) }} />
       )}
       <PropriedadeClient initialProp={prop} initialFotos={fotos} />
     </>
