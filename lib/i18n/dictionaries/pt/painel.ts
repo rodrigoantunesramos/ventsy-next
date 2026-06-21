@@ -79,6 +79,7 @@ const painel = {
   },
   shell: {
     verSite: 'Ver o site',
+    minhaArea: 'Minha área de cliente',
     sairConta: 'Sair da conta',
     validoAte: 'Válido até',
     emBreve: 'Em breve',

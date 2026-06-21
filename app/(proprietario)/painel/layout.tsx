@@ -319,6 +319,9 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
               <Link href="/painel" className="block px-4 py-2.5 text-sm hover:bg-[#f7f7f7]" onClick={() => setAvatarOpen(false)}>
                 {dict.painel.nav.itens.painel}
               </Link>
+              <Link href="/client" className="flex items-center gap-2 border-t border-black/[0.06] px-4 py-2.5 text-sm hover:bg-[#f7f7f7]" onClick={() => setAvatarOpen(false)}>
+                🎉 {dict.painel.shell.minhaArea}
+              </Link>
               <Link href="/" className="block px-4 py-2.5 text-sm hover:bg-[#f7f7f7]" onClick={() => setAvatarOpen(false)}>
                 {dict.painel.shell.verSite}
               </Link>

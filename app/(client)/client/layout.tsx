@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { usuarioTemPropriedade } from '@/lib/perfis'
 import NotificationBell from '@/components/NotificationBell'
 import { ToastProvider } from '@/components/Toast'
 
@@ -27,6 +28,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [sidebarOpen, setSidebar]  = useState(false)
   const [avatarOpen,  setAvatar]   = useState(false)
   const [loading,     setLoading]  = useState(true)
+  const [isProprietario, setIsProprietario] = useState(false)
 
   const router    = useRouter()
   const pathname  = usePathname()
@@ -47,6 +49,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       const inicial = (nome.split(' ')[0]?.[0] ?? '?').toUpperCase()
       setProfile({ nome, email: user.email ?? '', inicial })
       setLoading(false)
+
+      // Detecta se também é proprietário, para oferecer a troca de painel.
+      usuarioTemPropriedade(user.id).then(setIsProprietario)
     })()
   }, [router])
 
@@ -62,6 +67,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     await supabase.auth.signOut()
     router.push('/login')
   }
+
+  // Atalho para o "outro" painel: quem já anuncia vai ao painel do proprietário;
+  // quem ainda não, é convidado a anunciar (virar proprietário).
+  const trocaPainel = isProprietario
+    ? { href: '/painel',   label: '🏢 Painel do proprietário' }
+    : { href: '/anunciar', label: '🏢 Anunciar meu espaço' }
 
   if (loading) {
     return (
@@ -129,6 +140,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href={trocaPainel.href}
+                onClick={() => setAvatar(false)}
+                className="block px-4 py-2.5 text-[.88rem] font-semibold text-gray-800 no-underline border-t border-[#f0f0f0] hover:bg-gray-50 transition-colors"
+              >
+                {trocaPainel.label}
+              </Link>
               <button
                 onClick={handleSair}
                 className="w-full text-left px-4 py-2.5 border-none bg-transparent cursor-pointer text-[.88rem] text-[#ff385c] border-t border-[#f0f0f0] mt-1 font-[inherit] hover:bg-gray-50 transition-colors"
@@ -206,6 +224,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               className="block px-5 py-[9px] text-[.88rem] text-gray-600 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
             >
               ❓ Central de Ajuda
+            </Link>
+            <div className="border-t border-[#f5f5f5] my-3" />
+            <Link
+              href={trocaPainel.href}
+              onClick={() => setSidebar(false)}
+              className="block px-5 py-[9px] text-[.88rem] font-semibold text-gray-700 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
+            >
+              {trocaPainel.label}
             </Link>
           </nav>
         </aside>

@@ -78,6 +78,7 @@ const painel: T = {
   },
   shell: {
     verSite: 'Ver el sitio',
+    minhaArea: 'Mi área de cliente',
     sairConta: 'Cerrar sesión',
     validoAte: 'Válido hasta',
     emBreve: 'Próximamente',
