@@ -8,6 +8,10 @@ import { useEffect, type ReactNode } from 'react'
 import Link from 'next/link'
 import { Icon, type IconName } from './_nav'
 
+// Reexporta o Icon/IconName para as páginas importarem tudo de um lugar só (`../_ui`).
+export { Icon } from './_nav'
+export type { IconName } from './_nav'
+
 // ── Cabeçalho de página ───────────────────────────────────────────────────────
 export function PageHeader({
   title, subtitle, eyebrow, actions,
