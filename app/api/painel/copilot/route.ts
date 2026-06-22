@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
-import { generateText } from 'ai';
+import { streamText } from 'ai';
 import { getAuthUser, unauthorized } from '@/lib/apiAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { carregarDados, hojeUTC } from '@/app/api/automacoes/_engine';
 import { pendenciasDoDia, eventoLabel, ymdOf } from '@/lib/automacoes';
 import { formatMoney } from '@/lib/format';
+import { urlOpenMeteo, parseOpenMeteo, previsaoDisponivel, condicaoDe } from '@/lib/plano-b';
 import {
   detectarIntent, responderLocal, panoramaParaTexto,
   SUGESTOES_INICIAIS, type Panorama,
@@ -33,6 +34,24 @@ function addDias(ymd: string, n: number): string {
   const dt = new Date(ymd + 'T12:00:00');
   dt.setDate(dt.getDate() + n);
   return dt.toISOString().slice(0, 10);
+}
+
+const STORM = new Set([95, 96, 99]);
+function riscoClima(chuvaProb: number | null, codigo: number | null): 'baixo' | 'medio' | 'alto' | 'indef' {
+  if (codigo != null && STORM.has(codigo)) return 'alto';
+  if (chuvaProb == null) return 'indef';
+  if (chuvaProb >= 60) return 'alto';
+  if (chuvaProb >= 35) return 'medio';
+  return 'baixo';
+}
+async function fetchPrevisaoJson(url: string): Promise<unknown> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal, headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`meteo HTTP ${res.status}`);
+    return await res.json();
+  } finally { clearTimeout(t); }
 }
 
 async function montarPanorama(uid: string, hoje: string): Promise<Panorama> {
@@ -103,6 +122,68 @@ async function montarPanorama(uid: string, hoje: string): Promise<Panorama> {
   for (const e of d.eventos) { const tp = (e.tipo_evento || '').trim(); if (tp) tipoMap.set(tp, (tipoMap.get(tp) || 0) + 1); }
   const tiposEvento = Array.from(tipoMap.entries()).map(([tipo, n]) => ({ tipo, n })).sort((a, b) => b.n - a.n).slice(0, 6);
 
+  // Recebimento previsto por mês (parcelas em aberto, do mês atual em diante).
+  const mesAtual = hoje.slice(0, 7);
+  const recMap = new Map<string, number>();
+  for (const p of d.parcelas) {
+    const pago = (p.status || '') === 'pago' || !!p.pago_em;
+    if (pago || (p.status || '') === 'cancelado') continue;
+    const venc = ymdOf(p.vencimento);
+    if (!venc) continue;
+    const mes = venc.slice(0, 7);
+    if (mes >= mesAtual) recMap.set(mes, (recMap.get(mes) || 0) + (Number(p.valor) || 0));
+  }
+  const recebimentoPorMes = Array.from(recMap.entries())
+    .sort((a, b) => a[0].localeCompare(b[0])).slice(0, 4)
+    .map(([mes, valor]) => ({ mes, valor }));
+
+  // Clientes parados: têm evento passado (> 120 dias) e nenhum evento futuro.
+  let clientesInativos: { qtd: number; exemplos: string[] } = { qtd: 0, exemplos: [] };
+  try {
+    const { data: evs } = await admin.from('clientes_eventos').select('cliente_id,data_inicio').eq('usuario_id', uid);
+    const corte = addDias(hoje, -120);
+    const porCliente = new Map<string, { futuro: boolean; ultimo: string }>();
+    for (const e of (evs || [])) {
+      const cid = e.cliente_id == null ? '' : String(e.cliente_id);
+      const dia = ymdOf(e.data_inicio);
+      if (!cid || !dia) continue;
+      const cur = porCliente.get(cid) || { futuro: false, ultimo: '' };
+      if (dia >= hoje) cur.futuro = true;
+      else if (dia > cur.ultimo) cur.ultimo = dia;
+      porCliente.set(cid, cur);
+    }
+    const nomePorId = new Map(d.clientes.map((c) => [String(c.id), c.nome || 'Cliente']));
+    const inativos: string[] = [];
+    for (const [cid, info] of porCliente) {
+      if (!info.futuro && info.ultimo && info.ultimo < corte) inativos.push(nomePorId.get(cid) || 'Cliente');
+    }
+    clientesInativos = { qtd: inativos.length, exemplos: inativos.slice(0, 3) };
+  } catch { /* sem cliente_id/tabela → 0 */ }
+
+  // Clima do próximo evento (Open-Meteo keyless, reusa lib/plano-b).
+  let clima: Panorama['clima'] = null;
+  try {
+    const nextRaw = d.eventos
+      .filter((e) => ymdOf(e.data_inicio) && ymdOf(e.data_inicio)! >= hoje && e.propriedade_id != null)
+      .sort((a, b) => (a.data_inicio || '').localeCompare(b.data_inicio || ''))[0];
+    const dia = nextRaw ? ymdOf(nextRaw.data_inicio) : null;
+    if (nextRaw && dia && previsaoDisponivel(dia, hoje)) {
+      const { data: prop } = await admin.from('propriedades').select('nome,cidade,estado,latitude,longitude').eq('id', nextRaw.propriedade_id).maybeSingle();
+      if (prop && prop.latitude != null && prop.longitude != null) {
+        const json = await fetchPrevisaoJson(urlOpenMeteo(Number(prop.latitude), Number(prop.longitude), dia));
+        const resumo = parseOpenMeteo(json, dia, { inicio: null, fim: null }, new Date().toISOString());
+        clima = {
+          evento: eventoLabel(nextRaw),
+          data: dataBR(nextRaw.data_inicio),
+          local: [prop.nome, prop.cidade].filter(Boolean).join(' · '),
+          tempMin: resumo.temp_min, tempMax: resumo.temp_max, chuvaProb: resumo.chuva_prob,
+          condicao: condicaoDe(resumo.codigo).label,
+          risco: riscoClima(resumo.chuva_prob, resumo.codigo),
+        };
+      }
+    }
+  } catch { /* sem coords / falha API → null */ }
+
   return {
     hoje,
     contratado, recebido, aberto, aVencer30,
@@ -115,6 +196,7 @@ async function montarPanorama(uid: string, hoje: string): Promise<Panorama> {
     avaliacao,
     ticketMedio, taxaConversao, inadimplenciaValor, inadimplenciaQtd,
     eventoMaisValioso, tiposEvento,
+    recebimentoPorMes, clientesInativos, clima,
     proximosEventos,
     pendencias: pend.slice(0, 12).map((p) => ({ titulo: p.titulo, sub: p.sub, urgencia: p.urgencia, valor: p.valor_num, tipo: String(p.tipo) })),
   };
@@ -173,9 +255,14 @@ export async function POST(req: NextRequest) {
     panorama ? panoramaParaTexto(panorama, { money: brl }) : '(indisponível)',
   ].join('\n');
 
+  // STREAMING: a resposta aberta do LLM chega token a token (toTextStreamResponse).
+  // Erros do gateway viram stream vazio → o cliente degrada para as sugestões.
   try {
-    const { text } = await generateText({ model: MODEL, temperature: 0.3, system, messages });
-    return Response.json({ text: text.trim(), fonte: 'ia', sugestoes: SUGESTOES_INICIAIS });
+    const result = streamText({
+      model: MODEL, temperature: 0.3, system, messages,
+      onError: () => { /* erro do gateway é tratado no cliente (stream vazio) */ },
+    });
+    return result.toTextStreamResponse({ headers: { 'x-copilot-fonte': 'ia' } });
   } catch (e) {
     return Response.json(
       { error: 'Falha na IA aberta. Mas eu respondo perguntas diretas sobre seu painel — tente uma das sugestões.', detail: String(e), sugestoes: SUGESTOES_INICIAIS },

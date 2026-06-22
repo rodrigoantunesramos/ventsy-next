@@ -9,10 +9,16 @@
 export type IntentKey =
   | 'resumo' | 'faturamento' | 'pendencias' | 'agenda'
   | 'contratos' | 'clientes' | 'reservas' | 'avaliacao'
-  | 'ticket' | 'conversao' | 'evento_top' | 'inadimplencia' | 'tipos';
+  | 'ticket' | 'conversao' | 'evento_top' | 'inadimplencia' | 'tipos'
+  | 'recebimento' | 'inativos' | 'clima';
 
 export type PanoramaEvento = { titulo: string; tipo: string; data: string; valor: number; status: string };
 export type PanoramaPendencia = { titulo: string; sub: string; urgencia: string; valor: number | null; tipo: string };
+export type ClimaCopilot = {
+  evento: string; data: string; local: string;
+  tempMin: number | null; tempMax: number | null; chuvaProb: number | null;
+  condicao: string; risco: 'baixo' | 'medio' | 'alto' | 'indef';
+};
 
 export type Panorama = {
   hoje: string;
@@ -23,6 +29,9 @@ export type Panorama = {
   ticketMedio: number; taxaConversao: number; inadimplenciaValor: number; inadimplenciaQtd: number;
   eventoMaisValioso: PanoramaEvento | null;
   tiposEvento: { tipo: string; n: number }[];
+  recebimentoPorMes: { mes: string; valor: number }[];
+  clientesInativos: { qtd: number; exemplos: string[] };
+  clima: ClimaCopilot | null;
   proximosEventos: PanoramaEvento[];
   pendencias: PanoramaPendencia[];
 };
@@ -49,17 +58,29 @@ const CHIP = {
   leads: { label: 'Ver Leads', href: '/painel/leads' },
   avaliacoes: { label: 'Abrir Avaliações', href: '/painel/avaliacoes' },
   licencas: { label: 'Abrir Licenças', href: '/painel/licencas' },
+  planoB: { label: 'Abrir Clima & Plano B', href: '/painel/plano-b' },
 } as const;
 
 const norm = (s: string) => (s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+function labelMes(ym: string): string {
+  const [y, m] = (ym || '').split('-');
+  const i = Number(m) - 1;
+  return i >= 0 && i < 12 ? `${MESES[i]}/${y}` : ym;
+}
+const RISCO_LABEL: Record<string, string> = { baixo: 'baixo', medio: 'médio', alto: 'alto', indef: 'indefinido' };
+
 // Ordem importa: regras mais específicas antes das genéricas ('resumo' por último).
 const REGRAS: { key: IntentKey; re: RegExp }[] = [
+  { key: 'clima', re: /clima|previsao do tempo|vai chover|chover|chuva|temperatura|faz sol|esta chovendo|como .*(o tempo|clima)|tempo (pro|para|no) / },
+  { key: 'recebimento', re: /recebiment|previsao de receb|quanto .*(entra|vou receber|recebo).*(mes|julho|agosto|setembro|outubro|proximos)|por mes|mes a mes|proximos meses|entra .*(esse|este|proximo) mes/ },
   { key: 'inadimplencia', re: /inadimpl|quanto me devem|quanto .*(devem|atras)|valor .*atras|total .*atras|em atraso/ },
   { key: 'ticket', re: /ticket medio|valor medio|quanto vale .*(cada|um|por) evento|media por evento/ },
   { key: 'conversao', re: /conversao|taxa de fech|quantos .*(fecho|fechei|fecha)|funil|aproveitamento/ },
   { key: 'evento_top', re: /(evento|festa|casamento|contrato) mais (valioso|caro|alto|importante)|maior evento|maior contrato|top evento/ },
   { key: 'tipos', re: /tipo de evento|tipos de evento|que tipo|qual tipo|mais faco|distribui.*evento/ },
+  { key: 'inativos', re: /inativ|sumir|sumido|parado|sem (comprar|contratar|fechar)|cliente .*(frio|antigo|perdido|sumido)|reativ|recupera/ },
   { key: 'pendencias', re: /pendenc|atenca|atrasad|vencend|vencid|urgente|o que .*(precis|tenho que|devo).*(fazer|resolver)|o que falta|alerta/ },
   { key: 'agenda', re: /proximos? evento|agenda|calendario|que evento|eventos? (dessa|da|na|nesta|nesse) semana|quando .*(evento|festa|casamento)|o que .*tenho (essa|esta|na) semana|programad/ },
   { key: 'contratos', re: /contrato|assinatur|assinar|aguardando assin/ },
@@ -210,6 +231,35 @@ export function responderLocal(intent: IntentKey, p: Panorama, fmt: Fmt): Intent
         chips: [CHIP.clientes, CHIP.calendario],
         sugestoes: ['Qual meu evento mais valioso?', 'Como está meu mês?'],
       };
+
+    case 'recebimento':
+      return {
+        texto: p.recebimentoPorMes.length
+          ? `Previsão de recebimento (parcelas em aberto): ${p.recebimentoPorMes.map((m) => `${labelMes(m.mes)} ${money(m.valor)}`).join(' · ')}.`
+          : 'Não há parcelas a receber registradas para os próximos meses.',
+        chips: [CHIP.recebiveis, CHIP.financeiro],
+        sugestoes: ['Como está meu mês?', 'Quanto me devem em atraso?'],
+      };
+
+    case 'inativos':
+      return {
+        texto: p.clientesInativos.qtd
+          ? `Você tem ${p.clientesInativos.qtd} cliente(s) parado(s) — sem evento futuro e o último há mais de 4 meses${p.clientesInativos.exemplos.length ? `, como ${p.clientesInativos.exemplos.join(', ')}` : ''}. Vale uma campanha de reativação.`
+          : 'Nenhum cliente parado — sua base está ativa. 👍',
+        chips: [CHIP.clientes, CHIP.leads],
+        sugestoes: ['Como está meu mês?', 'Quais meus próximos eventos?'],
+      };
+
+    case 'clima':
+      return {
+        texto: p.clima
+          ? `Previsão para ${p.clima.evento} (${p.clima.data}${p.clima.local ? ` · ${p.clima.local}` : ''}): ${p.clima.condicao}` +
+            `${p.clima.tempMin != null && p.clima.tempMax != null ? `, ${Math.round(p.clima.tempMin)}–${Math.round(p.clima.tempMax)}°C` : ''}` +
+            `${p.clima.chuvaProb != null ? `, ${p.clima.chuvaProb}% de chance de chuva` : ''}. Risco para evento ao ar livre: ${RISCO_LABEL[p.clima.risco] || p.clima.risco}.`
+          : 'Sem previsão do tempo disponível — o próximo evento precisa de data nos próximos 16 dias e uma propriedade com coordenadas cadastradas.',
+        chips: [CHIP.planoB, CHIP.calendario],
+        sugestoes: ['Quais meus próximos eventos?', 'O que precisa da minha atenção?'],
+      };
   }
 }
 
@@ -226,6 +276,9 @@ export function panoramaParaTexto(p: Panorama, fmt: Fmt): string {
     `Ticket médio: ${money(p.ticketMedio)} · Conversão do funil: ${p.taxaConversao}% · Em atraso: ${money(p.inadimplenciaValor)} (${p.inadimplenciaQtd} parcela(s))`,
     p.eventoMaisValioso ? `Evento mais valioso: ${p.eventoMaisValioso.titulo} (${p.eventoMaisValioso.tipo || 'evento'}) — ${money(p.eventoMaisValioso.valor)}` : '',
     p.tiposEvento.length ? `Eventos por tipo: ${p.tiposEvento.slice(0, 5).map((t) => `${t.tipo} (${t.n})`).join(', ')}` : '',
+    p.recebimentoPorMes.length ? `Recebimento previsto: ${p.recebimentoPorMes.map((m) => `${labelMes(m.mes)} ${money(m.valor)}`).join(', ')}` : '',
+    p.clientesInativos.qtd ? `Clientes parados (reativar): ${p.clientesInativos.qtd}${p.clientesInativos.exemplos.length ? ' — ex.: ' + p.clientesInativos.exemplos.join(', ') : ''}` : '',
+    p.clima ? `Clima do próximo evento (${p.clima.evento}, ${p.clima.data}): ${p.clima.condicao}, ${p.clima.chuvaProb ?? '—'}% chuva, risco ${p.clima.risco}` : '',
     p.proximosEventos.length ? 'Próximos eventos:\n' + listaEventos(p.proximosEventos, money, 8) : 'Nenhum evento futuro agendado.',
     p.pendencias.length ? 'Pendências priorizadas:\n' + listaPendencias(p.pendencias, money, 12) : 'Sem pendências para os próximos dias.',
   ].join('\n');

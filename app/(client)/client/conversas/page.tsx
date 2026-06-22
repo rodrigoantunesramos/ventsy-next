@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import type { Conversation } from '@/types/client'
+import { PageHeader, Card, EmptyState, Skeleton, btnPrimary, Icon } from '../_ui'
 
 function timeAgo(iso: string) {
   if (!iso) return ''
@@ -26,13 +27,9 @@ export default function ConversasPage() {
   const carregar = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { router.push('/login'); return }
-
     try {
-      const res  = await fetch('/api/conversas', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
+      const res  = await fetch('/api/conversas', { headers: { Authorization: `Bearer ${session.access_token}` } })
       const json = await res.json()
-      // Na área do cliente mostramos as conversas em que ele é o contratante.
       const lista = ((json.data || []) as Conversation[]).filter((c) => c.papel !== 'dono')
       setConversas(lista)
     } catch { /* mantém a lista atual */ } finally {
@@ -50,71 +47,48 @@ export default function ConversasPage() {
       if (!session) return
       channel = supabase
         .channel('conversas-cliente')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'conversas', filter: `user_id=eq.${session.user.id}` },
-          () => { carregar() },
-        )
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'conversas', filter: `user_id=eq.${session.user.id}` }, () => { carregar() })
         .subscribe()
     })()
     return () => { if (channel) supabase.removeChannel(channel) }
   }, [carregar])
 
   if (loading) return (
-    <div className="px-6 py-7 max-w-[760px] mx-auto">
-      <div className="mb-6 h-8 w-44 animate-pulse rounded bg-black/[0.05]" />
-      <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-[68px] animate-pulse rounded-xl bg-black/[0.05]" />)}</div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <Skeleton className="h-12 w-48" />
+      <div className="space-y-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-[68px]" />)}</div>
     </div>
   )
 
   return (
-    <div className="px-6 py-7 max-w-[760px] mx-auto">
-      <div className="mb-6">
-        <h1 className="text-[1.5rem] font-extrabold text-gray-900 m-0">💬 Conversas</h1>
-        <p className="text-[.88rem] text-gray-400 mt-1.5">
-          {conversas.length > 0
-            ? `${conversas.length} conversa${conversas.length > 1 ? 's' : ''}`
-            : 'Nenhuma conversa iniciada'}
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader eyebrow="Minha área" title="Conversas"
+        subtitle={conversas.length > 0 ? `${conversas.length} conversa${conversas.length > 1 ? 's' : ''} com organizadores` : 'Fale direto com os anfitriões dos espaços.'} />
 
       {conversas.length === 0 ? (
-        <div className="text-center py-16 px-5 text-gray-300">
-          <div className="text-[3rem] mb-3">💬</div>
-          <div className="text-base font-semibold text-gray-400 mb-1.5">Nenhuma conversa ainda</div>
-          <div className="text-[.85rem]">
-            Encontre um espaço que você goste e inicie uma conversa com o proprietário.
-          </div>
-          <Link
-            href="/busca"
-            className="inline-block mt-5 bg-[#ff385c] hover:bg-[#e0304f] text-white rounded-xl py-2.5 px-6 text-[.9rem] font-bold no-underline transition-colors"
-          >
-            🔍 Explorar espaços
-          </Link>
-        </div>
+        <EmptyState icon="chat" title="Nenhuma conversa ainda"
+          text="Encontre um espaço que você goste e inicie uma conversa com o proprietário."
+          action={<Link href="/busca" className={btnPrimary}><Icon name="search" size={16} /> Explorar espaços</Link>} />
       ) : (
-        <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,.05)] border border-[#f0f0f0] overflow-hidden">
-          {conversas.map(conv => (
-            <Link
-              key={conv.id}
-              href={`/client/conversas/${conv.id}`}
-              className="flex items-center gap-3.5 px-5 py-3.5 border-b border-[#f5f5f5] last:border-0 no-underline text-inherit hover:bg-gray-50 transition-colors"
-            >
-              <div className="w-11 h-11 rounded-full bg-[#ff385c] text-white flex items-center justify-center font-bold text-base flex-shrink-0">
-                {conv.propriedade?.nome?.[0] ?? '?'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-[.9rem] text-gray-900">{conv.propriedade?.nome ?? 'Espaço'}</div>
-                <div className="text-[.8rem] text-gray-400 mt-0.5 truncate max-w-[280px]">{conv.ultima_mensagem ?? 'Nenhuma mensagem ainda'}</div>
-              </div>
-              {conv.ultima_mensagem_em && (
-                <span className="text-[.72rem] text-gray-300 whitespace-nowrap flex-shrink-0">
-                  {timeAgo(conv.ultima_mensagem_em)}
-                </span>
-              )}
-            </Link>
-          ))}
-        </div>
+        <Card className="p-0">
+          <div className="divide-y divide-line">
+            {conversas.map(conv => (
+              <Link key={conv.id} href={`/client/conversas/${conv.id}`}
+                className="flex items-center gap-3.5 px-5 py-3.5 transition hover:bg-black/[0.02]">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-brand text-base font-bold text-white">
+                  {conv.propriedade?.nome?.[0] ?? '?'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[.9rem] font-semibold text-ink">{conv.propriedade?.nome ?? 'Espaço'}</div>
+                  <div className="mt-0.5 max-w-[280px] truncate text-[.8rem] text-ink-muted">{conv.ultima_mensagem ?? 'Nenhuma mensagem ainda'}</div>
+                </div>
+                {conv.ultima_mensagem_em && (
+                  <span className="flex-shrink-0 whitespace-nowrap text-[.72rem] text-ink-muted">{timeAgo(conv.ultima_mensagem_em)}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </Card>
       )}
     </div>
   )

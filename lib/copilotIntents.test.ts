@@ -13,6 +13,9 @@ const P: Panorama = {
   ticketMedio: 14285, taxaConversao: 58, inadimplenciaValor: 7290, inadimplenciaQtd: 1,
   eventoMaisValioso: { titulo: 'Casamento Zara', tipo: 'casamento', data: '23/06/2026', valor: 24300, status: 'contratado' },
   tiposEvento: [{ tipo: 'casamento', n: 5 }, { tipo: 'corporativo', n: 3 }],
+  recebimentoPorMes: [{ mes: '2026-07', valor: 14580 }, { mes: '2026-08', valor: 7290 }],
+  clientesInativos: { qtd: 4, exemplos: ['Ana', 'Bruno'] },
+  clima: { evento: 'Casamento Zara', data: '23/06/2026', local: 'Chácara · Macacu', tempMin: 18, tempMax: 28, chuvaProb: 20, condicao: 'Parcialmente nublado', risco: 'baixo' },
   proximosEventos: [{ titulo: 'Casamento Zara', tipo: 'casamento', data: '23/06/2026', valor: 24300, status: 'contratado' }],
   pendencias: [{ titulo: 'Casamento Zara', sub: 'Vence em 1 dia(s)', urgencia: 'alerta', valor: 7290, tipo: 'parcela' }],
 };
@@ -20,6 +23,7 @@ const VAZIO: Panorama = {
   ...P, contratosPendentes: 0, parcelasAtrasadas: 0, reservasFuturas: 0,
   avaliacao: null, proximosEventos: [], pendencias: [],
   inadimplenciaValor: 0, inadimplenciaQtd: 0, eventoMaisValioso: null, tiposEvento: [],
+  recebimentoPorMes: [], clientesInativos: { qtd: 0, exemplos: [] }, clima: null,
 };
 
 describe('detectarIntent', () => {
@@ -101,6 +105,35 @@ describe('intents analíticos', () => {
   it('inadimplência: valor quando há, elogio quando zero', () => {
     expect(responderLocal('inadimplencia', P, fmt).texto).toContain('em atraso');
     expect(responderLocal('inadimplencia', VAZIO, fmt).texto).toMatch(/Nenhuma parcela em atraso/);
+  });
+});
+
+describe('intents v4 (recebimento / inativos / clima)', () => {
+  it('detecta as intenções novas', () => {
+    expect(detectarIntent('quanto vou receber nos próximos meses?')).toBe('recebimento');
+    expect(detectarIntent('tenho clientes inativos?')).toBe('inativos');
+    expect(detectarIntent('vai chover no meu próximo evento?')).toBe('clima');
+    expect(detectarIntent('como está o tempo pro evento?')).toBe('clima');
+  });
+  it('não rouba os básicos próximos', () => {
+    expect(detectarIntent('quanto tenho a receber?')).toBe('faturamento');
+    expect(detectarIntent('como está meu mês?')).toBe('resumo');
+  });
+  it('recebimento por mês lista valores; vazio avisa', () => {
+    expect(responderLocal('recebimento', P, fmt).texto).toContain('jul/2026');
+    expect(responderLocal('recebimento', VAZIO, fmt).texto).toMatch(/Não há parcelas a receber/);
+  });
+  it('inativos: conta + exemplos, ou base ativa', () => {
+    const r = responderLocal('inativos', P, fmt);
+    expect(r.texto).toContain('4 cliente');
+    expect(r.texto).toContain('Ana');
+    expect(responderLocal('inativos', VAZIO, fmt).texto).toMatch(/base está ativa/);
+  });
+  it('clima: previsão quando há, aviso quando não', () => {
+    const r = responderLocal('clima', P, fmt);
+    expect(r.texto).toContain('Casamento Zara');
+    expect(r.texto).toContain('chance de chuva');
+    expect(responderLocal('clima', VAZIO, fmt).texto).toMatch(/Sem previsão/);
   });
 });
 

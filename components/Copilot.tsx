@@ -51,17 +51,52 @@ export default function Copilot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: novas.map((m) => ({ role: m.role, content: m.content })) }),
       });
-      const j = await r.json().catch(() => ({}));
-      const text = (typeof j?.text === 'string' && j.text) || j?.error || 'Não consegui responder agora. Tente de novo em instantes.';
-      const aviso = !r.ok || j?.code === 'NO_KEY' || typeof j?.text !== 'string';
-      setMsgs((m) => [...m, {
-        role: 'assistant',
-        content: text,
-        chips: Array.isArray(j?.chips) ? j.chips : undefined,
-        sugestoes: Array.isArray(j?.sugestoes) ? j.sugestoes : undefined,
-        aviso,
-        fonte: j?.fonte,
-      }]);
+      const ct = r.headers.get('content-type') || '';
+
+      if (ct.includes('application/json')) {
+        // Resposta DIRETA (local/aviso): JSON com chips + sugestões.
+        const j = await r.json().catch(() => ({}));
+        const text = (typeof j?.text === 'string' && j.text) || j?.error || 'Não consegui responder agora. Tente de novo em instantes.';
+        const aviso = !r.ok || j?.code === 'NO_KEY' || typeof j?.text !== 'string';
+        setMsgs((m) => [...m, {
+          role: 'assistant',
+          content: text,
+          chips: Array.isArray(j?.chips) ? j.chips : undefined,
+          sugestoes: Array.isArray(j?.sugestoes) ? j.sugestoes : undefined,
+          aviso,
+          fonte: j?.fonte,
+        }]);
+      } else if (r.body) {
+        // Resposta ABERTA (LLM): stream de texto, token a token.
+        setMsgs((m) => [...m, { role: 'assistant', content: '', fonte: 'ia' }]);
+        setLoading(false);
+        const reader = r.body.getReader();
+        const dec = new TextDecoder();
+        let acc = '';
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          acc += dec.decode(value, { stream: true });
+          setMsgs((m) => {
+            const c = [...m];
+            const i = c.length - 1;
+            if (c[i]?.role === 'assistant') c[i] = { ...c[i], content: acc };
+            return c;
+          });
+        }
+        setMsgs((m) => {
+          const c = [...m];
+          const i = c.length - 1;
+          if (c[i]?.role === 'assistant') {
+            c[i] = acc.trim()
+              ? { ...c[i], sugestoes: SUGESTOES }
+              : { role: 'assistant', content: 'Não consegui responder agora — mas pergunte direto sobre o seu painel.', aviso: true, sugestoes: SUGESTOES };
+          }
+          return c;
+        });
+      } else {
+        setMsgs((m) => [...m, { role: 'assistant', content: 'Não consegui responder agora.', aviso: true, sugestoes: SUGESTOES }]);
+      }
     } catch {
       setMsgs((m) => [...m, { role: 'assistant', content: 'Sem conexão com o Copilot. Tente de novo em instantes.', aviso: true }]);
     } finally {
