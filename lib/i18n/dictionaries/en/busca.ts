@@ -25,6 +25,8 @@ const busca: T = {
   vazioTitulo: '😕 No venues found',
   vazioTexto: 'Try adjusting the filters or searching in another region.',
   vazioBotao: 'See all venues',
+  vazioFiltrosTitulo: '😕 No venues match these filters',
+  vazioFiltrosTexto: 'Try removing some filters to see more options.',
   carregarMais: 'Load more ({n} remaining)',
   mapaVer: 'View',
   verMapa: 'Show map',

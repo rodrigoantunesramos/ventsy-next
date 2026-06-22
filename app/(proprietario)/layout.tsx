@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function ProprietarioRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RootHtml lang="pt-BR">
+    <RootHtml lang="pt-BR" themeBootstrap>
       <PainelI18nProvider>{children}</PainelI18nProvider>
     </RootHtml>
   )

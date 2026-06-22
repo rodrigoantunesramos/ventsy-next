@@ -34,7 +34,7 @@ export function EmptyState({
   acao?: ReactNode
 }) {
   return (
-    <div className="mt-6 rounded-2xl bg-white p-10 text-center shadow-card">
+    <div className="mt-6 rounded-2xl border border-line bg-surface p-10 text-center shadow-card">
       {icone ? (
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand">
           {icone}

@@ -38,15 +38,45 @@ export default function NotificationBell({ verTodasHref = '/painel/automacoes?ta
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
+    let channel: ReturnType<typeof sb.channel> | null = null;
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { setIndisponivel(true); return; }
       const uid = session.user.id;
       setUserId(uid);
       await carregar(uid);
-      timer = setInterval(() => carregar(uid), 60000);   // refresca a cada 1 min
+
+      // TEMPO REAL: novas notificações e mudanças de status (lida) chegam na
+      // hora via Supabase Realtime, filtradas pelo dono. Requer a tabela na
+      // publication supabase_realtime — ver docs/sql/notificacoes-realtime.sql.
+      // O polling abaixo é só rede de segurança caso o realtime não esteja
+      // habilitado no projeto (degrada sem quebrar).
+      channel = sb
+        .channel(`notificacoes:${uid}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notificacoes', filter: `usuario_id=eq.${uid}` },
+          (payload) => {
+            const n = payload.new as Notif;
+            setNotifs((prev) => (prev.some((x) => x.id === n.id) ? prev : [n, ...prev].slice(0, 12)));
+          },
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'notificacoes', filter: `usuario_id=eq.${uid}` },
+          (payload) => {
+            const n = payload.new as Notif;
+            setNotifs((prev) => prev.map((x) => (x.id === n.id ? { ...x, ...n } : x)));
+          },
+        )
+        .subscribe();
+
+      timer = setInterval(() => carregar(uid), 120000);   // fallback a cada 2 min
     })();
-    return () => { if (timer) clearInterval(timer); };
+    return () => {
+      if (timer) clearInterval(timer);
+      if (channel) sb.removeChannel(channel);
+    };
   }, [carregar]);
 
   // fecha ao clicar fora

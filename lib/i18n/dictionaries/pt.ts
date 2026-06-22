@@ -77,6 +77,16 @@ const pt = {
   },
   home: {
     carregandoEspacos: 'Carregando espaços...',
+    hero: {
+      tag: 'A vitrine de espaços para eventos',
+      tituloA: 'Encontre o espaço ',
+      tituloEm: 'ideal',
+      tituloB: ' para o seu evento',
+      sub: 'Casamentos, aniversários, eventos corporativos e produções: descubra, compare e fale direto com quem cuida dos melhores espaços do Brasil.',
+      ctaBuscar: 'Explorar espaços',
+      ctaAnunciar: 'Anunciar meu espaço',
+      populares: 'Populares:',
+    },
   },
   componentes: {
     onde: {

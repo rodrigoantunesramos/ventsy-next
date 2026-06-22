@@ -13,6 +13,9 @@ const propriedade: T = {
   loading: {
     marca: 'VENTSY',
   },
+  barra: {
+    solicitar: 'Request booking',
+  },
   cabecalho: {
     avaliacoes: 'reviews',
     seloPremium: '✦ PREMIUM VENUE',

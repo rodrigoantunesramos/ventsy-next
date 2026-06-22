@@ -69,7 +69,7 @@ export default async function HomeFeed({ locale }: { locale: Locale }) {
 
             {/* Banner para anunciantes após a 3ª categoria */}
             {idx === 2 && (
-              <div className="mx-[5%] my-6 bg-[#0d0d0d] rounded-2xl px-8 py-10 flex items-center justify-between gap-6 flex-wrap">
+              <div className="mx-[5%] my-6 bg-ink rounded-2xl px-8 py-10 flex items-center justify-between gap-6 flex-wrap">
                 <div>
                   <p className="text-gray-400 text-sm mb-1">{dict.componentes.homeBanner.paraProprietarios}</p>
                   <h3 className="text-white text-2xl font-bold mb-2">{dict.componentes.homeBanner.titulo}</h3>
@@ -79,7 +79,7 @@ export default async function HomeFeed({ locale }: { locale: Locale }) {
                 </div>
                 <Link
                   href={localizar(locale, '/cadastro')}
-                  className="bg-[#ff385c] hover:bg-[#e0304f] text-white font-bold py-3 px-7 rounded-xl no-underline transition-colors whitespace-nowrap text-sm"
+                  className="bg-brand hover:bg-brand-600 text-white font-bold py-3 px-7 rounded-xl no-underline transition-colors whitespace-nowrap text-sm"
                 >
                   {dict.componentes.homeBanner.cta}
                 </Link>
