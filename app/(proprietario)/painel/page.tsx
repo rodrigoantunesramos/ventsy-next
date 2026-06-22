@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatNumber } from '@/lib/format';
 import { useT } from '@/components/i18n/I18nProvider';
 import { type Pendencia } from '@/lib/automacoes';
+import {
+  type WidgetId, type PainelLayout, WIDGETS_META, ORDEM_PADRAO,
+  loadLayout, saveLayout, moverWidget, reordenar,
+} from '@/lib/painelLayout';
 
 type Propriedade = {
   id: number;
@@ -61,8 +65,12 @@ export default function PainelPage() {
   });
   const [copied, setCopied] = useState(false);
   const [pend, setPend] = useState<Pendencia[] | null>(null);
+  const [layout, setLayout] = useState<PainelLayout>({ ordem: [...ORDEM_PADRAO], ocultos: [] });
+  const [customizing, setCustomizing] = useState(false);
+  const [draggedId, setDraggedId] = useState<WidgetId | null>(null);
 
   useEffect(() => {
+    setLayout(loadLayout());
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
       const user = session?.user;
@@ -136,6 +144,8 @@ export default function PainelPage() {
     })();
   }, []);
 
+  const aplicarLayout = (next: PainelLayout) => { setLayout(next); saveLayout(next); };
+
   const handleCopy = async () => {
     if (!prop) return;
     const url = `${window.location.origin}/propriedade/${prop.id}`;
@@ -187,6 +197,108 @@ export default function PainelPage() {
   const publicada = prop.publicada === true;
   const valorRef = prop.valor_base || prop.valor_periodo || prop.valor_hora || 0;
 
+  const BLOCKS: Record<WidgetId, ReactNode> = {
+    'seu-dia': <SeuDia pendencias={pend} />,
+    kpis: (
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <KpiCard
+          label={t.kpiVisualizacoes}
+          value={formatNumber(kpis.visualizacoes)}
+          icon="👁️"
+          delta={kpis.visualizacoesDelta}
+          sub={t.ultimos30}
+        />
+        <KpiCard label={t.kpiFavoritos} value={kpis.favoritos == null ? '—' : formatNumber(kpis.favoritos)} icon="❤️" />
+        <KpiCard label={t.kpiConversas} value={kpis.conversas == null ? '—' : formatNumber(kpis.conversas)} icon="💬" />
+        <KpiCard label={t.kpiAvaliacao} value={kpis.avaliacao} icon="⭐" />
+      </div>
+    ),
+    acoes: (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {QUICK_ACTIONS.map((a) => (
+          <Link
+            key={a.href}
+            href={a.href}
+            className="group rounded-2xl border border-transparent bg-white p-4 shadow-card transition hover:border-brand/30 hover:shadow-md"
+          >
+            <div className="text-xl">{a.emoji}</div>
+            <div className="mt-2 text-sm font-bold text-ink transition group-hover:text-brand">{a.label}</div>
+            <div className="mt-0.5 text-xs text-ink-muted">{a.desc}</div>
+          </Link>
+        ))}
+      </div>
+    ),
+    checklist: (
+      <div className="rounded-2xl bg-white p-6 shadow-card">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-ink">{t.completePerfil}</h3>
+          <span className="text-sm font-semibold text-ink-muted">{feitos} {t.de} {checklist.length}</span>
+        </div>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
+          <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${pct}%` }} />
+        </div>
+        <ul className="mt-5 space-y-1">
+          {checklist.map((c) => {
+            const inner = (
+              <>
+                <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[0.7rem] ${
+                  c.done ? 'bg-emerald-500 text-white' : 'border border-black/15 bg-white text-transparent'
+                }`}>
+                  ✓
+                </span>
+                <span className={`flex-1 text-sm ${c.done ? 'text-ink-soft line-through decoration-black/20' : 'font-medium text-ink'}`}>
+                  {c.label}
+                </span>
+                {!c.done && c.href && (
+                  <span className="text-xs font-semibold text-brand">{t.completar}</span>
+                )}
+              </>
+            );
+
+            if (!c.done && c.href) {
+              return (
+                <li key={c.label}>
+                  <Link
+                    href={c.href}
+                    className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-brand-50"
+                  >
+                    {inner}
+                  </Link>
+                </li>
+              );
+            }
+            return (
+              <li key={c.label} className="flex items-center gap-3 px-2 py-2">
+                {inner}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ),
+    resumo: (
+      <div className="rounded-2xl bg-white p-6 shadow-card">
+        <h3 className="text-base font-bold text-ink">{t.resumo}</h3>
+        <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+          <Linha termo={t.categoria} valor={prop.categoria || '—'} />
+          <Linha termo={t.valorReferencia} valor={valorRef ? formatMoney(valorRef) : t.sobConsulta} />
+          <Linha termo={t.tiposEvento} valor={prop.tipo_evento || '—'} />
+          <Linha termo={t.capacidade} valor={prop.capacidade ? `${formatNumber(prop.capacidade)} ${t.pessoas}` : '—'} />
+        </dl>
+        <div className="mt-5 border-t border-black/[0.05] pt-4">
+          <Link
+            href="/painel/minha-propriedade"
+            className="block w-full rounded-full border border-black/10 py-2 text-center text-sm font-semibold text-ink-soft transition hover:border-brand hover:text-brand sm:max-w-xs"
+          >
+            {t.editarPropriedade}
+          </Link>
+        </div>
+      </div>
+    ),
+  };
+
+  const visiveis = customizing ? layout.ordem : layout.ordem.filter((id) => !layout.ocultos.includes(id));
+
   return (
     <div className="mx-auto max-w-6xl space-y-5">
 
@@ -216,6 +328,16 @@ export default function PainelPage() {
         </div>
         <div className="flex flex-shrink-0 flex-wrap gap-2">
           <button
+            onClick={() => setCustomizing((v) => !v)}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
+              customizing
+                ? 'border-brand bg-brand text-white hover:bg-brand-600'
+                : 'border-black/10 text-ink-soft hover:border-brand hover:text-brand'
+            }`}
+          >
+            {customizing ? '✓ Concluir' : '⚙ Personalizar'}
+          </button>
+          <button
             onClick={handleCopy}
             className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink-soft transition hover:border-brand hover:text-brand"
           >
@@ -231,107 +353,47 @@ export default function PainelPage() {
         </div>
       </div>
 
-      {/* Seu dia — pendências cross-módulo ───────────────── */}
-      <SeuDia pendencias={pend} />
-
-      {/* KPIs ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard
-          label={t.kpiVisualizacoes}
-          value={formatNumber(kpis.visualizacoes)}
-          icon="👁️"
-          delta={kpis.visualizacoesDelta}
-          sub={t.ultimos30}
-        />
-        <KpiCard label={t.kpiFavoritos} value={kpis.favoritos == null ? '—' : formatNumber(kpis.favoritos)} icon="❤️" />
-        <KpiCard label={t.kpiConversas} value={kpis.conversas == null ? '—' : formatNumber(kpis.conversas)} icon="💬" />
-        <KpiCard label={t.kpiAvaliacao} value={kpis.avaliacao} icon="⭐" />
-      </div>
-
-      {/* Ações rápidas ───────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {QUICK_ACTIONS.map((a) => (
-          <Link
-            key={a.href}
-            href={a.href}
-            className="group rounded-2xl border border-transparent bg-white p-4 shadow-card transition hover:border-brand/30 hover:shadow-md"
+      {/* Personalização ──────────────────────────────────── */}
+      {customizing && (
+        <div className="flex flex-col gap-2 rounded-2xl border border-brand/30 bg-brand-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-ink-soft">
+            Arraste <span className="font-semibold">⠿</span> ou use <span className="font-semibold">↑↓</span> para reordenar; “Ocultar” esconde o widget. As mudanças salvam sozinhas.
+          </span>
+          <button
+            onClick={() => aplicarLayout({ ordem: [...ORDEM_PADRAO], ocultos: [] })}
+            className="self-start font-semibold text-brand hover:underline sm:self-auto"
           >
-            <div className="text-xl">{a.emoji}</div>
-            <div className="mt-2 text-sm font-bold text-ink transition group-hover:text-brand">{a.label}</div>
-            <div className="mt-0.5 text-xs text-ink-muted">{a.desc}</div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Checklist + Resumo ─────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-
-        <div className="lg:col-span-2 rounded-2xl bg-white p-6 shadow-card">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-ink">{t.completePerfil}</h3>
-            <span className="text-sm font-semibold text-ink-muted">{feitos} {t.de} {checklist.length}</span>
-          </div>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
-            <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${pct}%` }} />
-          </div>
-          <ul className="mt-5 space-y-1">
-            {checklist.map((c) => {
-              const inner = (
-                <>
-                  <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[0.7rem] ${
-                    c.done ? 'bg-emerald-500 text-white' : 'border border-black/15 bg-white text-transparent'
-                  }`}>
-                    ✓
-                  </span>
-                  <span className={`flex-1 text-sm ${c.done ? 'text-ink-soft line-through decoration-black/20' : 'font-medium text-ink'}`}>
-                    {c.label}
-                  </span>
-                  {!c.done && c.href && (
-                    <span className="text-xs font-semibold text-brand">{t.completar}</span>
-                  )}
-                </>
-              );
-
-              if (!c.done && c.href) {
-                return (
-                  <li key={c.label}>
-                    <Link
-                      href={c.href}
-                      className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-brand-50"
-                    >
-                      {inner}
-                    </Link>
-                  </li>
-                );
-              }
-              return (
-                <li key={c.label} className="flex items-center gap-3 px-2 py-2">
-                  {inner}
-                </li>
-              );
-            })}
-          </ul>
+            Restaurar padrão
+          </button>
         </div>
+      )}
 
-        <div className="rounded-2xl bg-white p-6 shadow-card">
-          <h3 className="text-base font-bold text-ink">{t.resumo}</h3>
-          <dl className="mt-4 space-y-3 text-sm">
-            <Linha termo={t.categoria} valor={prop.categoria || '—'} />
-            <Linha termo={t.valorReferencia} valor={valorRef ? formatMoney(valorRef) : t.sobConsulta} />
-            <Linha termo={t.tiposEvento} valor={prop.tipo_evento || '—'} />
-            <Linha termo={t.capacidade} valor={prop.capacidade ? `${formatNumber(prop.capacidade)} ${t.pessoas}` : '—'} />
-          </dl>
-          <div className="mt-5 border-t border-black/[0.05] pt-4">
-            <Link
-              href="/painel/minha-propriedade"
-              className="block w-full rounded-full border border-black/10 py-2 text-center text-sm font-semibold text-ink-soft transition hover:border-brand hover:text-brand"
-            >
-              {t.editarPropriedade}
-            </Link>
-          </div>
-        </div>
-
-      </div>
+      {/* Widgets (ordem/visibilidade personalizáveis) ─────── */}
+      {visiveis.map((id, idx) => {
+        const meta = WIDGETS_META.find((w) => w.id === id);
+        const oculto = layout.ocultos.includes(id);
+        return (
+          <WidgetWrapper
+            key={id}
+            nome={meta?.nome || id}
+            customizing={customizing}
+            oculto={oculto}
+            arrastando={draggedId === id}
+            onDragStart={() => setDraggedId(id)}
+            onDrop={() => {
+              if (draggedId && draggedId !== id) aplicarLayout({ ...layout, ordem: reordenar(layout.ordem, draggedId, id) });
+              setDraggedId(null);
+            }}
+            onDragEnd={() => setDraggedId(null)}
+            onMover={(dir) => aplicarLayout({ ...layout, ordem: moverWidget(layout.ordem, id, dir) })}
+            onToggle={() => aplicarLayout({ ...layout, ocultos: oculto ? layout.ocultos.filter((x) => x !== id) : [...layout.ocultos, id] })}
+            podeSubir={idx > 0}
+            podeDescer={idx < visiveis.length - 1}
+          >
+            {BLOCKS[id]}
+          </WidgetWrapper>
+        );
+      })}
     </div>
   );
 }
@@ -425,6 +487,43 @@ function SeuDia({ pendencias }: { pendencias: Pendencia[] | null }) {
           </Link>
         </div>
       )}
+    </div>
+  );
+}
+
+// Envoltório de widget no modo "Personalizar": tira de controle (arrastar, ↑↓,
+// ocultar) + borda tracejada. Fora do modo, é transparente (só renderiza o filho).
+function WidgetWrapper({
+  nome, customizing, oculto, arrastando, onDragStart, onDrop, onDragEnd, onMover, onToggle, podeSubir, podeDescer, children,
+}: {
+  nome: string; customizing: boolean; oculto: boolean; arrastando: boolean;
+  onDragStart: () => void; onDrop: () => void; onDragEnd: () => void;
+  onMover: (dir: -1 | 1) => void; onToggle: () => void;
+  podeSubir: boolean; podeDescer: boolean; children: ReactNode;
+}) {
+  if (!customizing) return <>{children}</>;
+  return (
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => { e.preventDefault(); onDrop(); }}
+      onDragEnd={onDragEnd}
+      className={`overflow-hidden rounded-2xl border-2 border-dashed transition ${arrastando ? 'border-brand opacity-40' : 'border-brand/30'}`}
+    >
+      <div className="flex items-center gap-1 border-b border-line bg-surface-alt px-3 py-2">
+        <span className="cursor-grab select-none px-1 text-ink-muted" title="Arraste para reordenar">⠿</span>
+        <span className="flex-1 truncate text-sm font-semibold text-ink">{nome}</span>
+        <button onClick={() => onMover(-1)} disabled={!podeSubir} aria-label="Mover para cima"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-soft transition hover:bg-black/[0.04] disabled:opacity-30">↑</button>
+        <button onClick={() => onMover(1)} disabled={!podeDescer} aria-label="Mover para baixo"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-soft transition hover:bg-black/[0.04] disabled:opacity-30">↓</button>
+        <button onClick={onToggle} aria-label={oculto ? 'Mostrar widget' : 'Ocultar widget'}
+          className="ml-1 rounded-lg px-2 py-1 text-xs font-semibold text-ink-soft transition hover:bg-black/[0.04]">
+          {oculto ? 'Mostrar' : 'Ocultar'}
+        </button>
+      </div>
+      <div className={oculto ? 'pointer-events-none p-3 opacity-40' : 'p-3'}>{children}</div>
     </div>
   );
 }
