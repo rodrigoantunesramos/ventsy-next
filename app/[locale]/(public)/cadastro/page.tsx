@@ -335,7 +335,9 @@ function CadastroContent() {
       }
 
       if (refCodigo.trim() && userId) {
+        // Indicação host→host (legado) + indicação cliente→cliente (créditos/cupom).
         try { await supabase.rpc('registrar_indicacao', { p_indicado_id: userId, p_ref_handle: refCodigo.trim() }) } catch (_) {}
+        try { await supabase.rpc('registrar_indicacao_cliente', { p_codigo: refCodigo.trim(), p_indicado: userId }) } catch (_) {}
       }
 
       try { await supabase.rpc('marcar_cadastro_convertido', { p_email: email.trim() }) } catch (_) {}

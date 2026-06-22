@@ -177,14 +177,14 @@ grant execute on function public.garantir_seucodigo(uuid) to authenticated, serv
 -- Registra a indicação no cadastro do NOVO usuário (auth.uid() = indicado).
 -- Concede um cupom de boas-vindas ao indicado; o crédito do indicador vem na
 -- conversão (primeiro evento). Idempotente por indicado.
-create or replace function public.registrar_indicacao_cliente(p_codigo text)
+create or replace function public.registrar_indicacao_cliente(p_codigo text, p_indicado uuid default null)
 returns jsonb
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_indicado  uuid := auth.uid();
+  v_indicado  uuid := coalesce(p_indicado, auth.uid());
   v_indicador uuid;
   v_email     text;
   v_cupom     text;
@@ -221,7 +221,7 @@ begin
   return jsonb_build_object('ok', true, 'cupom', v_cupom);
 end;
 $$;
-grant execute on function public.registrar_indicacao_cliente(text) to authenticated, service_role;
+grant execute on function public.registrar_indicacao_cliente(text, uuid) to authenticated, service_role;
 
 -- Converte a indicação quando o indicado vira contratante de fato (primeiro
 -- acesso a um evento) e credita o indicador. SECURITY DEFINER (escreve no

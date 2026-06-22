@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { formatMoney, formatDate } from '@/lib/format'
+import { PageHeader, Card, Badge, EmptyState, Skeleton, btnPrimary, Icon } from '../_ui'
 
 type Reserva = {
   id: string
@@ -23,14 +24,14 @@ type Reserva = {
   propriedade: { id: number; nome: string | null; cidade: string | null } | null
 }
 
-const STATUS: Record<string, { label: string; cls: string; passo: number }> = {
-  solicitada: { label: 'Aguardando aprovação', cls: 'border-amber-200 bg-amber-50 text-amber-700', passo: 1 },
-  aprovada: { label: 'Aprovada — pague para confirmar', cls: 'border-sky-200 bg-sky-50 text-sky-700', passo: 2 },
-  paga: { label: 'Confirmada', cls: 'border-emerald-200 bg-emerald-50 text-emerald-700', passo: 3 },
-  confirmada: { label: 'Confirmada', cls: 'border-emerald-200 bg-emerald-50 text-emerald-700', passo: 3 },
-  recusada: { label: 'Recusada', cls: 'border-red-200 bg-red-50 text-red-700', passo: 0 },
-  cancelada: { label: 'Cancelada', cls: 'border-gray-200 bg-gray-100 text-gray-500', passo: 0 },
-  expirada: { label: 'Expirada', cls: 'border-gray-200 bg-gray-100 text-gray-500', passo: 0 },
+const STATUS: Record<string, { label: string; tone: 'ambar' | 'azul' | 'verde' | 'vermelho' | 'cinza'; passo: number }> = {
+  solicitada: { label: 'Aguardando aprovação', tone: 'ambar', passo: 1 },
+  aprovada: { label: 'Aprovada — pague para confirmar', tone: 'azul', passo: 2 },
+  paga: { label: 'Confirmada', tone: 'verde', passo: 3 },
+  confirmada: { label: 'Confirmada', tone: 'verde', passo: 3 },
+  recusada: { label: 'Recusada', tone: 'vermelho', passo: 0 },
+  cancelada: { label: 'Cancelada', tone: 'cinza', passo: 0 },
+  expirada: { label: 'Expirada', tone: 'cinza', passo: 0 },
 }
 const PASSOS = ['Solicitada', 'Aprovada', 'Confirmada']
 
@@ -55,42 +56,32 @@ export default function ClientReservasPage() {
   }, [router])
 
   return (
-    <div className="mx-auto max-w-[760px] px-6 py-7">
-      <div className="mb-6">
-        <h1 className="m-0 text-[1.5rem] font-extrabold text-gray-900">📅 Minhas Reservas</h1>
-        <p className="mt-1.5 text-[.88rem] text-gray-400">Acompanhe o andamento das reservas que você solicitou.</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader eyebrow="Minha área" title="Minhas reservas" subtitle="Acompanhe o andamento das reservas que você solicitou." />
 
       {loading ? (
-        <div className="space-y-3">
-          {[0, 1].map((i) => <div key={i} className="h-32 animate-pulse rounded-2xl bg-black/[0.05]" />)}
-        </div>
+        <div className="space-y-3">{[0, 1].map((i) => <Skeleton key={i} className="h-32" />)}</div>
       ) : reservas.length === 0 ? (
-        <div className="rounded-2xl border border-[#f0f0f0] bg-white px-5 py-14 text-center shadow-[0_2px_12px_rgba(0,0,0,.05)]">
-          <div className="mb-3 text-[3rem]">📅</div>
-          <div className="mb-1.5 text-base font-semibold text-gray-500">Nenhuma reserva ainda</div>
-          <div className="mx-auto max-w-sm text-[.85rem] text-gray-400">Encontre um espaço e solicite uma reserva — o andamento aparece aqui.</div>
-          <Link href="/busca" className="mt-5 inline-block rounded-xl bg-[#ff385c] px-6 py-2.5 text-[.9rem] font-bold text-white no-underline transition-colors hover:bg-[#e0304f]">
-            🔍 Explorar espaços
-          </Link>
-        </div>
+        <EmptyState icon="calendar" title="Nenhuma reserva ainda"
+          text="Encontre um espaço e solicite uma reserva — o andamento aparece aqui."
+          action={<Link href="/busca" className={btnPrimary}><Icon name="search" size={16} /> Explorar espaços</Link>} />
       ) : (
         <div className="space-y-4">
           {reservas.map((r) => {
-            const st = STATUS[r.status] || { label: r.status, cls: 'border-gray-200 bg-gray-100 text-gray-500', passo: 0 }
+            const st = STATUS[r.status] || { label: r.status, tone: 'cinza' as const, passo: 0 }
             return (
-              <div key={r.id} className="rounded-2xl border border-[#f0f0f0] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,.05)]">
+              <Card key={r.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-[1rem] font-bold text-gray-900">{r.propriedade?.nome || 'Espaço'}</div>
-                    <div className="mt-0.5 text-[.8rem] text-gray-400">
+                    <div className="truncate text-[1rem] font-bold text-ink">{r.propriedade?.nome || 'Espaço'}</div>
+                    <div className="mt-0.5 text-[.8rem] text-ink-muted">
                       {r.propriedade?.cidade ? `${r.propriedade.cidade} · ` : ''}{r.tipo_evento || 'Evento'}
                     </div>
                   </div>
-                  <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[.72rem] font-semibold ${st.cls}`}>{st.label}</span>
+                  <Badge tone={st.tone}>{st.label}</Badge>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[.82rem] text-gray-500">
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[.82rem] text-ink-muted">
                   {r.data_inicio && <span>📅 {formatDate(r.data_inicio)}</span>}
                   {r.pessoas ? <span>👥 {r.pessoas} pessoas</span> : null}
                   {r.valor_estimado ? <span>💰 {formatMoney(Number(r.valor_estimado))} estimado</span> : null}
@@ -100,9 +91,9 @@ export default function ClientReservasPage() {
                   <div className="mt-4 flex items-center">
                     {PASSOS.map((p, i) => (
                       <div key={p} className="flex items-center">
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[.7rem] font-bold ${i + 1 <= st.passo ? 'bg-[#ff385c] text-white' : 'bg-gray-100 text-gray-400'}`}>{i + 1}</div>
-                        <span className={`ml-1.5 text-[.74rem] ${i + 1 <= st.passo ? 'font-semibold text-gray-700' : 'text-gray-400'}`}>{p}</span>
-                        {i < PASSOS.length - 1 && <div className={`mx-2 h-px w-5 ${i + 1 < st.passo ? 'bg-[#ff385c]' : 'bg-gray-200'}`} />}
+                        <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[.7rem] font-bold ${i + 1 <= st.passo ? 'bg-brand text-white' : 'bg-black/[0.06] text-ink-muted'}`}>{i + 1}</div>
+                        <span className={`ml-1.5 text-[.74rem] ${i + 1 <= st.passo ? 'font-semibold text-ink-soft' : 'text-ink-muted'}`}>{p}</span>
+                        {i < PASSOS.length - 1 && <div className={`mx-2 h-px w-5 ${i + 1 < st.passo ? 'bg-brand' : 'bg-black/[0.1]'}`} />}
                       </div>
                     ))}
                   </div>
@@ -110,10 +101,10 @@ export default function ClientReservasPage() {
 
                 {r.propriedade?.id && (
                   <div className="mt-3">
-                    <Link href={`/propriedade/${r.propriedade.id}`} className="text-[.8rem] font-semibold text-[#ff385c] no-underline">Ver espaço →</Link>
+                    <Link href={`/propriedade/${r.propriedade.id}`} className="text-[.8rem] font-semibold text-brand">Ver espaço →</Link>
                   </div>
                 )}
-              </div>
+              </Card>
             )
           })}
         </div>

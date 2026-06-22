@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import PropertyCard from '@/components/PropertyCard'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Favorite } from '@/types/client'
+import { PageHeader, EmptyState, Skeleton, btnPrimary, Icon } from '../_ui'
 
 export default function FavoritosPage() {
   const router = useRouter()
@@ -18,7 +20,6 @@ export default function FavoritosPage() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
-
       try {
         const res  = await fetch(`/api/favoritos?user_id=${session.user.id}`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
@@ -37,31 +38,25 @@ export default function FavoritosPage() {
   }
 
   if (loading) return (
-    <div className="px-6 py-7 max-w-[980px] mx-auto">
-      <div className="mb-6 h-8 w-44 animate-pulse rounded bg-black/[0.05]" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{[0, 1, 2].map((i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-black/[0.05]" />)}</div>
+    <div className="space-y-6">
+      <Skeleton className="h-12 w-48" />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-64" />)}</div>
     </div>
   )
 
   return (
-    <div className="px-6 py-7 max-w-[980px] mx-auto">
-      <div className="mb-6">
-        <h1 className="text-[1.5rem] font-extrabold text-gray-900 m-0">❤️ Meus Favoritos</h1>
-        <p className="text-[.88rem] text-gray-400 mt-1.5">
-          {favoritos.length > 0
-            ? `${favoritos.length} espaço${favoritos.length > 1 ? 's' : ''} salvo${favoritos.length > 1 ? 's' : ''}`
-            : 'Nenhum espaço salvo ainda'}
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader eyebrow="Descobrir" title="Favoritos"
+        subtitle={favoritos.length > 0
+          ? `${favoritos.length} espaço${favoritos.length > 1 ? 's' : ''} salvo${favoritos.length > 1 ? 's' : ''}`
+          : 'Os espaços que você curtiu ficam aqui.'} />
 
       {favoritos.length === 0 ? (
-        <div className="text-center py-16 px-5 text-gray-300">
-          <div className="text-[3rem] mb-3">❤️</div>
-          <div className="text-base font-semibold text-gray-400 mb-1.5">Nenhum favorito ainda</div>
-          <div className="text-[.85rem]">Salve os espaços que você curtiu para encontrá-los facilmente depois.</div>
-        </div>
+        <EmptyState icon="heart" title="Nenhum favorito ainda"
+          text="Salve os espaços que você curtiu para encontrá-los facilmente depois."
+          action={<Link href="/busca" className={btnPrimary}><Icon name="search" size={16} /> Explorar espaços</Link>} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {favoritos.map(fav => fav.propriedade && (
             <PropertyCard
               key={fav.id}
