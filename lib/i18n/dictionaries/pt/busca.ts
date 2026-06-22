@@ -32,6 +32,9 @@ const busca = {
   vazioTitulo: '😕 Nenhum espaço encontrado',
   vazioTexto: 'Tente ajustar os filtros ou buscar em outra região.',
   vazioBotao: 'Ver todos os espaços',
+  // Estado vazio quando há filtros ativos (oferece limpar, em vez de só voltar à home).
+  vazioFiltrosTitulo: '😕 Nenhum espaço com esses filtros',
+  vazioFiltrosTexto: 'Tente remover alguns filtros para ver mais opções.',
   // Botão "carregar mais" — {n} é quantos restam.
   carregarMais: 'Carregar mais ({n} restantes)',
   // Rótulo do marcador no mapa quando não há preço.

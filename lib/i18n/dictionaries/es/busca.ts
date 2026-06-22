@@ -25,6 +25,8 @@ const busca: T = {
   vazioTitulo: '😕 Ningún espacio encontrado',
   vazioTexto: 'Intenta ajustar los filtros o buscar en otra región.',
   vazioBotao: 'Ver todos los espacios',
+  vazioFiltrosTitulo: '😕 Ningún espacio con esos filtros',
+  vazioFiltrosTexto: 'Prueba a quitar algunos filtros para ver más opciones.',
   carregarMais: 'Cargar más ({n} restantes)',
   mapaVer: 'Ver',
   verMapa: 'Ver mapa',

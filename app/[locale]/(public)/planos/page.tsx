@@ -146,6 +146,23 @@ function PlanosContent() {
         </div>
       </section>
 
+      {/* ── Faixa de trial: o maior gancho (1 mês grátis no Ultra) sai do rodapé
+          e aparece logo após o hero, acima da dobra. Leva ao cadastro — fluxo
+          distinto dos botões "Assinar" (que vão ao checkout pago). ── */}
+      <div className="mx-auto max-w-[1060px] px-[5%] pt-6">
+        <Link
+          href={lhref('/cadastro')}
+          className="group flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl border border-ouro-200 bg-ouro-50 px-5 py-3.5 text-center no-underline transition-colors hover:bg-ouro-100"
+        >
+          <span className="text-xl" aria-hidden="true">🎁</span>
+          <span className="text-sm text-ink-soft">
+            <strong className="font-bold text-ink">{t.cta.trialTitulo}</strong>
+            <span className="text-ink-muted"> · {t.cta.semCartao}</span>
+          </span>
+          <span aria-hidden="true" className="font-bold text-ouro-600 transition-transform group-hover:translate-x-0.5">→</span>
+        </Link>
+      </div>
+
       {/* ── GRID ── */}
       <div className="pl-grid">
 

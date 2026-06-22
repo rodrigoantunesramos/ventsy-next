@@ -73,6 +73,16 @@ const en: Dictionary = {
   },
   home: {
     carregandoEspacos: 'Loading venues...',
+    hero: {
+      tag: 'The venue marketplace for events',
+      tituloA: 'Find the ',
+      tituloEm: 'perfect venue',
+      tituloB: ' for your event',
+      sub: 'Weddings, birthdays, corporate events and productions: discover, compare and talk directly with the people behind the best venues in Brazil.',
+      ctaBuscar: 'Explore venues',
+      ctaAnunciar: 'List your space',
+      populares: 'Popular:',
+    },
   },
   componentes: {
     onde: {

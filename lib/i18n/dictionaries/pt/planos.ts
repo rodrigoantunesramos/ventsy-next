@@ -79,6 +79,7 @@ const planos = {
   },
   cta: {
     trialTitulo: '1 mês grátis no Ultra',
+    semCartao: 'sem cartão de crédito',
     trialDesc:
       'Cadastre sua propriedade agora e experimente todos os recursos premium sem pagar nada. Após o período, você continua no plano Básico gratuitamente.',
     botao: 'Cadastre sua propriedade',

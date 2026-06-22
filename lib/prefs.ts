@@ -8,6 +8,7 @@ import { setFormatPrefs, type Locale, type Currency } from '@/lib/format'
 
 export type Idioma = 'pt' | 'en' | 'es'
 export type FormatoData = 'auto' | 'short' | 'long'
+export type Tema = 'sistema' | 'claro' | 'escuro'
 
 const STORAGE_KEY = 'ventsy_prefs'
 
@@ -42,6 +43,12 @@ export const FORMATOS_DATA: { v: FormatoData; label: string }[] = [
   { v: 'long', label: 'Por extenso — 31 de dezembro de 2026' },
 ]
 
+export const TEMAS: { v: Tema; label: string }[] = [
+  { v: 'sistema', label: 'Automático (sistema)' },
+  { v: 'claro', label: 'Claro' },
+  { v: 'escuro', label: 'Escuro' },
+]
+
 export const LOCALE_BY_IDIOMA: Record<Idioma, Locale> = {
   pt: 'pt-BR',
   en: 'en-US',
@@ -61,6 +68,7 @@ export type Prefs = {
   moeda: Currency
   fuso: string
   formato_data: FormatoData
+  tema: Tema
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -69,6 +77,7 @@ export const DEFAULT_PREFS: Prefs = {
   moeda: 'BRL',
   fuso: 'America/Sao_Paulo',
   formato_data: 'auto',
+  tema: 'sistema',
 }
 
 /** Lê as preferências salvas no navegador (ou null se ausentes/inválidas). */
@@ -88,7 +97,7 @@ export function loadStoredPrefs(): Prefs | null {
  * Chame ao salvar em /painel/configuracoes e no boot do layout (com os dados do
  * servidor). Dispara um evento para componentes que queiram reagir na hora.
  */
-export function applyPrefs(input: { idioma?: Idioma; moeda?: Currency; fuso?: string; formato_data?: FormatoData }): Prefs {
+export function applyPrefs(input: { idioma?: Idioma; moeda?: Currency; fuso?: string; formato_data?: FormatoData; tema?: Tema }): Prefs {
   const base = loadStoredPrefs() ?? DEFAULT_PREFS
   const idioma = input.idioma ?? base.idioma
   const prefs: Prefs = {
@@ -97,9 +106,11 @@ export function applyPrefs(input: { idioma?: Idioma; moeda?: Currency; fuso?: st
     moeda: input.moeda ?? base.moeda,
     fuso: input.fuso ?? base.fuso,
     formato_data: input.formato_data ?? base.formato_data,
+    tema: input.tema ?? base.tema,
   }
   setFormatPrefs({ locale: prefs.locale, currency: prefs.moeda, timeZone: prefs.fuso })
   if (typeof window !== 'undefined') {
+    applyTema(prefs.tema)
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
       window.dispatchEvent(new CustomEvent('ventsy:prefs', { detail: prefs }))
@@ -108,4 +119,17 @@ export function applyPrefs(input: { idioma?: Idioma; moeda?: Currency; fuso?: st
     }
   }
   return prefs
+}
+
+/** Resolve se o tema efetivo é escuro ('sistema' consulta o SO via matchMedia). */
+export function resolveTemaEscuro(tema: Tema): boolean {
+  if (tema === 'escuro') return true
+  if (tema === 'claro') return false
+  return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-color-scheme: dark)').matches
+}
+
+/** Liga/desliga a classe `dark` no <html> conforme o tema escolhido. */
+export function applyTema(tema: Tema): void {
+  if (typeof document === 'undefined') return
+  document.documentElement.classList.toggle('dark', resolveTemaEscuro(tema))
 }

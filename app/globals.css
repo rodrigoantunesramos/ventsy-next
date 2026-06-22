@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap');
+/* Playfair Display (títulos/marca) ainda vem por CDN: é referenciado por NOME em
+   styles/publico.css, legal.css, propriedade.css e CategorySection. DM Sans saiu
+   daqui — agora vem otimizada via next/font (--font-sans), sem download duplicado. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,10 +18,74 @@
   --borda:    #e8e8e8;
   --texto:    #3a3a3a;
   --suave:    #888;
+
+  /* ── Tokens de TEMA (claro) — canais "R G B" p/ casar com rgb(var()/alpha)
+     do tailwind.config. Os valores de tinta são idênticos aos antigos. ── */
+  --ink: 13 13 13;
+  --ink-soft: 34 34 34;
+  --ink-muted: 107 114 128;
+  --surface: 255 255 255;
+  --surface-alt: 247 247 248;
+  --canvas: 247 247 248;
+  --line: rgba(0, 0, 0, 0.08);
 }
 
+/* ── TEMA ESCURO ─────────────────────────────────────────────────────────────
+   Só ativo no painel (a classe `dark` é setada no <html> pelo bootstrap do
+   RootHtml + lib/prefs). Tinta/superfícies vêm das vars acima. ── */
+.dark {
+  color-scheme: dark;
+  --ink: 237 238 242;
+  --ink-soft: 209 213 219;
+  --ink-muted: 150 159 173;
+  --surface: 22 24 29;
+  --surface-alt: 28 31 38;
+  --canvas: 14 15 19;
+  --line: rgba(255, 255, 255, 0.10);
+}
+
+/* ── Camada de COMPATIBILIDADE dark ──────────────────────────────────────────
+   O painel tem ~900 usos de bg-white e cores hardcoded espalhados em 200+
+   telas. Em vez de reescrever tudo, remapeamos sob `.dark` os utilitários mais
+   usados para as superfícies do tema. Texto (text-ink*) já adapta sozinho via
+   tokens. Migração incremental troca estes por bg-surface/border-line. ── */
+.dark body { background: rgb(var(--canvas)); color: rgb(var(--ink-soft)); }
+
+.dark .bg-white { background-color: rgb(var(--surface)) !important; }
+.dark .bg-\[\#f7f7f8\],
+.dark .bg-\[\#f7f7f7\],
+.dark .bg-\[\#fafafa\],
+.dark .bg-\[\#f9fafb\] { background-color: rgb(var(--canvas)) !important; }
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-slate-50,
+.dark .bg-neutral-50 { background-color: rgb(var(--surface-alt)) !important; }
+
+.dark .hover\:bg-\[\#f7f7f7\]:hover,
+.dark .hover\:bg-black\/\[0\.02\]:hover,
+.dark .hover\:bg-black\/\[0\.03\]:hover { background-color: rgb(var(--surface-alt)) !important; }
+
+.dark .bg-black\/\[0\.02\],
+.dark .bg-black\/\[0\.03\],
+.dark .bg-black\/\[0\.04\],
+.dark .bg-black\/5 { background-color: rgba(255, 255, 255, 0.05) !important; }
+
+.dark .border-black\/\[0\.04\],
+.dark .border-black\/\[0\.06\],
+.dark .border-black\/\[0\.08\],
+.dark .border-black\/5,
+.dark .border-black\/10,
+.dark .border-gray-100,
+.dark .border-gray-200 { border-color: var(--line) !important; }
+
+.dark .bg-brand-50 { background-color: rgba(255, 56, 92, 0.14) !important; }
+.dark .hover\:bg-brand-50:hover { background-color: rgba(255, 56, 92, 0.18) !important; }
+
+.dark .shadow-card,
+.dark .shadow-pop { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5) !important; }
+
 body {
-  font-family: 'DM Sans', Arial, sans-serif;
+  font-family: var(--font-sans), 'DM Sans', system-ui, sans-serif;
   background: #fafafa;
   color: #3a3a3a;
   min-height: 100vh;
@@ -47,7 +114,7 @@ body {
 .dash-menu-link.active { background: #fff5f6; color: #ff385c !important; border-left-color: #ff385c !important; font-weight: 600; }
 
 /* Flatpickr overrides */
-.flatpickr-calendar { font-family: 'DM Sans', Arial, sans-serif !important; border-radius: 16px !important; box-shadow: 0 12px 40px rgba(0,0,0,.15) !important; border: 1px solid #eee !important; }
+.flatpickr-calendar { font-family: var(--font-sans), 'DM Sans', sans-serif !important; border-radius: 16px !important; box-shadow: 0 12px 40px rgba(0,0,0,.15) !important; border: 1px solid #eee !important; }
 .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--vermelho) !important; border-color: var(--vermelho) !important; }
 .flatpickr-day.inRange { background: #ffe0e6 !important; border-color: #ffe0e6 !important; box-shadow: -5px 0 0 #ffe0e6, 5px 0 0 #ffe0e6 !important; color: #333 !important; }
 .flatpickr-day:hover { background: #ffe0e6 !important; }

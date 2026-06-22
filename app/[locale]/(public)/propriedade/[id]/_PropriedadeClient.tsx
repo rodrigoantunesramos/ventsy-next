@@ -345,6 +345,8 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
   const abrirLb=(urls:string[],i:number)=>{setLbFotos(urls);setLbIdx(i);setLbOpen(true)}
   const toggleFav=()=>{if(!prop?.id)return;const f:string[]=JSON.parse(localStorage.getItem('ventsy_favs')||'[]');const i=f.indexOf(prop.id);if(i>=0)f.splice(i,1);else f.push(prop.id);localStorage.setItem('ventsy_favs',JSON.stringify(f));setFav(i<0)}
   const copiarLink=()=>{navigator.clipboard.writeText(window.location.href);setLinkCopiado(true);setTimeout(()=>setLinkCopiado(false),2000)}
+  // Atalho da barra mobile: rola até o card de reserva e foca o primeiro campo.
+  const irParaReserva=()=>{const el=document.getElementById('pp-reserva');if(!el)return;el.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>{(el.querySelector('.pp-form input') as HTMLInputElement|null)?.focus()},450)}
 
   const avalFil=(()=>{const b=avaliacoes;if(avalFiltro==='5')return b.filter(a=>a.nota===5);if(avalFiltro==='4')return b.filter(a=>a.nota===4);if(avalFiltro==='3')return b.filter(a=>a.nota<=3);if(avalFiltro==='verificados')return b.filter(a=>a.verificada);return b})()
   const linhas=(prop?.descricao||'').split('\n').filter((l:string)=>l.trim())
@@ -569,7 +571,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                   ) : (
                     <button
                       onClick={()=>setReviewModal(true)}
-                      className="bg-[#ff385c] text-white border-none rounded-[10px] px-[18px] py-[9px] text-[.86rem] font-bold cursor-pointer transition-opacity duration-150"
+                      className="bg-brand hover:bg-brand-600 text-white border-none rounded-[10px] px-[18px] py-[9px] text-[.86rem] font-bold cursor-pointer transition-colors duration-150"
                     >
                       {t.avaliacoes.avaliarEspaco}
                     </button>
@@ -686,8 +688,16 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
           </div>
 
           {/* Card lateral */}
-          <div className="pp-card-lateral-outer">
+          <div id="pp-reserva" className="pp-card-lateral-outer scroll-mt-24">
             <div className="pp-card-lateral">
+              {/* Sinais de confiança — só com dados reais (nada inventado). */}
+              {(nota||anfTempo!=='—'||prop?.fotos_verificadas)&&(
+                <div className="pp-confianca">
+                  {nota&&<div className="pp-conf-item"><span className="pp-conf-ic" aria-hidden="true">⭐</span><span><strong>{parseFloat(nota).toFixed(1)}</strong> · {avaliacoes.length} {t.avaliacoes.verificadas}</span></div>}
+                  {anfTempo!=='—'&&<div className="pp-conf-item"><span className="pp-conf-ic" aria-hidden="true">🛡️</span><span>{t.anfitriao.proprietario} · {t.anfitriao.naVentsyHa} {anfTempo}</span></div>}
+                  {prop?.fotos_verificadas&&<div className="pp-conf-item"><span>{t.galeria.fotosVerificadas}</span></div>}
+                </div>
+              )}
               {plano==='ultra'&&(
                 <div className="pp-ultra-banner">
                   <div className="pp-ultra-title">{t.cardLateral.ultraBannerTitulo}</div>
@@ -762,7 +772,7 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
                       type="button"
                       onClick={solicitarReserva}
                       disabled={enviandoReserva}
-                      className="w-full bg-[#ff385c] hover:bg-[#e0304f] disabled:opacity-60 text-white font-bold text-[.92rem] rounded-[12px] py-3 transition-colors inline-flex items-center justify-center gap-2"
+                      className="w-full bg-brand hover:bg-brand-600 disabled:opacity-60 text-white font-bold text-[.92rem] rounded-[12px] py-3 transition-colors inline-flex items-center justify-center gap-2"
                     >
                       {enviandoReserva?t.form.enviando:t.form.solicitarReserva}
                     </button>
@@ -820,6 +830,36 @@ function PropriedadeContent({ initialProp, initialFotos }: { initialProp: PropMe
           <div className="pp-lb-counter">{lbIdx+1} / {lbFotos.length}</div>
         </div>
       )}
+
+      {/* Barra de ação fixa (mobile): preço + Solicitar + WhatsApp sempre à mão.
+          No mobile o card de reserva fica no fim da página — esta barra encurta o
+          caminho até a conversão. Some em ≥981px (o card sticky reassume). */}
+      <div className="pp-barra-mobile">
+        <div className="flex min-w-0 flex-col leading-tight">
+          {temPreco ? (
+            <>
+              <span className="text-[.62rem] font-semibold uppercase tracking-wide text-[var(--pp-muted)]">{dict.componentes.card.aPartirDe}</span>
+              <span className="truncate text-[1.05rem] font-extrabold text-[var(--preto)]">
+                {Number(prop?.valor_hora) > 0
+                  ? <>{formatMoney(locale, Number(prop.valor_hora))}<em className="not-italic text-[.8rem] font-medium text-[var(--pp-muted)]">{t.cardLateral.porHoraSufixo}</em></>
+                  : formatMoney(locale, Number(prop?.valor_base || prop?.preco))}
+              </span>
+            </>
+          ) : (
+            <span className="text-[1.02rem] font-extrabold text-[var(--preto)]">{dict.componentes.card.sobConsulta}</span>
+          )}
+        </div>
+        <div className="ml-auto flex flex-none items-center gap-2">
+          {wppRef.current && (
+            <button onClick={irWppDireto} aria-label={t.cardLateral.whatsappDireto} className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-[#25d366] text-white">
+              {WPP_SVG}
+            </button>
+          )}
+          <button onClick={irParaReserva} className="h-12 whitespace-nowrap rounded-xl bg-brand px-6 font-bold text-white transition-colors hover:bg-brand-600">
+            {t.barra.solicitar}
+          </button>
+        </div>
+      </div>
 
       <Footer/>
     </>

@@ -88,7 +88,7 @@ async function listar(tabela: string, uid: string): Promise<Record<string, unkno
 const s = (v: unknown): string | null => (v == null ? null : String(v));
 const n = (v: unknown): number | null => (v == null || v === '' ? null : Number(v));
 
-async function carregarDados(uid: string): Promise<DadosSelecao> {
+export async function carregarDados(uid: string): Promise<DadosSelecao> {
   const [evs, pcs, ctrs, cls, lics, fbs] = await Promise.all([
     listar('clientes_eventos', uid), listar('parcelas', uid), listar('contratos', uid),
     listar('clientes', uid), listar('licencas', uid), listar('feedbacks', uid),

@@ -113,7 +113,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
       <div className="mt-20 flex h-[calc(100vh-80px)]">
         <section className={`flex-1 overflow-y-auto px-5 py-5 min-w-0 ${mapaMobile ? 'hidden lg:block' : ''}`}>
           <div className="flex items-center gap-4 flex-wrap mb-2">
-            <h1 className="text-[1.4rem] font-extrabold text-[#0d0d0d] m-0">{titulo}</h1>
+            <h1 className="text-[1.4rem] font-extrabold text-ink m-0">{titulo}</h1>
             <button
               type="button"
               aria-haspopup="dialog"
@@ -122,7 +122,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
             >
               ⚙ {t.filtrosBtn}
               {contFiltros > 0 && (
-                <span className="bg-[#ff385c] text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[.7rem] font-extrabold">
+                <span className="bg-brand text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[.7rem] font-extrabold">
                   {contFiltros}
                 </span>
               )}
@@ -146,18 +146,54 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
           )}
 
           {loading ? (
-            <div className="text-gray-400 py-10 text-center">{t.carregando}</div>
+            <div role="status" aria-live="polite">
+              <span className="sr-only">{t.carregando}</span>
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-4" aria-hidden="true">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i}>
+                    <div className="aspect-[4/3] w-full animate-pulse rounded-2xl bg-gray-200" />
+                    <div className="mt-3 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                    <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : props.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-[1.1rem] mb-3">{t.vazioTitulo}</p>
-              <p className="text-gray-400 mb-6 text-[.9rem]">{t.vazioTexto}</p>
-              <button
-                type="button"
-                onClick={() => router.push(lhref('/'))}
-                className="bg-[#ff385c] hover:bg-[#e0304f] text-white border-none rounded-xl px-7 py-3 cursor-pointer font-[inherit] font-bold text-[.9rem] transition-colors"
-              >
-                {t.vazioBotao}
-              </button>
+              {contFiltros > 0 ? (
+                <>
+                  <p className="text-[1.1rem] mb-3">{t.vazioFiltrosTitulo}</p>
+                  <p className="text-gray-400 mb-6 text-[.9rem]">{t.vazioFiltrosTexto}</p>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => router.push(lhref('/busca'))}
+                      className="bg-brand hover:bg-brand-600 text-white border-none rounded-xl px-7 py-3 cursor-pointer font-[inherit] font-bold text-[.9rem] transition-colors"
+                    >
+                      {t.limparFiltros}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(lhref('/'))}
+                      className="bg-white border border-gray-300 hover:border-gray-500 text-gray-700 rounded-xl px-7 py-3 cursor-pointer font-[inherit] font-bold text-[.9rem] transition-colors"
+                    >
+                      {t.vazioBotao}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-[1.1rem] mb-3">{t.vazioTitulo}</p>
+                  <p className="text-gray-400 mb-6 text-[.9rem]">{t.vazioTexto}</p>
+                  <button
+                    type="button"
+                    onClick={() => router.push(lhref('/'))}
+                    className="bg-brand hover:bg-brand-600 text-white border-none rounded-xl px-7 py-3 cursor-pointer font-[inherit] font-bold text-[.9rem] transition-colors"
+                  >
+                    {t.vazioBotao}
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -203,7 +239,7 @@ function BuscaContent({ initialProps, initialPlanos }: { initialProps: RawProper
       {!loading && props.length > 0 && (
         <button
           type="button"
-          className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] bg-[#0d0d0d] text-white rounded-full px-5 py-3 text-sm font-bold shadow-pop flex items-center gap-2"
+          className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] bg-ink text-white rounded-full px-5 py-3 text-sm font-bold shadow-pop flex items-center gap-2"
           onClick={() => setMapaMobile((m) => !m)}
         >
           {mapaMobile ? `📋 ${t.verLista}` : `🗺️ ${t.verMapa}`}

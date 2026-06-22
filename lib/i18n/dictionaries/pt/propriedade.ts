@@ -15,6 +15,10 @@ const propriedade = {
     // Tela de carregamento (logo + dots).
     marca: 'VENTSY',
   },
+  // Barra de ação fixa no mobile (preço + CTA).
+  barra: {
+    solicitar: 'Solicitar reserva',
+  },
   cabecalho: {
     avaliacoes: 'avaliações',
     seloPremium: '✦ ESPAÇO PREMIUM',

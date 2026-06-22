@@ -74,6 +74,16 @@ const es: Dictionary = {
   },
   home: {
     carregandoEspacos: 'Cargando espacios...',
+    hero: {
+      tag: 'El escaparate de espacios para eventos',
+      tituloA: 'Encuentra el ',
+      tituloEm: 'espacio ideal',
+      tituloB: ' para tu evento',
+      sub: 'Bodas, cumpleaños, eventos corporativos y producciones: descubre, compara y habla directamente con quienes cuidan los mejores espacios de Brasil.',
+      ctaBuscar: 'Explorar espacios',
+      ctaAnunciar: 'Anuncia tu espacio',
+      populares: 'Populares:',
+    },
   },
   componentes: {
     onde: {
