@@ -60,6 +60,14 @@ export default function SearchBar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale])
 
+  // Trava o scroll do body enquanto a folha de busca (mobile) está aberta — antes
+  // a página continuava rolando atrás da folha full-screen (scroll duplo).
+  useEffect(() => {
+    if (!mobileOpen) return
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
+
   // Permite buscar por local, tipo de evento e/ou data — qualquer combinação.
   const canSearch = !!ondeSelected || !!eventoValue || !!datas.ini
 

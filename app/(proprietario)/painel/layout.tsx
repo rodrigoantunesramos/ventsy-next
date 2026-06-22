@@ -14,6 +14,7 @@ import type { Currency } from '@/lib/format';
 import { ToastProvider } from '@/components/Toast';
 import NotificationBell from '@/components/NotificationBell';
 import ThemeToggle from '@/components/ThemeToggle';
+import Copilot from '@/components/Copilot';
 import { useT } from '@/components/i18n/I18nProvider';
 import UpgradeGate from '@/components/UpgradeGate';
 import CommandPalette from '@/components/CommandPalette';
@@ -338,6 +339,7 @@ export default function PainelLayout({ children }: { children: React.ReactNode }
         </main>
       </div>
     </div>
+    <Copilot />
     </ToastProvider>
   );
 }

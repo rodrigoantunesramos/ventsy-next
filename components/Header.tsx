@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import SearchBar from './SearchBar'
 import { useT } from './i18n/I18nProvider'
@@ -10,6 +10,7 @@ import LocaleSwitcher from './i18n/LocaleSwitcher'
 export default function Header() {
   const { dict, lhref } = useT()
   const router = useRouter()
+  const pathname = usePathname()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -32,6 +33,10 @@ export default function Header() {
     document.addEventListener('click', handler)
     return () => document.removeEventListener('click', handler)
   }, [])
+
+  // Fecha o menu ao trocar de rota (clicar num link, voltar/avançar). Antes só
+  // fechava por clique fora — no mobile o menu podia ficar preso aberto.
+  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   const handleSair = async () => {
     setMenuOpen(false)
@@ -115,6 +120,8 @@ export default function Header() {
                 </Link>
                 <div className="my-1.5 border-t border-gray-100" />
                 {linksPublicos}
+                <div className="my-1.5 border-t border-gray-100 sm:hidden" />
+                <div className="px-2.5 py-1 sm:hidden"><LocaleSwitcher /></div>
                 <div className="my-1.5 border-t border-gray-100" />
                 <button
                   type="button"
@@ -151,6 +158,8 @@ export default function Header() {
               {menuOpen && (
                 <div className="absolute top-12 right-0 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col py-2 z-[2000]">
                   {linksPublicos}
+                  <div className="my-1.5 border-t border-gray-100 sm:hidden" />
+                  <div className="px-2.5 py-1 sm:hidden"><LocaleSwitcher /></div>
                 </div>
               )}
             </div>
