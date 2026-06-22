@@ -81,6 +81,7 @@ const planos: T = {
   },
   cta: {
     trialTitulo: '1 mes gratis en Ultra',
+    semCartao: 'sin tarjeta de crédito',
     trialDesc:
       'Anuncia tu propiedad ahora y prueba todas las funciones premium sin pagar nada. Tras el período, continúas en el plan Básico de forma gratuita.',
     botao: 'Anuncia tu propiedad',

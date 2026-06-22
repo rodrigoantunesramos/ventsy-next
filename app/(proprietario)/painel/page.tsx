@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase as sb } from '@/lib/supabase';
 import { formatMoney, formatNumber } from '@/lib/format';
 import { useT } from '@/components/i18n/I18nProvider';
+import { type Pendencia } from '@/lib/automacoes';
 
 type Propriedade = {
   id: number;
@@ -59,12 +60,19 @@ export default function PainelPage() {
     visualizacoesDelta: null,
   });
   const [copied, setCopied] = useState(false);
+  const [pend, setPend] = useState<Pendencia[] | null>(null);
 
   useEffect(() => {
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
       const user = session?.user;
       if (!user) { setLoading(false); return; }
+
+      // Cockpit "Seu dia" — pendências cross-módulo (não bloqueia os KPIs).
+      fetch('/api/painel/cockpit')
+        .then((r) => (r.ok ? r.json() : { pendencias: [] }))
+        .then((j) => setPend(Array.isArray(j.pendencias) ? j.pendencias : []))
+        .catch(() => setPend([]));
 
       if (user.email) setNome(user.email.split('@')[0]);
 
@@ -223,6 +231,9 @@ export default function PainelPage() {
         </div>
       </div>
 
+      {/* Seu dia — pendências cross-módulo ───────────────── */}
+      <SeuDia pendencias={pend} />
+
       {/* KPIs ────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard
@@ -356,6 +367,64 @@ function Linha({ termo, valor }: { termo: string; valor: string }) {
     <div className="flex items-start justify-between gap-3">
       <dt className="text-ink-muted">{termo}</dt>
       <dd className="text-right font-semibold text-ink-soft">{valor}</dd>
+    </div>
+  );
+}
+
+// Cor do ponto por urgência (saturada — legível em claro e escuro).
+const URG_DOT: Record<string, string> = {
+  critico: 'bg-red-500', alerta: 'bg-amber-500', sucesso: 'bg-emerald-500', info: 'bg-sky-500',
+};
+
+function SeuDia({ pendencias }: { pendencias: Pendencia[] | null }) {
+  if (pendencias === null) {
+    return <div className="h-28 animate-pulse rounded-2xl border border-line bg-surface shadow-card" />;
+  }
+  const total = pendencias.length;
+  const top = pendencias.slice(0, 8);
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-6 shadow-card">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-bold text-ink">Seu dia</h3>
+        {total > 0 && (
+          <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-bold text-brand">{total}</span>
+        )}
+      </div>
+
+      {total === 0 ? (
+        <div className="mt-4 flex items-center gap-3 text-sm text-ink-muted">
+          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/12 text-emerald-500">✓</span>
+          Tudo em dia — nenhuma pendência para os próximos dias.
+        </div>
+      ) : (
+        <ul className="mt-3 divide-y divide-line">
+          {top.map((p, i) => (
+            <li key={i}>
+              <Link
+                href={p.link}
+                className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-brand-50"
+              >
+                <span className={`h-2 w-2 flex-shrink-0 rounded-full ${URG_DOT[p.urgencia] || 'bg-sky-500'}`} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-ink">{p.titulo}</span>
+                  <span className="block truncate text-xs text-ink-muted">{p.sub}</span>
+                </span>
+                {p.valor_num != null && (
+                  <span className="flex-shrink-0 text-sm font-semibold text-ink-soft">{formatMoney(p.valor_num)}</span>
+                )}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {total > top.length && (
+        <div className="mt-2 text-center">
+          <Link href="/painel/automacoes?tab=notificacoes" className="text-xs font-semibold text-brand hover:underline">
+            Ver todas ({total})
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
