@@ -1,90 +1,74 @@
 'use client'
 
+// Shell premium da Área do Cliente (contratante). Tokens do projeto (tema-aware),
+// navegação agrupada com ícones, troca de tema, central de notificações e menu
+// de avatar. A navegação/identidade vivem em ./_nav.
+
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { usuarioTemPropriedade } from '@/lib/perfis'
 import NotificationBell from '@/components/NotificationBell'
+import ThemeToggle from '@/components/ThemeToggle'
 import { ToastProvider } from '@/components/Toast'
+import { NAV, Icon } from './_nav'
 
-interface UserProfile {
-  nome: string
-  email: string
-  inicial: string
-}
-
-const MENU_ITEMS = [
-  { href: '/client',           label: '🏠 Início',            rota: '/client'           },
-  { href: '/client/eventos',   label: '🎫 Meus Eventos',       rota: '/client/eventos'   },
-  { href: '/client/reservas',  label: '📅 Minhas Reservas',    rota: '/client/reservas'  },
-  { href: '/client/favoritos', label: '❤️ Favoritos',          rota: '/client/favoritos' },
-  { href: '/client/conversas', label: '💬 Conversas',          rota: '/client/conversas' },
-  { href: '/client/avaliacoes',label: '⭐ Minhas Avaliações',  rota: '/client/avaliacoes'},
-]
+interface UserProfile { nome: string; email: string; inicial: string }
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [profile,     setProfile]  = useState<UserProfile | null>(null)
-  const [sidebarOpen, setSidebar]  = useState(false)
-  const [avatarOpen,  setAvatar]   = useState(false)
-  const [loading,     setLoading]  = useState(true)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [sidebarOpen, setSidebar] = useState(false)
+  const [avatarOpen, setAvatar] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [isProprietario, setIsProprietario] = useState(false)
 
-  const router    = useRouter()
-  const pathname  = usePathname()
+  const router = useRouter()
+  const pathname = usePathname()
   const avatarRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
-
       const user = session.user
-      let nome   = user.email ?? ''
+      let nome = user.email ?? ''
       try {
         const { data: perfil } = await supabase.from('usuarios').select('nome').eq('id', user.id).single()
         if (perfil?.nome) nome = perfil.nome
       } catch { /* silencioso */ }
-
       const inicial = (nome.split(' ')[0]?.[0] ?? '?').toUpperCase()
       setProfile({ nome, email: user.email ?? '', inicial })
       setLoading(false)
-
-      // Detecta se também é proprietário, para oferecer a troca de painel.
       usuarioTemPropriedade(user.id).then(setIsProprietario)
     })()
   }, [router])
 
   useEffect(() => {
-    const h = (e: MouseEvent) => {
-      if (!avatarRef.current?.contains(e.target as Node)) setAvatar(false)
-    }
+    const h = (e: MouseEvent) => { if (!avatarRef.current?.contains(e.target as Node)) setAvatar(false) }
     document.addEventListener('click', h)
     return () => document.removeEventListener('click', h)
   }, [])
 
-  const handleSair = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
+  // Fecha a sidebar mobile ao navegar.
+  useEffect(() => { setSidebar(false) }, [pathname])
 
-  // Atalho para o "outro" painel: quem já anuncia vai ao painel do proprietário;
-  // quem ainda não, é convidado a anunciar (virar proprietário).
+  const handleSair = async () => { await supabase.auth.signOut(); router.push('/login') }
+
   const trocaPainel = isProprietario
-    ? { href: '/painel',   label: '🏢 Painel do proprietário' }
-    : { href: '/anunciar', label: '🏢 Anunciar meu espaço' }
+    ? { href: '/painel', label: 'Painel do proprietário', icon: 'building' as const }
+    : { href: '/anunciar', label: 'Anunciar meu espaço', icon: 'building' as const }
+
+  const isActive = (href: string) =>
+    href === '/client' ? pathname === '/client' : pathname === href || pathname.startsWith(href + '/')
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999]">
-        <span className="font-['Georgia,serif'] italic text-[2rem] text-[#ff385c] font-bold">VENTSY</span>
-        <div className="flex gap-1.5 mt-4">
-          {[0, 1, 2].map(i => (
-            <span
-              key={i}
-              className="w-2 h-2 rounded-full bg-[#ff385c] animate-bounce-dot"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
+      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-canvas">
+        <span className="font-display text-[2rem] font-bold italic text-brand">VENTSY</span>
+        <div className="mt-4 flex gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="h-2 w-2 animate-bounce rounded-full bg-brand" style={{ animationDelay: `${i * 0.15}s` }} />
           ))}
         </div>
       </div>
@@ -93,155 +77,97 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <ToastProvider>
-    <div className="min-h-screen bg-[#f7f7f8]">
+      <div className="min-h-screen bg-canvas">
+        {/* ── HEADER ───────────────────────────────────────────────────────── */}
+        <header className="sticky top-0 z-[100] flex h-[60px] items-center justify-between border-b border-line bg-surface px-4 sm:px-5">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebar(!sidebarOpen)} aria-label="Menu" className="flex flex-col gap-[5px] p-2 md:hidden">
+              <span className="block h-0.5 w-[22px] rounded-sm bg-ink-soft" />
+              <span className="block h-0.5 w-[22px] rounded-sm bg-ink-soft" />
+              <span className="block h-0.5 w-[22px] rounded-sm bg-ink-soft" />
+            </button>
+            <Link href="/"><span className="font-display text-[1.4rem] font-bold italic text-brand">VENTSY</span></Link>
+          </div>
 
-      {/* ── HEADER ──────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-[100] bg-white border-b border-[#f0f0f0] flex items-center justify-between px-5 h-[60px]">
-        <div className="flex items-center gap-3">
-          {/* Hambúrguer (só mobile) */}
-          <button
-            onClick={() => setSidebar(!sidebarOpen)}
-            aria-label="Menu"
-            className="md:hidden flex flex-col gap-[5px] bg-transparent border-none cursor-pointer p-2"
-          >
-            <span className="block w-[22px] h-0.5 bg-gray-700 rounded-sm" />
-            <span className="block w-[22px] h-0.5 bg-gray-700 rounded-sm" />
-            <span className="block w-[22px] h-0.5 bg-gray-700 rounded-sm" />
-          </button>
-          <Link href="/">
-            <span className="font-['Georgia,serif'] italic text-[1.4rem] text-[#ff385c] font-bold">VENTSY</span>
-          </Link>
-        </div>
-
-        {/* Sino + Avatar */}
-        <div className="flex items-center gap-1.5">
-          <NotificationBell verTodasHref={null} />
-          <div className="relative" ref={avatarRef}>
-          <button
-            onClick={() => setAvatar(!avatarOpen)}
-            className="w-[38px] h-[38px] rounded-full bg-[#ff385c] text-white border-none cursor-pointer text-base font-bold"
-          >
-            {profile?.inicial ?? '?'}
-          </button>
-
-          {avatarOpen && (
-            <div className="absolute top-12 right-0 bg-white rounded-xl shadow-[0_8px_32px_rgba(0,0,0,.12)] border border-[#f0f0f0] min-w-[200px] py-2 z-[200]">
-              <div className="px-4 py-2.5 border-b border-[#f0f0f0]">
-                <div className="font-bold text-[.9rem]">{profile?.nome}</div>
-                <div className="text-[.78rem] text-gray-400 mt-0.5">{profile?.email}</div>
-              </div>
-              {MENU_ITEMS.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block px-4 py-2.5 text-[.88rem] text-gray-700 no-underline hover:bg-gray-50 transition-colors"
-                  onClick={() => setAvatar(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <Link
-                href={trocaPainel.href}
-                onClick={() => setAvatar(false)}
-                className="block px-4 py-2.5 text-[.88rem] font-semibold text-gray-800 no-underline border-t border-[#f0f0f0] hover:bg-gray-50 transition-colors"
-              >
-                {trocaPainel.label}
-              </Link>
-              <button
-                onClick={handleSair}
-                className="w-full text-left px-4 py-2.5 border-none bg-transparent cursor-pointer text-[.88rem] text-[#ff385c] border-t border-[#f0f0f0] mt-1 font-[inherit] hover:bg-gray-50 transition-colors"
-              >
-                🚪 Sair
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NotificationBell verTodasHref="/client/notificacoes" />
+            <div className="relative" ref={avatarRef}>
+              <button onClick={() => setAvatar(!avatarOpen)} className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-brand text-base font-bold text-white">
+                {profile?.inicial ?? '?'}
               </button>
+              {avatarOpen && (
+                <div className="absolute right-0 top-12 z-[200] min-w-[224px] rounded-2xl border border-line bg-surface py-2 shadow-pop">
+                  <div className="border-b border-line px-4 py-2.5">
+                    <div className="text-[.9rem] font-bold text-ink">{profile?.nome}</div>
+                    <div className="mt-0.5 truncate text-[.78rem] text-ink-muted">{profile?.email}</div>
+                  </div>
+                  {[
+                    { href: '/client/perfil', label: 'Meu perfil', icon: 'user' as const },
+                    { href: '/client/carteira', label: 'Carteira', icon: 'wallet' as const },
+                    { href: '/client/indique', label: 'Indique e ganhe', icon: 'gift' as const },
+                  ].map((i) => (
+                    <Link key={i.href} href={i.href} onClick={() => setAvatar(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-[.86rem] text-ink-soft transition hover:bg-brand-50 hover:text-brand">
+                      <Icon name={i.icon} size={16} />{i.label}
+                    </Link>
+                  ))}
+                  <Link href={trocaPainel.href} onClick={() => setAvatar(false)} className="flex items-center gap-2.5 border-t border-line px-4 py-2.5 text-[.86rem] font-semibold text-ink transition hover:bg-brand-50 hover:text-brand">
+                    <Icon name={trocaPainel.icon} size={16} />{trocaPainel.label}
+                  </Link>
+                  <button onClick={handleSair} className="flex w-full items-center gap-2.5 border-t border-line px-4 py-2.5 text-left text-[.86rem] text-brand transition hover:bg-brand-50">
+                    <Icon name="logout" size={16} />Sair
+                  </button>
+                </div>
+              )}
             </div>
-          )}
           </div>
+        </header>
+
+        {/* ── OVERLAY MOBILE ───────────────────────────────────────────────── */}
+        {sidebarOpen && <div className="fixed inset-0 z-[149] bg-black/40 md:hidden" onClick={() => setSidebar(false)} />}
+
+        <div className="flex min-h-[calc(100vh-60px)]">
+          {/* ── SIDEBAR ─────────────────────────────────────────────────────── */}
+          <aside className={`flex w-[264px] flex-shrink-0 flex-col overflow-y-auto border-r border-line bg-surface sticky top-[60px] h-[calc(100vh-60px)]
+            max-md:fixed max-md:z-[150] max-md:transition-[left] max-md:duration-300 ${sidebarOpen ? 'max-md:left-0' : 'max-md:-left-[300px]'}`}>
+            {/* Perfil */}
+            <div className="border-b border-line px-5 pb-4 pt-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-[1.2rem] font-bold text-white">{profile?.inicial ?? '?'}</div>
+              <div className="mt-2.5 text-[.95rem] font-bold text-ink">{profile?.nome}</div>
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand-50 px-2.5 py-[3px] text-[.72rem] font-semibold text-brand">
+                <Icon name="sparkle" size={12} /> Cliente Ventsy
+              </div>
+            </div>
+
+            {/* Navegação agrupada */}
+            <nav className="flex-1 py-3">
+              {NAV.map((grupo) => (
+                <div key={grupo.group} className="mb-1">
+                  <div className="px-5 pb-1 pt-3 text-[.66rem] font-bold uppercase tracking-[.09em] text-ink-muted/70">{grupo.group}</div>
+                  {grupo.items.map((item) => {
+                    const active = item.href.startsWith('/client') && isActive(item.href)
+                    return (
+                      <Link key={item.href} href={item.href}
+                        className={`flex items-center gap-3 border-l-[3px] px-5 py-[8px] text-[.86rem] transition-all ${active ? 'border-brand bg-brand-50 font-semibold text-brand' : 'border-transparent text-ink-soft hover:bg-brand-50 hover:text-brand'}`}>
+                        <Icon name={item.icon} size={17} />{item.label}
+                      </Link>
+                    )
+                  })}
+                </div>
+              ))}
+              <div className="my-3 border-t border-line" />
+              <Link href={trocaPainel.href} className="flex items-center gap-3 border-l-[3px] border-transparent px-5 py-[8px] text-[.86rem] font-semibold text-ink-soft transition-all hover:bg-brand-50 hover:text-brand">
+                <Icon name={trocaPainel.icon} size={17} />{trocaPainel.label}
+              </Link>
+            </nav>
+          </aside>
+
+          {/* ── CONTEÚDO ────────────────────────────────────────────────────── */}
+          <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+            <div className="mx-auto max-w-6xl animate-fade-up">{children}</div>
+          </main>
         </div>
-      </header>
-
-      {/* ── OVERLAY MOBILE ────────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-[149] md:hidden"
-          onClick={() => setSidebar(false)}
-        />
-      )}
-
-      {/* ── CORPO ─────────────────────────────────────────────────── */}
-      <div className="flex min-h-[calc(100vh-60px)]">
-
-        {/* ── SIDEBAR ─────────────────────────────────────────────── */}
-        <aside
-          className={`
-            w-[260px] flex-shrink-0 bg-white border-r border-[#f0f0f0] flex flex-col
-            sticky top-[60px] h-[calc(100vh-60px)] overflow-y-auto
-            max-md:fixed max-md:z-[150] max-md:h-[calc(100vh-60px)] max-md:transition-[left_.28s_ease]
-            ${sidebarOpen ? 'max-md:left-0' : 'max-md:-left-[280px]'}
-          `}
-        >
-          {/* Perfil */}
-          <div className="px-5 pt-6 pb-4 border-b border-[#f5f5f5]">
-            <div className="w-12 h-12 rounded-full bg-[#ff385c] text-white flex items-center justify-center font-bold text-[1.2rem] mb-2.5">
-              {profile?.inicial ?? '?'}
-            </div>
-            <div className="font-bold text-[.95rem] text-gray-900">{profile?.nome}</div>
-            <div className="mt-2 inline-flex items-center gap-1 bg-[#fff5f6] text-[#ff385c] border border-[rgba(255,56,92,.2)] rounded-full px-2.5 py-[3px] text-[.75rem] font-semibold">
-              🎉 Cliente
-            </div>
-          </div>
-
-          {/* Nav */}
-          <nav className="py-3 flex-1">
-            <div className="px-5 pt-2.5 pb-1 text-[.68rem] font-bold text-gray-300 tracking-[.08em] uppercase">
-              Minha Área
-            </div>
-            {MENU_ITEMS.map(item => {
-              const isActive = pathname === item.rota
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setSidebar(false)}
-                  className={`block px-5 py-[9px] text-[.88rem] no-underline border-l-[3px] transition-all
-                    ${isActive
-                      ? 'bg-[#fff5f6] text-[#ff385c] border-l-[#ff385c] font-semibold'
-                      : 'text-gray-600 border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c]'
-                    }`}
-                >
-                  {item.label}
-                </Link>
-              )
-            })}
-            <div className="border-t border-[#f5f5f5] my-3" />
-            <Link
-              href="/busca"
-              className="block px-5 py-[9px] text-[.88rem] text-gray-600 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
-            >
-              🔍 Explorar espaços
-            </Link>
-            <Link
-              href="/client/ajuda"
-              className="block px-5 py-[9px] text-[.88rem] text-gray-600 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
-            >
-              ❓ Central de Ajuda
-            </Link>
-            <div className="border-t border-[#f5f5f5] my-3" />
-            <Link
-              href={trocaPainel.href}
-              onClick={() => setSidebar(false)}
-              className="block px-5 py-[9px] text-[.88rem] font-semibold text-gray-700 no-underline border-l-[3px] border-transparent hover:bg-[#fff5f6] hover:text-[#ff385c] hover:border-l-[#ff385c] transition-all"
-            >
-              {trocaPainel.label}
-            </Link>
-          </nav>
-        </aside>
-
-        {/* ── CONTEÚDO ──────────────────────────────────────────────── */}
-        <main className="flex-1 min-w-0 overflow-x-hidden">
-          {children}
-        </main>
       </div>
-    </div>
     </ToastProvider>
   )
 }
